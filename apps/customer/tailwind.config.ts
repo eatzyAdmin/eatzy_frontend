@@ -5,12 +5,17 @@ const config: Config = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../packages/ui/src/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        primary: "var(--primary)",
+        secondary: "var(--secondary)",
+        warning: "var(--warning)",
+        danger: "var(--danger)",
       },
     },
   },
