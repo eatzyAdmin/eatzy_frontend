@@ -24,5 +24,10 @@
   "peerDependencies": {
     "react": "^18",
     "react-dom": "^18"
+  },
+  "dependencies": {
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.460.0",
+    "clsx": "^2.1.0"
   }
 }

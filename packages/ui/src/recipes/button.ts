@@ -1,20 +1,22 @@
 import { createRecipe } from "./createRecipe";
 
 export const buttonRecipe = createRecipe({
-  base: "inline-flex items-center justify-center rounded-lg font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2",
+  base: "inline-flex items-center justify-center rounded-xl font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm hover:shadow-md active:scale-[0.98]",
   variants: {
     variant: {
-      primary: "bg-[var(--primary)] focus:ring-[var(--primary)]",
-      secondary: "bg-[var(--secondary)] focus:ring-[var(--secondary)]",
-      warning: "bg-[var(--warning)] focus:ring-[var(--warning)]",
-      danger: "bg-[var(--danger)] focus:ring-[var(--danger)]",
-      outline: "bg-transparent text-current border",
-      ghost: "bg-transparent text-current",
+      primary: "text-white bg-[var(--primary)] hover:brightness-105 focus:ring-[var(--primary)]",
+      secondary: "text-white bg-[var(--secondary)] hover:brightness-105 focus:ring-[var(--secondary)]",
+      warning: "text-white bg-[var(--warning)] hover:brightness-105 focus:ring-[var(--warning)]",
+      danger: "text-white bg-[var(--danger)] hover:brightness-105 focus:ring-[var(--danger)]",
+      outline: "bg-transparent border border-current",
+      ghost: "bg-transparent",
+      glass: "text-gray-800 bg-white/30 backdrop-blur-lg border border-white/40 hover:bg-white/40",
     },
     size: {
-      sm: "h-8 px-3 text-sm",
+      sm: "h-9 px-3 text-sm",
       md: "h-10 px-4 text-sm",
       lg: "h-12 px-6 text-base",
+      icon: "h-10 w-10",
     },
   },
   defaultVariants: {
@@ -22,6 +24,7 @@ export const buttonRecipe = createRecipe({
     size: "md",
   },
   compoundVariants: [
-    { when: { variant: "outline" }, classes: "border-current" },
+    { when: { variant: "outline" }, classes: "text-current" },
+    { when: { size: "icon" }, classes: "p-0" },
   ],
 });
