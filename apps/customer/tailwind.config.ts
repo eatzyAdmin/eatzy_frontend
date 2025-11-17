@@ -64,6 +64,24 @@ const config: Config = {
         fadeInUp: {
           '0%': { opacity: '0', transform: 'translateY(12px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' }
+        },
+        smoke: {
+          '0%': { transform: 'scale(0.8) translate(0, 0)', opacity: '0.8' },
+          '100%': { transform: 'scale(2) translate(0, -80px)', opacity: '0' }
+        },
+        reveal: {
+          '0%': { transform: 'scale(0.5)', opacity: '0' },
+          '50%': { transform: 'scale(1.1)' },
+          '100%': { transform: 'scale(1)', opacity: '1' }
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' }
+        },
+        pulseBorder: {
+          '0%': { boxShadow: '0 0 0 0 rgba(120, 200, 65, 0.7)' },
+          '70%': { boxShadow: '0 0 0 10px rgba(120, 200, 65, 0)' },
+          '100%': { boxShadow: '0 0 0 0 rgba(120, 200, 65, 0)' }
         }
       },
       animation: {
@@ -76,7 +94,20 @@ const config: Config = {
         'float-random-3': 'floatRandom3 20s ease-in-out infinite',
         'float-random-4': 'floatRandom4 24s ease-in-out infinite',
         'pulse-ring': 'pulseRing 1.8s ease-out infinite',
-        'fade-in-up': 'fadeInUp 0.8s ease-out forwards'
+        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+        'smoke-1': 'smoke 2s ease-out infinite',
+        'smoke-2': 'smoke 2.5s ease-out 0.3s infinite',
+        'smoke-3': 'smoke 2.2s ease-out 0.6s infinite',
+        'smoke-4': 'smoke 2.4s ease-out 0.9s infinite',
+        'smoke-5': 'smoke 2.3s ease-out 1.2s infinite',
+        'smoke-green-1': 'smoke 2.4s ease-out 0.2s infinite',
+        'smoke-green-2': 'smoke 2.6s ease-out 0.5s infinite',
+        'smoke-green-3': 'smoke 2.3s ease-out 0.8s infinite',
+        'smoke-green-4': 'smoke 2.7s ease-out 1.1s infinite',
+        'reveal': 'reveal 1.5s ease-out forwards',
+        'shimmer': 'shimmer 2s infinite linear',
+        'pulse-border': 'pulseBorder 2s infinite',
+        'pulse-slow': 'pulse 3s ease-in-out infinite'
       }
     },
   },
