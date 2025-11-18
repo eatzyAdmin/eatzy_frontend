@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 // Hooks
 import { useScrollAnimation, useSectionVisibility, usePageAnimation } from "./hooks";
 
 // Core components
-import { LoadingOverlay, AnimatedBackground, ScrollIndicator, PageLoadAnimation } from "./core";
+import { AnimatedBackground, ScrollIndicator, PageLoadAnimation } from "./core";
+import { useLoading } from "@repo/ui";
 
 // Navigation
 import { Navbar } from "./navigation";
@@ -20,7 +21,7 @@ import { DeliveryScooter, SteamEffect } from "./animations";
 
 export default function LandingPageV2() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { show, hide } = useLoading();
 
   // Refs for sections
   const homeRef = useRef<HTMLElement>(null);
@@ -93,9 +94,10 @@ export default function LandingPageV2() {
 
   // Navigation handlers
   const navigateToLogin = () => {
-    setIsLoading(true);
+    show("Đang chuyển hướng đến trang đăng nhập");
     setTimeout(() => {
       router.push("/login");
+      hide();
     }, 1000);
   };
 
@@ -117,8 +119,7 @@ export default function LandingPageV2() {
 
   return (
     <div className="relative pt-20 w-full min-h-screen overflow-x-hidden bg-white">
-      {/* Loading Overlay */}
-      <LoadingOverlay isLoading={isLoading} message="Đang chuyển hướng đến trang đăng nhập" />
+      {/* Loading Overlay moved to global provider */}
 
       {/* Page Load Animation */}
       <PageLoadAnimation pageLoaded={animationState.pageLoaded} />

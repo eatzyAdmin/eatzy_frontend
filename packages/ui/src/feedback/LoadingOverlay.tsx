@@ -1,6 +1,6 @@
 "use client";
 
-import { Utensils } from "lucide-react";
+import { Utensils } from "../icons";
 
 interface LoadingOverlayProps {
   isLoading: boolean;
@@ -9,7 +9,6 @@ interface LoadingOverlayProps {
 
 export default function LoadingOverlay({ isLoading, message = "Đang tải..." }: LoadingOverlayProps) {
   if (!isLoading) return null;
-
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-white/95 backdrop-blur-sm">
       <div className="flex flex-col items-center gap-4">
@@ -23,4 +22,3 @@ export default function LoadingOverlay({ isLoading, message = "Đang tải..." }
     </div>
   );
 }
-

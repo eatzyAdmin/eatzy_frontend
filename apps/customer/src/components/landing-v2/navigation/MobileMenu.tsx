@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { X } from "@repo/ui/icons";
 import { Button } from "@repo/ui";
 import MobileNavItem from "./MobileNavItem";
 

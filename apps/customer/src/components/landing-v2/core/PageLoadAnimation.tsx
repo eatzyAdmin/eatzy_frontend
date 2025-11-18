@@ -1,6 +1,6 @@
 "use client";
 
-import { Utensils } from "lucide-react";
+import { Utensils } from "@repo/ui/icons";
 
 interface PageLoadAnimationProps {
   pageLoaded: boolean;

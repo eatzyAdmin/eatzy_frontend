@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUp } from "lucide-react";
+import { ArrowUp } from "@repo/ui/icons";
 
 interface ScrollIndicatorProps {
   visible: boolean;

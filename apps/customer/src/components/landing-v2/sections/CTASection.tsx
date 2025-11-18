@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@repo/ui/icons";
 import { Button } from "@repo/ui";
 
 interface CTASectionProps {

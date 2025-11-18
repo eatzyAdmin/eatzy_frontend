@@ -1,8 +1,16 @@
 "use client";
 
-import { LoginForm, LoginIllustration } from "@/components/auth";
+import { LoginForm, LoginIllustration } from "@repo/ui";
+import { useRouter } from "next/navigation";
+import { useZodForm, loginSchema, type LoginFormData } from "@repo/lib";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const form = useZodForm<LoginFormData>({
+    schema: loginSchema,
+    mode: "onChange",
+    defaultValues: { email: "", password: "", rememberMe: false },
+  });
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4 md:p-8">
       {/* Main Card Container */}
@@ -25,7 +33,12 @@ export default function LoginPage() {
             
             {/* Form Content */}
             <div className="relative z-10">
-              <LoginForm />
+              <LoginForm
+                form={form}
+                onForgotPassword={() => router.push("/forgot-password")}
+                onSuccess={() => router.push("/booking")}
+                onRegister={() => router.push("/register")}
+              />
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { FeatureCardData } from "../types";
-import { Plus } from "lucide-react";
+import { Plus } from "@repo/ui/icons";
 
 interface FeatureCardProps extends FeatureCardData {
   index: number;

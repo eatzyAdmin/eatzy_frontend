@@ -2,7 +2,7 @@
 
 import { FeatureGrid } from "../features";
 import { Button } from "@repo/ui";
-import { Maximize2 } from "lucide-react";
+import { Maximize2 } from "@repo/ui/icons";
 
 interface FeaturesSectionProps {
   visible: boolean;

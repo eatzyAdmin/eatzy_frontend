@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, InputHTMLAttributes, forwardRef, useEffect } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "../icons";
 
 interface FloatingLabelInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label: string;
@@ -16,10 +16,8 @@ const FloatingLabelInput = forwardRef<HTMLInputElement, FloatingLabelInputProps>
     const [showPassword, setShowPassword] = useState(false);
     const internalRef = useRef<HTMLInputElement>(null);
     
-    // Use forwarded ref or internal ref
     const inputRef = (ref as React.RefObject<HTMLInputElement>) || internalRef;
 
-    // Check if input has value on mount and when value changes
     useEffect(() => {
       const currentValue = value || inputRef.current?.value || '';
       setHasValue(currentValue.toString().length > 0);
@@ -52,8 +50,6 @@ const FloatingLabelInput = forwardRef<HTMLInputElement, FloatingLabelInputProps>
             onChange={handleChange}
             {...props}
           />
-          
-          {/* Floating Label */}
           <label
             className={`absolute left-0 transition-all duration-300 ease-out pointer-events-none ${
               isActive
@@ -69,8 +65,6 @@ const FloatingLabelInput = forwardRef<HTMLInputElement, FloatingLabelInputProps>
           >
             {label}
           </label>
-
-          {/* Password Toggle */}
           {type === 'password' && (
             <button
               type="button"
@@ -82,8 +76,6 @@ const FloatingLabelInput = forwardRef<HTMLInputElement, FloatingLabelInputProps>
             </button>
           )}
         </div>
-
-        {/* Error Message */}
         {error && (
           <p className="mt-1 text-xs text-[var(--danger)] animate-fade-in-up">
             {error}
@@ -97,4 +89,3 @@ const FloatingLabelInput = forwardRef<HTMLInputElement, FloatingLabelInputProps>
 FloatingLabelInput.displayName = "FloatingLabelInput";
 
 export default FloatingLabelInput;
-

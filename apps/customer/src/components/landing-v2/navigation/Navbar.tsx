@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User } from "@repo/ui/icons";
 import { Button } from "@repo/ui";
 import NavItem from "./NavItem";
 import MobileMenu from "./MobileMenu";

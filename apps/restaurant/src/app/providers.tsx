@@ -1,11 +1,13 @@
 "use client";
 import { QueryProvider } from "@repo/lib";
-import { ThemeProvider } from "@repo/ui";
+import { ThemeProvider, LoadingProvider } from "@repo/ui";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryProvider>
-      <ThemeProvider>{children}</ThemeProvider>
+      <ThemeProvider>
+        <LoadingProvider>{children}</LoadingProvider>
+      </ThemeProvider>
     </QueryProvider>
   );
 }

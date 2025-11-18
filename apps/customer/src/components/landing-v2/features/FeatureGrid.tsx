@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Users, Star, Clock, TrendingUp, Gift, Zap } from "lucide-react";
+import { Users, Star, Clock, TrendingUp, Gift, Zap } from "@repo/ui/icons";
 import FeatureCard from "./FeatureCard";
 import { FeatureCardData } from "../types";
 

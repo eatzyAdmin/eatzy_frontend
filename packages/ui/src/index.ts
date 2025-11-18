@@ -9,3 +9,8 @@ export { default as InputField } from "./forms/InputField";
 export { default as CustomSelect } from "./forms/CustomSelect";
 export { default as CalendarDatePicker } from "./forms/CalendarDatePicker";
 export { default as AddressFields } from "./forms/AddressFields";
+export * from "./icons";
+export { default as LoadingOverlay } from "./feedback/LoadingOverlay";
+export * from "./providers/LoadingProvider";
+export { default as LoginForm } from "./auth/LoginForm";
+export { default as LoginIllustration } from "./auth/LoginIllustration";
