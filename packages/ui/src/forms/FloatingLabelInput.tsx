@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "../icons";
 
 interface FloatingLabelInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label: string;
-  type?: 'text' | 'email' | 'password';
+  type?: 'text' | 'email' | 'password' | 'tel';
   error?: string;
 }
 

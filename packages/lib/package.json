@@ -5,7 +5,9 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./query/QueryProvider": "./src/query/QueryProvider.tsx"
+    "./query/QueryProvider": "./src/query/QueryProvider.tsx",
+    "./form": "./src/form/index.ts",
+    "./zod": "./src/zod.ts"
   },
   "peerDependencies": {
     "react": "^18",

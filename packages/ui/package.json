@@ -10,6 +10,7 @@
     "./feedback/LoadingOverlay": "./src/feedback/LoadingOverlay.tsx",
     "./providers/LoadingProvider": "./src/providers/LoadingProvider.tsx",
     "./auth/*": "./src/auth/*",
+    "./motion": "./src/motion.ts",
     "./*": "./src/*"
   },
   "scripts": {

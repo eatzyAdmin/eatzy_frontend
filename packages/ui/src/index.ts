@@ -9,6 +9,7 @@ export { default as InputField } from "./forms/InputField";
 export { default as CustomSelect } from "./forms/CustomSelect";
 export { default as CalendarDatePicker } from "./forms/CalendarDatePicker";
 export { default as AddressFields } from "./forms/AddressFields";
+export { default as FloatingLabelInput } from "./forms/FloatingLabelInput";
 export * from "./icons";
 export { default as LoadingOverlay } from "./feedback/LoadingOverlay";
 export * from "./providers/LoadingProvider";
