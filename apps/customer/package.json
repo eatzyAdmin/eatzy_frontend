@@ -12,6 +12,7 @@
     "@repo/api": "workspace:*",
     "@repo/lib": "workspace:*",
     "@repo/store": "workspace:*",
+    "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",
     "next": "14.2.33",
     "react": "^18",
