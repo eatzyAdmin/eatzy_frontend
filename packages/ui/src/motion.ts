@@ -1,1 +1,1 @@
-export { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+export { motion, AnimatePresence, LayoutGroup, useScroll, useTransform } from "framer-motion";
