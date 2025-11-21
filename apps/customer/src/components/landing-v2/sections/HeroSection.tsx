@@ -17,7 +17,7 @@ export default function HeroSection({ animationComplete, onGetStarted, onExplore
       }`}
     >
       {/* Subtitle */}
-      <div className="mb-6 translate-y-6 text-lg text-gray-700 font-normal">
+      <div className="mb-6 translate-y-6 text-lg text-white/80 font-normal">
         Khám phá hương vị tuyệt vời cùng <span className="text-[var(--primary)] text-4xl font-bold">Eatzy</span>
       </div>
 
@@ -44,14 +44,14 @@ export default function HeroSection({ animationComplete, onGetStarted, onExplore
       </div>
 
       {/* Main heading */}
-      <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6 max-w-4xl leading-tight">
+      <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 max-w-4xl leading-tight">
         Đặt Món Dễ Dàng
         <br />
         <span className="text-[var(--primary)]">Giao Nhanh Tận Nơi!</span>
       </h1>
 
       {/* Description */}
-      <p className="text-lg text-gray-600 max-w-2xl mb-12">
+      <p className="text-lg text-white/80 max-w-2xl mb-12">
         Khám phá hàng nghìn nhà hàng và món ăn ngon, săn ưu đãi hấp dẫn và theo dõi đơn hàng thời gian thực. Tất cả
         trong một ứng dụng tiện lợi.
       </p>

@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import LoginPageContent from "./login/LoginPageContent";
 import RegisterPageContent from "./register/RegisterPageContent";
+import BackgroundTransition from "@/features/home/components/BackgroundTransition";
+import { getCategoryBackgroundImage } from "@/features/home/data/mockRestaurants";
 
 /**
  * Layout Pattern from RoleManagement.jsx
@@ -26,14 +28,14 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   const isRegisterPage = pathname === "/register";
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen w-full overflow-hidden">
+      <BackgroundTransition imageUrl={getCategoryBackgroundImage("sushi-sashimi")} categoryName="" />
       {/* LoginPageContent - like RoleCard, always renders when active */}
       {isLoginPage && <LoginPageContent />}
 
       {/* RegisterPageContent - like DeleteRoleModal, always in DOM, controlled by isOpen */}
       <RegisterPageContent isOpen={isRegisterPage} />
 
-      {/* Hidden children - just for Next.js routing */}
       <div className="hidden">{children}</div>
     </div>
   );

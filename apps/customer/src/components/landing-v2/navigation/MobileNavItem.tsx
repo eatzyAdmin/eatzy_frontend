@@ -7,7 +7,7 @@ export default function MobileNavItem({ text, active = false, onClick }: NavItem
     <button
       onClick={onClick}
       className={`relative text-xl font-medium py-3 mb-1 transition-colors duration-300 w-full text-center bg-transparent border-none outline-none cursor-pointer flex flex-col items-center justify-center ${
-        active ? "text-[var(--primary)]" : "text-gray-700 hover:text-[var(--primary)]"
+        active ? "text-[var(--primary)]" : "text-white/80 hover:text-[var(--primary)]"
       }`}
     >
       {text}

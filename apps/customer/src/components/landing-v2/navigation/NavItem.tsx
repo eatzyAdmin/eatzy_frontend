@@ -7,7 +7,7 @@ export default function NavItem({ text, active = false, onClick }: NavItemProps)
     <button
       onClick={onClick}
       className={`relative font-medium transition-colors duration-300 ${
-        active ? "text-[var(--primary)]" : "text-gray-700 hover:text-[var(--primary)]"
+        active ? "text-[var(--primary)]" : "text-white/80 hover:text-[var(--primary)]"
       } bg-transparent border-none outline-none cursor-pointer px-1`}
     >
       {text}

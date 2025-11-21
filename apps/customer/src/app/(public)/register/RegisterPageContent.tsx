@@ -34,21 +34,25 @@ export default function RegisterPageContent({ isOpen }: { isOpen: boolean }) {
   return (
     <AnimatePresence mode="wait">
       {isOpen && (
-        <motion.div
-          layoutId="auth-container" // Same layoutId as login card
-          className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-lime-50"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 30,
-            mass: 0.5,
-          }}
-        >
-          <RegisterForm onBack={handleBack} onSuccess={handleSuccess} />
-        </motion.div>
+        <div className="min-h-screen w-full flex items-center justify-center p-4 md:p-8">
+          <motion.div
+            layoutId="auth-container"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+              mass: 0.5,
+            }}
+            className="w-full max-w-4xl rounded-[32px] md:rounded-[40px] bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden"
+          >
+            <div className="bg-white">
+              <RegisterForm onBack={handleBack} onSuccess={handleSuccess} />
+            </div>
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );

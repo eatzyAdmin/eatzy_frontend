@@ -17,11 +17,11 @@ export default function CTASection({ visible, onGetStarted }: CTASectionProps) {
           visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"
         }`}
       >
-        <h2 className="text-2xl md:text-4xl lg:text-6xl font-light text-gray-900 mb-4 md:mb-6 transition-all duration-700 delay-100">
+        <h2 className="text-2xl md:text-4xl lg:text-6xl font-light text-white mb-4 md:mb-6 transition-all duration-700 delay-100">
           Đặt Món <span className="text-[var(--primary)] font-semibold">Mọi Lúc,</span> Giao Đến Ngay!
         </h2>
         <div>
-          <p className="text-gray-600 text-lg md:text-2xl lg:text-3xl font-light max-w-2xl mx-auto mb-6 md:mb-8 transition-all duration-700 delay-200">
+          <p className="text-white/80 text-lg md:text-2xl lg:text-3xl font-light max-w-2xl mx-auto mb-6 md:mb-8 transition-all duration-700 delay-200">
             Giờ đây bạn có thể <span className="text-[var(--primary)] font-normal">đặt món mọi lúc mọi nơi</span> và{" "}
             <span className="text-[var(--primary)] font-normal">theo dõi đơn hàng thời gian thực</span>.
           </p>
@@ -43,10 +43,10 @@ export default function CTASection({ visible, onGetStarted }: CTASectionProps) {
           visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"
         }`}
       >
-        <h2 className="text-2xl md:text-4xl lg:text-6xl font-light text-gray-900 mb-4 md:mb-6 transition-all duration-700 delay-100">
+        <h2 className="text-2xl md:text-4xl lg:text-6xl font-light text-white mb-4 md:mb-6 transition-all duration-700 delay-100">
           Bắt đầu hành trình <span className="text-[var(--primary)] font-semibold">ẨM THỰC</span> của bạn ngay hôm nay
         </h2>
-        <p className="text-gray-600 text-xl font-light max-w-2xl mx-auto mb-8 transition-all duration-700 delay-200">
+        <p className="text-white/80 text-xl font-light max-w-2xl mx-auto mb-8 transition-all duration-700 delay-200">
           Với hàng nghìn nhà hàng, ưu đãi hấp dẫn và giao hàng siêu nhanh, Eatzy là lựa chọn hoàn hảo cho bữa ăn của
           bạn.
         </p>

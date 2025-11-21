@@ -28,13 +28,13 @@ export default function MobileMenu({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-30 bg-white transform transition-transform duration-300 ease-in-out">
+    <div className="fixed inset-0 z-30 bg-black/50 backdrop-blur-md transform transition-transform duration-300 ease-in-out">
       <div className="flex justify-end p-4">
-        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+        <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full text-white">
           <X size={24} />
         </button>
       </div>
-      <div className="flex flex-col items-center space-y-6 p-8">
+      <div className="flex flex-col items-center space-y-6 p-8 text-white">
         <MobileNavItem
           text="Trang Chủ"
           active={activeSection === "home"}

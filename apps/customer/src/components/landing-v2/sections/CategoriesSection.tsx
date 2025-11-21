@@ -57,7 +57,7 @@ export default function CategoriesSection({ visible }: CategoriesSectionProps) {
   ];
 
   return (
-    <section className="relative z-10 py-6 md:py-12 pt-12 md:pt-24 mb-6 md:mb-12 rounded-[40px] md:rounded-[80px] shadow-2xl overflow-hidden bg-black/5 backdrop-blur-xl mx-6 md:mx-12 lg:mx-24">
+    <section className="relative z-10 py-6 md:py-12 pt-12 md:pt-24 mb-6 md:mb-12 rounded-[40px] md:rounded-[80px] shadow-2xl overflow-hidden bg-white/8 backdrop-blur-xl border border-white/20 mx-6 md:mx-12 lg:mx-24">
       <div className="container mx-auto px-6 md:px-12 lg:px-24">
         {/* Title */}
         <div
@@ -65,11 +65,11 @@ export default function CategoriesSection({ visible }: CategoriesSectionProps) {
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"
           }`}
         >
-          <h2 className="text-3xl md:text-5xl font-light text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-5xl font-light text-white mb-4">
             Khám Phá - <span className="text-[var(--primary)] font-semibold">Danh Mục Phong Phú</span>
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] mx-auto my-4 rounded-full"></div>
-          <p className="text-gray-600 text-xl font-light max-w-3xl mx-auto mb-8">
+          <p className="text-white/80 text-xl font-light max-w-3xl mx-auto mb-8">
             Hàng nghìn món ăn đa dạng từ các nhà hàng uy tín, phục vụ mọi khẩu vị của bạn
           </p>
         </div>
@@ -95,8 +95,8 @@ export default function CategoriesSection({ visible }: CategoriesSectionProps) {
                 <div className="text-5xl mb-4 transform transition-transform duration-300 hover:scale-110">{category.emoji}</div>
 
                 {/* Category Info */}
-                <h3 className="text-2xl font-semibold text-gray-800 mb-2">{category.name}</h3>
-                <p className="text-gray-600">{category.description}</p>
+                <h3 className="text-2xl font-semibold text-white mb-2">{category.name}</h3>
+                <p className="text-white/80">{category.description}</p>
 
                 {/* Hover indicator */}
                 <div className="absolute bottom-4 right-4 w-8 h-8 bg-[var(--primary)]/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">

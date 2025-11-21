@@ -38,7 +38,7 @@ export default function BenefitsSection({ visible, onGetStarted }: BenefitsSecti
           <div className="max-w-2xl">
             <div className="flex items-center gap-2">
               <div className="text-5xl font-bold text-[var(--primary)]">
-                <span className="text-black font-semibold">Ưu Điểm </span>Eatzy
+                <span className="text-white font-semibold">Ưu Điểm </span>Eatzy
               </div>
               <div className="relative w-7 h-7 transform rotate-45 rounded-md flex items-center justify-center hover:rotate-90 transition-all duration-300">
                 <div className="absolute inset-0 rounded-md bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)]"></div>
@@ -62,7 +62,7 @@ export default function BenefitsSection({ visible, onGetStarted }: BenefitsSecti
           </div>
 
           <div className="mt-8 md:mt-0 max-w-xl text-right">
-            <p className="text-gray-600 text-2xl font-light">
+            <p className="text-white/80 text-2xl font-light">
               Trải nghiệm đặt món tuyệt vời với những tính năng độc đáo
             </p>
           </div>

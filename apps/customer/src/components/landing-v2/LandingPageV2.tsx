@@ -7,8 +7,10 @@ import { useRouter } from "next/navigation";
 import { useScrollAnimation, useSectionVisibility, usePageAnimation } from "./hooks";
 
 // Core components
-import { AnimatedBackground, ScrollIndicator, PageLoadAnimation } from "./core";
+import { ScrollIndicator, PageLoadAnimation } from "./core";
 import { useLoading } from "@repo/ui";
+import BackgroundTransition from "@/features/home/components/BackgroundTransition";
+import { getCategoryBackgroundImage } from "@/features/home/data/mockRestaurants";
 
 // Navigation
 import { Navbar } from "./navigation";
@@ -98,7 +100,7 @@ export default function LandingPageV2() {
     setTimeout(() => {
       router.push("/login");
       hide();
-    }, 1000);
+    }, 5000);
   };
 
   const scrollToHome = () => {
@@ -118,14 +120,13 @@ export default function LandingPageV2() {
   };
 
   return (
-    <div className="relative pt-20 w-full min-h-screen overflow-x-hidden bg-white">
+    <div className="relative pt-20 w-full min-h-screen overflow-x-hidden">
       {/* Loading Overlay moved to global provider */}
 
       {/* Page Load Animation */}
       <PageLoadAnimation pageLoaded={animationState.pageLoaded} />
 
-      {/* Animated Background */}
-      <AnimatedBackground animationComplete={animationState.animationComplete} />
+      <BackgroundTransition imageUrl={getCategoryBackgroundImage("desserts")} categoryName="" />
 
       {/* Scroll to Top Button */}
       <ScrollIndicator visible={scrollState.showScrollTop} onClick={scrollToTop} />

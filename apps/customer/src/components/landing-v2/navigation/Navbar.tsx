@@ -30,7 +30,7 @@ export default function Navbar({
   return (
     <>
       <nav
-        className={`fixed top-5 left-1/2 transform -translate-x-1/2 w-[90%] md:w-[70%] lg:w-[55%] z-20 flex justify-between items-center px-3 py-2 bg-white/20 backdrop-blur-lg rounded-full shadow-xl transition-all duration-1000 delay-500 ${
+        className={`fixed top-5 left-1/2 transform -translate-x-1/2 w-[90%] md:w-[70%] lg:w-[55%] z-20 flex justify-between items-center px-3 py-2 bg-white/20 backdrop-blur-lg rounded-full shadow-xl border border-white/20 transition-all duration-1000 delay-500 ${
           animationComplete ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10"
         }`}
       >

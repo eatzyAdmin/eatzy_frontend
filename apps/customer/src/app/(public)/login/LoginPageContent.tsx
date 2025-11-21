@@ -32,10 +32,10 @@ export default function LoginPageContent() {
 
   return (
     <AnimatePresence mode="wait">
-      <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4 md:p-8">
+      <div className="min-h-screen w-full flex items-center justify-center p-4 md:p-8">
         <motion.div
           layoutId="auth-container" // Shared element key - same as RegisterPageContent
-          className="w-full max-w-7xl bg-gray-50 rounded-[32px] md:rounded-[40px] shadow-2xl overflow-hidden"
+          className="w-full max-w-5xl rounded-[32px] md:rounded-[40px] bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden text-white"
           transition={{
             type: "spring",
             stiffness: 300,
@@ -43,15 +43,15 @@ export default function LoginPageContent() {
             mass: 0.5,
           }}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[600px] lg:min-h-[700px]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[560px] lg:min-h-[640px]">
             {/* Left Column - Illustration */}
-            <div className="hidden lg:flex bg-gray-50 relative overflow-hidden">
+            <div className="hidden lg:flex relative overflow-hidden bg-white/5 backdrop-blur-md">
               {/* Decorative gradient background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/5 via-transparent to-[var(--secondary)]/5"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/10 via-transparent to-[var(--secondary)]/10"></div>
               
               {/* Floating orbs */}
-              <div className="absolute top-10 right-10 w-24 h-24 bg-[var(--primary)]/10 rounded-full blur-2xl animate-pulse-slow"></div>
-              <div className="absolute bottom-20 left-10 w-32 h-32 bg-[var(--secondary)]/10 rounded-full blur-2xl animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute top-10 right-10 w-24 h-24 bg-[var(--primary)]/20 rounded-full blur-2xl animate-pulse-slow"></div>
+              <div className="absolute bottom-20 left-10 w-32 h-32 bg-[var(--secondary)]/20 rounded-full blur-2xl animate-pulse-slow" style={{ animationDelay: '1s' }}></div>
               
               <LoginIllustration />
             </div>
