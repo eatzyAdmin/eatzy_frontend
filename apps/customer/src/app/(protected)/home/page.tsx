@@ -32,9 +32,12 @@ export default function HomePage() {
 
       <motion.button
         layoutId="all-categories"
+        initial={{ opacity: 0, y: 80 }}
+        animate={{ opacity: 1, y: 0 }}
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
         transition={{
+          duration: 0.6,
           layout: {
             type: "spring",
             damping: 16,
@@ -52,9 +55,9 @@ export default function HomePage() {
       <main className="relative z-10 flex flex-col h-full pt-20 overflow-hidden">
         {/* Category Scroller Section - Top 45% of screen */}
         <motion.section
-          initial={{ opacity: 0, y: -40 }}
+          initial={{ opacity: 0, y: 80 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.7 }}
+          transition={{ delay: 0.15, duration: 0.4 }}
           className="flex items-center justify-center"
           style={{ height: "42vh" }}
         >
@@ -67,9 +70,9 @@ export default function HomePage() {
 
         {/* Restaurant Slider Section - Middle 45% of screen */}
         <motion.section
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 80 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.7 }}
+          transition={{ delay: 0.15, duration: 0.4 }}
           className="flex-1 flex items-start justify-center"
         >
           <AnimatePresence mode="wait">

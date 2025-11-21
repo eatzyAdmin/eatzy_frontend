@@ -86,8 +86,17 @@ export default function HomeHeader({
 
           {/* Search */}
           <motion.button
+            layoutId="search"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            transition={{
+              duration: 0.25,
+              layout: {
+                type: "spring",
+                damping: 16,
+                stiffness: 100,
+              },
+            }}
             onClick={onSearchClick}
             className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
           >
