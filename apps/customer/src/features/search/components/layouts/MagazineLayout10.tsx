@@ -1,9 +1,11 @@
 import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import Image from 'next/image';
+import { useHoverHighlight, HoverHighlightOverlay } from '@repo/ui';
 
 export default function MagazineLayout10({ restaurant, dishes }: { restaurant: Restaurant; dishes: Dish[]; menuCategories: MenuCategory[]; }) {
   const top = dishes.slice(0, 4);
+  const { containerRef, rect, style, moveHighlight, clearHover } = useHoverHighlight<HTMLDivElement>();
   return (
     <motion.section className="mb-16">
       <div className="relative h-[420px] overflow-hidden">
@@ -13,9 +15,10 @@ export default function MagazineLayout10({ restaurant, dishes }: { restaurant: R
           <p className="mt-3 text-[#555]">{restaurant.description}</p>
         </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
+      <div ref={containerRef} onMouseLeave={clearHover} className="relative grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
+        <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
         {top.map((d) => (
-          <div key={d.id} className="group bg-white hover:shadow-lg transition-shadow">
+          <div key={d.id} onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#ffffff', opacity: 1, scaleEnabled: true, scale: 1.12 })} className="group bg-white hover:shadow-lg transition-shadow relative z-10 cursor-pointer">
             <div className="relative aspect-[4/3] overflow-hidden">
               <Image src={d.imageUrl} alt={d.name} fill className="object-cover" />
             </div>

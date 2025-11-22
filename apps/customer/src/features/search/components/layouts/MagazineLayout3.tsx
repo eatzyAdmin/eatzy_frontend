@@ -1,6 +1,7 @@
 import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import { Star } from '@repo/ui/icons';
+import { useHoverHighlight, HoverHighlightOverlay } from '@repo/ui';
 import Image from 'next/image';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 export default function MagazineLayout3({ restaurant, dishes, menuCategories }: Props) {
   const hero = dishes[0];
   const secondary = dishes.slice(1, 4);
+  const { containerRef, rect, style, moveHighlight, clearHover } = useHoverHighlight<HTMLDivElement>();
   
   return (
     <motion.article
@@ -22,7 +24,8 @@ export default function MagazineLayout3({ restaurant, dishes, menuCategories }: 
       transition={{ duration: 0.6 }}
       className="mb-16 px-4"
     >
-      <div className="max-w-[1200px] mx-auto">
+      <div ref={containerRef} onMouseLeave={clearHover} className="relative max-w-[1200px] mx-auto">
+        <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
         <div className="grid grid-cols-12 gap-12">
           {/* Left: Editorial text */}
           <div className="col-span-5 flex flex-col justify-center">
@@ -56,8 +59,7 @@ export default function MagazineLayout3({ restaurant, dishes, menuCategories }: 
             </div>
           </div>
 
-          {/* Right: Hero dish */}
-          <div className="col-span-7">
+          <div onMouseEnter={(e) => moveHighlight(e, { borderRadius: 16, backgroundColor: '#f6f1e7', opacity: 1, scaleEnabled: true, scale: 1.12 })} className="col-span-7 relative z-10 cursor-pointer">
             <div className="relative aspect-[3/4] overflow-hidden mb-6">
               <Image 
                 src={hero.imageUrl}
@@ -91,6 +93,8 @@ export default function MagazineLayout3({ restaurant, dishes, menuCategories }: 
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
               viewport={{ once: true }}
+              onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#f3ede4', opacity: 1, scaleEnabled: true, scale: 1.12 })}
+              className="relative z-10 cursor-pointer"
             >
               <div className="relative aspect-square overflow-hidden mb-3">
                 <Image 

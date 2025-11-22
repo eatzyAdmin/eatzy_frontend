@@ -1,11 +1,13 @@
 import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import Image from 'next/image';
+import { useHoverHighlight, HoverHighlightOverlay } from '@repo/ui';
 
 export default function MagazineLayout9({ restaurant, dishes, menuCategories }: { restaurant: Restaurant; dishes: Dish[]; menuCategories: MenuCategory[]; }) {
   const lead = dishes[0];
   const others = dishes.slice(1, 4);
   const catMap = Object.fromEntries((menuCategories || []).map((c) => [c.id, c.name]));
+  const { containerRef, rect, style, moveHighlight, clearHover } = useHoverHighlight<HTMLDivElement>();
   
   return (
     <motion.section 
@@ -15,6 +17,9 @@ export default function MagazineLayout9({ restaurant, dishes, menuCategories }: 
       transition={{ duration: 0.5 }}
       style={{ height: '700px' }}
     >
+      <div ref={containerRef} onMouseLeave={clearHover} className="absolute inset-0">
+        <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
+      </div>
       <div className="absolute inset-0" style={{ clipPath: 'polygon(22% 0, 100% 0, 100% 100%, 0 100%)' }}>
         <Image
           src={lead?.imageUrl || ''}
@@ -30,7 +35,8 @@ export default function MagazineLayout9({ restaurant, dishes, menuCategories }: 
       />
 
       <div 
-        className="absolute top-8 bottom-8 left-[140px] bg-white shadow-xl p-8"
+        onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#ffffff', opacity: 1, scaleEnabled: true, scale: 1.12 })}
+        className="absolute top-8 bottom-8 left-[140px] bg-white shadow-xl p-8 cursor-pointer"
         style={{ width: '42%', clipPath: 'polygon(0 0, 100% 0, 86% 100%, 0 100%)', borderRadius: '12px' }}
       >
         <h2 className="text-[22px] font-bold text-[#222] leading-tight">{restaurant.name}</h2>
@@ -45,7 +51,7 @@ export default function MagazineLayout9({ restaurant, dishes, menuCategories }: 
         )}
         <div className="mt-6 space-y-4">
           {others.map((d) => (
-            <div key={d.id} className="flex items-start justify-between">
+            <div key={d.id} onMouseEnter={(e) => moveHighlight(e, { borderRadius: 8, backgroundColor: '#f7f7f7', opacity: 1, scaleEnabled: true, scale: 1.12 })} className="flex items-start justify-between relative z-10 cursor-pointer">
               <div>
                 <h3 className="text-[16px] font-semibold text-[#222]">{d.name}</h3>
                 <p className="text-[13px] text-[#666] leading-relaxed line-clamp-2">{d.description}</p>

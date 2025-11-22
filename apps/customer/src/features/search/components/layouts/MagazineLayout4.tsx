@@ -1,6 +1,7 @@
 import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import { Star } from '@repo/ui/icons';
+import { useHoverHighlight, HoverHighlightOverlay } from '@repo/ui';
 import Image from 'next/image';
 
 interface Props {
@@ -15,6 +16,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
   const secondCategory = menuCategories[1];
   const cat1Dishes = dishes.filter(d => d.menuCategoryId === firstCategory?.id).slice(0, 4);
   const cat2Dishes = dishes.filter(d => d.menuCategoryId === secondCategory?.id).slice(0, 4);
+  const { containerRef, rect, style, moveHighlight, clearHover } = useHoverHighlight<HTMLDivElement>();
   
   return (
     <motion.article
@@ -43,8 +45,8 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
           {restaurant.description}
         </p>
 
-        {/* Categories grid */}
-        <div className="grid grid-cols-2 gap-16">
+        <div ref={containerRef} onMouseLeave={clearHover} className="relative grid grid-cols-2 gap-16">
+          <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
           {/* First category */}
           {firstCategory && (
             <div>
@@ -63,7 +65,8 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.1 }}
                     viewport={{ once: true }}
-                    className="flex gap-4 group cursor-pointer"
+                    onMouseEnter={(e) => moveHighlight(e, { borderRadius: 10, backgroundColor: '#f0eadf', opacity: 1, scaleEnabled: true, scale: 1.12 })}
+                    className="flex gap-4 group cursor-pointer relative z-10"
                   >
                     <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
                       <Image 
@@ -114,7 +117,8 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.1 }}
                     viewport={{ once: true }}
-                    className="flex gap-4 group cursor-pointer"
+                    onMouseEnter={(e) => moveHighlight(e, { borderRadius: 10, backgroundColor: '#f6f1e7', opacity: 1, scaleEnabled: true, scale: 1.12 })}
+                    className="flex gap-4 group cursor-pointer relative z-10"
                   >
                     <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
                       <Image 

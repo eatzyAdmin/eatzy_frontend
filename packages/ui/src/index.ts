@@ -35,3 +35,4 @@ export { default as Skeleton } from "./feedback/Skeleton";
 export { SkeletonGroup, SkeletonText, SkeletonCard, SkeletonAvatar, SkeletonButton } from "./feedback/Skeleton";
 export { default as ModernHeader } from "./headers/ModernHeader";
 export { default as ModalHeader } from "./headers/ModalHeader";
+export * from "./effects/HoverHighlight";

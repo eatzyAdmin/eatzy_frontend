@@ -1,6 +1,7 @@
 import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import { Star } from '@repo/ui/icons';
+import { useHoverHighlight, HoverHighlightOverlay } from '@repo/ui';
 import Image from 'next/image';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 export default function MagazineLayout2({ restaurant, dishes }: Props) {
   const leftDishes = dishes.slice(0, 3);
   const rightDishes = dishes.slice(3, 6);
+  const { containerRef, rect, style, moveHighlight, clearHover } = useHoverHighlight<HTMLDivElement>();
   
   return (
     <motion.article
@@ -52,8 +54,8 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
           </div>
         </div>
 
-        {/* Dish grid */}
-        <div className="grid grid-cols-2 gap-12">
+        <div ref={containerRef} onMouseLeave={clearHover} className="relative grid grid-cols-2 gap-12">
+          <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
           {/* Left column */}
           <div className="space-y-10">
             {leftDishes.map((dish, idx) => (
@@ -63,6 +65,8 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.15 }}
                 viewport={{ once: true }}
+                onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#f6f1e7', opacity: 1, scaleEnabled: true, scale: 1.12 })}
+                className="relative z-10 cursor-pointer"
               >
                 <div className="relative aspect-[3/2] overflow-hidden mb-4">
                   <Image 
@@ -101,6 +105,8 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: (idx + 3) * 0.15 }}
                 viewport={{ once: true }}
+                onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#f3ede4', opacity: 1, scaleEnabled: true, scale: 1.12 })}
+                className="relative z-10 cursor-pointer"
               >
                 <div className="relative aspect-[3/2] overflow-hidden mb-4">
                   <Image 

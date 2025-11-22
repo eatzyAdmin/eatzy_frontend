@@ -1,9 +1,11 @@
 import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import Image from 'next/image';
+import { useHoverHighlight, HoverHighlightOverlay } from '@repo/ui';
 
 export default function MagazineLayout8({ restaurant, dishes }: { restaurant: Restaurant; dishes: Dish[]; menuCategories: MenuCategory[]; }) {
   const grid = dishes.slice(0, 4);
+  const { containerRef, rect, style, moveHighlight, clearHover } = useHoverHighlight<HTMLDivElement>();
   
   return (
     <motion.section 
@@ -26,12 +28,13 @@ export default function MagazineLayout8({ restaurant, dishes }: { restaurant: Re
         </h1>
       </div>
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+      <div ref={containerRef} onMouseLeave={clearHover} className="relative grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+        <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
         {grid.map((dish, index) => (
           <motion.div 
             key={dish.id} 
-            className="group"
+            onMouseEnter={(e) => moveHighlight(e, { borderRadius: 24, backgroundColor: '#ffffff', opacity: 1, scaleEnabled: true, scale: 1.12 })}
+            className="group relative z-10 cursor-pointer"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}

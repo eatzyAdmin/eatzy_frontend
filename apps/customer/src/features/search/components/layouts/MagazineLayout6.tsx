@@ -1,9 +1,11 @@
 import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import Image from 'next/image';
+import { useHoverHighlight, HoverHighlightOverlay } from '@repo/ui';
 
 export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Restaurant; dishes: Dish[]; menuCategories: MenuCategory[]; }) {
   const items = dishes.slice(0, 10);
+  const { containerRef, rect, style, moveHighlight, clearHover } = useHoverHighlight<HTMLDivElement>();
   
   return (
     <motion.section 
@@ -12,9 +14,9 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="flex min-h-[800px]">
-        {/* Left Sidebar - Contents Title (Rotated) */}
-        <div className="w-[140px] bg-white border-r border-gray-300 flex items-start justify-center pt-8">
+      <div ref={containerRef} onMouseLeave={clearHover} className="relative flex min-h-[800px]">
+        <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
+        <div onMouseEnter={(e) => moveHighlight(e, { borderRadius: 10, backgroundColor: '#f0eadf', opacity: 1 })} className="w-[140px] bg-white border-r border-gray-300 flex items-start justify-center pt-8 relative z-10 cursor-pointer">
           <h1 
             className="text-[68px] font-bold text-[#3C3C3C] leading-none"
             style={{ 
@@ -29,10 +31,9 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
           </h1>
         </div>
 
-        {/* Main Content - 4 Rows with different layouts */}
-        <div className="flex-1 flex flex-col">
+        <div className="relative flex-1 flex flex-col">
           {/* Row 1 - Single large item */}
-          <div className="border-b border-gray-300 p-8 flex-shrink-0" style={{ height: '550px' }}>
+          <div onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#f5efe6', opacity: 1 })} className="border-b border-gray-300 p-8 flex-shrink-0  relative z-10 cursor-pointer" style={{ height: '550px' }}>
             <div className="flex gap-8 h-full">
               
               <div className="flex-1 flex items-center">
@@ -59,7 +60,11 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
           {/* Row 2 - 4 columns */}
           <div className="grid grid-cols-4 border-b border-gray-300 flex-shrink-0" style={{ height: '240px' }}>
             {items.slice(1, 5).map((dish, idx) => (
-              <div key={dish.id} className={`p-5 ${idx < 3 ? 'border-r border-gray-300' : ''} flex flex-col`}>
+              <div
+                key={dish.id}
+                onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#f6f1e7', opacity: 1 })}
+                className={`relative z-10 cursor-pointer p-5 ${idx < 3 ? 'border-r border-gray-300' : ''} flex flex-col`}
+              >
                 <div className="text-[42px] font-bold text-[#C9A574] leading-none mb-3">{idx + 4}</div>
                 <div className="relative mb-3 flex-shrink-0" style={{ height: '110px' }}>
                   <Image
@@ -78,7 +83,11 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
           {/* Row 3 - 2 columns */}
           <div className="grid grid-cols-2 border-b border-gray-300 flex-shrink-0" style={{ height: '190px' }}>
             {items.slice(5, 7).map((dish, idx) => (
-              <div key={dish.id} className={`p-6 ${idx === 0 ? 'border-r border-gray-300' : ''}`}>
+              <div
+                key={dish.id}
+                onMouseEnter={(e) => moveHighlight(e, { borderRadius: 14, backgroundColor: '#f3ede4', opacity: 1 })}
+                className={`relative z-10 cursor-pointer p-6 ${idx === 0 ? 'border-r border-gray-300' : ''}`}
+              >
                 <div className="flex gap-5 h-full">
                   <div className="relative flex-shrink-0" style={{ width: '140px', height: '140px' }}>
                     <Image
@@ -101,7 +110,11 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
           {/* Row 4 - 2 columns */}
           <div className="grid grid-cols-2 flex-shrink-0" style={{ height: '190px' }}>
             {items.slice(7, 9).map((dish, idx) => (
-              <div key={dish.id} className={`p-6 ${idx === 0 ? 'border-r border-gray-300' : ''}`}>
+              <div
+                key={dish.id}
+                onMouseEnter={(e) => moveHighlight(e, { borderRadius: 14, backgroundColor: '#f6efe6', opacity: 1 })}
+                className={`relative z-10 cursor-pointer p-6 ${idx === 0 ? 'border-r border-gray-300' : ''}`}
+              >
                 <div className="flex gap-5 h-full">
                   <div className="relative flex-shrink-0" style={{ width: '140px', height: '140px' }}>
                     <Image

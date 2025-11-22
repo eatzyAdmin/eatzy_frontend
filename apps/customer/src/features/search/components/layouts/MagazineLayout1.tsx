@@ -1,6 +1,7 @@
 import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import { Star } from '@repo/ui/icons';
+import { useHoverHighlight, HoverHighlightOverlay } from '@repo/ui';
 import Image from 'next/image';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 export default function MagazineLayout1({ restaurant, dishes }: Props) {
   const featured = dishes[0];
   const sideDishes = dishes.slice(1, 5);
+  const { containerRef, rect, style, moveHighlight, clearHover } = useHoverHighlight<HTMLDivElement>();
   
   return (
     <motion.article
@@ -45,10 +47,10 @@ export default function MagazineLayout1({ restaurant, dishes }: Props) {
           </div>
         </div>
 
-        {/* Main grid */}
-        <div className="grid grid-cols-12 gap-8">
+        <div ref={containerRef} onMouseLeave={clearHover} className="relative grid grid-cols-12 gap-8">
+          <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
           {/* Large featured dish */}
-          <div className="col-span-8">
+          <div onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#f5efe6', opacity: 1, scaleEnabled: true, scale: 1.12 })} className="col-span-8 relative z-10 cursor-pointer">
             <div className="relative aspect-[4/3] overflow-hidden mb-4">
               <Image 
                 src={featured.imageUrl}
@@ -77,7 +79,6 @@ export default function MagazineLayout1({ restaurant, dishes }: Props) {
             </div>
           </div>
 
-          {/* Sidebar dishes */}
           <div className="col-span-4 space-y-6">
             <div className="text-xs uppercase tracking-widest text-gray-400 font-semibold border-b border-gray-200 pb-2">
               More Dishes
@@ -89,7 +90,8 @@ export default function MagazineLayout1({ restaurant, dishes }: Props) {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.1 }}
                 viewport={{ once: true }}
-                className="group cursor-pointer"
+                onMouseEnter={(e) => moveHighlight(e, { borderRadius: 10, backgroundColor: '#f0eadf', opacity: 1, scaleEnabled: true, scale: 1.12 })}
+                className="group cursor-pointer relative z-10"
               >
                 <div className="flex gap-4">
                   <div className="relative w-24 h-24 flex-shrink-0 overflow-hidden">
