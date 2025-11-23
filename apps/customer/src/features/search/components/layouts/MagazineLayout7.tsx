@@ -1,6 +1,6 @@
 import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
-import Image from 'next/image';
+import { ImageWithFallback } from '@repo/ui';
 import { useHoverHighlight, HoverHighlightOverlay, useTapRipple, TapRippleOverlay, useLoading } from '@repo/ui';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
@@ -54,7 +54,7 @@ export default function MagazineLayout7({ restaurant, dishes }: { restaurant: Re
             {/* Image Container - Vertical Rectangle */}
             <div className="w-full px-4 mb-4">
               <div className="relative overflow-hidden rounded-lg shadow-md" style={{ height: '380px' }}>
-                <Image
+                <ImageWithFallback
                   src={dish.imageUrl}
                   alt={dish.name}
                   fill

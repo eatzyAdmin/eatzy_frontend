@@ -173,7 +173,25 @@ export const mockMenuCategories: MenuCategory[] = [
 // Dishes for each restaurant
 export const mockDishes: Dish[] = [
   // Phở Hà Nội - Phở & Noodles
-  { id: 'dish-1-1', name: 'Phở Bò Tái', description: 'Rare beef pho with fresh herbs and lime', price: 65000, imageUrl: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-1', availableQuantity: 50, isAvailable: true, rating: 4.8 },
+  { id: 'dish-1-1', name: 'Phở Bò Tái', description: 'Rare beef pho with fresh herbs and lime', price: 65000, imageUrl: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-1', availableQuantity: 50, isAvailable: true, rating: 4.8,
+    variants: [
+      { id: 'size-s', name: 'Nhỏ', price: 60000 },
+      { id: 'size-m', name: 'Vừa', price: 65000 },
+      { id: 'size-l', name: 'Lớn', price: 75000 },
+    ],
+    addonGroups: [
+      { id: 'ag-them', title: 'Thêm topping', options: [
+        { id: 'add-trung', name: 'Trứng trần', price: 5000 },
+        { id: 'add-thit', name: 'Thêm thịt', price: 15000 },
+        { id: 'add-banh', name: 'Thêm bánh phở', price: 5000 },
+      ] },
+      { id: 'ag-cay', title: 'Độ cay', required: true, minSelect: 1, maxSelect: 1, options: [
+        { id: 'cay-it', name: 'Ít cay', price: 0 },
+        { id: 'cay-vua', name: 'Vừa cay', price: 0 },
+        { id: 'cay-nhieu', name: 'Cay nhiều', price: 0 },
+      ] },
+    ]
+  },
   { id: 'dish-1-2', name: 'Phở Gà', description: 'Chicken pho with tender meat and clear broth', price: 60000, imageUrl: 'https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-1', availableQuantity: 40, isAvailable: true, rating: 4.7 },
   { id: 'dish-1-3', name: 'Bún Chả', description: 'Grilled pork with vermicelli and herbs', price: 70000, imageUrl: 'https://images.unsplash.com/photo-1559314809-0d155014e29e?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-1', availableQuantity: 35, isAvailable: true, rating: 4.9 },
   { id: 'dish-1-4', name: 'Bún Bò Huế', description: 'Spicy beef noodle soup from Central Vietnam', price: 75000, imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-1', availableQuantity: 30, isAvailable: true, rating: 4.8 },
@@ -224,7 +242,25 @@ export const mockDishes: Dish[] = [
   // Café De Paris - Coffee & Drinks
   { id: 'dish-5-1', name: 'Espresso', description: 'Rich Italian espresso', price: 45000, imageUrl: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 100, isAvailable: true, rating: 4.7 },
   { id: 'dish-5-2', name: 'Cappuccino', description: 'Espresso with steamed milk foam', price: 55000, imageUrl: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 90, isAvailable: true, rating: 4.8 },
-  { id: 'dish-5-3', name: 'Latte', description: 'Smooth espresso with steamed milk', price: 58000, imageUrl: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 95, isAvailable: true, rating: 4.7 },
+  { id: 'dish-5-3', name: 'Latte', description: 'Smooth espresso with steamed milk', price: 58000, imageUrl: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 95, isAvailable: true, rating: 4.7,
+    variants: [
+      { id: 'size-s', name: 'Nhỏ', price: 48000 },
+      { id: 'size-m', name: 'Vừa', price: 58000 },
+      { id: 'size-l', name: 'Lớn', price: 65000 },
+    ],
+    addonGroups: [
+      { id: 'ag-ice', title: 'Đá', required: true, minSelect: 1, maxSelect: 1, options: [
+        { id: 'ice-it', name: 'Ít đá', price: 0 },
+        { id: 'ice-vua', name: 'Trung bình', price: 0 },
+        { id: 'ice-nhieu', name: 'Nhiều đá', price: 0 },
+      ] },
+      { id: 'ag-topping', title: 'Topping thêm', options: [
+        { id: 'top-tranchau', name: 'Trân châu đen', price: 8000 },
+        { id: 'top-tranchau-trang', name: 'Trân châu trắng', price: 8000 },
+        { id: 'top-syrup', name: 'Thêm syrup', price: 5000 },
+      ] },
+    ]
+  },
   { id: 'dish-5-4', name: 'Vietnamese Iced Coffee', description: 'Strong coffee with condensed milk', price: 48000, imageUrl: 'https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 80, isAvailable: true, rating: 4.9 },
 
   // Café De Paris - Pastries & Desserts
@@ -344,6 +380,10 @@ export function searchRestaurants(query: string): Restaurant[] {
     
     return false;
   });
+}
+
+export function getRestaurantById(id: string): Restaurant | undefined {
+  return mockSearchRestaurants.find(r => r.id === id);
 }
 
 export function getRestaurantBySlug(slug: string): Restaurant | undefined {

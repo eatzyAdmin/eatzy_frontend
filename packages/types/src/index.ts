@@ -39,6 +39,8 @@ export type Dish = {
   availableQuantity: number;
   isAvailable?: boolean;
   rating?: number;
+  variants?: DishVariant[];
+  addonGroups?: AddonGroup[];
 };
 
 export type Voucher = {
@@ -50,6 +52,27 @@ export type Voucher = {
   discountAmount?: number;
   expiresAt?: string;
   isAvailable?: boolean;
+};
+
+export type DishVariant = {
+  id: string;
+  name: string;
+  price: number;
+};
+
+export type AddonOption = {
+  id: string;
+  name: string;
+  price: number;
+};
+
+export type AddonGroup = {
+  id: string;
+  title: string;
+  required?: boolean;
+  minSelect?: number;
+  maxSelect?: number;
+  options: AddonOption[];
 };
 
 export {};

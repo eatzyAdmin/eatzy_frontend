@@ -2,25 +2,30 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
-import { ChevronLeft, ChevronRight, Tag, Star, Clock, MapPin, ArrowLeft, ChefHat, Plus } from "@repo/ui/icons";
+import { ImageWithFallback } from "@repo/ui";
+import { ChevronLeft, ChevronRight, Tag, Star, Clock, MapPin, ArrowLeft, ChefHat, Plus, Minus } from "@repo/ui/icons";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { useLoading, useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
+import { useLoading, useHoverHighlight, HoverHighlightOverlay, useFlyToCart, FlyToCartLayer } from "@repo/ui";
 import type { Restaurant, Dish, MenuCategory, Voucher } from "@repo/types";
 import { useCartStore } from "@repo/store";
+import { formatVnd } from "@repo/lib";
 import {
   getRestaurantBySlug,
   getDishesByMenuCategory,
   getMenuCategoriesForRestaurant,
   getVouchersForRestaurant,
 } from "@/features/search/data/mockSearchData";
+import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer";
 
 export default function RestaurantDetailPage() {
   const params = useParams() as { slug: string };
   const router = useRouter();
   const { hide } = useLoading();
 
-  useEffect(() => { hide(); }, [hide]);
+  useEffect(() => {
+    const t = setTimeout(() => hide(), 1500);
+    return () => clearTimeout(t);
+  }, [hide]);
 
   const restaurant: Restaurant | undefined = useMemo(() => getRestaurantBySlug(params.slug), [params.slug]);
   const categories: MenuCategory[] = useMemo(() => restaurant ? getMenuCategoriesForRestaurant(restaurant.id).sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)) : [], [restaurant]);
@@ -34,9 +39,13 @@ export default function RestaurantDetailPage() {
   const rightColumnRef = useRef<HTMLDivElement | null>(null);
   const leftColumnRef = useRef<HTMLDivElement | null>(null);
   const [isTabsSticky, setIsTabsSticky] = useState(false);
-  const { addItem, setActiveRestaurant } = useCartStore();
+  const items = useCartStore((s) => s.items);
+  const { addItem, setActiveRestaurant, removeItem } = useCartStore();
   const { containerRef: catContainerRef, rect: catRect, style: catStyle, moveHighlight: catMove, clearHover: catClear } = useHoverHighlight<HTMLDivElement>();
   const { containerRef: menuContainerRef, rect: menuRect, style: menuStyle, moveHighlight: menuMove, clearHover: menuClear } = useHoverHighlight<HTMLDivElement>();
+  const { ghosts, fly } = useFlyToCart();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerDish, setDrawerDish] = useState<Dish | null>(null);
 
   useEffect(() => {
     const el = tabsRef.current;
@@ -110,6 +119,7 @@ export default function RestaurantDetailPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7]">
+      <FlyToCartLayer ghosts={ghosts} />
       {/* Back button - Fixed position */}
       <button
         onClick={() => router.back()}
@@ -128,10 +138,10 @@ export default function RestaurantDetailPage() {
                 <h1
                   className="text-[62px] font-bold leading-tight text-[#1A1A1A] mb-3"
                   style={{
-                      fontStretch: "condensed",
-                      letterSpacing: "-0.01em",
-                      fontFamily: "var(--font-anton), var(--font-sans)",
-                    }}
+                    fontStretch: "condensed",
+                    letterSpacing: "-0.01em",
+                    fontFamily: "var(--font-anton), var(--font-sans)",
+                  }}
                 >
                   {restaurant.name.toUpperCase()}
                 </h1>
@@ -175,9 +185,8 @@ export default function RestaurantDetailPage() {
               {/* Small illustration image */}
               {restaurant.imageUrl && (
                 <div className="rounded-[24px] overflow-hidden">
-                  <div
-                    className="relative aspect-[16/11]">
-                    <Image
+                  <div className="relative aspect-[16/11]">
+                    <ImageWithFallback
                       src={restaurant.imageUrl}
                       alt={restaurant.name}
                       fill
@@ -187,14 +196,17 @@ export default function RestaurantDetailPage() {
                 </div>
               )}
 
-              
-
               {vouchers.length > 0 && (
                 <div>
-                  <div className="text-[13px] font-semibold text-[#1A1A1A] mb-3 uppercase tracking-wide">Available Offers</div>
+                  <div className="text-[13px] font-semibold text-[#1A1A1A] mb-3 uppercase tracking-wide">
+                    Available Offers
+                  </div>
                   <div className="space-y-3">
                     {vouchers.map((v) => (
-                      <div key={v.id} className="relative bg-white rounded-[14px] p-4 border-2 border-dashed border-[var(--primary)]/50 shadow-sm">
+                      <div
+                        key={v.id}
+                        className="relative bg-white rounded-[14px] p-4 border-2 border-dashed border-[var(--primary)]/50 shadow-sm"
+                      >
                         <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-[#F7F7F7] rounded-full border border-[var(--primary)]/50"></div>
                         <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-[#F7F7F7] rounded-full border border-[var(--primary)]/50"></div>
                         <div className="flex items-start gap-3">
@@ -202,8 +214,14 @@ export default function RestaurantDetailPage() {
                             <Tag className="w-5 h-5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-[#1A1A1A] text-[13px]">{v.title}</div>
-                            {v.description && <div className="text-[12px] text-[#555] mt-0.5 line-clamp-2">{v.description}</div>}
+                            <div className="font-semibold text-[#1A1A1A] text-[13px]">
+                              {v.title}
+                            </div>
+                            {v.description && (
+                              <div className="text-[12px] text-[#555] mt-0.5 line-clamp-2">
+                                {v.description}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-r from-[var(--secondary)]/10 via-transparent to-[var(--primary)]/10 pointer-events-none rounded-[14px]"></div>
@@ -212,7 +230,6 @@ export default function RestaurantDetailPage() {
                   </div>
                 </div>
               )}
-              
             </div>
 
             {/* Right Column - Main Image & Menu (Scrollable independently) */}
@@ -221,12 +238,11 @@ export default function RestaurantDetailPage() {
               {restaurant.imageUrl && (
                 <div className="relative mb-6">
                   <div className="relative aspect-[16/8] rounded-[24px] overflow-hidden shadow-md bg-white">
-                    <Image
+                    <ImageWithFallback
                       src={restaurant.imageUrl}
                       alt={restaurant.name}
                       fill
                       className="object-cover"
-                      priority
                     />
                   </div>
                   <button className="absolute top-4 right-4 bg-[#28A745] hover:bg-[#218838] text-white px-4 py-2 rounded-[12px] shadow-lg flex items-center gap-2 transition-all">
@@ -260,8 +276,24 @@ export default function RestaurantDetailPage() {
                             letterSpacing: "-0.01em",
                             fontFamily: "var(--font-anton), var(--font-sans)",
                           }}
-                          onMouseEnter={(e) => catMove(e, { borderRadius: 12, backgroundColor: "rgba(0,0,0,0.06)", opacity: 1, scaleEnabled: true, scale: 1.1 })}
-                          onMouseMove={(e) => catMove(e, { borderRadius: 12, backgroundColor: "rgba(0,0,0,0.06)", opacity: 1, scaleEnabled: true, scale: 1.1 })}
+                          onMouseEnter={(e) =>
+                            catMove(e, {
+                              borderRadius: 12,
+                              backgroundColor: "rgba(0,0,0,0.06)",
+                              opacity: 1,
+                              scaleEnabled: true,
+                              scale: 1.1,
+                            })
+                          }
+                          onMouseMove={(e) =>
+                            catMove(e, {
+                              borderRadius: 12,
+                              backgroundColor: "rgba(0,0,0,0.06)",
+                              opacity: 1,
+                              scaleEnabled: true,
+                              scale: 1.1,
+                            })
+                          }
                           onMouseLeave={catClear}
                         >
                           {c.name}
@@ -333,76 +365,120 @@ export default function RestaurantDetailPage() {
                       </div>
 
                       <div className="grid grid-cols-3 gap-5">
-                        {dishes.map((d) => (
-                          <div
-                            key={d.id}
-                            className="group relative bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
-                            onMouseEnter={(e) =>
-                              menuMove(e, {
-                                borderRadius: 16,
-                                backgroundColor: "rgba(0,0,0,0.06)",
-                                opacity: 1,
-                                scaleEnabled: true,
-                                scale: 1.1,
-                              })
-                            }
-                            onMouseMove={(e) =>
-                              menuMove(e, {
-                                borderRadius: 16,
-                                backgroundColor: "rgba(0,0,0,0.06)",
-                                opacity: 1,
-                                scaleEnabled: true,
-                                scale: 1.1,
-                              })
-                            }
-                            onMouseLeave={menuClear}
-                          >
-                            <div className="relative aspect-[4/3] overflow-hidden">
-                              <Image
-                                src={d.imageUrl}
-                                alt={d.name}
-                                fill
-                                className="object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                              />
-                              {d.isAvailable === false && (
-                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs font-semibold">
-                                  Hết hàng
+                        {dishes.map((d) => {
+                          const count = items
+                            .filter(
+                              (it) =>
+                                it.id === d.id || it.id.startsWith(`${d.id}::`)
+                            )
+                            .reduce((s, it) => s + it.quantity, 0);
+                          const minPrice =
+                            d.variants && d.variants.length > 0
+                              ? Math.min(...d.variants.map((v) => v.price))
+                              : d.price;
+                          return (
+                            <div
+                              key={d.id}
+                              className="group relative bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
+                              onMouseEnter={(e) =>
+                                menuMove(e, {
+                                  borderRadius: 16,
+                                  backgroundColor: "rgba(0,0,0,0.06)",
+                                  opacity: 1,
+                                  scaleEnabled: true,
+                                  scale: 1.1,
+                                })
+                              }
+                              onMouseMove={(e) =>
+                                menuMove(e, {
+                                  borderRadius: 16,
+                                  backgroundColor: "rgba(0,0,0,0.06)",
+                                  opacity: 1,
+                                  scaleEnabled: true,
+                                  scale: 1.1,
+                                })
+                              }
+                              onMouseLeave={menuClear}
+                            >
+                              <div className="relative aspect-[4/3] overflow-hidden">
+                                <ImageWithFallback
+                                  src={d.imageUrl}
+                                  alt={d.name}
+                                  fill
+                                  className="object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                                />
+                                {d.isAvailable === false && (
+                                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs font-semibold">
+                                    Hết hàng
+                                  </div>
+                                )}
+                                <div className="absolute top-3 right-3">
+                                  {count > 0 ? (
+                                    <motion.div
+                                      layoutId={`item-${d.id}-btn`}
+                                      className="rounded-full bg-[var(--primary)] text-white shadow flex items-center gap-2 px-3 h-9"
+                                    >
+                                      <button
+                                        onClick={() => {
+                                          const target = items.find(
+                                            (it) =>
+                                              it.id === d.id ||
+                                              it.id.startsWith(`${d.id}::`)
+                                          );
+                                          if (target) removeItem(target.id);
+                                        }}
+                                        className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+                                      >
+                                        <Minus className="w-4 h-4" />
+                                      </button>
+                                      <span className="text-sm font-semibold">
+                                        {count}
+                                      </span>
+                                      <button
+                                        onClick={() => {
+                                          setActiveRestaurant(restaurant.id);
+                                          setDrawerDish(d);
+                                          setDrawerOpen(true);
+                                        }}
+                                        className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                      </button>
+                                    </motion.div>
+                                  ) : (
+                                    <motion.button
+                                      layoutId={`item-${d.id}-btn`}
+                                      onClick={() => {
+                                        setActiveRestaurant(restaurant.id);
+                                        setDrawerDish(d);
+                                        setDrawerOpen(true);
+                                      }}
+                                      className="w-9 h-9 rounded-full bg-[var(--primary)] text-white shadow flex items-center justify-center hover:scale-105 transition-transform"
+                                    >
+                                      <Plus className="w-5 h-5" />
+                                    </motion.button>
+                                  )}
                                 </div>
-                              )}
-                              <button
-                                onClick={() => {
-                                  setActiveRestaurant(restaurant.id);
-                                  addItem({
-                                    id: d.id,
-                                    name: d.name,
-                                    price: d.price,
-                                    imageUrl: d.imageUrl,
-                                    restaurantId: restaurant.id,
-                                  });
-                                }}
-                                className="absolute top-3 right-3 w-9 h-9 rounded-full bg-[var(--primary)] text-white shadow flex items-center justify-center hover:scale-105 transition-transform"
-                              >
-                                <Plus className="w-5 h-5" />
-                              </button>
+                              </div>
+                              <div className="p-4">
+                                <div className="font-semibold text-[#1A1A1A] mb-1 line-clamp-1">
+                                  {d.name}
+                                </div>
+                                <div className="text-[13px] text-[#555] line-clamp-2 mb-2 min-h-[2.5rem]">
+                                  {d.description}
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <div className="text-[16px] font-bold text-[var(--primary)]">
+                                    {formatVnd(minPrice)}
+                                  </div>
+                                  <div className="text-[11px] text-gray-500">
+                                    SL: {d.availableQuantity}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            <div className="p-4">
-                              <div className="font-semibold text-[#1A1A1A] mb-1 line-clamp-1">
-                                {d.name}
-                              </div>
-                              <div className="text-[13px] text-[#555] line-clamp-2 mb-2 min-h-[2.5rem]">
-                                {d.description}
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <div className="text-[16px] font-bold text-[var(--primary)]">
-                                  {(d.price / 1000).toFixed(0)}K
-                                </div>
-                                <div className="text-[11px] text-gray-500">
-                                  SL: {d.availableQuantity}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </section>
                   );
@@ -413,6 +489,45 @@ export default function RestaurantDetailPage() {
           </div>
         </div>
       </div>
+      <DishCustomizeDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        dish={drawerDish}
+        onConfirm={(payload, startRect) => {
+          if (!drawerDish) return;
+          const variantId = payload.variant?.id ?? "base";
+          const addonIds = payload.addons.map((a) => a.id).sort();
+          const uniqueId = `${drawerDish.id}::${variantId}::${addonIds.join(".")}`;
+          const endEl = document.getElementById("header-cart-button");
+          if (startRect && endEl) {
+            fly({
+              start: startRect,
+              end: endEl.getBoundingClientRect(),
+              imageUrl: drawerDish.imageUrl,
+            });
+          }
+          setActiveRestaurant(restaurant.id);
+          addItem({
+            id: uniqueId,
+            name: drawerDish.name,
+            price: payload.totalPrice / payload.quantity,
+            imageUrl: drawerDish.imageUrl,
+            restaurantId: restaurant.id,
+            quantity: payload.quantity,
+            options: {
+              variant: payload.variant
+                ? {
+                    id: payload.variant.id,
+                    name: payload.variant.name,
+                    price: payload.variant.price,
+                  }
+                : undefined,
+              addons: payload.addons,
+            },
+          });
+          setDrawerOpen(false);
+        }}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
-import Image from 'next/image';
+import { ImageWithFallback } from '@repo/ui';
 import { useHoverHighlight, HoverHighlightOverlay, useTapRipple, TapRippleOverlay, useLoading } from '@repo/ui';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
@@ -59,7 +59,7 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
               </div>
 
               <div className="relative flex-shrink-0" style={{ width: '80%', height: '100%' }}>
-                <Image
+                <ImageWithFallback
                   src={items[0]?.imageUrl || ''}
                   alt={items[0]?.name || ''}
                   fill
@@ -79,7 +79,7 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
               >
                 <div className="text-[42px] font-bold text-[#C9A574] leading-none mb-3">{idx + 4}</div>
                 <div className="relative mb-3 flex-shrink-0" style={{ height: '110px' }}>
-                  <Image
+                  <ImageWithFallback
                     src={dish.imageUrl}
                     alt={dish.name}
                     fill
@@ -102,7 +102,7 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
               >
                 <div className="flex gap-5 h-full">
                   <div className="relative flex-shrink-0" style={{ width: '140px', height: '140px' }}>
-                    <Image
+                    <ImageWithFallback
                       src={dish.imageUrl}
                       alt={dish.name}
                       fill
@@ -129,7 +129,7 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
               >
                 <div className="flex gap-5 h-full">
                   <div className="relative flex-shrink-0" style={{ width: '140px', height: '140px' }}>
-                    <Image
+                    <ImageWithFallback
                       src={dish.imageUrl}
                       alt={dish.name}
                       fill

@@ -2,7 +2,7 @@ import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import { Star } from '@repo/ui/icons';
 import { useHoverHighlight, HoverHighlightOverlay, useTapRipple, TapRippleOverlay, useLoading } from '@repo/ui';
-import Image from 'next/image';
+import { ImageWithFallback } from '@repo/ui';
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -81,7 +81,7 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
                 className="relative z-10 cursor-pointer"
               >
                 <div className="relative aspect-[3/2] overflow-hidden mb-4">
-                  <Image 
+                  <ImageWithFallback 
                     src={dish.imageUrl}
                     alt={dish.name}
                     fill
@@ -121,7 +121,7 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
                 className="relative z-10 cursor-pointer"
               >
                 <div className="relative aspect-[3/2] overflow-hidden mb-4">
-                  <Image 
+                  <ImageWithFallback 
                     src={dish.imageUrl}
                     alt={dish.name}
                     fill

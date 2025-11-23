@@ -37,3 +37,5 @@ export { default as ModernHeader } from "./headers/ModernHeader";
 export { default as ModalHeader } from "./headers/ModalHeader";
 export * from "./effects/HoverHighlight";
 export * from "./effects/TapRipple";
+export * from "./effects/FlyToCart";
+export { default as ImageWithFallback } from "./media/ImageWithFallback";

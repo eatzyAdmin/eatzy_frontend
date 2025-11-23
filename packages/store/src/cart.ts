@@ -8,6 +8,10 @@ export interface CartItem {
   imageUrl?: string;
   quantity: number;
   restaurantId: string;
+  options?: {
+    variant?: { id: string; name: string; price: number };
+    addons?: { id: string; name: string; price: number }[];
+  };
 }
 
 export interface CartState {

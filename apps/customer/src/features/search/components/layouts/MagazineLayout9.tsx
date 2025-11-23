@@ -1,6 +1,6 @@
 import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
-import Image from 'next/image';
+import { ImageWithFallback } from '@repo/ui';
 import { useHoverHighlight, HoverHighlightOverlay, useTapRipple, TapRippleOverlay, useLoading } from '@repo/ui';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
@@ -33,7 +33,7 @@ export default function MagazineLayout9({ restaurant, dishes, menuCategories }: 
         <TapRippleOverlay ripple={ripple} />
       </div>
       <div className="absolute inset-0" style={{ clipPath: 'polygon(22% 0, 100% 0, 100% 100%, 0 100%)' }}>
-        <Image
+        <ImageWithFallback
           src={lead?.imageUrl || ''}
           alt={lead?.name || ''}
           fill

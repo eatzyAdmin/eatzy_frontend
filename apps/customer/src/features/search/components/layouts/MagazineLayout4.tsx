@@ -2,7 +2,7 @@ import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import { Star } from '@repo/ui/icons';
 import { useHoverHighlight, HoverHighlightOverlay, useTapRipple, TapRippleOverlay, useLoading } from '@repo/ui';
-import Image from 'next/image';
+import { ImageWithFallback } from '@repo/ui';
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -81,7 +81,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                     className="flex gap-4 group cursor-pointer relative z-10"
                   >
                     <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
-                      <Image 
+                      <ImageWithFallback 
                         src={dish.imageUrl}
                         alt={dish.name}
                         fill
@@ -133,7 +133,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                     className="flex gap-4 group cursor-pointer relative z-10"
                   >
                     <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
-                      <Image 
+                      <ImageWithFallback 
                         src={dish.imageUrl}
                         alt={dish.name}
                         fill

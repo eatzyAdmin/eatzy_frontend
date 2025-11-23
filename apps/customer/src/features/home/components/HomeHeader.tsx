@@ -3,7 +3,7 @@
 import { motion } from '@repo/ui/motion';
 import { Menu, BookHeart, Search, ShoppingCart } from '@repo/ui/icons';
 import { useCartStore } from '@repo/store';
-// import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface HomeHeaderProps {
   onMenuClick?: () => void;
@@ -123,7 +123,6 @@ export default function HomeHeader({
           )}
 
           <motion.button
-            layoutId="cart"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{
@@ -134,15 +133,14 @@ export default function HomeHeader({
               },
             }}
             onClick={onCartClick}
-            className={`relative w-10 h-10 rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${
+            id="header-cart-button"
+            className={`relative rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${
               hideSearchIcon
                 ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
                 : 'bg-white/10 border-white/20 hover:bg-white/20'
-            }`}
+            } ${useCartStore((s) => s.items.length) > 0 ? 'px-3 w-auto h-10 gap-2' : 'w-10 h-10'}`}
           >
-            <ShoppingCart className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
-            {/** Cart count badge */}
-            <CartCountBadge />
+            <CartButtonContent hideSearchIcon={hideSearchIcon} />
           </motion.button>
         </motion.div>
       </div>
@@ -150,13 +148,32 @@ export default function HomeHeader({
   );
 }
 
-function CartCountBadge() {
+function CartButtonContent({ hideSearchIcon }: { hideSearchIcon: boolean }) {
   const count = useCartStore((s) => s.items.length);
-  if (count === 0) return null;
+  const total = useCartStore((s) => s.total());
+  const [pulse, setPulse] = useState(false);
+  useEffect(() => {
+    setPulse(true);
+    const t = setTimeout(() => setPulse(false), 300);
+    return () => clearTimeout(t);
+  }, [count]);
+
   return (
-    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--primary)] text-[10px] leading-[18px] text-black font-bold border border-white/60 flex items-center justify-center">
-      {count}
-    </span>
+    <>
+      <motion.div animate={pulse ? { scale: [1, 1.15, 1] } : {}} transition={{ duration: 0.3 }} className="relative flex items-center">
+        <ShoppingCart className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
+        {count > 0 && (
+          <motion.span key={count} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 300 }} className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--primary)] text-[10px] leading-[18px] text-black font-bold border border-white/60 flex items-center justify-center">
+            {count}
+          </motion.span>
+        )}
+      </motion.div>
+      {count > 0 && (
+        <div className={`hidden md:flex items-center text-sm font-semibold ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
+          {new Intl.NumberFormat('vi-VN').format(total)} đ
+        </div>
+      )}
+    </>
   );
 }
 

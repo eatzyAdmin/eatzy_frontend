@@ -2,7 +2,7 @@ import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import { Star } from '@repo/ui/icons';
 import { useHoverHighlight, HoverHighlightOverlay, useTapRipple, TapRippleOverlay, useLoading } from '@repo/ui';
-import Image from 'next/image';
+import { ImageWithFallback } from '@repo/ui';
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -73,7 +73,7 @@ export default function MagazineLayout3({ restaurant, dishes, menuCategories }: 
 
           <div onMouseEnter={(e) => moveHighlight(e, { borderRadius: 16, backgroundColor: '#f6f1e7', opacity: 1, scaleEnabled: true, scale: 1.12 })} className="col-span-7 relative z-10 cursor-pointer">
             <div className="relative aspect-[3/4] overflow-hidden mb-6">
-              <Image 
+              <ImageWithFallback 
                 src={hero.imageUrl}
                 alt={hero.name}
                 fill
@@ -109,7 +109,7 @@ export default function MagazineLayout3({ restaurant, dishes, menuCategories }: 
               className="relative z-10 cursor-pointer"
             >
               <div className="relative aspect-square overflow-hidden mb-3">
-                <Image 
+                <ImageWithFallback 
                   src={dish.imageUrl}
                   alt={dish.name}
                   fill

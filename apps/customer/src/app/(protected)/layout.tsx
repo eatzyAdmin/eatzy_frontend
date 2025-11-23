@@ -52,6 +52,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       <AnimatePresence>
+        {((isSearchMode || isRestaurantDetail) && isHeaderVisible) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="pointer-events-none fixed inset-x-0 top-0 h-20 z-[20] backdrop-blur-xl"
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
         {(!isSearchMode || isHeaderVisible) && (
           <motion.div
             initial={{ y: 0, opacity: 1 }}

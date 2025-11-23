@@ -3,7 +3,7 @@
 import { motion, AnimatePresence, PanInfo } from '@repo/ui/motion';
 import { Restaurant } from '@repo/models';
 import { ChevronLeft, ChevronRight } from '@repo/ui/icons';
-import Image from 'next/image';
+import { ImageWithFallback } from '@repo/ui';
 
 interface RestaurantSliderProps {
   restaurants: Restaurant[];
@@ -121,7 +121,7 @@ export default function RestaurantSlider({
                           className="relative w-full rounded-xl overflow-hidden shadow-2xl"
                           style={{ height: `${imageHeight}px` }}
                         >
-                          <Image
+                          <ImageWithFallback
                             src={restaurant.imageUrl ?? 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800'}
                             alt={restaurant.name}
                             fill
