@@ -20,6 +20,7 @@ export default function DishCustomizeDrawer({
     payload: {
       variant?: DishVariant;
       addons: { id: string; name: string; price: number }[];
+      groups?: { id: string; title: string; options: { id: string; name: string; price: number }[] }[];
       quantity: number;
       totalPrice: number;
     },
@@ -36,9 +37,7 @@ export default function DishCustomizeDrawer({
   const confirmRef = useRef<HTMLButtonElement | null>(null);
   const rightColRef = useRef<HTMLDivElement | null>(null);
   const groupRefs = useRef<Record<string, HTMLElement | null>>({});
-  const [activeGroupId, setActiveGroupId] = useState<string | null>(
-    dish?.addonGroups?.[0]?.id ?? null
-  );
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const {
     containerRef: addonContainerRef,
     rect: addonRect,
@@ -47,36 +46,60 @@ export default function DishCustomizeDrawer({
     clearHover: addonClear,
   } = useHoverHighlight<HTMLDivElement>();
 
+  const optionGroups: any[] = useMemo(() => {
+    const og = (dish as any)?.optionGroups as any[] | undefined;
+    if (og && Array.isArray(og)) return og;
+    return (dish as any)?.addonGroups ?? [];
+  }, [dish]);
+
+  const VARIANT_PREFIX = "variant";
+  const variantGroup: any | null = useMemo(() => {
+    const byTitle = optionGroups.find((g: any) => String(g.title || "").toLowerCase().startsWith(VARIANT_PREFIX));
+    return byTitle ?? null;
+  }, [optionGroups]);
+
+  const nonVariantGroups: any[] = useMemo(() => {
+    return optionGroups.filter((g: any) => {
+      const title = String(g.title || "").toLowerCase();
+      return !title.startsWith(VARIANT_PREFIX);
+    });
+  }, [optionGroups]);
+
   const variant = useMemo(() => {
-    if (!dish?.variants || dish.variants.length === 0) return undefined;
-    const id = selectedVariantId ?? dish.variants[0].id;
-    return dish.variants.find((v) => v.id === id);
-  }, [dish, selectedVariantId]);
+    if (variantGroup && Array.isArray(variantGroup.options) && variantGroup.options.length > 0) {
+      const id = selectedVariantId ?? variantGroup.options[0].id;
+      const found = variantGroup.options.find((v: any) => v.id === id);
+      return found ? ({ id: found.id, name: found.name, price: found.price } as DishVariant) : undefined;
+    }
+    const legacyVariants = (dish as any)?.variants as any[] | undefined;
+    if (!legacyVariants || legacyVariants.length === 0) return undefined;
+    const id = selectedVariantId ?? legacyVariants[0].id;
+    return legacyVariants.find((v: any) => v.id === id);
+  }, [dish, selectedVariantId, variantGroup]);
   const currentVariantId = variant?.id;
 
   const addons = useMemo(() => {
     const res: { id: string; name: string; price: number }[] = [];
-    if (!dish?.addonGroups) return res;
-    dish.addonGroups.forEach((g) => {
+    nonVariantGroups.forEach((g: any) => {
       const set = selectedAddonIds[g.id];
       if (set) {
-        g.options.forEach((opt) => {
-          if (set.has(opt.id))
-            res.push({ id: opt.id, name: opt.name, price: opt.price });
+        (g.options ?? []).forEach((opt: any) => {
+          if (set.has(opt.id)) res.push({ id: opt.id, name: opt.name, price: opt.price });
         });
       }
     });
     return res;
-  }, [dish, selectedAddonIds]);
+  }, [selectedAddonIds, nonVariantGroups]);
 
-  const basePrice = variant?.price ?? dish?.price ?? 0;
-  const addonsSum = addons.reduce((s, a) => s + a.price, 0);
-  const totalPrice = (basePrice + addonsSum) * qty;
+  const basePrice = Number(dish?.price ?? 0);
+  const variantPrice = Number(variant?.price ?? 0);
+  const addonsSum = addons.reduce((s, a) => s + Number(a.price || 0), 0);
+  const totalPrice = (basePrice + variantPrice + addonsSum) * qty;
 
   const canConfirm = useMemo(() => {
     if (!dish) return false;
-    if (!dish.addonGroups) return true;
-    for (const g of dish.addonGroups) {
+    if (!nonVariantGroups || nonVariantGroups.length === 0) return true;
+    for (const g of nonVariantGroups) {
       const set = selectedAddonIds[g.id] ?? new Set<string>();
       const count = set.size;
       if (g.required && (g.minSelect ?? 1) > count) return false;
@@ -84,7 +107,7 @@ export default function DishCustomizeDrawer({
       if (typeof g.maxSelect === "number" && count > g.maxSelect) return false;
     }
     return true;
-  }, [dish, selectedAddonIds]);
+  }, [dish, selectedAddonIds, nonVariantGroups]);
 
   const toggleAddon = (groupId: string, optionId: string) => {
     setSelectedAddonIds((prev) => {
@@ -98,13 +121,13 @@ export default function DishCustomizeDrawer({
   };
 
   useEffect(() => {
-    if (!dish?.addonGroups) return;
-    setActiveGroupId(dish.addonGroups[0]?.id ?? null);
-  }, [dish]);
+    const first = nonVariantGroups[0]?.id ?? null;
+    setActiveGroupId(first);
+  }, [nonVariantGroups]);
 
   useEffect(() => {
     const root = rightColRef.current;
-    if (!root || !dish?.addonGroups) return;
+    if (!root || !nonVariantGroups || nonVariantGroups.length === 0) return;
     const obs = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -115,12 +138,12 @@ export default function DishCustomizeDrawer({
       },
       { root, rootMargin: "-100px 0px -60% 0px", threshold: 0.2 }
     );
-    dish.addonGroups.forEach((g) => {
+    nonVariantGroups.forEach((g: any) => {
       const node = groupRefs.current[g.id];
       if (node) obs.observe(node);
     });
     return () => obs.disconnect();
-  }, [dish]);
+  }, [nonVariantGroups]);
 
   if (!dish) return null;
 
@@ -230,7 +253,7 @@ export default function DishCustomizeDrawer({
                     />
                   </div>
                 </div>
-                {dish.variants && dish.variants.length > 0 && (
+                {(variantGroup && variantGroup.options?.length > 0) || ((dish as any)?.variants && (dish as any).variants.length > 0) ? (
                   <div className="mt-6">
                     <div
                       className="text-3xl text-gray-600 font-semibold text-[#1A1A1A] tracking-wide mb-2"
@@ -242,7 +265,7 @@ export default function DishCustomizeDrawer({
                       Variant
                     </div>
                     <div className="flex flex-wrap gap-3">
-                      {dish.variants.map((v) => (
+                      {(variantGroup?.options ?? (dish as any)?.variants ?? []).map((v: any) => (
                         <motion.button
                           whileHover={{ scale: 1.03 }}
                           whileTap={{ scale: 0.97 }}
@@ -250,18 +273,18 @@ export default function DishCustomizeDrawer({
                           onClick={() => setSelectedVariantId(v.id)}
                           className={`px-8 py-4 rounded-2xl text-md font-medium transition-all shadow-sm border ${currentVariantId === v.id ? "bg-[var(--primary)] text-white border-[var(--primary)]" : "bg-gray-300 text-gray-400 border-gray-300 hover:bg-gray-100"} `}
                         >
-                          {v.name} • {formatVnd(v.price)}
+                          {v.name} • {formatVnd((dish?.price ?? 0) + Number(v.price || 0))}
                         </motion.button>
                       ))}
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
               <div
                 ref={rightColRef}
-                className="relative overflow-y-auto no-scrollbar px-12 p-6 pb-24 bg-white border-l border-gray-100"
+                className="relative overflow-y-auto px-12 p-6 pb-24 bg-white border-l border-gray-100"
               >
-                {dish.addonGroups && dish.addonGroups.length > 0 && (
+                {nonVariantGroups && nonVariantGroups.length > 0 && (
                   <div className="sticky top-0 z-10 -mt-6 pt-6 bg-white">
                     <div
                       ref={addonContainerRef}
@@ -271,9 +294,9 @@ export default function DishCustomizeDrawer({
                         rect={addonRect}
                         style={addonStyle}
                       />
-                      <div className="overflow-x-auto no-scrollbar">
+                      <div className="overflow-x-auto">
                         <div className="inline-flex items-center gap-6 px-1 py-3">
-                          {dish.addonGroups.map((g) => {
+                          {nonVariantGroups.map((g: any) => {
                             const set =
                               selectedAddonIds[g.id] ?? new Set<string>();
                             const unmet =
@@ -293,7 +316,7 @@ export default function DishCustomizeDrawer({
                                 onMouseLeave={addonClear}
                                 className={`relative text-2xl font-semibold font-anton ${activeGroupId === g.id ? "text-[#1A1A1A]" : "text-[#555]"} px-3 py-2`}
                               >
-                                {g.title.toUpperCase()}
+                                {String(g.title || "").toUpperCase()}
                                 {unmet && (
                                   <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
                                 )}
@@ -305,9 +328,9 @@ export default function DishCustomizeDrawer({
                     </div>
                   </div>
                 )}
-                {dish.addonGroups && dish.addonGroups.length > 0 ? (
+                {nonVariantGroups && nonVariantGroups.length > 0 ? (
                   <div className="space-y-6">
-                    {dish.addonGroups.map((g) => (
+                    {nonVariantGroups.map((g: any) => (
                       <section
                         key={g.id}
                         ref={(el) => {
@@ -316,7 +339,7 @@ export default function DishCustomizeDrawer({
                         data-id={g.id}
                       >
                         <div className="text-sm font-semibold text-[#1A1A1A] uppercase tracking-wide mb-2">
-                          {g.title}
+                          {String(g.title || "")}
                           {typeof g.minSelect === "number" && (
                             <span className="ml-2 text-gray-500 lowercase">
                               chọn tối thiểu {g.minSelect}
@@ -327,7 +350,7 @@ export default function DishCustomizeDrawer({
                           )}
                         </div>
                         <div className="grid grid-cols-2 gap-3">
-                          {g.options.map((opt) => {
+                          {(g.options ?? []).map((opt: any) => {
                             const set =
                               selectedAddonIds[g.id] ?? new Set<string>();
                             const active = set.has(opt.id);
@@ -347,10 +370,10 @@ export default function DishCustomizeDrawer({
                                 </div>
                                 <div className="flex-1">
                                   <div className="font-semibold text-sm text-[#1A1A1A]">
-                                    {opt.name}
+                                    {String(opt.name || "")}
                                   </div>
                                   <div className="text-xs text-gray-600">
-                                    {formatVnd(opt.price)}
+                                    {formatVnd(Number(opt.price || 0))}
                                   </div>
                                 </div>
                                 <div
@@ -396,7 +419,38 @@ export default function DishCustomizeDrawer({
                     ref={confirmRef}
                     onClick={() =>
                       onConfirm(
-                        { variant, addons, quantity: qty, totalPrice },
+                        {
+                          variant,
+                          addons,
+                          groups: [
+                            ...(
+                              variantGroup && variant
+                                ? [
+                                    {
+                                      id: String(variantGroup.id),
+                                      title: String(variantGroup.title || ""),
+                                      options: [
+                                        { id: String(variant.id), name: String(variant.name), price: Number(variant.price) },
+                                      ],
+                                    },
+                                  ]
+                                : []
+                            ),
+                            ...nonVariantGroups
+                              .map((g: any) => {
+                                const set = selectedAddonIds[g.id] ?? new Set<string>();
+                                const opts = (g.options ?? []).filter((o: any) => set.has(o.id));
+                                return {
+                                  id: String(g.id),
+                                  title: String(g.title || ""),
+                                  options: opts.map((o: any) => ({ id: String(o.id), name: String(o.name || ""), price: Number(o.price || 0) })),
+                                };
+                              })
+                              .filter((g: any) => g.options.length > 0),
+                          ],
+                          quantity: qty,
+                          totalPrice,
+                        },
                         confirmRef.current?.getBoundingClientRect() || undefined
                       )
                     }

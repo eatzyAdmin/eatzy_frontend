@@ -57,7 +57,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
               ) : (
                 <ul className="divide-y divide-gray-200">
                   {items.map((it) => (
-                    <li key={it.id} className="p-4">
+                    <li key={it.id} className="p-6">
                       <div className="flex items-start gap-3">
                         <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-white border border-gray-200 flex items-center justify-center">
                           <ImageWithFallback src={it.imageUrl ?? ""} alt={it.name} fill className="object-cover" />
@@ -74,11 +74,29 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                               <Trash className="w-4 h-4 text-gray-700" />
                             </motion.button>
                           </div>
-                          {it.options?.variant?.name && (
-                            <div className="text-[#555] text-xs">Vị cay: {it.options.variant.name}</div>
-                          )}
-                          {it.options?.addons && it.options.addons.length > 0 && (
-                            <div className="text-[#555] text-xs">Topping: {it.options.addons.map((a) => a.name).join(", ")}</div>
+                          {Array.isArray(it.options?.groups) && it.options!.groups.length > 0 ? (
+                            <div className="space-y-0.5">
+                              {[...it.options!.groups]
+                                .sort((a, b) => {
+                                  const ap = String(a.title || "").toLowerCase().startsWith("variant") ? 0 : 1;
+                                  const bp = String(b.title || "").toLowerCase().startsWith("variant") ? 0 : 1;
+                                  return ap - bp;
+                                })
+                                .map((g) => (
+                                  <div key={g.id} className="text-[#555] text-xs">
+                                    {String(g.title || "").toLowerCase().startsWith("variant") ? "Phân loại" : g.title}: {g.options.map((o) => o.name).join(", ")}
+                                  </div>
+                                ))}
+                            </div>
+                          ) : (
+                            <>
+                              {it.options?.variant?.name && (
+                                <div className="text-[#555] text-xs">Phân loại: {it.options.variant.name}</div>
+                              )}
+                              {it.options?.addons && it.options.addons.length > 0 && (
+                                <div className="text-[#555] text-xs">Topping: {it.options.addons.map((a) => a.name).join(", ")}</div>
+                              )}
+                            </>
                           )}
                           <div className="mt-2 flex items-center justify-between">
                             <div className="text-[#1A1A1A] font-semibold">{formatVnd(it.price)}</div>

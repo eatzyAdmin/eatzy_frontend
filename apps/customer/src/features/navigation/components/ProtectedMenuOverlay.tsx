@@ -9,13 +9,12 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const params = useSearchParams();
-  const pathname = usePathname();
   useEffect(() => { const t = setTimeout(() => setIsLoading(false), 400); return () => clearTimeout(t); }, []);
 
   const handleHomeClick = () => {
     const next = new URLSearchParams(params.toString());
     next.delete('q');
-    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+    router.replace(`/home`, { scroll: false });
     onClose();
   };
 

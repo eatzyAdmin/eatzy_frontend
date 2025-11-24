@@ -174,12 +174,12 @@ export const mockMenuCategories: MenuCategory[] = [
 export const mockDishes: Dish[] = [
   // Phở Hà Nội - Phở & Noodles
   { id: 'dish-1-1', name: 'Phở Bò Tái', description: 'Rare beef pho with fresh herbs and lime', price: 65000, imageUrl: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-1', availableQuantity: 50, isAvailable: true, rating: 4.8,
-    variants: [
-      { id: 'size-s', name: 'Nhỏ', price: 60000 },
-      { id: 'size-m', name: 'Vừa', price: 65000 },
-      { id: 'size-l', name: 'Lớn', price: 75000 },
-    ],
-    addonGroups: [
+    optionGroups: [
+      { id: 'size', title: 'variant__19f2a48e6cddf3', options: [
+        { id: 'size-s', name: 'Nhỏ', price: 60000 },
+        { id: 'size-m', name: 'Vừa', price: 65000 },
+        { id: 'size-l', name: 'Lớn', price: 75000 },
+      ] },
       { id: 'ag-them', title: 'Thêm topping', options: [
         { id: 'add-trung', name: 'Trứng trần', price: 5000 },
         { id: 'add-thit', name: 'Thêm thịt', price: 15000 },
@@ -243,12 +243,12 @@ export const mockDishes: Dish[] = [
   { id: 'dish-5-1', name: 'Espresso', description: 'Rich Italian espresso', price: 45000, imageUrl: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 100, isAvailable: true, rating: 4.7 },
   { id: 'dish-5-2', name: 'Cappuccino', description: 'Espresso with steamed milk foam', price: 55000, imageUrl: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 90, isAvailable: true, rating: 4.8 },
   { id: 'dish-5-3', name: 'Latte', description: 'Smooth espresso with steamed milk', price: 58000, imageUrl: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 95, isAvailable: true, rating: 4.7,
-    variants: [
-      { id: 'size-s', name: 'Nhỏ', price: 48000 },
-      { id: 'size-m', name: 'Vừa', price: 58000 },
-      { id: 'size-l', name: 'Lớn', price: 65000 },
-    ],
-    addonGroups: [
+    optionGroups: [
+      { id: 'size', title: 'variant__19f2a48e6cddf3', options: [
+        { id: 'size-s', name: 'Nhỏ', price: 48000 },
+        { id: 'size-m', name: 'Vừa', price: 58000 },
+        { id: 'size-l', name: 'Lớn', price: 65000 },
+      ] },
       { id: 'ag-ice', title: 'Đá', required: true, minSelect: 1, maxSelect: 1, options: [
         { id: 'ice-it', name: 'Ít đá', price: 0 },
         { id: 'ice-vua', name: 'Trung bình', price: 0 },

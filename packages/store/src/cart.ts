@@ -11,6 +11,7 @@ export interface CartItem {
   options?: {
     variant?: { id: string; name: string; price: number };
     addons?: { id: string; name: string; price: number }[];
+    groups?: { id: string; title: string; options: { id: string; name: string; price: number }[] }[];
   };
 }
 

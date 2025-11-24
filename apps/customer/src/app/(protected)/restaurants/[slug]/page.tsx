@@ -131,7 +131,7 @@ export default function RestaurantDetailPage() {
       {/* Main Content - Two Column Layout */}
       <div className="flex-1 overflow-hidden">
         <div className="max-w-[1400px] mx-auto pr-16 px-8 pt-20 h-full">
-          <div className="grid grid-cols-[30%_70%] gap-8 h-full">
+            <div className="grid grid-cols-[30%_70%] gap-8 h-full">
             <div ref={leftColumnRef} className="relative overflow-y-auto no-scrollbar pr-2 space-y-6 mb-12">
               {/* Restaurant Title */}
               <div>
@@ -372,10 +372,14 @@ export default function RestaurantDetailPage() {
                                 it.id === d.id || it.id.startsWith(`${d.id}::`)
                             )
                             .reduce((s, it) => s + it.quantity, 0);
-                          const minPrice =
-                            d.variants && d.variants.length > 0
-                              ? Math.min(...d.variants.map((v) => v.price))
-                              : d.price;
+                          const variantGroup = Array.isArray((d as any).optionGroups)
+                            ? (d as any).optionGroups.find((g: any) => (g.type ?? g.kind) === 'variant' || String(g.title || '').toLowerCase().startsWith('variant'))
+                            : null;
+                          const minPrice = variantGroup && Array.isArray(variantGroup.options) && variantGroup.options.length > 0
+                            ? (Number(d.price || 0) + Math.min(...variantGroup.options.map((v: any) => Number(v.price || 0))))
+                            : (((d as any).variants && (d as any).variants.length > 0)
+                              ? (Number(d.price || 0) + Math.min(...((d as any).variants as any[]).map((v: any) => Number(v.price || 0))))
+                              : Number(d.price || 0));
                           return (
                             <div
                               key={d.id}
@@ -507,24 +511,25 @@ export default function RestaurantDetailPage() {
             });
           }
           setActiveRestaurant(restaurant.id);
-          addItem({
-            id: uniqueId,
-            name: drawerDish.name,
-            price: payload.totalPrice / payload.quantity,
-            imageUrl: drawerDish.imageUrl,
-            restaurantId: restaurant.id,
-            quantity: payload.quantity,
-            options: {
-              variant: payload.variant
-                ? {
-                    id: payload.variant.id,
-                    name: payload.variant.name,
-                    price: payload.variant.price,
-                  }
-                : undefined,
-              addons: payload.addons,
-            },
-          });
+                          addItem({
+                            id: uniqueId,
+                            name: drawerDish.name,
+                            price: payload.totalPrice / payload.quantity,
+                            imageUrl: drawerDish.imageUrl,
+                            restaurantId: restaurant.id,
+                            quantity: payload.quantity,
+                            options: {
+                              variant: payload.variant
+                                ? {
+                                    id: payload.variant.id,
+                                    name: payload.variant.name,
+                                    price: payload.variant.price,
+                                  }
+                                : undefined,
+                              addons: payload.addons,
+                              groups: payload.groups,
+                            },
+                          });
           setDrawerOpen(false);
         }}
       />

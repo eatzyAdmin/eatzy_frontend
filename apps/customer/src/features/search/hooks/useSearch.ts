@@ -85,13 +85,12 @@ export function useSearch() {
   useEffect(() => {
     const query = searchParams.get('q') || '';
     if (!query) return;
-    // Avoid re-entrancy while a search is in progress
     if (isSearching) return;
-    // Trigger search whenever URL query changes to a new value
-    if (query !== searchQuery) {
+    // Trigger when URL param changes OR on reload when we haven't searched yet
+    if (query !== searchQuery || !hasSearched) {
       performSearch(query);
     }
-  }, [searchParams, searchQuery, performSearch, isSearching]);
+  }, [searchParams, searchQuery, performSearch, isSearching, hasSearched]);
 
   return {
     searchQuery,
@@ -104,4 +103,3 @@ export function useSearch() {
     clearSearch,
   };
 }
-

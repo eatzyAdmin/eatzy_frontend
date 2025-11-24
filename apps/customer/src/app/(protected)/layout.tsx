@@ -82,7 +82,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               onLogoClick={() => {
                 const next = new URLSearchParams(searchParams.toString());
                 next.delete('q');
-                router.replace(`?${next.toString()}`, { scroll: false });
+                router.replace(`/home`, { scroll: false });
               }}
             />
           </motion.div>

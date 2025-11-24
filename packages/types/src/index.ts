@@ -39,8 +39,7 @@ export type Dish = {
   availableQuantity: number;
   isAvailable?: boolean;
   rating?: number;
-  variants?: DishVariant[];
-  addonGroups?: AddonGroup[];
+  optionGroups?: OptionGroup[];
 };
 
 export type Voucher = {
@@ -54,25 +53,25 @@ export type Voucher = {
   isAvailable?: boolean;
 };
 
-export type DishVariant = {
+export type OptionChoice = {
   id: string;
   name: string;
   price: number;
 };
 
-export type AddonOption = {
-  id: string;
-  name: string;
-  price: number;
-};
+export type AddonOption = OptionChoice;
 
-export type AddonGroup = {
+export type OptionGroup = {
   id: string;
   title: string;
+  type?: 'variant' | 'addon' | string;
   required?: boolean;
   minSelect?: number;
   maxSelect?: number;
-  options: AddonOption[];
+  options: OptionChoice[];
 };
+
+export type AddonGroup = OptionGroup;
+export type DishVariant = OptionChoice;
 
 export {};
