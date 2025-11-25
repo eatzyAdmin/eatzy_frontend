@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "@repo/ui/motion";
 import { History, Home, Heart } from "@repo/ui/icons";
 import { NavItem, NavItemShimmer, ProfileShimmer } from "@repo/ui";
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [isLoading, setIsLoading] = useState(true);

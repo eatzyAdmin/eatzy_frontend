@@ -2,7 +2,7 @@
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { ImageWithFallback } from "@repo/ui";
 import { useState, useMemo, useRef, useEffect } from "react";
-import type { Dish, DishVariant } from "@repo/types";
+import type { Dish, DishVariant, OptionGroup, OptionChoice } from "@repo/types";
 import { formatVnd } from "@repo/lib";
 import { useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
 import { ChefHat } from "@repo/ui/icons";
@@ -46,45 +46,43 @@ export default function DishCustomizeDrawer({
     clearHover: addonClear,
   } = useHoverHighlight<HTMLDivElement>();
 
-  const optionGroups: any[] = useMemo(() => {
-    const og = (dish as any)?.optionGroups as any[] | undefined;
-    if (og && Array.isArray(og)) return og;
-    return (dish as any)?.addonGroups ?? [];
+  const optionGroups: OptionGroup[] = useMemo(() => {
+    const og = dish?.optionGroups;
+    if (og && Array.isArray(og)) return og as OptionGroup[];
+    const legacy = (dish as unknown as { addonGroups?: OptionGroup[] } | null)?.addonGroups;
+    return Array.isArray(legacy) ? legacy : [];
   }, [dish]);
 
   const VARIANT_PREFIX = "variant";
-  const variantGroup: any | null = useMemo(() => {
-    const byTitle = optionGroups.find((g: any) => String(g.title || "").toLowerCase().startsWith(VARIANT_PREFIX));
+  const variantGroup: OptionGroup | null = useMemo(() => {
+    const byTitle = optionGroups.find((g) => String(g.title || "").toLowerCase().startsWith(VARIANT_PREFIX));
     return byTitle ?? null;
   }, [optionGroups]);
 
-  const nonVariantGroups: any[] = useMemo(() => {
-    return optionGroups.filter((g: any) => {
+  const nonVariantGroups: OptionGroup[] = useMemo(() => {
+    return optionGroups.filter((g) => {
       const title = String(g.title || "").toLowerCase();
       return !title.startsWith(VARIANT_PREFIX);
     });
   }, [optionGroups]);
 
-  const variant = useMemo(() => {
+  const variant: DishVariant | undefined = useMemo(() => {
     if (variantGroup && Array.isArray(variantGroup.options) && variantGroup.options.length > 0) {
       const id = selectedVariantId ?? variantGroup.options[0].id;
-      const found = variantGroup.options.find((v: any) => v.id === id);
-      return found ? ({ id: found.id, name: found.name, price: found.price } as DishVariant) : undefined;
+      const found = (variantGroup.options as OptionChoice[]).find((v) => v.id === id);
+      return found ? ({ id: found.id, name: found.name, price: found.price }) : undefined;
     }
-    const legacyVariants = (dish as any)?.variants as any[] | undefined;
-    if (!legacyVariants || legacyVariants.length === 0) return undefined;
-    const id = selectedVariantId ?? legacyVariants[0].id;
-    return legacyVariants.find((v: any) => v.id === id);
-  }, [dish, selectedVariantId, variantGroup]);
+    return undefined;
+  }, [selectedVariantId, variantGroup]);
   const currentVariantId = variant?.id;
 
   const addons = useMemo(() => {
     const res: { id: string; name: string; price: number }[] = [];
-    nonVariantGroups.forEach((g: any) => {
+    nonVariantGroups.forEach((g) => {
       const set = selectedAddonIds[g.id];
       if (set) {
-        (g.options ?? []).forEach((opt: any) => {
-          if (set.has(opt.id)) res.push({ id: opt.id, name: opt.name, price: opt.price });
+        (g.options ?? []).forEach((opt) => {
+          if (set.has(opt.id)) res.push({ id: opt.id, name: String(opt.name || ""), price: Number(opt.price || 0) });
         });
       }
     });
@@ -138,7 +136,7 @@ export default function DishCustomizeDrawer({
       },
       { root, rootMargin: "-100px 0px -60% 0px", threshold: 0.2 }
     );
-    nonVariantGroups.forEach((g: any) => {
+    nonVariantGroups.forEach((g) => {
       const node = groupRefs.current[g.id];
       if (node) obs.observe(node);
     });
@@ -253,7 +251,7 @@ export default function DishCustomizeDrawer({
                     />
                   </div>
                 </div>
-                {(variantGroup && variantGroup.options?.length > 0) || ((dish as any)?.variants && (dish as any).variants.length > 0) ? (
+                {(variantGroup && variantGroup.options?.length > 0) ? (
                   <div className="mt-6">
                     <div
                       className="text-3xl text-gray-600 font-semibold text-[#1A1A1A] tracking-wide mb-2"
@@ -265,7 +263,7 @@ export default function DishCustomizeDrawer({
                       Variant
                     </div>
                     <div className="flex flex-wrap gap-3">
-                      {(variantGroup?.options ?? (dish as any)?.variants ?? []).map((v: any) => (
+                      {(variantGroup?.options ?? []).map((v: OptionChoice) => (
                         <motion.button
                           whileHover={{ scale: 1.03 }}
                           whileTap={{ scale: 0.97 }}
@@ -296,7 +294,7 @@ export default function DishCustomizeDrawer({
                       />
                       <div className="overflow-x-auto">
                         <div className="inline-flex items-center gap-6 px-1 py-3">
-                          {nonVariantGroups.map((g: any) => {
+                          {nonVariantGroups.map((g) => {
                             const set =
                               selectedAddonIds[g.id] ?? new Set<string>();
                             const unmet =
@@ -330,7 +328,7 @@ export default function DishCustomizeDrawer({
                 )}
                 {nonVariantGroups && nonVariantGroups.length > 0 ? (
                   <div className="space-y-6">
-                    {nonVariantGroups.map((g: any) => (
+                    {nonVariantGroups.map((g) => (
                       <section
                         key={g.id}
                         ref={(el) => {
@@ -350,7 +348,7 @@ export default function DishCustomizeDrawer({
                           )}
                         </div>
                         <div className="grid grid-cols-2 gap-3">
-                          {(g.options ?? []).map((opt: any) => {
+                          {(g.options ?? []).map((opt) => {
                             const set =
                               selectedAddonIds[g.id] ?? new Set<string>();
                             const active = set.has(opt.id);
@@ -437,16 +435,16 @@ export default function DishCustomizeDrawer({
                                 : []
                             ),
                             ...nonVariantGroups
-                              .map((g: any) => {
+                              .map((g) => {
                                 const set = selectedAddonIds[g.id] ?? new Set<string>();
-                                const opts = (g.options ?? []).filter((o: any) => set.has(o.id));
+                                const opts = (g.options ?? []).filter((o) => set.has(o.id));
                                 return {
                                   id: String(g.id),
                                   title: String(g.title || ""),
-                                  options: opts.map((o: any) => ({ id: String(o.id), name: String(o.name || ""), price: Number(o.price || 0) })),
+                                  options: opts.map((o) => ({ id: String(o.id), name: String(o.name || ""), price: Number(o.price || 0) })),
                                 };
                               })
-                              .filter((g: any) => g.options.length > 0),
+                              .filter((g) => g.options.length > 0),
                           ],
                           quantity: qty,
                           totalPrice,

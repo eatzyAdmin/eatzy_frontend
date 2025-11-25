@@ -372,14 +372,10 @@ export default function RestaurantDetailPage() {
                                 it.id === d.id || it.id.startsWith(`${d.id}::`)
                             )
                             .reduce((s, it) => s + it.quantity, 0);
-                          const variantGroup = Array.isArray((d as any).optionGroups)
-                            ? (d as any).optionGroups.find((g: any) => (g.type ?? g.kind) === 'variant' || String(g.title || '').toLowerCase().startsWith('variant'))
-                            : null;
+                          const variantGroup = (d.optionGroups ?? []).find((g) => String(g.title || '').toLowerCase().startsWith('variant')) || null;
                           const minPrice = variantGroup && Array.isArray(variantGroup.options) && variantGroup.options.length > 0
-                            ? (Number(d.price || 0) + Math.min(...variantGroup.options.map((v: any) => Number(v.price || 0))))
-                            : (((d as any).variants && (d as any).variants.length > 0)
-                              ? (Number(d.price || 0) + Math.min(...((d as any).variants as any[]).map((v: any) => Number(v.price || 0))))
-                              : Number(d.price || 0));
+                            ? (Number(d.price || 0) + Math.min(...(variantGroup.options ?? []).map((v) => Number(v.price || 0))))
+                            : Number(d.price || 0);
                           return (
                             <div
                               key={d.id}
