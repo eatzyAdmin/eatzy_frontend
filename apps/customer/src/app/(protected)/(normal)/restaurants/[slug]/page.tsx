@@ -215,7 +215,12 @@ export default function RestaurantDetailPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-semibold text-[#1A1A1A] text-[13px]">
-                              {v.title}
+                              {v.title ?? (v.discountType === 'PERCENT' && typeof v.discountValue === 'number'
+                                ? `Giảm ${v.discountValue}%`
+                                : v.discountType === 'AMOUNT' && typeof v.discountValue === 'number'
+                                  ? `Giảm ${new Intl.NumberFormat('vi-VN').format(v.discountValue)}đ`
+                                  : v.description ?? ''
+                              )}
                             </div>
                             {v.description && (
                               <div className="text-[12px] text-[#555] mt-0.5 line-clamp-2">

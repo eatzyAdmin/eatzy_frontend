@@ -6,9 +6,13 @@ import { useEffect } from "react";
 import { ImageWithFallback } from "@repo/ui";
 import { formatVnd } from "@repo/lib";
 import { getRestaurantById } from "@/features/search/data/mockSearchData";
+import { useRouter } from "next/navigation";
+import { useLoading } from "@repo/ui";
 
 export default function CartOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { items, addItem, removeItem, setQuantity, total, activeRestaurantId } = useCartStore();
+  const router = useRouter();
+  const { show } = useLoading();
   useEffect(() => {
     if (open && items.length === 0) {
       addItem({ id: "dish-001", name: "Traditional Sushi", price: 85000, imageUrl: "https://images.unsplash.com/photo-1540317584754-5079b12b2743?w=400&q=60", restaurantId: "rest-2", quantity: 1 });
@@ -155,7 +159,11 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={onClose}
+                onClick={() => {
+                  show("Đang chuyển đến Checkout...");
+                  onClose();
+                  router.push("/checkout");
+                }}
                 className="mt-3 w-full h-12 rounded-2xl bg-[var(--primary)] text-white font-semibold shadow-md"
               >
                 Xem đơn hàng

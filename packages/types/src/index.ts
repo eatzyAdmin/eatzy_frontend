@@ -45,13 +45,21 @@ export type Dish = {
 export type Voucher = {
   id: string;
   restaurantId: string;
-  title: string;
+  code?: string;
+  title?: string;
   description?: string;
+  discountType?: 'PERCENT' | 'AMOUNT';
+  discountValue?: number;
+  minOrderValue?: number;
+  startDate?: string;
+  endDate?: string;
+  isAvailable?: boolean;
   discountPercent?: number;
   discountAmount?: number;
   expiresAt?: string;
-  isAvailable?: boolean;
 };
+
+export type PaymentMethod = 'EATZYPAY' | 'VNPAY' | 'CASH';
 
 export type OptionChoice = {
   id: string;

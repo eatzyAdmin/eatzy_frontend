@@ -22,18 +22,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isRestaurantDetail = pathname?.startsWith("/restaurants/") ?? false;
   const isSearchBarCompact = !isHeaderVisible && isSearchMode;
 
-  // Listen to scroll visibility events from SearchResults
   useEffect(() => {
     const handleHeaderVisibility = (e: Event) => {
       const customEvent = e as CustomEvent<{ visible: boolean }>;
       setIsHeaderVisible(customEvent.detail.visible);
     };
-
     window.addEventListener('searchHeaderVisibility', handleHeaderVisibility);
     return () => window.removeEventListener('searchHeaderVisibility', handleHeaderVisibility);
   }, []);
 
-  // Reset header visibility when leaving search mode
   useEffect(() => {
     if (!isSearchMode) {
       setIsHeaderVisible(true);
@@ -44,7 +41,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     performSearch(query);
   };
 
-  // Close overlay once we enter search mode (after shimmer completes)
   useEffect(() => {
     if (isSearchMode) setSearchOpen(false);
   }, [isSearchMode]);
@@ -88,7 +84,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </motion.div>
         )}
       </AnimatePresence>
-      
       <CartOverlay open={cartOpen} onClose={() => setCartOpen(false)} />
       <ProtectedMenuOverlay open={menuOpen} onClose={() => setMenuOpen(false)} />
       <SearchOverlay 
