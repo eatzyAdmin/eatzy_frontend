@@ -94,7 +94,7 @@ export default function HomeHeader({
           >
             <BookHeart className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
             <span className={`text-sm font-medium ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
-              Đơn hàng hiện tại
+              Current Orders
             </span>
           </motion.button>
 
