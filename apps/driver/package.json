@@ -15,7 +15,8 @@
     "@repo/ui": "workspace:*",
     "@repo/lib": "workspace:*",
     "@repo/api": "workspace:*",
-    "@repo/store": "workspace:*"
+    "@repo/store": "workspace:*",
+    "@repo/fonts": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5",
