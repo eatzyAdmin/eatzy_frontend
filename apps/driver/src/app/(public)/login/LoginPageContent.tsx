@@ -15,7 +15,7 @@ export default function LoginPageContent() {
   }, [hide]);
   const form = useZodForm<LoginFormData>({ schema: loginSchema, mode: "onChange", defaultValues: { email: "", password: "", rememberMe: false } });
   const handleRegisterClick = () => { show("Đang mở trang đăng ký..."); router.push("/register"); };
-  const handleSuccess = () => { show("Đang mở trang đăng ký hồ sơ..."); document.cookie = "driver_auth=1; path=/"; router.push("/onboarding"); };
+  const handleSuccess = () => { show("Đang đăng nhập..."); document.cookie = "driver_auth=1; path=/"; router.push("/home"); };
   return (
     <div className="min-h-screen w-full p-4">
       <div className="max-w-md mx-auto">

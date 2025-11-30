@@ -15,7 +15,9 @@
     "@repo/ui": "workspace:*",
     "@repo/lib": "workspace:*",
     "@repo/api": "workspace:*",
-    "@repo/store": "workspace:*"
+    "@repo/store": "workspace:*",
+    "mapbox-gl": "^3.16.0",
+    "react-map-gl": "^8.1.0"
   },
   "devDependencies": {
     "typescript": "^5",
