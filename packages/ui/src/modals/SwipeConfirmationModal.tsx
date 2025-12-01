@@ -173,7 +173,7 @@ export function SwipeConfirmationModal({
             onClick={(e) => e.stopPropagation()}
             layout
             style={{ transformStyle: 'preserve-3d' }}
-        >
+          >
             {backgroundIconProps && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
                 <motion.div
@@ -206,42 +206,42 @@ export function SwipeConfirmationModal({
                     <LoadingSpinner size={56} color={getBackgroundIconColor()} />
                   </motion.div>
                   <motion.p className="text-gray-700 text-center font-medium tracking-wide drop-shadow-sm" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }}>
-                    Sweet đang xử lý, sẽ xong ngay thôi...
+                    Eatzy đang xử lý, sẽ xong ngay thôi...
                   </motion.p>
                 </motion.div>
               ) : (
                 <motion.div className="p-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
-                <motion.p className="text-gray-700 mb-8 text-center leading-relaxed drop-shadow-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 0.4 }}>
-                  {description}
-                </motion.p>
-                {confirmDetails && (
-                  <motion.div className={`rounded-3xl pt-3 p-5 mb-8 relative bg-white/5 shadow-[inset_0_0_8px_4px_rgba(255,255,255,0.2)] ${theme.bg}`} layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.4 }}>
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-3xl pointer-events-none" />
-                    {Object.entries(confirmDetails).map(([label, value], index) => (
-                      <motion.div key={label} className="flex justify-between items-center py-2 first:pt-0 last:pb-0 relative z-10" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + index * 0.1, duration: 0.3 }}>
-                        <span className="text-gray-500 font-medium">{label}:</span>
-                        <span className="font-semibold text-gray-700 tracking-wide drop-shadow-sm">{value as any}</span>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                )}
-                <motion.div className="flex justify-center mb-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.4 }}>
-                  <SwipeToConfirm
-                    onComplete={handleConfirmComplete}
-                    text={isCompleted ? "Đã xác nhận!" : confirmText}
-                    disabled={isCompleted || isProcessing}
-                    type={type}
-                  />
-                </motion.div>
-                <motion.div className="text-sm text-gray-600 text-center font-normal drop-shadow-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7, duration: 0.4 }}>
-                  {isCompleted ? (
-                    <motion.span animate={{ opacity: [0.6, 1, 0.6] }} transition={{ repeat: Infinity, duration: 1.5 }} className="text-gray-700">
-                      Đang chuẩn bị xử lý...
-                    </motion.span>
-                  ) : (
-                    "Vuốt nút sang phải để xác nhận"
+                  <motion.p className="text-gray-700 mb-8 text-center leading-relaxed drop-shadow-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 0.4 }}>
+                    {description}
+                  </motion.p>
+                  {confirmDetails && (
+                    <motion.div className={`rounded-3xl pt-3 p-5 mb-8 relative bg-white/5 shadow-[inset_0_0_8px_4px_rgba(255,255,255,0.2)] ${theme.bg}`} layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.4 }}>
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-3xl pointer-events-none" />
+                      {Object.entries(confirmDetails).map(([label, value], index) => (
+                        <motion.div key={label} className="flex justify-between items-center py-2 first:pt-0 last:pb-0 relative z-10" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + index * 0.1, duration: 0.3 }}>
+                          <span className="text-gray-500 font-medium">{label}:</span>
+                          <span className="font-semibold text-gray-700 tracking-wide drop-shadow-sm">{value as any}</span>
+                        </motion.div>
+                      ))}
+                    </motion.div>
                   )}
-                </motion.div>
+                  <motion.div className="flex justify-center mb-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.4 }}>
+                    <SwipeToConfirm
+                      onComplete={handleConfirmComplete}
+                      text={isCompleted ? "Đã xác nhận!" : confirmText}
+                      disabled={isCompleted || isProcessing}
+                      type={type}
+                    />
+                  </motion.div>
+                  <motion.div className="text-sm text-gray-600 text-center font-normal drop-shadow-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7, duration: 0.4 }}>
+                    {isCompleted ? (
+                      <motion.span animate={{ opacity: [0.6, 1, 0.6] }} transition={{ repeat: Infinity, duration: 1.5 }} className="text-gray-700">
+                        Đang chuẩn bị xử lý...
+                      </motion.span>
+                    ) : (
+                      "Vuốt nút sang phải để xác nhận"
+                    )}
+                  </motion.div>
                 </motion.div>
               )}
             </motion.div>

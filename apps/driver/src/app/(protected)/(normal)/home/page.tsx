@@ -1,7 +1,8 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "@repo/ui/motion";
+import { useLoading } from "@repo/ui";
 const DriverMapView = dynamic(() => import("@/features/map/DriverMapView"), { ssr: false });
 import ConnectToggle from "@/features/online/ConnectToggle";
 import OnlineStatusBadge from "@/features/online/OnlineStatusBadge";
@@ -12,10 +13,20 @@ import { LocateFixed, Bike } from "@repo/ui/icons";
 import type { DriverActiveOrder } from "@repo/types";
 
 export default function Page() {
+  const { hide } = useLoading();
   const [online, setOnline] = useState(false);
   const [locateVersion, setLocateVersion] = useState(0);
   const [activeOrder, setActiveOrder] = useState<DriverActiveOrder | null>(null);
   const { currentOffer, countdown, acceptOffer, rejectOffer } = useOrderOffers(online, !!activeOrder);
+
+  // Hide loading after 1.5s on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      hide();
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [hide]);
+
   return (
     <div className="w-full h-full">
       <DriverMapView locateVersion={locateVersion} activeOrder={activeOrder} />

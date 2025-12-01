@@ -1,6 +1,5 @@
 "use client";
 import { LoginForm, useLoading } from "@repo/ui";
-import { useEffect } from "react";
 import { motion } from "@repo/ui/motion";
 import { useRouter } from "next/navigation";
 import { useZodForm, loginSchema, type LoginFormData } from "@repo/lib";
@@ -8,14 +7,22 @@ import { Button } from "@repo/ui";
 
 export default function LoginPageContent() {
   const router = useRouter();
-  const { show, hide } = useLoading();
-  useEffect(() => {
-    const t = setTimeout(() => hide(), 1500);
-    return () => clearTimeout(t);
-  }, [hide]);
+  const { show } = useLoading();
+
   const form = useZodForm<LoginFormData>({ schema: loginSchema, mode: "onChange", defaultValues: { email: "", password: "", rememberMe: false } });
-  const handleRegisterClick = () => { show("Đang mở trang đăng ký..."); router.push("/register"); };
-  const handleSuccess = () => { show("Đang đăng nhập..."); document.cookie = "driver_auth=1; path=/"; router.push("/home"); };
+
+  const handleRegisterClick = () => {
+    show("Đang mở trang đăng ký...");
+    router.push("/register");
+  };
+
+  const handleSuccess = () => {
+    show("Đang đăng nhập...");
+    document.cookie = "driver_auth=1; path=/";
+    router.push("/home");
+    // Note: Loading will be hidden in home page after 1.5s
+  };
+
   return (
     <div className="min-h-screen w-full p-4">
       <div className="max-w-md mx-auto">
