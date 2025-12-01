@@ -12,6 +12,7 @@ export { default as AddressFields } from "./forms/AddressFields";
 export { default as FloatingLabelInput } from "./forms/FloatingLabelInput";
 export * from "./icons";
 export { default as LoadingOverlay } from "./feedback/LoadingOverlay";
+export { default as LoadingSpinner } from "./feedback/LoadingSpinner";
 export * from "./providers/LoadingProvider";
 export { default as LoginForm } from "./auth/LoginForm";
 export { default as LoginIllustration } from "./auth/LoginIllustration";

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { ChevronsRight } from "lucide-react";
+import { useEffect, useRef, useState } from 'react';
+import { ChevronsRight } from 'lucide-react';
+import styles from './SwipeToConfirm.module.css';
 
-type SwipeType = "primary" | "success" | "warning" | "danger" | "info";
+type SwipeType = "primary" | "success" | "warning" | "danger" | "info" | "pink" | "withdrawal" | "deposit" | "unlock" | "update" | "add";
 
 function isTouchEvent(e: React.MouseEvent | React.TouchEvent): e is React.TouchEvent {
   return (e as React.TouchEvent).touches !== undefined;
@@ -73,7 +73,9 @@ export function SwipeToConfirm({
   const endDrag = () => {
     if (!isDragging || isComplete) return;
     setIsDragging(false);
-    reset();
+    if (!isComplete) {
+      reset();
+    }
   };
 
   const reset = () => {
@@ -92,26 +94,41 @@ export function SwipeToConfirm({
       case "success":
         return { start: "#16a34a", end: "#22c55e" };
       case "warning":
-        return { start: "#f59e0b", end: "#d97706" };
+        return { start: "#d97706", end: "#f59e0b" };
       case "danger":
         return { start: "#ef4444", end: "#dc2626" };
       case "info":
         return { start: "#0ea5e9", end: "#38bdf8" };
+      case "pink":
+        return { start: "#db2777", end: "#ec4899" };
+      case "unlock":
+      case "update":
+      case "add":
+      case "withdrawal":
+        return { start: "#0ea5e9", end: "#38bdf8" };
+      case "deposit":
+        return { start: "#0ea5e9", end: "#38bdf8" };
+      case "primary":
+        return { start: "#0ea5e9", end: "#38bdf8" };
       default:
-        return { start: "var(--primary)", end: "var(--secondary)" };
+        return { start: "#0ea5e9", end: "#38bdf8" };
     }
   })();
 
   return (
     <div
       ref={sliderRef}
-      className={`relative flex items-center rounded-full h-14 w-80 shadow-md select-none overflow-hidden ${
+      className={`relative flex items-center rounded-full h-14 w-80 sm:w-80 shadow-md select-none overflow-hidden ${className || ""} ${
         disabled ? "opacity-70" : ""
-      } ${className ?? ""}`}
+      }`}
       style={{
         background: `linear-gradient(to right, ${theme.start} ${percent}%, ${theme.end} ${percent}%)`,
       }}
     >
+      {/* Shimmering overlay effect */}
+      <div className={`absolute inset-0 z-0 ${styles.shimmerOverlay}`} />
+      
+      {/* Touch/click capture area */}
       <div
         className="absolute inset-0 z-10"
         onMouseDown={startDrag}
@@ -123,7 +140,8 @@ export function SwipeToConfirm({
         onMouseLeave={endDrag}
       />
 
-      <motion.div
+      {/* Slider Knob with shimmering effect */}
+      <div
         ref={knobRef}
         className="absolute left-0 top-1/2 -translate-y-1/2 p-1.5 z-20 pointer-events-none"
         style={{
@@ -131,14 +149,17 @@ export function SwipeToConfirm({
           transition: isDragging ? "none" : "transform 0.3s ease-out",
         }}
       >
-        <motion.div className="bg-white rounded-full h-11 w-11 flex items-center justify-center shadow-md" whileTap={{ scale: 0.95 }}>
-          <ChevronsRight size={28} className="text-neutral-700" strokeWidth={2.5} />
-        </motion.div>
-      </motion.div>
+        <div className="bg-white rounded-full h-11 w-11 flex items-center justify-center shadow-md overflow-hidden">
+          <div className={styles.shimmerContainer}>
+            <ChevronsRight size={28} className={`text-neutral-700 ${styles.shimmerIcon}`} strokeWidth={2.5} />
+          </div>
+        </div>
+      </div>
 
-      <motion.span className="flex-grow text-center text-white text-lg font-semibold pl-10 pr-4" initial={false} animate={{ opacity: isDragging ? 0.9 : 1 }}>
-        {isComplete ? "Đã xác nhận!" : text}
-      </motion.span>
+      {/* Text with shimmering effect */}
+      <span className="flex-grow text-center text-white text-lg font-semibold pl-10 pr-4">
+        {text}
+      </span>
     </div>
   );
 }

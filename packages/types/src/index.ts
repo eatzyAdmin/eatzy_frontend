@@ -117,4 +117,40 @@ export type Order = {
   updatedAt?: string;
 };
 
+// Driver-focused types
+export type DriverOrderPhase = 'PICKUP' | 'DELIVERY';
+
+export type DriverEarningsSummary = {
+  orderId: string;
+  driverId?: string;
+  orderSubtotal: number;
+  deliveryFee: number;
+  driverCommissionRate?: number;
+  driverCommissionAmount?: number;
+  driverNetEarning: number;
+  restaurantNetEarning?: number;
+  platformTotalEarning?: number;
+};
+
+export type DriverOrderOffer = {
+  id: string;
+  netEarning: number; // driver_net_earning
+  orderValue: number; // total_amount
+  paymentMethod: PaymentMethod;
+  distanceKm: number;
+  pickup: { name: string; address: string };
+  dropoff: { name?: string; address: string };
+  expireSeconds: number; // 30s countdown
+};
+
+export type DriverActiveOrder = {
+  id: string;
+  phase: DriverOrderPhase; // PICKUP or DELIVERY
+  pickup: { name: string; address: string };
+  dropoff: { name?: string; address: string };
+  earnings: DriverEarningsSummary;
+  paymentMethod: PaymentMethod;
+  distanceKm?: number;
+};
+
 export {};
