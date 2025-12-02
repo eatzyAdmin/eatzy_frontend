@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import LoginPageContent from "./login/LoginPageContent";
+import ForgotPasswordPageContent from "./forgot-password/ForgotPasswordPageContent";
 import RegisterPageContent from "./register/RegisterPageContent";
 import BackgroundTransition from "@/features/home/components/BackgroundTransition";
 import { getCategoryBackgroundImage } from "@/features/home/data/mockRestaurants";
@@ -26,6 +27,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   // Detect which page to show based on pathname
   const isLoginPage = pathname === "/login" || pathname === "/";
   const isRegisterPage = pathname === "/register";
+  const isForgotPage = pathname === "/forgot-password";
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
@@ -35,6 +37,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
       {/* RegisterPageContent - like DeleteRoleModal, always in DOM, controlled by isOpen */}
       <RegisterPageContent isOpen={isRegisterPage} />
+      <ForgotPasswordPageContent isOpen={isForgotPage} />
 
       <div className="hidden">{children}</div>
     </div>
