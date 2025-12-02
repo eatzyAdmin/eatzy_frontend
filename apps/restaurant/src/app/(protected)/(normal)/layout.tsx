@@ -13,10 +13,11 @@ import {
   TrendingUp,
   Wallet,
   User,
-  LogOut
+  LogOut,
+  Power
 } from '@repo/ui/icons';
 import RestaurantNavItem from '../../../components/RestaurantNavItem';
-import { ProfileShimmer, NavItemShimmer } from '@repo/ui';
+import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation } from '@repo/ui';
 
 const restaurantMenuItems = [
   { id: 'orders', icon: ShoppingCart, text: 'Đơn hàng' },
@@ -31,10 +32,12 @@ const restaurantMenuItems = [
 export default function NormalLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { confirm } = useSwipeConfirmation();
   const [activeSection, setActiveSection] = useState('orders');
   const [profileData] = useState({ fullName: 'Nhà hàng ABC', email: 'restaurant@eatzy.com' });
   const [navHovered, setNavHovered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAppActive, setIsAppActive] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -64,8 +67,22 @@ export default function NormalLayout({ children }: { children: ReactNode }) {
     router.push('/profile');
   };
 
+  const handleToggleApp = () => {
+    const newStatus = !isAppActive;
+    confirm({
+      title: newStatus ? 'Bật ứng dụng' : 'Tắt ứng dụng',
+      description: newStatus
+        ? 'Bật ứng dụng để nhận đơn hàng mới từ khách hàng.'
+        : 'Tắt ứng dụng sẽ ngừng nhận đơn hàng mới. Bạn có chắc chắn?',
+      confirmText: newStatus ? 'Bật' : 'Tắt',
+      onConfirm: () => {
+        setIsAppActive(newStatus);
+      }
+    });
+  };
+
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-gray-50">
       <div
         className={`nav-container liquid-glass-container flex rounded-3xl flex-col transition-all duration-500 ease-out backdrop-blur-sm shadow-2xl ${navHovered ? "w-72 bottom-6 top-6" : "w-20 bottom-24 top-24"
           } fixed left-6 z-50 overflow-hidden`}
@@ -73,10 +90,9 @@ export default function NormalLayout({ children }: { children: ReactNode }) {
           background: navHovered
             ? "linear-gradient(135deg, rgba(120, 200, 65, 0.15) 0%, rgba(180, 229, 13, 0.1) 50%, rgba(120, 200, 65, 0.08) 100%)"
             : "linear-gradient(135deg, rgba(120, 200, 65, 0.2) 0%, rgba(180, 229, 13, 0.15) 100%)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
           boxShadow: navHovered
-            ? "0 25px 45px rgba(0, 0, 0, 0.15), 0 0 80px rgba(120, 200, 65, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
-            : "0 20px 35px rgba(0, 0, 0, 0.1), 0 0 40px rgba(120, 200, 65, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
+            ? "0 25px 45px rgba(0, 0, 0, 0.15), 0 0 80px rgba(120, 200, 65, 0.1)"
+            : "0 15px 25px -10px rgba(0,0,0,0.12), 0 0 20px -10px rgba(120,200,65,0.08)",
         }}
         onMouseEnter={() => setNavHovered(true)}
         onMouseLeave={() => setNavHovered(false)}
@@ -231,7 +247,31 @@ export default function NormalLayout({ children }: { children: ReactNode }) {
         </div>
       </div >
 
-      <div className="flex-1 ml-28">{children}</div>
+      <div className="flex-1 ml-28 flex flex-col">
+        {/* Header */}
+        <div className="border-b border-gray-200 px-8 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-anton font-bold text-[#1A1A1A]">
+              NHÀ HÀNG ABC
+            </h1>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleToggleApp}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${isAppActive
+                ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                : 'bg-gray-200 text-gray-600'
+                }`}
+            >
+              <Power className="w-5 h-5" />
+              <span>{isAppActive ? 'Đang mở' : 'Đã đóng'}</span>
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Page Content */}
+        <div className="flex-1">{children}</div>
+      </div>
     </div >
   );
 }

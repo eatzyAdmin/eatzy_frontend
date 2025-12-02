@@ -157,7 +157,7 @@ export function SwipeConfirmationModal({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-black/20 backdrop-blur-md z-[100] flex items-end sm:items-center justify-center"
+          className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-end sm:items-center justify-center"
           initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
           animate={{ opacity: 1, backdropFilter: 'blur(8px)' }}
           exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
@@ -165,7 +165,7 @@ export function SwipeConfirmationModal({
           onClick={onClose}
         >
           <motion.div
-            className={`relative w-full max-w-md mx-2 sm:mx-0 bg-white/20 backdrop-blur-xl shadow-[inset_0_0_16px_8px_rgba(255,255,255,0.3)] border-0 ${theme.border} rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:${theme.accent} before:opacity-60 before:pointer-events-none`}
+            className={`relative w-full max-w-md mx-2 sm:mx-0 bg-white/40 backdrop-blur-xl shadow-[inset_0_0_16px_8px_rgba(255,255,255,0.3)] border-0 ${theme.border} rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:${theme.accent} before:opacity-60 before:pointer-events-none`}
             initial={{ y: '100%', scale: 0.9, opacity: 0, rotateX: 10 }}
             animate={{ y: 0, scale: 1, opacity: 1, rotateX: 0 }}
             exit={{ y: '100%', scale: 0.95, opacity: 0, rotateX: -5 }}

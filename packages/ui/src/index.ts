@@ -1,4 +1,5 @@
 export * from "./providers/ThemeProvider";
+export * from "./providers/SwipeConfirmationProvider";
 export * from "./primitives/Button";
 export * from "./tokens";
 export * from "./recipes";
