@@ -32,9 +32,11 @@ export const useLogin = () => {
         // Redirect
         router.push("/home");
       }
-    } catch (err: any) {
-      if (err?.message) {
+    } catch (err: unknown) {
+      if (err instanceof Error) {
         setError(err.message);
+      } else if (typeof err === "string") {
+        setError(err);
       } else {
         setError("Đã có lỗi xảy ra. Vui lòng thử lại.");
       }

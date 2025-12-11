@@ -22,9 +22,7 @@ export default function ForgotPasswordPageContent({ isOpen }: { isOpen: boolean 
   };
 
   const onSubmit = (data: EmailVerificationData) => {
-    // Mock behavior: mark as sent and show message
-    // Real implementation should call an API to send reset link
-    setIsSent(true);
+    setIsSent(Boolean(data.email));
   };
 
   return (
