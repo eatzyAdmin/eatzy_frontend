@@ -1,6 +1,7 @@
 "use client";
 
-import { LoginForm, LoginIllustration, useLoading } from "@repo/ui";
+import { LoginForm, LoginIllustration, useLoading, useNotification } from "@repo/ui";
+import { useLogin } from "@/features/auth/hooks/useLogin";
 import { useRouter } from "next/navigation";
 import { useZodForm, loginSchema, type LoginFormData } from "@repo/lib";
 import { motion, AnimatePresence } from "@repo/ui/motion";
@@ -8,6 +9,8 @@ import { motion, AnimatePresence } from "@repo/ui/motion";
 export default function LoginPageContent() {
   const router = useRouter();
   const { show } = useLoading();
+  const { showNotification } = useNotification();
+  const { handleLogin, isLoading, error } = useLogin();
 
   const form = useZodForm<LoginFormData>({
     schema: loginSchema,
@@ -15,11 +18,18 @@ export default function LoginPageContent() {
     defaultValues: { email: "", password: "", rememberMe: false },
   });
 
-  const handleSuccess = () => {
-    show("Đang đăng nhập...");
-    document.cookie = "restaurant_auth=1; path=/";
-    router.push("/orders");
-    // Note: Loading will be hidden in orders page after 1.5s
+  const onSubmit = async (data: LoginFormData) => {
+    const success = await handleLogin(data);
+    if (success) {
+      showNotification({
+        message: "Đăng nhập thành công!",
+        type: "success",
+        format: "excel",
+        autoHideDuration: 3000
+      });
+      show("Đang chuyển hướng về trang quản lý...");
+      router.push("/orders");
+    }
   };
 
   return (
@@ -55,7 +65,10 @@ export default function LoginPageContent() {
                 <LoginForm
                   form={form}
                   onForgotPassword={() => router.push("/forgot-password")}
-                  onSuccess={handleSuccess}
+                  onSubmit={onSubmit}
+                  isLoading={isLoading}
+                  error={error}
+                  onSuccess={() => { }}
                 />
               </div>
             </div>
