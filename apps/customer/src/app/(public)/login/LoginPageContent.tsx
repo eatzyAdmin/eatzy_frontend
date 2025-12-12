@@ -1,6 +1,6 @@
 "use client";
 
-import { LoginForm, LoginIllustration } from "@repo/ui";
+import { LoginForm, LoginIllustration, useLoading } from "@repo/ui";
 import { useRouter } from "next/navigation";
 import { useZodForm, loginSchema, type LoginFormData } from "@repo/lib";
 import { motion, AnimatePresence } from "@repo/ui/motion";
@@ -28,12 +28,20 @@ export default function LoginPageContent() {
     defaultValues: { email: "", password: "", rememberMe: false },
   });
 
+  // Use global loading context
+  const { show } = useLoading();
+
   const handleRegisterClick = () => {
     router.push("/register");
   };
 
-  const onSubmit = (data: LoginFormData) => {
-    handleLogin(data);
+  const onSubmit = async (data: LoginFormData) => {
+    const success = await handleLogin(data);
+
+    if (success) {
+      show("Đang chuyển hướng về trang chủ...");
+      router.push("/home");
+    }
   };
 
   return (
@@ -72,7 +80,7 @@ export default function LoginPageContent() {
                   isLoading={isLoading}
                   error={error}
                   onForgotPassword={() => router.push("/forgot-password")}
-                  onSuccess={() => { }} // Handle inside hook
+                  onSuccess={() => { }}
                   onRegister={handleRegisterClick}
                 />
               </div>
@@ -83,4 +91,3 @@ export default function LoginPageContent() {
     </AnimatePresence>
   );
 }
-

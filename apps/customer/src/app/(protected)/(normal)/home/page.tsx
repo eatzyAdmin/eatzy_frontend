@@ -8,6 +8,7 @@ import BackgroundTransition from '@/features/home/components/BackgroundTransitio
 import { useHomePage } from '@/features/home/hooks/useHomePage';
 import { useState, useEffect } from 'react';
 import { List } from '@repo/ui/icons';
+import { useLoading } from '@repo/ui';
 import { useSearch } from '@/features/search/hooks/useSearch';
 import SearchResults from '@/features/search/components/SearchResults';
 declare global {
@@ -27,9 +28,18 @@ export default function HomePage() {
     handleCategoryChange,
     handleRestaurantChange,
   } = useHomePage();
-  
+
   const [showAllCategories, setShowAllCategories] = useState(false);
-  
+
+  // Handle global loading state (transition from Login)
+  const { hide } = useLoading();
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      hide();
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [hide]);
+
   const {
     searchResults,
     isSearching,
@@ -53,7 +63,7 @@ export default function HomePage() {
         {!isSearchMode && (
           <motion.div
             initial={{ y: 0 }}
-            exit={{ 
+            exit={{
               y: '-100vh',
               transition: { duration: 0.6, ease: [0.33, 1, 0.68, 1], delay: 0.1 }
             }}
@@ -148,8 +158,8 @@ export default function HomePage() {
       {/* Search Results - always render when in search mode, pre-rendered behind */}
       <AnimatePresence>
         {isSearchMode && (
-          <SearchResults 
-            results={searchResults} 
+          <SearchResults
+            results={searchResults}
             searchQuery={searchQuery}
             isLoading={isSearching}
           />
