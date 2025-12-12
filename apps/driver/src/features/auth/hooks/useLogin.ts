@@ -25,6 +25,12 @@ export const useLogin = () => {
       if (res.data?.access_token && res.data?.user) {
         setLogin(res.data.access_token, res.data.user);
         localStorage.setItem("access_token", res.data.access_token);
+
+        // CRITICAL: Set cookie for Driver middleware authentication
+        // Middleware at apps/driver/src/middleware.ts checks for 'driver_auth=1' cookie
+        // Without this, middleware redirects /home -> /login causing infinite loop
+        document.cookie = "driver_auth=1; path=/; max-age=86400"; // 1 day expiry
+
         // DO NOT setIsLoading(false) here on success to keep spinner during redirect
         return true;
       }
