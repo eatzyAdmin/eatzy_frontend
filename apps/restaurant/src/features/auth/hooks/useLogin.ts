@@ -32,23 +32,26 @@ export const useLogin = () => {
         return true;
       }
       return false;
-    } catch (err: any) {
-      // Backend returns structured error (IBackendRes) via interceptor
-      // Structure: { statusCode, message, error, data }
-      if (err?.message) {
-        // Backend often returns "message" as the human readable error
-        // Sometimes detail is in "error" if it's a validation array, but usually message is good
-        if (Array.isArray(err.message)) {
-          setError(err.message[0]);
+    } catch (err: unknown) {
+      if (typeof err === "object" && err !== null) {
+        const maybeMessage = (err as { message?: string | string[] }).message;
+        if (maybeMessage) {
+          if (Array.isArray(maybeMessage)) {
+            setError(maybeMessage[0]);
+          } else {
+            setError(maybeMessage);
+          }
         } else {
-          setError(err.message);
-        }
-      } else if (err?.error) {
-        // Fallback to error field if message is missing
-        if (Array.isArray(err.error)) {
-          setError(err.error[0]);
-        } else {
-          setError(err.error);
+          const maybeError = (err as { error?: string | string[] }).error;
+          if (maybeError) {
+            if (Array.isArray(maybeError)) {
+              setError(maybeError[0]);
+            } else {
+              setError(maybeError);
+            }
+          } else {
+            setError("Đã có lỗi xảy ra. Vui lòng thử lại.");
+          }
         }
       } else {
         setError("Đã có lỗi xảy ra. Vui lòng thử lại.");
