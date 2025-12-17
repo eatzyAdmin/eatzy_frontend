@@ -13,6 +13,10 @@ import {
   ChevronRight,
   LogOut,
   BarChart3,
+  Shield,
+  Lock,
+  BookOpen,
+  User,
 } from "@repo/ui/icons";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 
@@ -24,11 +28,16 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { icon: LayoutDashboard, text: "Dashboard", path: "/dashboard" },
-  { icon: Users, text: "Customers", path: "/customers" },
+  { icon: Users, text: "Users", path: "/users" },
+  { icon: Shield, text: "Roles", path: "/roles" },
+  { icon: Lock, text: "Permissions", path: "/permissions" },
+  { icon: ShoppingBag, text: "Customers", path: "/customers" },
   { icon: Store, text: "Restaurants", path: "/restaurants" },
   { icon: Truck, text: "Drivers", path: "/drivers" },
   { icon: ShoppingBag, text: "Orders", path: "/orders" },
+  { icon: BookOpen, text: "Booking", path: "/booking" },
   { icon: BarChart3, text: "Analytics", path: "/analytics" },
+  { icon: User, text: "Profile", path: "/profile" },
   { icon: Settings, text: "Settings", path: "/settings" },
 ];
 
