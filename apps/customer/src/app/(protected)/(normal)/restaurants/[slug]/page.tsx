@@ -16,6 +16,7 @@ import {
   getVouchersForRestaurant,
 } from "@/features/search/data/mockSearchData";
 import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer";
+import { ReviewsModal } from "@/features/search/components/ReviewsModal";
 
 export default function RestaurantDetailPage() {
   const params = useParams() as { slug: string };
@@ -46,6 +47,7 @@ export default function RestaurantDetailPage() {
   const { ghosts, fly } = useFlyToCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerDish, setDrawerDish] = useState<Dish | null>(null);
+  const [isReviewsOpen, setIsReviewsOpen] = useState(false);
 
   useEffect(() => {
     const el = tabsRef.current;
@@ -62,7 +64,7 @@ export default function RestaurantDetailPage() {
   useEffect(() => {
     const rightCol = rightColumnRef.current;
     if (!rightCol) return;
-    
+
     const obs = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -70,10 +72,10 @@ export default function RestaurantDetailPage() {
           .sort((a, b) => (a.boundingClientRect.top - b.boundingClientRect.top));
         if (visible[0]) setActiveCategoryId(visible[0].target.getAttribute("data-id"));
       },
-      { 
+      {
         root: rightCol,
-        rootMargin: "-120px 0px -60% 0px", 
-        threshold: 0.2 
+        rootMargin: "-120px 0px -60% 0px",
+        threshold: 0.2
       }
     );
     categories.forEach((c) => {
@@ -86,16 +88,16 @@ export default function RestaurantDetailPage() {
   useEffect(() => {
     const rightCol = rightColumnRef.current;
     if (!rightCol) return;
-    
+
     const handleScroll = () => {
       setIsTabsSticky(rightCol.scrollTop > 400);
     };
-    
+
     rightCol.addEventListener('scroll', handleScroll, { passive: true });
     return () => rightCol.removeEventListener('scroll', handleScroll);
   }, []);
 
-  
+
 
   if (!restaurant) {
     return (
@@ -109,11 +111,11 @@ export default function RestaurantDetailPage() {
     const node = sectionRefs.current[id];
     const rightCol = rightColumnRef.current;
     if (!node || !rightCol) return;
-    
+
     const containerRect = rightCol.getBoundingClientRect();
     const nodeRect = node.getBoundingClientRect();
     const offsetTop = nodeRect.top - containerRect.top + rightCol.scrollTop - 140;
-    
+
     rightCol.scrollTo({ top: offsetTop, behavior: "smooth" });
   };
 
@@ -131,7 +133,7 @@ export default function RestaurantDetailPage() {
       {/* Main Content - Two Column Layout */}
       <div className="flex-1 overflow-hidden">
         <div className="max-w-[1400px] mx-auto pr-16 px-8 pt-20 h-full">
-            <div className="grid grid-cols-[30%_70%] gap-8 h-full">
+          <div className="grid grid-cols-[30%_70%] gap-8 h-full">
             <div ref={leftColumnRef} className="relative overflow-y-auto no-scrollbar pr-2 space-y-6 mb-12">
               {/* Restaurant Title */}
               <div>
@@ -171,15 +173,20 @@ export default function RestaurantDetailPage() {
               </div>
 
               <div className="flex items-center gap-10">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-[#555555]" />
-                  <span className="text-[14px] font-medium text-[#555555]">15 min.</span>
-                </div>
-                <div className="w-px h-5 bg-gray-300" />
-                <div className="flex items-center gap-2">
-                  <ChefHat className="w-5 h-5 text-[#555555]" />
-                  <span className="text-[14px] font-medium text-[#555555]">Easy</span>
-                </div>
+                {restaurant.rating && (
+                  <button
+                    onClick={() => setIsReviewsOpen(true)}
+                    className="group bg-white border border-gray-200 shadow-sm rounded-full pl-2 pr-4 py-1.5 hover:shadow-md hover:border-gray-300 active:scale-95 transition-all duration-300 flex items-center gap-2"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-50 group-hover:scale-110 transition-transform">
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-[16px] font-bold text-[#1A1A1A]">{restaurant.rating}</span>
+                      <span className="text-[13px] font-medium text-gray-500 group-hover:text-gray-900 transition-colors">Xem đánh giá</span>
+                    </div>
+                  </button>
+                )}
               </div>
 
               {/* Small illustration image */}
@@ -271,11 +278,10 @@ export default function RestaurantDetailPage() {
                         <button
                           key={c.id}
                           onClick={() => scrollToCategory(c.id)}
-                          className={`text-[28px] font-bold uppercase tracking-wide transition-all relative pb-1 whitespace-nowrap ${
-                            activeCategoryId === c.id
-                              ? "text-[#1A1A1A]"
-                              : "text-gray-400"
-                          }`}
+                          className={`text-[28px] font-bold uppercase tracking-wide transition-all relative pb-1 whitespace-nowrap ${activeCategoryId === c.id
+                            ? "text-[#1A1A1A]"
+                            : "text-gray-400"
+                            }`}
                           style={{
                             fontStretch: "condensed",
                             letterSpacing: "-0.01em",
@@ -512,28 +518,29 @@ export default function RestaurantDetailPage() {
             });
           }
           setActiveRestaurant(restaurant.id);
-                          addItem({
-                            id: uniqueId,
-                            name: drawerDish.name,
-                            price: payload.totalPrice / payload.quantity,
-                            imageUrl: drawerDish.imageUrl,
-                            restaurantId: restaurant.id,
-                            quantity: payload.quantity,
-                            options: {
-                              variant: payload.variant
-                                ? {
-                                    id: payload.variant.id,
-                                    name: payload.variant.name,
-                                    price: payload.variant.price,
-                                  }
-                                : undefined,
-                              addons: payload.addons,
-                              groups: payload.groups,
-                            },
-                          });
+          addItem({
+            id: uniqueId,
+            name: drawerDish.name,
+            price: payload.totalPrice / payload.quantity,
+            imageUrl: drawerDish.imageUrl,
+            restaurantId: restaurant.id,
+            quantity: payload.quantity,
+            options: {
+              variant: payload.variant
+                ? {
+                  id: payload.variant.id,
+                  name: payload.variant.name,
+                  price: payload.variant.price,
+                }
+                : undefined,
+              addons: payload.addons,
+              groups: payload.groups,
+            },
+          });
           setDrawerOpen(false);
         }}
       />
+      <ReviewsModal restaurant={restaurant} isOpen={isReviewsOpen} onClose={() => setIsReviewsOpen(false)} />
     </div>
   );
 }

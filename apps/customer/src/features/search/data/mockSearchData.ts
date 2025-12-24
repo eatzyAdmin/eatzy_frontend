@@ -1,4 +1,16 @@
-import type { Restaurant, Dish, MenuCategory, Voucher } from '@repo/types';
+import type { Restaurant, Dish, MenuCategory, Voucher, Review } from '@repo/types';
+import {
+  phoHaNoiReviews,
+  sushiSakuraReviews,
+  pizzaBellaReviews,
+  bunBoHueReviews,
+  cafeDeParisReviews,
+  kbbqReviews,
+  thaiSpiceReviews,
+  burgerBrosReviews,
+  dimSumReviews,
+  medReviews
+} from './mockReviews';
 
 // Mock restaurants for search
 export const mockSearchRestaurants: Restaurant[] = [
@@ -12,6 +24,8 @@ export const mockSearchRestaurants: Restaurant[] = [
     address: '123 Nguyễn Huệ, Q1, TP.HCM',
     imageUrl: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800',
     description: 'Authentic Northern Vietnamese cuisine with traditional pho and street food favorites',
+    reviews: phoHaNoiReviews,
+    reviewCount: phoHaNoiReviews.length,
   },
   {
     id: 'rest-2',
@@ -23,6 +37,8 @@ export const mockSearchRestaurants: Restaurant[] = [
     address: '456 Lê Lợi, Q1, TP.HCM',
     imageUrl: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800',
     description: 'Premium Japanese sushi and sashimi with fresh ingredients imported daily',
+    reviews: sushiSakuraReviews,
+    reviewCount: sushiSakuraReviews.length,
   },
   {
     id: 'rest-3',
@@ -34,6 +50,8 @@ export const mockSearchRestaurants: Restaurant[] = [
     address: '789 Pasteur, Q3, TP.HCM',
     imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800',
     description: 'Authentic Italian pizzas and pastas made with imported ingredients',
+    reviews: pizzaBellaReviews,
+    reviewCount: pizzaBellaReviews.length,
   },
   {
     id: 'rest-4',
@@ -45,6 +63,8 @@ export const mockSearchRestaurants: Restaurant[] = [
     address: '321 Võ Văn Tần, Q3, TP.HCM',
     imageUrl: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=800',
     description: 'Traditional Central Vietnamese cuisine specializing in spicy beef noodle soup',
+    reviews: bunBoHueReviews,
+    reviewCount: bunBoHueReviews.length,
   },
   {
     id: 'rest-5',
@@ -56,6 +76,8 @@ export const mockSearchRestaurants: Restaurant[] = [
     address: '654 Đồng Khởi, Q1, TP.HCM',
     imageUrl: 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=800',
     description: 'French-inspired café serving artisanal coffee and delicate pastries',
+    reviews: cafeDeParisReviews,
+    reviewCount: cafeDeParisReviews.length,
   },
   {
     id: 'rest-6',
@@ -67,6 +89,8 @@ export const mockSearchRestaurants: Restaurant[] = [
     address: '987 Nguyễn Thị Minh Khai, Q3, TP.HCM',
     imageUrl: 'https://images.unsplash.com/photo-1600891964092-4316c288032e?w=800',
     description: 'Premium Korean BBQ with all-you-can-eat options and authentic side dishes',
+    reviews: kbbqReviews,
+    reviewCount: kbbqReviews.length,
   },
   {
     id: 'rest-7',
@@ -78,6 +102,8 @@ export const mockSearchRestaurants: Restaurant[] = [
     address: '147 Hai Bà Trưng, Q1, TP.HCM',
     imageUrl: 'https://images.unsplash.com/photo-1559314809-0d155014e29e?w=800',
     description: 'Authentic Thai flavors with the perfect balance of sweet, sour, salty, and spicy',
+    reviews: thaiSpiceReviews,
+    reviewCount: thaiSpiceReviews.length,
   },
   {
     id: 'rest-8',
@@ -89,6 +115,8 @@ export const mockSearchRestaurants: Restaurant[] = [
     address: '258 Cách Mạng Tháng 8, Q10, TP.HCM',
     imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800',
     description: 'Gourmet burgers made with premium beef and creative toppings',
+    reviews: burgerBrosReviews,
+    reviewCount: burgerBrosReviews.length,
   },
   {
     id: 'rest-9',
@@ -100,6 +128,8 @@ export const mockSearchRestaurants: Restaurant[] = [
     address: '369 Nguyễn Đình Chiểu, Q3, TP.HCM',
     imageUrl: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800',
     description: 'Traditional Cantonese dim sum served in bamboo steamers with tea',
+    reviews: dimSumReviews,
+    reviewCount: dimSumReviews.length,
   },
   {
     id: 'rest-10',
@@ -111,6 +141,8 @@ export const mockSearchRestaurants: Restaurant[] = [
     address: '741 Trần Hưng Đạo, Q5, TP.HCM',
     imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800',
     description: 'Fresh Mediterranean cuisine with healthy options and vibrant flavors',
+    reviews: medReviews,
+    reviewCount: medReviews.length,
   },
 ];
 
@@ -152,39 +184,39 @@ export const mockMenuCategories: MenuCategory[] = [
   // Phở Hà Nội
   { id: 'menu-cat-1-1', name: 'Phở & Noodles', restaurantId: 'rest-1', displayOrder: 1 },
   { id: 'menu-cat-1-2', name: 'Appetizers', restaurantId: 'rest-1', displayOrder: 2 },
-  
+
   // Sushi Sakura
   { id: 'menu-cat-2-1', name: 'Sushi & Sashimi', restaurantId: 'rest-2', displayOrder: 1 },
   { id: 'menu-cat-2-2', name: 'Special Rolls', restaurantId: 'rest-2', displayOrder: 2 },
-  
+
   // Pizza Bella Italia
   { id: 'menu-cat-3-1', name: 'Classic Pizzas', restaurantId: 'rest-3', displayOrder: 1 },
   { id: 'menu-cat-3-2', name: 'Pasta Dishes', restaurantId: 'rest-3', displayOrder: 2 },
-  
+
   // Bún Bò Huế
   { id: 'menu-cat-4-1', name: 'Noodle Soups', restaurantId: 'rest-4', displayOrder: 1 },
   { id: 'menu-cat-4-2', name: 'Rice Dishes', restaurantId: 'rest-4', displayOrder: 2 },
-  
+
   // Café De Paris
   { id: 'menu-cat-5-1', name: 'Coffee & Drinks', restaurantId: 'rest-5', displayOrder: 1 },
   { id: 'menu-cat-5-2', name: 'Pastries & Desserts', restaurantId: 'rest-5', displayOrder: 2 },
-  
+
   // Korean BBQ
   { id: 'menu-cat-6-1', name: 'BBQ Meats', restaurantId: 'rest-6', displayOrder: 1 },
   { id: 'menu-cat-6-2', name: 'Hot Pots & Stews', restaurantId: 'rest-6', displayOrder: 2 },
-  
+
   // Thai Spice
   { id: 'menu-cat-7-1', name: 'Curry & Stir-fry', restaurantId: 'rest-7', displayOrder: 1 },
   { id: 'menu-cat-7-2', name: 'Salads & Appetizers', restaurantId: 'rest-7', displayOrder: 2 },
-  
+
   // Burger Brothers
   { id: 'menu-cat-8-1', name: 'Signature Burgers', restaurantId: 'rest-8', displayOrder: 1 },
   { id: 'menu-cat-8-2', name: 'Sides & Drinks', restaurantId: 'rest-8', displayOrder: 2 },
-  
+
   // Dim Sum Palace
   { id: 'menu-cat-9-1', name: 'Steamed Dim Sum', restaurantId: 'rest-9', displayOrder: 1 },
   { id: 'menu-cat-9-2', name: 'Fried & Baked', restaurantId: 'rest-9', displayOrder: 2 },
-  
+
   // Mediterranean Delight
   { id: 'menu-cat-10-1', name: 'Mezze & Salads', restaurantId: 'rest-10', displayOrder: 1 },
   { id: 'menu-cat-10-2', name: 'Main Courses', restaurantId: 'rest-10', displayOrder: 2 },
@@ -193,29 +225,36 @@ export const mockMenuCategories: MenuCategory[] = [
 // Dishes for each restaurant
 export const mockDishes: Dish[] = [
   // Phở Hà Nội - Phở & Noodles
-  { id: 'dish-1-1', name: 'Phở Bò Tái', description: 'Rare beef pho with fresh herbs and lime', price: 65000, imageUrl: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-1', availableQuantity: 50, isAvailable: true, rating: 4.8,
+  {
+    id: 'dish-1-1', name: 'Phở Bò Tái', description: 'Rare beef pho with fresh herbs and lime', price: 65000, imageUrl: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-1', availableQuantity: 50, isAvailable: true, rating: 4.8,
     optionGroups: [
-      { id: 'size', title: 'variant__19f2a48e6cddf3', options: [
-        { id: 'size-s', name: 'Nhỏ', price: 60000 },
-        { id: 'size-m', name: 'Vừa', price: 65000 },
-        { id: 'size-l', name: 'Lớn', price: 75000 },
-      ] },
-      { id: 'ag-them', title: 'Thêm topping', options: [
-        { id: 'add-trung', name: 'Trứng trần', price: 5000 },
-        { id: 'add-thit', name: 'Thêm thịt', price: 15000 },
-        { id: 'add-banh', name: 'Thêm bánh phở', price: 5000 },
-      ] },
-      { id: 'ag-cay', title: 'Độ cay', required: true, minSelect: 1, maxSelect: 1, options: [
-        { id: 'cay-it', name: 'Ít cay', price: 0 },
-        { id: 'cay-vua', name: 'Vừa cay', price: 0 },
-        { id: 'cay-nhieu', name: 'Cay nhiều', price: 0 },
-      ] },
+      {
+        id: 'size', title: 'variant__19f2a48e6cddf3', options: [
+          { id: 'size-s', name: 'Nhỏ', price: 60000 },
+          { id: 'size-m', name: 'Vừa', price: 65000 },
+          { id: 'size-l', name: 'Lớn', price: 75000 },
+        ]
+      },
+      {
+        id: 'ag-them', title: 'Thêm topping', options: [
+          { id: 'add-trung', name: 'Trứng trần', price: 5000 },
+          { id: 'add-thit', name: 'Thêm thịt', price: 15000 },
+          { id: 'add-banh', name: 'Thêm bánh phở', price: 5000 },
+        ]
+      },
+      {
+        id: 'ag-cay', title: 'Độ cay', required: true, minSelect: 1, maxSelect: 1, options: [
+          { id: 'cay-it', name: 'Ít cay', price: 0 },
+          { id: 'cay-vua', name: 'Vừa cay', price: 0 },
+          { id: 'cay-nhieu', name: 'Cay nhiều', price: 0 },
+        ]
+      },
     ]
   },
   { id: 'dish-1-2', name: 'Phở Gà', description: 'Chicken pho with tender meat and clear broth', price: 60000, imageUrl: 'https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-1', availableQuantity: 40, isAvailable: true, rating: 4.7 },
   { id: 'dish-1-3', name: 'Bún Chả', description: 'Grilled pork with vermicelli and herbs', price: 70000, imageUrl: 'https://images.unsplash.com/photo-1559314809-0d155014e29e?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-1', availableQuantity: 35, isAvailable: true, rating: 4.9 },
   { id: 'dish-1-4', name: 'Bún Bò Huế', description: 'Spicy beef noodle soup from Central Vietnam', price: 75000, imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-1', availableQuantity: 30, isAvailable: true, rating: 4.8 },
-  
+
   // Phở Hà Nội - Appetizers
   { id: 'dish-1-5', name: 'Gỏi Cuốn', description: 'Fresh spring rolls with shrimp and pork', price: 45000, imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-2', availableQuantity: 60, isAvailable: true, rating: 4.6 },
   { id: 'dish-1-6', name: 'Chả Giò', description: 'Crispy fried spring rolls', price: 50000, imageUrl: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400', restaurantId: 'rest-1', menuCategoryId: 'menu-cat-1-2', availableQuantity: 55, isAvailable: true, rating: 4.7 },
@@ -262,23 +301,30 @@ export const mockDishes: Dish[] = [
   // Café De Paris - Coffee & Drinks
   { id: 'dish-5-1', name: 'Espresso', description: 'Rich Italian espresso', price: 45000, imageUrl: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 100, isAvailable: true, rating: 4.7 },
   { id: 'dish-5-2', name: 'Cappuccino', description: 'Espresso with steamed milk foam', price: 55000, imageUrl: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 90, isAvailable: true, rating: 4.8 },
-  { id: 'dish-5-3', name: 'Latte', description: 'Smooth espresso with steamed milk', price: 58000, imageUrl: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 95, isAvailable: true, rating: 4.7,
+  {
+    id: 'dish-5-3', name: 'Latte', description: 'Smooth espresso with steamed milk', price: 58000, imageUrl: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 95, isAvailable: true, rating: 4.7,
     optionGroups: [
-      { id: 'size', title: 'variant__19f2a48e6cddf3', options: [
-        { id: 'size-s', name: 'Nhỏ', price: 48000 },
-        { id: 'size-m', name: 'Vừa', price: 58000 },
-        { id: 'size-l', name: 'Lớn', price: 65000 },
-      ] },
-      { id: 'ag-ice', title: 'Đá', required: true, minSelect: 1, maxSelect: 1, options: [
-        { id: 'ice-it', name: 'Ít đá', price: 0 },
-        { id: 'ice-vua', name: 'Trung bình', price: 0 },
-        { id: 'ice-nhieu', name: 'Nhiều đá', price: 0 },
-      ] },
-      { id: 'ag-topping', title: 'Topping thêm', options: [
-        { id: 'top-tranchau', name: 'Trân châu đen', price: 8000 },
-        { id: 'top-tranchau-trang', name: 'Trân châu trắng', price: 8000 },
-        { id: 'top-syrup', name: 'Thêm syrup', price: 5000 },
-      ] },
+      {
+        id: 'size', title: 'variant__19f2a48e6cddf3', options: [
+          { id: 'size-s', name: 'Nhỏ', price: 48000 },
+          { id: 'size-m', name: 'Vừa', price: 58000 },
+          { id: 'size-l', name: 'Lớn', price: 65000 },
+        ]
+      },
+      {
+        id: 'ag-ice', title: 'Đá', required: true, minSelect: 1, maxSelect: 1, options: [
+          { id: 'ice-it', name: 'Ít đá', price: 0 },
+          { id: 'ice-vua', name: 'Trung bình', price: 0 },
+          { id: 'ice-nhieu', name: 'Nhiều đá', price: 0 },
+        ]
+      },
+      {
+        id: 'ag-topping', title: 'Topping thêm', options: [
+          { id: 'top-tranchau', name: 'Trân châu đen', price: 8000 },
+          { id: 'top-tranchau-trang', name: 'Trân châu trắng', price: 8000 },
+          { id: 'top-syrup', name: 'Thêm syrup', price: 5000 },
+        ]
+      },
     ]
   },
   { id: 'dish-5-4', name: 'Vietnamese Iced Coffee', description: 'Strong coffee with condensed milk', price: 48000, imageUrl: 'https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=400', restaurantId: 'rest-5', menuCategoryId: 'menu-cat-5-1', availableQuantity: 80, isAvailable: true, rating: 4.9 },
@@ -370,34 +416,34 @@ export function searchRestaurants(query: string): Restaurant[] {
   if (!query || query.trim() === '') {
     return mockSearchRestaurants;
   }
-  
+
   const lowerQuery = query.toLowerCase().trim();
-  
+
   return mockSearchRestaurants.filter(restaurant => {
     // Search in restaurant name
     if (restaurant.name.toLowerCase().includes(lowerQuery)) {
       return true;
     }
-    
+
     // Search in restaurant description
     if (restaurant.description?.toLowerCase().includes(lowerQuery)) {
       return true;
     }
-    
+
     // Search in restaurant categories
     if (restaurant.categories.some(cat => cat.name.toLowerCase().includes(lowerQuery))) {
       return true;
     }
-    
+
     // Search in dishes
     const restaurantDishes = getDishesForRestaurant(restaurant.id);
-    if (restaurantDishes.some(dish => 
-      dish.name.toLowerCase().includes(lowerQuery) || 
+    if (restaurantDishes.some(dish =>
+      dish.name.toLowerCase().includes(lowerQuery) ||
       dish.description.toLowerCase().includes(lowerQuery)
     )) {
       return true;
     }
-    
+
     return false;
   });
 }
