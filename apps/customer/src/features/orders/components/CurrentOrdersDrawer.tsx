@@ -12,7 +12,7 @@ const OrderMapView = dynamic(() => import("@/features/orders/components/OrderMap
 import OrderStatusSteps from "@/features/orders/components/OrderStatusSteps";
 
 export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const orders = useMemo(() => getOrders(), []);
+  const orders = useMemo(() => getOrders().filter(o => o.status !== "DELIVERED"), []);
   const [activeOrderId, setActiveOrderId] = useState<string>(orders[0]?.id ?? "");
   const activeOrder = orders.find((o) => o.id === activeOrderId) ?? orders[0];
 
@@ -46,51 +46,51 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                 <X className="w-4 h-4" />
               </motion.button>
             </div>
-              <div className="grid grid-cols-[20%_40%_40%] h-[calc(88vh-72px)]">
-                <div className="overflow-y-auto no-scrollbar bg-white border-r border-gray-100">
-                  <ul className="divide-y divide-gray-200">
-                    {orders.map((o) => {
-                      const restaurant = getRestaurantById(o.restaurantId);
-                      const active = o.id === activeOrderId;
-                      const StatusIcon = (() => {
-                        switch (o.status) {
-                          case "PLACED": return ClipboardList;
-                          case "PREPARED": return ChefHat;
-                          case "PICKED": return Bike;
-                          case "DELIVERED": return BadgeCheck;
-                        }
-                      })();
-                      return (
-                        <motion.li
-                          key={o.id}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className={`p-4 cursor-pointer border-l-4 ${active ? "border-[var(--primary)] bg-[var(--primary)]/8" : "border-transparent bg-white hover:bg-gray-50"}`}
-                          onClick={() => setActiveOrderId(o.id)}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <div className={`w-7 h-7 rounded-full flex items-center justify-center ${active ? "bg-[var(--primary)] text-white" : "bg-gray-100 text-gray-600"}`}>
-                                <Store className="w-4 h-4" />
-                              </div>
-                              <div className={`text-sm font-semibold line-clamp-1 ${active ? "text-[#1A1A1A]" : "text-[#555]"}`}>{restaurant?.name ?? o.restaurantId}</div>
+            <div className="grid grid-cols-[20%_40%_40%] h-[calc(88vh-72px)]">
+              <div className="overflow-y-auto no-scrollbar bg-white border-r border-gray-100">
+                <ul className="divide-y divide-gray-200">
+                  {orders.map((o) => {
+                    const restaurant = getRestaurantById(o.restaurantId);
+                    const active = o.id === activeOrderId;
+                    const StatusIcon = (() => {
+                      switch (o.status) {
+                        case "PLACED": return ClipboardList;
+                        case "PREPARED": return ChefHat;
+                        case "PICKED": return Bike;
+                        case "DELIVERED": return BadgeCheck;
+                      }
+                    })();
+                    return (
+                      <motion.li
+                        key={o.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className={`p-4 cursor-pointer border-l-4 ${active ? "border-[var(--primary)] bg-[var(--primary)]/8" : "border-transparent bg-white hover:bg-gray-50"}`}
+                        onClick={() => setActiveOrderId(o.id)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center ${active ? "bg-[var(--primary)] text-white" : "bg-gray-100 text-gray-600"}`}>
+                              <Store className="w-4 h-4" />
                             </div>
-                            <div className={`text-xs rounded-full px-2 py-1 ${active ? "bg-[var(--primary)]/20 text-[var(--primary)]" : "bg-gray-100 text-gray-600"}`}>{o.code}</div>
+                            <div className={`text-sm font-semibold line-clamp-1 ${active ? "text-[#1A1A1A]" : "text-[#555]"}`}>{restaurant?.name ?? o.restaurantId}</div>
                           </div>
-                          <div className={`mt-1 flex items-center gap-2 text-xs ${active ? "text-[#1A1A1A]" : "text-[#777]"}`}>
-                            <MapPin className="w-3 h-3" />
-                            <span className="line-clamp-1">{o.deliveryLocation.address ?? "Vị trí nhận"}</span>
-                          </div>
-                          <div className={`mt-2 flex items-center gap-2 text-xs ${active ? "text-[#1A1A1A]" : "text-[#777]"}`}>
-                            {StatusIcon && <StatusIcon className="w-3 h-3" />}
-                            <span>{statusLabel(o.status)}</span>
-                          </div>
-                        </motion.li>
-                      );
-                    })}
-                  </ul>
-                </div>
+                          <div className={`text-xs rounded-full px-2 py-1 ${active ? "bg-[var(--primary)]/20 text-[var(--primary)]" : "bg-gray-100 text-gray-600"}`}>{o.code}</div>
+                        </div>
+                        <div className={`mt-1 flex items-center gap-2 text-xs ${active ? "text-[#1A1A1A]" : "text-[#777]"}`}>
+                          <MapPin className="w-3 h-3" />
+                          <span className="line-clamp-1">{o.deliveryLocation.address ?? "Vị trí nhận"}</span>
+                        </div>
+                        <div className={`mt-2 flex items-center gap-2 text-xs ${active ? "text-[#1A1A1A]" : "text-[#777]"}`}>
+                          {StatusIcon && <StatusIcon className="w-3 h-3" />}
+                          <span>{statusLabel(o.status)}</span>
+                        </div>
+                      </motion.li>
+                    );
+                  })}
+                </ul>
+              </div>
 
               <div className="relative">
                 {activeOrder && <OrderMapView order={activeOrder} />}
@@ -100,7 +100,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                 {activeOrder && (
                   <>
                     <OrderStatusSteps status={activeOrder.status} />
-                    <div className="mt-2">
+                    <div className="mt-2 border-2 border-gray-200 p-6 rounded-[24px]">
                       <div className="text-[14px] font-semibold text-[#1A1A1A] mb-3">Thông tin đơn hàng</div>
                       <ul className="divide-y divide-gray-200">
                         {activeOrder.items.map((it) => (
