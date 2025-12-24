@@ -23,10 +23,15 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
     onClose();
   };
 
+  const handleFavoritesClick = () => {
+    router.push(`/favorites`);
+    onClose();
+  };
+
   const customerItems = [
     { id: "home", icon: Home, text: "Trang chủ", onClick: handleHomeClick },
     { id: "history", icon: History, text: "Lịch sử đơn hàng", onClick: handleOrderHistoryClick },
-    { id: "favorites", icon: Heart, text: "Yêu thích", onClick: onClose },
+    { id: "favorites", icon: Heart, text: "Yêu thích", onClick: handleFavoritesClick },
   ];
 
   return (

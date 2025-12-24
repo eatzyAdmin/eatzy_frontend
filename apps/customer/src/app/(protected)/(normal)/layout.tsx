@@ -24,6 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isSearchMode = searchParams.has("q");
   const isRestaurantDetail = pathname?.startsWith("/restaurants/") ?? false;
   const isOrderHistory = pathname?.startsWith("/order-history") ?? false;
+  const isFavorites = pathname?.startsWith("/favorites") ?? false;
   const isSearchBarCompact = !isHeaderVisible && isSearchMode;
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       <AnimatePresence>
-        {((isSearchMode || isRestaurantDetail || isOrderHistory) && isHeaderVisible) && (
+        {((isSearchMode || isRestaurantDetail || isOrderHistory || isFavorites) && isHeaderVisible) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -78,7 +79,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               onFavoritesClick={() => setOrdersOpen(true)}
               onSearchClick={() => setSearchOpen(true)}
               onCartClick={() => setCartOpen(true)}
-              hideSearchIcon={isSearchMode || isRestaurantDetail || isOrderHistory}
+              hideSearchIcon={isSearchMode || isRestaurantDetail || isOrderHistory || isFavorites}
               onLogoClick={() => {
                 const next = new URLSearchParams(searchParams.toString());
                 next.delete('q');
