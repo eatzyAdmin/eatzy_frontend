@@ -1,6 +1,6 @@
 "use client";
 import { QueryProvider } from "@repo/lib";
-import { ThemeProvider, LoadingProvider, NotificationProvider } from "@repo/ui";
+import { ThemeProvider, LoadingProvider, NotificationProvider, SwipeConfirmationProvider } from "@repo/ui";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -8,7 +8,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <ThemeProvider>
         <LoadingProvider>
           <NotificationProvider>
-            {children}
+            <SwipeConfirmationProvider>
+              {children}
+            </SwipeConfirmationProvider>
           </NotificationProvider>
         </LoadingProvider>
       </ThemeProvider>

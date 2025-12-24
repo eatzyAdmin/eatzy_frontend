@@ -22,7 +22,7 @@ import { formatVnd } from "@repo/lib";
 import type { Order } from "@repo/types";
 import { getRestaurantById } from "@/features/search/data/mockSearchData";
 
-const OrderMapView = dynamic(() => import("@/features/orders/components/OrderMapView"), { ssr: false });
+const OrderReviewTab = dynamic(() => import("@/features/orders/components/OrderReviewTab"), { ssr: false });
 
 // Mock driver data - in real app this would come from API
 const mockDriverData = {
@@ -44,7 +44,7 @@ export default function OrderDetailDrawer({
   onClose: () => void;
   order: Order | null;
 }) {
-  const [activeTab, setActiveTab] = useState<"details" | "map">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "reviews">("details");
   const restaurant = useMemo(() => (order ? getRestaurantById(order.restaurantId) : null), [order]);
 
   useEffect(() => {
@@ -98,13 +98,13 @@ export default function OrderDetailDrawer({
                       Chi tiết
                     </button>
                     <button
-                      onClick={() => setActiveTab("map")}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "map"
+                      onClick={() => setActiveTab("reviews")}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "reviews"
                         ? "bg-white text-[#1A1A1A] shadow-sm"
                         : "text-gray-600 hover:text-[#1A1A1A]"
                         }`}
                     >
-                      Bản đồ
+                      Đánh giá
                     </button>
                   </div>
 
@@ -439,14 +439,18 @@ export default function OrderDetailDrawer({
                   </motion.div>
                 ) : (
                   <motion.div
-                    key="map"
+                    key="reviews"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.2 }}
                     className="h-full"
                   >
-                    <OrderMapView order={order} />
+                    <OrderReviewTab
+                      order={order}
+                      driver={mockDriverData}
+                      restaurant={restaurant ?? null}
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
