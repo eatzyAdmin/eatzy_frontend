@@ -97,15 +97,6 @@ export default function FavoritesPage() {
               </div>
             )}
           </div>
-
-          {favoriteRestaurants.length > 0 && (
-            <div className="flex items-center gap-3 mt-4">
-              <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-              <span className="text-sm text-gray-600">
-                {filteredRestaurants.length} restaurant{filteredRestaurants.length !== 1 ? 's' : ''}
-              </span>
-            </div>
-          )}
         </div>
       </div>
 
