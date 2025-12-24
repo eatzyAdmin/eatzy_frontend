@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { ArrowLeft, Heart, Search, X, Store } from "@repo/ui/icons";
-import { useLoading } from "@repo/ui";
+import { useLoading, useNotification } from "@repo/ui";
 import type { Restaurant } from "@repo/types";
 import { getFavoriteIds } from "@/features/favorites/data/mockFavorites";
 import { mockSearchRestaurants } from "@/features/search/data/mockSearchData";
@@ -12,8 +12,10 @@ import FavoriteRestaurantCard from "@/features/favorites/components/FavoriteRest
 
 export default function FavoritesPage() {
   const router = useRouter();
-  const { hide } = useLoading();
+  const { hide, show } = useLoading();
+  const { showNotification } = useNotification();
   const [searchQuery, setSearchQuery] = useState("");
+  const [removedIds, setRemovedIds] = useState<string[]>([]);
 
   useEffect(() => {
     const t = setTimeout(() => hide(), 1500);
@@ -24,9 +26,9 @@ export default function FavoritesPage() {
   const favoriteRestaurants = useMemo(() => {
     const favoriteIds = getFavoriteIds();
     return mockSearchRestaurants.filter((restaurant) =>
-      favoriteIds.includes(restaurant.id)
+      favoriteIds.includes(restaurant.id) && !removedIds.includes(restaurant.id)
     );
-  }, []);
+  }, [removedIds]);
 
   // Filter by search query
   const filteredRestaurants = useMemo(() => {
@@ -41,7 +43,17 @@ export default function FavoritesPage() {
   }, [favoriteRestaurants, searchQuery]);
 
   const handleRestaurantClick = (restaurant: Restaurant) => {
+    show("Đang tải thông tin quán ăn...");
     router.push(`/restaurants/${restaurant.slug}`);
+  };
+
+  const handleRemoveFavorite = (id: string, name: string) => {
+    setRemovedIds((prev) => [...prev, id]);
+    showNotification({
+      type: "success",
+      message: "Đã xóa khỏi danh sách yêu thích",
+      format: `Đã xóa ${name} khỏi danh sách yêu thích của bạn`,
+    });
   };
 
   return (
@@ -118,6 +130,7 @@ export default function FavoritesPage() {
                     <FavoriteRestaurantCard
                       restaurant={restaurant}
                       onClick={() => handleRestaurantClick(restaurant)}
+                      onRemove={() => handleRemoveFavorite(restaurant.id, restaurant.name)}
                     />
                   </motion.div>
                 ))}

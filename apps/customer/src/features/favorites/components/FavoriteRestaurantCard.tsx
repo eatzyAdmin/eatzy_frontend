@@ -7,10 +7,12 @@ import type { Restaurant } from "@repo/types";
 
 export default function FavoriteRestaurantCard({
   restaurant,
-  onClick
+  onClick,
+  onRemove
 }: {
   restaurant: Restaurant;
   onClick: () => void;
+  onRemove?: (e: React.MouseEvent) => void;
 }) {
   const {
     containerRef,
@@ -60,9 +62,15 @@ export default function FavoriteRestaurantCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
           {/* Favorite Badge */}
-          <div className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove?.(e);
+            }}
+            className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center hover:scale-110 transition-transform z-10"
+          >
             <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-          </div>
+          </button>
 
           {/* Rating Badge */}
           {restaurant.rating && (
