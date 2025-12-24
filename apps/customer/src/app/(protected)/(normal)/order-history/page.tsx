@@ -26,7 +26,7 @@ export default function OrderHistoryPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => hide(), 1200);
+    const t = setTimeout(() => hide(), 1500);
     return () => clearTimeout(t);
   }, [hide]);
 

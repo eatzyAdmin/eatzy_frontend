@@ -1,7 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { History, Home, Heart } from "@repo/ui/icons";
-import { NavItem, NavItemShimmer, ProfileShimmer } from "@repo/ui";
+import { NavItem, NavItemShimmer, ProfileShimmer, useLoading } from "@repo/ui";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -9,9 +9,12 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const params = useSearchParams();
+  const { show } = useLoading();
+
   useEffect(() => { const t = setTimeout(() => setIsLoading(false), 400); return () => clearTimeout(t); }, []);
 
   const handleHomeClick = () => {
+    show();
     const next = new URLSearchParams(params.toString());
     next.delete('q');
     router.replace(`/home`, { scroll: false });
@@ -19,11 +22,13 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
   };
 
   const handleOrderHistoryClick = () => {
+    show();
     router.push(`/order-history`);
     onClose();
   };
 
   const handleFavoritesClick = () => {
+    show();
     router.push(`/favorites`);
     onClose();
   };
