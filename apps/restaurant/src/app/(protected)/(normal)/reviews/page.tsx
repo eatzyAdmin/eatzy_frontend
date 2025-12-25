@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useMemo, useEffect } from "react";
-import { Search, Star, Sparkles, CheckCircle2, MessageSquare, Map, Tag, ChefHat } from "@repo/ui/icons";
+import { useState, useMemo } from "react";
+import { Search, Star, Sparkles, CheckCircle2, MessageSquare, Map, Tag, ChefHat, ChevronDown } from "@repo/ui/icons";
 import { ImageWithFallback } from "@repo/ui";
-import { motion } from "@repo/ui/motion";
+import { motion, AnimatePresence } from "@repo/ui/motion";
 import type { Review } from "@repo/types";
 
 // Mock Data
@@ -72,9 +72,11 @@ const mockReviews: Review[] = [
 export default function ReviewsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("relevant");
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
+  const [isSortOpen, setIsSortOpen] = useState(false);
 
   const reviews = useMemo(() => mockReviews, []);
-  const reviewCount = reviews.length;
+
   // Calculate average rating
   const rating = reviews.reduce((acc, r) => acc + r.rating, 0) / (reviews.length || 1);
 
@@ -113,8 +115,9 @@ export default function ReviewsPage() {
 
   const filteredReviews = useMemo(() => {
     let result = reviews.filter(review =>
-      review.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      review.authorName.toLowerCase().includes(searchQuery.toLowerCase())
+      (review.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        review.authorName.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (selectedRating === null || Math.floor(review.rating) === selectedRating)
     );
 
     if (sortBy === 'highest') {
@@ -125,7 +128,14 @@ export default function ReviewsPage() {
     // For 'relevant' and 'recent', we keep default order for now
 
     return result;
-  }, [reviews, searchQuery, sortBy]);
+  }, [reviews, searchQuery, sortBy, selectedRating]);
+
+  const sortOptions = [
+    { value: 'relevant', label: 'Phù hợp nhất' },
+    { value: 'recent', label: 'Gần đây nhất' },
+    { value: 'highest', label: 'Đánh giá cao nhất' },
+    { value: 'lowest', label: 'Đánh giá thấp nhất' },
+  ];
 
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
@@ -159,18 +169,36 @@ export default function ReviewsPage() {
 
             {/* Rating Distribution */}
             <div className="space-y-2.5">
-              <h4 className="font-semibold text-gray-900 text-sm mb-3">Xếp hạng tổng thể</h4>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-gray-900 text-sm">Xếp hạng tổng thể</h4>
+                {selectedRating !== null && (
+                  <button
+                    onClick={() => setSelectedRating(null)}
+                    className="text-xs text-[var(--primary)] font-bold hover:underline"
+                  >
+                    Xóa lọc
+                  </button>
+                )}
+              </div>
               {ratingDistribution.map((item) => (
-                <div key={item.stars} className="flex items-center gap-2.5">
-                  <span className="text-xs text-gray-600 w-2">{item.stars}</span>
+                <div
+                  key={item.stars}
+                  onClick={() => setSelectedRating(selectedRating === item.stars ? null : item.stars)}
+                  className={`flex items-center gap-2.5 cursor-pointer p-1 rounded-lg transition-colors ${selectedRating === item.stars ? 'bg-gray-100 ring-1 ring-gray-200' : 'hover:bg-gray-50'
+                    }`}
+                >
+                  <span className={`text-xs w-2 ${selectedRating === item.stars ? 'text-[#1A1A1A] font-bold' : 'text-gray-600'}`}>
+                    {item.stars}
+                  </span>
                   <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${item.percentage}%` }}
                       transition={{ duration: 0.8, delay: 0.2 }}
-                      className="h-full bg-gray-900 rounded-full"
+                      className={`h-full rounded-full ${selectedRating === item.stars ? 'bg-[var(--primary)]' : 'bg-gray-900'}`}
                     />
                   </div>
+                  {selectedRating === item.stars && <CheckCircle2 className="w-3 h-3 text-[var(--primary)]" />}
                 </div>
               ))}
             </div>
@@ -200,20 +228,41 @@ export default function ReviewsPage() {
               {/* Header */}
               <div className="flex items-center justify-between pb-4">
                 <h2 className="text-xl font-bold text-gray-900">
-                  {reviewCount} lượt đánh giá
+                  {filteredReviews.length} lượt đánh giá
                 </h2>
 
                 <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none cursor-pointer"
+                  <button
+                    onClick={() => setIsSortOpen(!isSortOpen)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium hover:border-gray-300 transition-colors text-gray-700 min-w-[160px] justify-between"
                   >
-                    <option value="relevant">Phù hợp nhất</option>
-                    <option value="recent">Gần đây nhất</option>
-                    <option value="highest">Đánh giá cao nhất</option>
-                    <option value="lowest">Đánh giá thấp nhất</option>
-                  </select>
+                    <span>{sortOptions.find(o => o.value === sortBy)?.label}</span>
+                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isSortOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {isSortOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.1 }}
+                        className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 py-2 z-30 overflow-hidden"
+                      >
+                        {sortOptions.map(option => (
+                          <button
+                            key={option.value}
+                            onClick={() => { setSortBy(option.value); setIsSortOpen(false); }}
+                            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors flex items-center justify-between ${sortBy === option.value ? 'text-[var(--primary)] font-bold bg-[var(--primary)]/5' : 'text-gray-700'
+                              }`}
+                          >
+                            {option.label}
+                            {sortBy === option.value && <CheckCircle2 className="w-4 h-4" />}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
