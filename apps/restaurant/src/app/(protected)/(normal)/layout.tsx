@@ -29,22 +29,30 @@ const restaurantMenuItems = [
   { id: 'wallet', icon: Wallet, text: 'Ví cửa hàng' }
 ];
 
-export default function NormalLayout({ children }: { children: ReactNode }) {
+import { NormalLoadingProvider, useNormalLoading, NormalLoadingOverlay } from './context/NormalLoadingContext';
+
+function RestaurantLayoutContent({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { confirm } = useSwipeConfirmation();
+  const { startLoading, stopLoading } = useNormalLoading();
   const [activeSection, setActiveSection] = useState('orders');
   const [profileData] = useState({ fullName: 'Nhà hàng ABC', email: 'restaurant@eatzy.com' });
   const [navHovered, setNavHovered] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isAppActive, setIsAppActive] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsLoading(false);
+      setIsInitialLoading(false);
     }, 500);
     return () => clearTimeout(timer);
   }, []);
+
+  // Stop loading on navigation complete
+  useEffect(() => {
+    stopLoading();
+  }, [pathname, stopLoading]);
 
   // Update active section based on pathname
   useEffect(() => {
@@ -58,13 +66,20 @@ export default function NormalLayout({ children }: { children: ReactNode }) {
     if (sectionId === 'logout') {
       router.push('/login');
     } else {
-      setActiveSection(sectionId);
-      router.push(`/${sectionId}`);
+      const targetPath = `/${sectionId}`;
+      if (!pathname.endsWith(sectionId)) {
+        startLoading();
+        setActiveSection(sectionId);
+        router.push(targetPath);
+      }
     }
   };
 
   const handleProfileClick = () => {
-    router.push('/profile');
+    if (!pathname.endsWith('/profile')) {
+      startLoading();
+      router.push('/profile');
+    }
   };
 
   const handleToggleApp = () => {
@@ -113,7 +128,7 @@ export default function NormalLayout({ children }: { children: ReactNode }) {
         />
 
         {/* Profile section */}
-        {isLoading ? (
+        {isInitialLoading ? (
           <ProfileShimmer expanded={navHovered} />
         ) : (
           <motion.div
@@ -187,7 +202,7 @@ export default function NormalLayout({ children }: { children: ReactNode }) {
             </p>
           </div>
 
-          {isLoading ? (
+          {isInitialLoading ? (
             Array.from({ length: restaurantMenuItems.length }, (_, index) => (
               <NavItemShimmer
                 key={`shimmer-${index}`}
@@ -227,7 +242,7 @@ export default function NormalLayout({ children }: { children: ReactNode }) {
               "linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)",
           }}
         >
-          {isLoading ? (
+          {isInitialLoading ? (
             <NavItemShimmer
               expanded={navHovered}
               index={restaurantMenuItems.length}
@@ -273,5 +288,16 @@ export default function NormalLayout({ children }: { children: ReactNode }) {
         <div className="flex-1">{children}</div>
       </div>
     </div >
+  );
+}
+
+export default function NormalLayout({ children }: { children: ReactNode }) {
+  return (
+    <NormalLoadingProvider>
+      <div className="relative">
+        <RestaurantLayoutContent>{children}</RestaurantLayoutContent>
+        <NormalLoadingOverlay />
+      </div>
+    </NormalLoadingProvider>
   );
 }

@@ -95,7 +95,6 @@ export default function DishInfoCard({ dish, originalDish, onUpdate, onDraftChan
   return (
     <motion.div
       layoutId={layoutId}
-      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
       className="bg-[#F7F7F7] rounded-[32px] p-8 h-full flex flex-col shadow-2xl border border-white/50 overflow-hidden"
     >
       {/* Scrollable Content */}
@@ -221,8 +220,8 @@ export default function DishInfoCard({ dish, originalDish, onUpdate, onDraftChan
         <button
           onClick={handleSaveDetails}
           className={`w-full py-4 text-white rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all ${hasChanges()
-              ? 'bg-[var(--primary)] shadow-[var(--primary)]/30 hover:shadow-[var(--primary)]/50 hover:scale-[1.02] active:scale-[0.98]'
-              : 'bg-gray-300 shadow-none cursor-not-allowed opacity-70'
+            ? 'bg-[var(--primary)] shadow-[var(--primary)]/30 hover:shadow-[var(--primary)]/50 hover:scale-[1.02] active:scale-[0.98]'
+            : 'bg-gray-300 shadow-none cursor-not-allowed opacity-70'
             }`}
         >
           <Save className="w-5 h-5" />
