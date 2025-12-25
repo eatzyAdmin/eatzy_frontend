@@ -21,7 +21,7 @@ const adminMenuItems = [
   { id: 'restaurants', icon: Store, text: 'Quản lý quán ăn' },
   { id: 'drivers', icon: Truck, text: 'Quản lý tài xế' },
   { id: 'customers', icon: Users, text: 'Quản lý khách hàng' },
-  { id: 'system', icon: Settings, text: 'Tham số hệ thống' }
+  { id: 'system-parameters', icon: Settings, text: 'Tham số hệ thống' }
 ];
 
 import { NormalLoadingProvider, useNormalLoading, NormalLoadingOverlay } from './context/NormalLoadingContext';
