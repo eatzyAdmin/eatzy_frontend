@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, Star, Sparkles, CheckCircle2, MessageSquare, Map, Tag, ChefHat, ChevronDown } from "@repo/ui/icons";
-import { ImageWithFallback } from "@repo/ui";
+import { ImageWithFallback, ReviewItemShimmer, ReviewStatsShimmer, TextShimmer, useLoading } from "@repo/ui";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import type { Review } from "@repo/types";
 
@@ -70,12 +70,23 @@ const mockReviews: Review[] = [
 ];
 
 export default function ReviewsPage() {
+  const { hide } = useLoading();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("relevant");
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const reviews = useMemo(() => mockReviews, []);
+
+  // Initial loading simulation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      hide();
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [hide]);
 
   // Calculate average rating
   const rating = reviews.reduce((acc, r) => acc + r.rating, 0) / (reviews.length || 1);
@@ -149,77 +160,81 @@ export default function ReviewsPage() {
       <div className="flex-1 flex overflow-hidden p-8 gap-8">
 
         {/* Left Column - Scrollable Stats */}
-        <div className="w-[400px] flex-shrink-0 bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full">
-          <div className="flex-1 overflow-y-auto p-8 space-y-8">
-            {/* Hero Rating */}
-            <div className="text-center space-y-3">
-              <div className="flex items-center justify-center gap-4 mb-3">
-                <span className="text-4xl">🏆</span>
-                <div className="text-[80px] leading-none font-bold text-[#1A1A1A]">
-                  {rating.toFixed(1).replace('.', ',')}
+        {isLoading ? (
+          <ReviewStatsShimmer />
+        ) : (
+          <div className="w-[400px] flex-shrink-0 bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full">
+            <div className="flex-1 overflow-y-auto p-8 space-y-8">
+              {/* Hero Rating */}
+              <div className="text-center space-y-3">
+                <div className="flex items-center justify-center gap-4 mb-3">
+                  <span className="text-4xl">🏆</span>
+                  <div className="text-[80px] leading-none font-bold text-[#1A1A1A]">
+                    {rating.toFixed(1).replace('.', ',')}
+                  </div>
+                  <span className="text-4xl">🏆</span>
                 </div>
-                <span className="text-4xl">🏆</span>
+
+                <h3 className="text-[18px] font-bold text-[#1A1A1A]">Được khách yêu thích</h3>
+                <p className="text-gray-600 text-[13px] leading-relaxed">
+                  Trong số các quán ăn đủ điều kiện dựa trên điểm xếp hạng, lượt đánh giá và độ tin cậy, quán này nằm trong <span className="font-bold text-gray-900">nhóm 10% quán ăn hàng đầu</span>
+                </p>
               </div>
 
-              <h3 className="text-[18px] font-bold text-[#1A1A1A]">Được khách yêu thích</h3>
-              <p className="text-gray-600 text-[13px] leading-relaxed">
-                Trong số các quán ăn đủ điều kiện dựa trên điểm xếp hạng, lượt đánh giá và độ tin cậy, quán này nằm trong <span className="font-bold text-gray-900">nhóm 10% quán ăn hàng đầu</span>
-              </p>
-            </div>
-
-            {/* Rating Distribution */}
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="font-semibold text-gray-900 text-sm">Xếp hạng tổng thể</h4>
-                {selectedRating !== null && (
-                  <button
-                    onClick={() => setSelectedRating(null)}
-                    className="text-xs text-[var(--primary)] font-bold hover:underline"
+              {/* Rating Distribution */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-gray-900 text-sm">Xếp hạng tổng thể</h4>
+                  {selectedRating !== null && (
+                    <button
+                      onClick={() => setSelectedRating(null)}
+                      className="text-xs text-[var(--primary)] font-bold hover:underline"
+                    >
+                      Xóa lọc
+                    </button>
+                  )}
+                </div>
+                {ratingDistribution.map((item) => (
+                  <div
+                    key={item.stars}
+                    onClick={() => setSelectedRating(selectedRating === item.stars ? null : item.stars)}
+                    className={`flex items-center gap-2.5 cursor-pointer p-1 rounded-lg transition-colors ${selectedRating === item.stars ? 'bg-gray-100 ring-1 ring-gray-200' : 'hover:bg-gray-50'
+                      }`}
                   >
-                    Xóa lọc
-                  </button>
-                )}
-              </div>
-              {ratingDistribution.map((item) => (
-                <div
-                  key={item.stars}
-                  onClick={() => setSelectedRating(selectedRating === item.stars ? null : item.stars)}
-                  className={`flex items-center gap-2.5 cursor-pointer p-1 rounded-lg transition-colors ${selectedRating === item.stars ? 'bg-gray-100 ring-1 ring-gray-200' : 'hover:bg-gray-50'
-                    }`}
-                >
-                  <span className={`text-xs w-2 ${selectedRating === item.stars ? 'text-[#1A1A1A] font-bold' : 'text-gray-600'}`}>
-                    {item.stars}
-                  </span>
-                  <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${item.percentage}%` }}
-                      transition={{ duration: 0.8, delay: 0.2 }}
-                      className={`h-full rounded-full ${selectedRating === item.stars ? 'bg-[var(--primary)]' : 'bg-gray-900'}`}
-                    />
-                  </div>
-                  {selectedRating === item.stars && <CheckCircle2 className="w-3 h-3 text-[var(--primary)]" />}
-                </div>
-              ))}
-            </div>
-
-            {/* Categories */}
-            <div className="space-y-3 pt-4 border-t border-gray-100">
-              {categories.map((cat) => {
-                const Icon = cat.icon;
-                return (
-                  <div key={cat.label} className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-2.5">
-                      <Icon className="w-4 h-4 text-gray-700" strokeWidth={1.5} />
-                      <span className="text-sm text-gray-900">{cat.label}</span>
+                    <span className={`text-xs w-2 ${selectedRating === item.stars ? 'text-[#1A1A1A] font-bold' : 'text-gray-600'}`}>
+                      {item.stars}
+                    </span>
+                    <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${item.percentage}%` }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        className={`h-full rounded-full ${selectedRating === item.stars ? 'bg-[var(--primary)]' : 'bg-gray-900'}`}
+                      />
                     </div>
-                    <span className="font-semibold text-gray-900 text-sm">{cat.score.toFixed(1).replace('.', ',')}</span>
+                    {selectedRating === item.stars && <CheckCircle2 className="w-3 h-3 text-[var(--primary)]" />}
                   </div>
-                );
-              })}
+                ))}
+              </div>
+
+              {/* Categories */}
+              <div className="space-y-3 pt-4 border-t border-gray-100">
+                {categories.map((cat) => {
+                  const Icon = cat.icon;
+                  return (
+                    <div key={cat.label} className="flex items-center justify-between py-1">
+                      <div className="flex items-center gap-2.5">
+                        <Icon className="w-4 h-4 text-gray-700" strokeWidth={1.5} />
+                        <span className="text-sm text-gray-900">{cat.label}</span>
+                      </div>
+                      <span className="font-semibold text-gray-900 text-sm">{cat.score.toFixed(1).replace('.', ',')}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Right Column - Scrollable Reviews */}
         <div className="flex-1 bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden flex flex-col">
@@ -227,9 +242,13 @@ export default function ReviewsPage() {
             <div className="space-y-6">
               {/* Header */}
               <div className="flex items-center justify-between pb-4">
-                <h2 className="text-xl font-bold text-gray-900">
-                  {filteredReviews.length} lượt đánh giá
-                </h2>
+                {isLoading ? (
+                  <TextShimmer width={150} height={28} rounded="lg" />
+                ) : (
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {filteredReviews.length} lượt đánh giá
+                  </h2>
+                )}
 
                 <div className="relative">
                   <button
@@ -280,7 +299,9 @@ export default function ReviewsPage() {
 
               {/* Reviews List */}
               <div className="space-y-6 pt-2">
-                {filteredReviews.length === 0 ? (
+                {isLoading ? (
+                  <ReviewItemShimmer count={5} />
+                ) : filteredReviews.length === 0 ? (
                   <div className="text-center py-12 text-gray-500 text-sm">
                     Không tìm thấy đánh giá nào
                   </div>

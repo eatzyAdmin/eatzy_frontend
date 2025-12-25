@@ -17,7 +17,7 @@ import {
   Power
 } from '@repo/ui/icons';
 import RestaurantNavItem from '../../../components/RestaurantNavItem';
-import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation } from '@repo/ui';
+import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation, useNotification } from '@repo/ui';
 
 const restaurantMenuItems = [
   { id: 'orders', icon: ShoppingCart, text: 'Đơn hàng' },
@@ -35,6 +35,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { confirm } = useSwipeConfirmation();
+  const { showNotification } = useNotification();
   const { startLoading, stopLoading } = useNormalLoading();
   const [activeSection, setActiveSection] = useState('orders');
   const [profileData] = useState({ fullName: 'Nhà hàng ABC', email: 'restaurant@eatzy.com' });
@@ -102,6 +103,15 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
       confirmText: newStatus ? 'Bật' : 'Tắt',
       onConfirm: () => {
         setIsAppActive(newStatus);
+
+        // Show notification after successful toggle
+        showNotification({
+          message: newStatus
+            ? 'Nhà hàng đang mở và sẵn sàng nhận đơn hàng mới!'
+            : 'Nhà hàng đã đóng. Bạn sẽ không nhận được đơn hàng mới.',
+          type: 'success', // Both on/off are successful operations
+          autoHideDuration: 3000
+        });
       }
     });
   };
