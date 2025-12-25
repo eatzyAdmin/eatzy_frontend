@@ -1,18 +1,49 @@
 "use client";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { History, Home, Heart, LogOut } from "@repo/ui/icons";
-import { NavItem, NavItemShimmer, ProfileShimmer, useLoading, useSwipeConfirmation } from "@repo/ui";
+import { History, Home, Heart, LogOut, User } from "@repo/ui/icons";
+import { NavItem, NavItemShimmer, ProfileShimmer, useLoading, useSwipeConfirmation, STORAGE_KEYS } from "@repo/ui";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [isLoading, setIsLoading] = useState(true);
+  const [userData, setUserData] = useState<any>(null);
   const router = useRouter();
   const params = useSearchParams();
   const { show } = useLoading();
   const { confirm } = useSwipeConfirmation();
 
-  useEffect(() => { const t = setTimeout(() => setIsLoading(false), 400); return () => clearTimeout(t); }, []);
+  useEffect(() => {
+    // Load user data from localStorage
+    const loadUserData = () => {
+      try {
+        const currentUserStr = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+        if (currentUserStr) {
+          const user = JSON.parse(currentUserStr);
+
+          // Get customer profile
+          const customersStr = localStorage.getItem(STORAGE_KEYS.CUSTOMERS);
+          if (customersStr) {
+            const customers = JSON.parse(customersStr);
+            const customer = customers.find((c: any) => c.userId === user.id);
+
+            setUserData({
+              ...user,
+              ...customer,
+            });
+          } else {
+            setUserData(user);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+      setIsLoading(false);
+    };
+
+    const timer = setTimeout(loadUserData, 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleHomeClick = () => {
     show("Đang tải trang chủ...");
@@ -44,6 +75,10 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
       onConfirm: async () => {
         // Simulate 2 second loading
         await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Clear auth data
+        localStorage.removeItem('access_token');
+        localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
 
         // Show loading overlay
         show("Đang đăng xuất...");
@@ -87,11 +122,23 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
             ) : (
               <div className="relative flex items-center p-6 border-b border-white/10 text-white/90">
                 <div className="relative h-12 w-12 rounded-2xl flex items-center justify-center shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.2)] bg-white/10 border border-white/20">
-                  <div className="w-5 h-5 rounded-md bg-white/40" />
+                  {userData?.profilePhoto ? (
+                    <img
+                      src={userData.profilePhoto}
+                      alt={userData.fullName || 'User'}
+                      className="w-full h-full rounded-2xl object-cover"
+                    />
+                  ) : (
+                    <User size={20} className="text-white/60" />
+                  )}
                 </div>
-                <div className="ml-4">
-                  <p className="font-semibold text-sm">Người dùng</p>
-                  <p className="text-xs text-white/80">user@example.com</p>
+                <div className="ml-4 flex-1 overflow-hidden">
+                  <p className="font-semibold text-sm truncate">
+                    {userData?.fullName || 'Người dùng'}
+                  </p>
+                  <p className="text-xs text-white/80 truncate">
+                    {userData?.email || 'user@example.com'}
+                  </p>
                 </div>
               </div>
             )}

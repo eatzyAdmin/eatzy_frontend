@@ -1,5 +1,6 @@
 export * from "./providers/ThemeProvider";
 export * from "./providers/SwipeConfirmationProvider";
+export * from "./providers/EatzyDataInitializer";
 export * from "./primitives/Button";
 export * from "./tokens";
 export * from "./recipes";
@@ -52,4 +53,17 @@ export * from "./effects/TapRipple";
 export * from "./effects/FlyToCart";
 export { default as ImageWithFallback } from "./media/ImageWithFallback";
 export * from "./utils/eatzy-sync";
+export * from "./utils/init-data";
+export { STORAGE_KEYS, SYSTEM_PARAMS, DATA_VERSION } from "./utils/localStorage-manager";
+export type {
+  User as EatzyUser,
+  Restaurant as EatzyRestaurant,
+  Driver as EatzyDriver,
+  Customer as EatzyCustomer,
+  Order as EatzyOrder,
+  OrderItem as EatzyOrderItem,
+  Transaction as EatzyTransaction,
+  SystemParameter as EatzySystemParameter,
+} from "./utils/localStorage-manager";
+
 
