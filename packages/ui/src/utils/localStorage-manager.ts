@@ -141,6 +141,7 @@ export const STORAGE_KEYS = {
   USERS: 'eatzy_users',
   RESTAURANTS: 'eatzy_restaurants',
   DISHES: 'eatzy_dishes',
+  MENU_CATEGORIES: 'eatzy_menu_categories',
   DRIVERS: 'eatzy_drivers',
   CUSTOMERS: 'eatzy_customers',
   ORDERS: 'eatzy_orders',

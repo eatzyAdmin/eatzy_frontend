@@ -9,14 +9,51 @@ import { useLoading, useHoverHighlight, HoverHighlightOverlay, useFlyToCart, Fly
 import type { Restaurant, Dish, MenuCategory, Voucher } from "@repo/types";
 import { useCartStore } from "@repo/store";
 import { formatVnd } from "@repo/lib";
-import {
-  getRestaurantBySlug,
-  getDishesByMenuCategory,
-  getMenuCategoriesForRestaurant,
-  getVouchersForRestaurant,
-} from "@/features/search/data/mockSearchData";
+import { STORAGE_KEYS } from "@repo/ui";
 import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer";
 import { ReviewsModal } from "@/features/search/components/ReviewsModal";
+
+// Helper functions to get data from localStorage
+function getRestaurantBySlug(slug: string): Restaurant | undefined {
+  try {
+    const restaurantsStr = localStorage.getItem(STORAGE_KEYS.RESTAURANTS);
+    if (!restaurantsStr) return undefined;
+    const restaurants = JSON.parse(restaurantsStr);
+    return restaurants.find((r: Restaurant) => r.slug === slug);
+  } catch (error) {
+    console.error('Error loading restaurant:', error);
+    return undefined;
+  }
+}
+
+function getDishesByMenuCategory(menuCategoryId: string): Dish[] {
+  try {
+    const dishesStr = localStorage.getItem(STORAGE_KEYS.DISHES);
+    if (!dishesStr) return [];
+    const dishes = JSON.parse(dishesStr);
+    return dishes.filter((d: Dish) => d.menuCategoryId === menuCategoryId);
+  } catch (error) {
+    console.error('Error loading dishes:', error);
+    return [];
+  }
+}
+
+function getMenuCategoriesForRestaurant(restaurantId: string): MenuCategory[] {
+  try {
+    const categoriesStr = localStorage.getItem(STORAGE_KEYS.MENU_CATEGORIES);
+    if (!categoriesStr) return [];
+    const categories = JSON.parse(categoriesStr);
+    return categories.filter((c: MenuCategory) => c.restaurantId === restaurantId);
+  } catch (error) {
+    console.error('Error loading menu categories:', error);
+    return [];
+  }
+}
+
+function getVouchersForRestaurant(restaurantId: string): Voucher[] {
+  // No vouchers as requested - restaurant don't have vouchers
+  return [];
+}
 
 export default function RestaurantDetailPage() {
   const params = useParams() as { slug: string };

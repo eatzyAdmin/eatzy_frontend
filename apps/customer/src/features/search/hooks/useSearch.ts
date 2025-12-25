@@ -1,17 +1,86 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
-import {
-  searchRestaurants,
-  getDishesForRestaurant,
-  getMenuCategoriesForRestaurant,
-} from '../data/mockSearchData';
+import { STORAGE_KEYS } from '@repo/ui';
 
 export interface RestaurantWithMenu {
   restaurant: Restaurant;
   dishes: Dish[];
   menuCategories: MenuCategory[];
   layoutType: number; // 1-5 for different magazine layouts
+}
+
+// Helper functions to get data from localStorage
+function getRestaurantsFromStorage(): Restaurant[] {
+  try {
+    const restaurantsStr = localStorage.getItem(STORAGE_KEYS.RESTAURANTS);
+    return restaurantsStr ? JSON.parse(restaurantsStr) : [];
+  } catch (error) {
+    console.error('Error loading restaurants:', error);
+    return [];
+  }
+}
+
+function getDishesFromStorage(): Dish[] {
+  try {
+    const dishesStr = localStorage.getItem(STORAGE_KEYS.DISHES);
+    return dishesStr ? JSON.parse(dishesStr) : [];
+  } catch (error) {
+    console.error('Error loading dishes:', error);
+    return [];
+  }
+}
+
+// Search restaurants by query
+function searchRestaurants(query: string): Restaurant[] {
+  if (!query || query.trim() === '') {
+    return getRestaurantsFromStorage();
+  }
+
+  const allRestaurants = getRestaurantsFromStorage();
+  const allDishes = getDishesFromStorage();
+  const lowerQuery = query.toLowerCase().trim();
+
+  return allRestaurants.filter(restaurant => {
+    // Search in restaurant name
+    if (restaurant.name.toLowerCase().includes(lowerQuery)) {
+      return true;
+    }
+
+    // Search in restaurant description
+    if (restaurant.description?.toLowerCase().includes(lowerQuery)) {
+      return true;
+    }
+
+    // Search in restaurant categories
+    if (restaurant.categories.some(cat => cat.name.toLowerCase().includes(lowerQuery))) {
+      return true;
+    }
+
+    // Search in dishes
+    const restaurantDishes = allDishes.filter(dish => dish.restaurantId === restaurant.id);
+    if (restaurantDishes.some(dish =>
+      dish.name.toLowerCase().includes(lowerQuery) ||
+      dish.description.toLowerCase().includes(lowerQuery)
+    )) {
+      return true;
+    }
+
+    return false;
+  });
+}
+
+// Get dishes for a restaurant
+function getDishesForRestaurant(restaurantId: string): Dish[] {
+  const allDishes = getDishesFromStorage();
+  return allDishes.filter(dish => dish.restaurantId === restaurantId);
+}
+
+// Get menu categories for a restaurant (simplified - just return empty for now)
+function getMenuCategoriesForRestaurant(restaurantId: string): MenuCategory[] {
+  // For now, return empty array since we don't have menu categories in localStorage yet
+  // You can add this later if needed
+  return [];
 }
 
 export function useSearch() {
@@ -45,7 +114,7 @@ export function useSearch() {
     // Simulate loading for 2 seconds
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Get search results
+    // Get search results from localStorage
     const restaurants = searchRestaurants(query);
 
     // Prepare results with dishes and random layout types
@@ -75,7 +144,7 @@ export function useSearch() {
     setSearchResults([]);
     setHasSearched(false);
     setIsSearching(false);
-    
+
     const next = new URLSearchParams(searchParams.toString());
     next.delete('q');
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });

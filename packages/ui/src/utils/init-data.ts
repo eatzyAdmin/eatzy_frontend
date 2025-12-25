@@ -6,11 +6,28 @@
  */
 
 import { STORAGE_KEYS, SEED_USERS, SYSTEM_PARAMS } from './localStorage-manager';
-import { SEED_RESTAURANTS } from './seed-restaurants';
-import { SEED_DISHES } from './seed-dishes';
+import { SEED_MENU_CATEGORIES } from './seed-menu-categories';
 import { MAIN_CUSTOMER, MAIN_DRIVER, OTHER_CUSTOMERS, OTHER_DRIVERS } from './seed-users';
 import { SEED_ORDERS, CUSTOMER_TOTAL_SPENT, DRIVER_EARNINGS_FROM_ORDERS } from './seed-orders';
 import { SEED_TRANSACTIONS, CALCULATED_AVAILABLE_BALANCE, TOTAL_EARNINGS } from './seed-transactions';
+
+// Import restaurants and dishes from customer app mockSearchData to ensure perfect sync
+let mockSearchRestaurants: any[] = [];
+let mockDishes: any[] = [];
+let mockMenuCategories: any[] = [];
+
+try {
+  // Dynamic import to load from customer app
+  const mockModule = require('../../../../apps/customer/src/features/search/data/mockSearchData');
+  mockSearchRestaurants = mockModule.mockSearchRestaurants || [];
+  mockDishes = mockModule.mockDishes || [];
+  mockMenuCategories = mockModule.mockMenuCategories || [];
+  console.log('✅ Loaded mock data from customer app');
+} catch (error) {
+  console.warn('⚠️ Could not load mockData from customer app, using fallback');
+  // Fallback to SEED_MENU_CATEGORIES if import fails
+  mockMenuCategories = SEED_MENU_CATEGORIES;
+}
 
 /**
  * Initialize all Eatzy data in localStorage
@@ -30,13 +47,17 @@ export function initializeEatzyData(): void {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(SEED_USERS));
     console.log('✅ Users initialized:', SEED_USERS.length);
 
-    // 2. Restaurants (NO VOUCHERS)
-    localStorage.setItem(STORAGE_KEYS.RESTAURANTS, JSON.stringify(SEED_RESTAURANTS));
-    console.log('✅ Restaurants initialized:', SEED_RESTAURANTS.length);
+    // 2. Restaurants (from mockSearchRestaurants - includes reviews!)
+    localStorage.setItem(STORAGE_KEYS.RESTAURANTS, JSON.stringify(mockSearchRestaurants));
+    console.log('✅ Restaurants initialized:', mockSearchRestaurants.length);
 
-    // 3. Dishes
-    localStorage.setItem(STORAGE_KEYS.DISHES, JSON.stringify(SEED_DISHES));
-    console.log('✅ Dishes initialized:', SEED_DISHES.length);
+    // 3. Menu Categories (from mockMenuCategories)
+    localStorage.setItem(STORAGE_KEYS.MENU_CATEGORIES, JSON.stringify(mockMenuCategories));
+    console.log('✅ Menu Categories initialized:', mockMenuCategories.length);
+
+    // 4. Dishes (from mockDishes)
+    localStorage.setItem(STORAGE_KEYS.DISHES, JSON.stringify(mockDishes));
+    console.log('✅ Dishes initialized:', mockDishes.length);
 
     // 3. Customers
     const allCustomers = [MAIN_CUSTOMER, ...OTHER_CUSTOMERS];
@@ -68,8 +89,9 @@ export function initializeEatzyData(): void {
     console.log('🎉 Eatzy data initialization complete!');
     console.log('📊 Summary:');
     console.log(`  - Users: ${SEED_USERS.length}`);
-    console.log(`  - Restaurants: ${SEED_RESTAURANTS.length}`);
-    console.log(`  - Dishes: ${SEED_DISHES.length}`);
+    console.log(`  - Restaurants: ${mockSearchRestaurants.length}`);
+    console.log(`  - Menu Categories: ${mockMenuCategories.length}`);
+    console.log(`  - Dishes: ${mockDishes.length}`);
     console.log(`  - Customers: ${allCustomers.length}`);
     console.log(`  - Drivers: ${allDrivers.length}`);
     console.log(`  - Orders: ${SEED_ORDERS.length}`);
