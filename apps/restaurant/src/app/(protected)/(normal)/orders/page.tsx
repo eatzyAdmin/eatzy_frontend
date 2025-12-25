@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from '@repo/ui/motion';
-import { useLoading } from '@repo/ui';
+import { useLoading, OrderCardShimmer } from '@repo/ui';
 import { ClipboardList, ChefHat, Bike } from '@repo/ui/icons';
 import type { Order } from '@repo/types';
 import { mockRestaurantOrders } from '@/data/mockOrders';
@@ -15,10 +15,12 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>(mockRestaurantOrders);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       hide();
+      setIsLoading(false);
     }, 1500);
     return () => clearTimeout(timer);
   }, [hide]);
@@ -79,22 +81,28 @@ export default function OrdersPage() {
               </div>
             </div>
             <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar min-h-0 px-3">
-              <AnimatePresence mode="popLayout">
-                {pendingOrders.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onClick={() => handleOpenOrder(order)}
-                  />
-                ))}
-              </AnimatePresence>
-              {pendingOrders.length === 0 && (
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center text-gray-400">
-                    <ClipboardList className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                    <div className="text-sm">Không có đơn hàng mới</div>
-                  </div>
-                </div>
+              {isLoading ? (
+                <OrderCardShimmer cardCount={2} />
+              ) : (
+                <>
+                  <AnimatePresence mode="popLayout">
+                    {pendingOrders.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        onClick={() => handleOpenOrder(order)}
+                      />
+                    ))}
+                  </AnimatePresence>
+                  {pendingOrders.length === 0 && (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="text-center text-gray-400">
+                        <ClipboardList className="w-16 h-16 mx-auto mb-2 opacity-30" />
+                        <div className="text-sm">Không có đơn hàng mới</div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -106,26 +114,32 @@ export default function OrdersPage() {
                 ĐANG CHUẨN BỊ
               </h3>
               <div className="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center">
-                <span className="text-xs font-bold text-white">{inProgressOrders.length}</span>
+                <span className="text-xs font-bold text-white">{isLoading ? '-' : inProgressOrders.length}</span>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar min-h-0 px-2">
-              <AnimatePresence mode="popLayout">
-                {inProgressOrders.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onClick={() => handleOpenOrder(order)}
-                  />
-                ))}
-              </AnimatePresence>
-              {inProgressOrders.length === 0 && (
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center text-gray-400">
-                    <ChefHat className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                    <div className="text-sm">Không có đơn đang chuẩn bị</div>
-                  </div>
-                </div>
+              {isLoading ? (
+                <OrderCardShimmer cardCount={2} />
+              ) : (
+                <>
+                  <AnimatePresence mode="popLayout">
+                    {inProgressOrders.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        onClick={() => handleOpenOrder(order)}
+                      />
+                    ))}
+                  </AnimatePresence>
+                  {inProgressOrders.length === 0 && (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="text-center text-gray-400">
+                        <ChefHat className="w-16 h-16 mx-auto mb-2 opacity-30" />
+                        <div className="text-sm">Không có đơn đang chuẩn bị</div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -137,26 +151,32 @@ export default function OrdersPage() {
                 CHỜ TÀI XẾ
               </h3>
               <div className="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center">
-                <span className="text-xs font-bold text-white">{waitingForDriverOrders.length}</span>
+                <span className="text-xs font-bold text-white">{isLoading ? '-' : waitingForDriverOrders.length}</span>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar min-h-0 pl-3">
-              <AnimatePresence mode="popLayout">
-                {waitingForDriverOrders.map((order) => (
-                  <OrderCard
-                    key={order.id}
-                    order={order}
-                    onClick={() => handleOpenOrder(order)}
-                  />
-                ))}
-              </AnimatePresence>
-              {waitingForDriverOrders.length === 0 && (
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center text-gray-400">
-                    <Bike className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                    <div className="text-sm">Chưa có đơn chờ tài xế</div>
-                  </div>
-                </div>
+              {isLoading ? (
+                <OrderCardShimmer cardCount={2} />
+              ) : (
+                <>
+                  <AnimatePresence mode="popLayout">
+                    {waitingForDriverOrders.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        onClick={() => handleOpenOrder(order)}
+                      />
+                    ))}
+                  </AnimatePresence>
+                  {waitingForDriverOrders.length === 0 && (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="text-center text-gray-400">
+                        <Bike className="w-16 h-16 mx-auto mb-2 opacity-30" />
+                        <div className="text-sm">Chưa có đơn chờ tài xế</div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

@@ -27,6 +27,7 @@ export { default as ProfileShimmer } from "./feedback/shimmer/ProfileShimmer";
 export { default as LiquidGlassMobileNavigationShimmer } from "./feedback/shimmer/LiquidGlassMobileNavigationShimmer";
 export { default as DataTableRowShimmer } from "./feedback/shimmer/DataTableRowShimmer";
 export { default as TextShimmer } from "./feedback/shimmer/TextShimmer";
+export { default as OrderCardShimmer } from "./feedback/shimmer/OrderCardShimmer";
 export { default as NumberInput } from "./forms/NumberInput";
 export { default as DateRangePicker } from "./forms/DateRangePicker";
 export { default as StatusBadge } from "./feedback/StatusBadge";
