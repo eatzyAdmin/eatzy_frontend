@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  basePath: "/restaurant",
   transpilePackages: ["@repo/ui", "@repo/models", "@repo/api"],
   async rewrites() {
     return [

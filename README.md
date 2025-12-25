@@ -1,14 +1,34 @@
-# Turborepo starter
+# Eatzy Frontend - Turborepo Monorepo
 
-This Turborepo starter is maintained by the Turborepo core team.
+Food delivery platform with multiple Next.js applications for different user roles.
 
-## Using this example
+## 🌐 Multi-App Setup with Nginx
 
-Run the following command:
+**All apps run under a single origin (`eatzy.local`) to share localStorage/IndexedDB/BroadcastChannel.**
 
-```sh
-npx create-turbo@latest
+### Quick Start
+```bash
+# 1. Add to hosts file: 127.0.0.1 eatzy.local
+# 2. Setup Nginx (see NGINX_SETUP_GUIDE.md)
+# 3. Run all apps:
+.\start-all-apps.ps1  # Windows
+./start-all-apps.sh   # WSL/Git Bash
 ```
+
+**Access apps:**
+- 🛒 Customer: http://eatzy.local/customer
+- 🚗 Driver: http://eatzy.local/driver  
+- 🍽️ Restaurant: http://eatzy.local/restaurant
+- 👔 Admin: http://eatzy.local/admin
+- 🔧 Super Admin: http://eatzy.local/super-admin
+
+📚 **Detailed guides:**
+- [SETUP_CHECKLIST.md](./SETUP_CHECKLIST.md) - Complete setup checklist
+- [NGINX_SETUP_GUIDE.md](./NGINX_SETUP_GUIDE.md) - Full Nginx configuration guide
+- [NGINX_QUICK_START.md](./NGINX_QUICK_START.md) - Quick reference
+- [CROSS_APP_SYNC_GUIDE.md](./CROSS_APP_SYNC_GUIDE.md) - BroadcastChannel usage
+
+---
 
 ## What's inside?
 
@@ -16,11 +36,16 @@ This Turborepo includes the following packages/apps:
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `customer`: Customer-facing [Next.js](https://nextjs.org/) app (port 3000)
+- `driver`: Driver [Next.js](https://nextjs.org/) app (port 3001)
+- `restaurant`: Restaurant management [Next.js](https://nextjs.org/) app (port 3002)
+- `admin`: Admin [Next.js](https://nextjs.org/) app (port 3003)
+- `super-admin`: Super Admin [Next.js](https://nextjs.org/) app (port 3004)
+- `@repo/ui`: Shared React component library with design system
+- `@repo/models`: Shared TypeScript types and models
+- `@repo/api`: Shared API client utilities
+- `@repo/eslint-config`: ESLint configurations
+- `@repo/typescript-config`: Shared `tsconfig.json`s
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 

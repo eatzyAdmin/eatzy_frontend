@@ -51,3 +51,5 @@ export * from "./effects/HoverHighlight";
 export * from "./effects/TapRipple";
 export * from "./effects/FlyToCart";
 export { default as ImageWithFallback } from "./media/ImageWithFallback";
+export * from "./utils/eatzy-sync";
+
