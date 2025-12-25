@@ -7,7 +7,7 @@ const DataTableRowShimmer = ({ columnCount = 6, index = 0 }: DataTableRowShimmer
   const shimmerVariants = { initial: { x: "-100%" }, animate: { x: "100%", transition: { repeat: Infinity, duration: 1.5, ease: "linear" } } };
   const rowVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { delay: (index || 0) * 0.05, duration: 0.4, ease: "easeOut" } }, exit: { opacity: 0, y: -10, transition: { duration: 0.3, ease: "easeInOut" } } };
   return (
-    <motion.tr variants={rowVariants} initial="hidden" animate="visible" exit="exit" className="hover:bg-blue-50/60 transition-colors">
+    <motion.tr variants={rowVariants} initial="hidden" animate="visible" exit="exit" className="hover:bg-gray-50 transition-colors">
       {Array.from({ length: columnCount }, (_, colIndex) => (
         <td key={colIndex} className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
           <div className="relative overflow-hidden">

@@ -28,7 +28,7 @@ export { default as LiquidGlassMobileNavigationShimmer } from "./feedback/shimme
 export { default as NumberInput } from "./forms/NumberInput";
 export { default as DateRangePicker } from "./forms/DateRangePicker";
 export { default as StatusBadge } from "./feedback/StatusBadge";
-export { default as DataTable } from "./tables/DataTable";
+export { default as DataTable, type ColumnDef } from "./tables/DataTable";
 export { default as DataTableFilter } from "./tables/DataTableFilter";
 export { default as SearchFilterBar } from "./search/SearchFilterBar";
 export { default as ExportNotification } from "./feedback/ExportNotification";
