@@ -1,8 +1,9 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "@repo/ui/motion";
-import { MapPin, Hand } from "@repo/ui";
+import { MapPin, Hand, useSwipeConfirmation, useNotification, useLoading } from "@repo/ui";
 const MapView = dynamic(() => import("@/features/checkout/components/MapView"), { ssr: false });
 import { formatVnd } from "@repo/lib";
 
@@ -18,11 +19,40 @@ export default function RightSidebar({
   children?: React.ReactNode;
 }) {
   const rightColRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
+  const { confirm } = useSwipeConfirmation();
+  const { showNotification } = useNotification();
+  const { show: showLoading } = useLoading();
 
   useEffect(() => {
     const el = rightColRef.current;
     if (!el) return;
   }, []);
+
+  const handleCompleteOrder = () => {
+    confirm({
+      title: "Xác nhận đặt hàng",
+      description: `Bạn có chắc chắn muốn đặt đơn hàng với tổng tiền ${formatVnd(totalPayable)}?`,
+      confirmText: "Đặt hàng",
+      type: "success",
+      processingDuration: 1500,
+      onConfirm: async () => {
+        showLoading("Đang xử lý đơn hàng...");
+
+        // Navigate to home first
+        router.push('/home');
+
+        // Show notification after navigation
+        setTimeout(() => {
+          showNotification({
+            type: "success",
+            message: "Đặt hàng thành công",
+            format: `Đơn hàng của bạn đã được đặt thành công. Đang tìm tài xế...`,
+          });
+        }, 800);
+      }
+    });
+  };
 
   return (
     <div ref={rightColRef} className="relative overflow-y-auto no-scrollbar pl-2">
@@ -41,7 +71,7 @@ export default function RightSidebar({
         {children}
       </SidebarMapWithPlaces>
 
-      
+
 
       <div className="sticky bottom-0 pb-4 bg-[#F7F7F7]">
         <div className="pb-0 pt-2 p-6 border-t-2 border-gray-300">
@@ -52,6 +82,7 @@ export default function RightSidebar({
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
+            onClick={handleCompleteOrder}
             className="mt-3 w-full h-16 rounded-2xl bg-[var(--primary)] text-white text-2xl uppercase font-anton font-semibold shadow-sm"
           >
             Complete Order
