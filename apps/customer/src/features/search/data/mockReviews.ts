@@ -1,10 +1,18 @@
 import type { Review } from '@repo/types';
 
+// Map với customers trong localStorage:
+// cust-1: Nguyễn Văn An (main customer)
+// cust-2: Trần Thị Bình  
+// cust-3: Lê Văn Cường
+// cust-4: Phạm Thị Dung
+// cust-5: Hoàng Văn Em
+
 export const phoHaNoiReviews: Review[] = [
   {
     id: "phn-1",
-    authorName: "Nguyễn Văn Hùng",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Hung",
+    customerId: "cust-1",
+    authorName: "Nguyễn Văn An",
+    authorAvatar: "https://i.pravatar.cc/150?img=1",
     rating: 5,
     date: "2 ngày trước",
     content: "Phở ở đây ngon tuyệt vời! Nước dùng trong, thanh ngọt đúng chuẩn vị Bắc. Mình rất thích quẩy ở đây, giòn tan.",
@@ -13,8 +21,9 @@ export const phoHaNoiReviews: Review[] = [
   },
   {
     id: "phn-2",
-    authorName: "Trần Thị Mai",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mai",
+    customerId: "cust-2",
+    authorName: "Trần Thị Bình",
+    authorAvatar: "https://i.pravatar.cc/150?img=5",
     rating: 4,
     date: "1 tuần trước",
     content: "Quán sạch sẽ, nhân viên phục vụ nhanh nhẹn. Tuy nhiên vào giờ cao điểm hơi đông và ồn ào một chút.",
@@ -23,8 +32,9 @@ export const phoHaNoiReviews: Review[] = [
   },
   {
     id: "phn-3",
-    authorName: "Lê Minh Tuấn",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tuan",
+    customerId: "cust-3",
+    authorName: "Lê Văn Cường",
+    authorAvatar: "https://i.pravatar.cc/150?img=7",
     rating: 5,
     date: "2 tuần trước",
     content: "Mình ăn phở ở đây từ hồi quán mới mở. Chất lượng vẫn giữ vững phong độ. Bò tái lăn rất ngon!",
@@ -33,7 +43,9 @@ export const phoHaNoiReviews: Review[] = [
   },
   {
     id: "phn-4",
-    authorName: "Phạm Thu Hà",
+    customerId: "cust-4",
+    authorName: "Phạm Thị Dung",
+    authorAvatar: "https://i.pravatar.cc/150?img=9",
     rating: 5,
     date: "3 tuần trước",
     content: "Vị phở làm mình nhớ Hà Nội quá. Sẽ ghé lại thường xuyên.",
@@ -41,21 +53,23 @@ export const phoHaNoiReviews: Review[] = [
   },
   {
     id: "phn-5",
-    authorName: "John Smith",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
+    customerId: "cust-5",
+    authorName: "Hoàng Văn Em",
+    authorAvatar: "https://i.pravatar.cc/150?img=11",
     rating: 5,
     date: "1 tháng trước",
-    content: "The best Pho I've had in Saigon! The broth is incredibly flavorful.",
-    tenure: "Tourist",
-    location: "USA"
+    content: "Phở ở đây ngon lắm, giá cả hợp lý. Mình sẽ giới thiệu cho bạn bè.",
+    tenure: "Thành viên thường",
+    location: "TP.HCM"
   }
 ];
 
 export const sushiSakuraReviews: Review[] = [
   {
     id: "ss-1",
-    authorName: "Võ Hoàng Yến",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Yen",
+    customerId: "cust-4",
+    authorName: "Phạm Thị Dung",
+    authorAvatar: "https://i.pravatar.cc/150?img=9",
     rating: 5,
     date: "1 ngày trước",
     content: "Sashimi tươi rói, cắt lát dày dặn ăn rất đã miệng. Không gian quán ấm cúng, đậm chất Nhật Bản.",
@@ -64,7 +78,9 @@ export const sushiSakuraReviews: Review[] = [
   },
   {
     id: "ss-2",
-    authorName: "Ngô Kiến Huy",
+    customerId: "cust-1",
+    authorName: "Nguyễn Văn An",
+    authorAvatar: "https://i.pravatar.cc/150?img=1",
     rating: 5,
     date: "3 ngày trước",
     content: "Sushi cuộn chắc tay, cơm dẻo. Mình thích nhất là món lươn nướng Nhật.",
@@ -72,8 +88,9 @@ export const sushiSakuraReviews: Review[] = [
   },
   {
     id: "ss-3",
-    authorName: "Sakura Fan",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sakura",
+    customerId: "cust-5",
+    authorName: "Hoàng Văn Em",
+    authorAvatar: "https://i.pravatar.cc/150?img=11",
     rating: 4,
     date: "1 tuần trước",
     content: "Đồ ăn ngon nhưng giá hơi cao so với mặt bằng chung. Đáng để thử vào dịp đặc biệt.",
@@ -82,7 +99,9 @@ export const sushiSakuraReviews: Review[] = [
   },
   {
     id: "ss-4",
-    authorName: "Trương Quỳnh Anh",
+    customerId: "cust-2",
+    authorName: "Trần Thị Bình",
+    authorAvatar: "https://i.pravatar.cc/150?img=5",
     rating: 5,
     date: "2 tuần trước",
     content: "Nhân viên rất lịch sự, cúi chào khách nhiệt tình. Món ăn trang trí đẹp mắt, check-in sống ảo cực chất.",
@@ -90,17 +109,20 @@ export const sushiSakuraReviews: Review[] = [
   },
   {
     id: "ss-5",
-    authorName: "Michael Truong",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael",
+    customerId: "cust-3",
+    authorName: "Lê Văn Cường",
+    authorAvatar: "https://i.pravatar.cc/150?img=7",
     rating: 5,
     date: "1 tháng trước",
-    content: "Authentic Japanese taste. Highly recommended!",
+    content: "Sushi ngon, tươi. Không gian đẹp, view thoáng. Rất recommend!",
     tenure: "Expat",
     location: "District 2"
   },
   {
     id: "ss-6",
-    authorName: "Bùi Anh Tuấn",
+    customerId: "cust-4",
+    authorName: "Phạm Thị Dung",
+    authorAvatar: "https://i.pravatar.cc/150?img=9",
     rating: 4.5,
     date: "1 tháng trước",
     content: "Tempura giòn rụm, không bị ngấm dầu. Sẽ quay lại thử các món lẩu.",
@@ -111,8 +133,9 @@ export const sushiSakuraReviews: Review[] = [
 export const pizzaBellaReviews: Review[] = [
   {
     id: "pb-1",
-    authorName: "Đặng Thu Thảo",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Thao",
+    customerId: "cust-2",
+    authorName: "Trần Thị Bình",
+    authorAvatar: "https://i.pravatar.cc/150?img=5",
     rating: 5,
     date: "5 giờ trước",
     content: "Pizza nướng củi thơm phức, đế bánh mỏng giòn đúng kiểu Ý. Phô mai Mozzarella béo ngậy.",
@@ -121,7 +144,9 @@ export const pizzaBellaReviews: Review[] = [
   },
   {
     id: "pb-2",
-    authorName: "Hồ Quang Hiếu",
+    customerId: "cust-5",
+    authorName: "Hoàng Văn Em",
+    authorAvatar: "https://i.pravatar.cc/150?img=11",
     rating: 4,
     date: "2 ngày trước",
     content: "Mỳ Ý sốt kem nấm (Carbonara) rất ngon, kem béo nhưng không ngán. Phục vụ hơi chậm xíu.",
@@ -129,17 +154,20 @@ export const pizzaBellaReviews: Review[] = [
   },
   {
     id: "pb-3",
-    authorName: "Alice Wonderland",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
+    customerId: "cust-1",
+    authorName: "Nguyễn Văn An",
+    authorAvatar: "https://i.pravatar.cc/150?img=1",
     rating: 5,
     date: "1 tuần trước",
-    content: "Best pizza in town! Love the Margherita.",
+    content: "Pizza Margherita ở đây ngon nhất Sài Gòn! Sẽ quay lại nhé.",
     tenure: "Expat",
     location: "District 7"
   },
   {
     id: "pb-4",
-    authorName: "Trần Thanh Tâm",
+    customerId: "cust-3",
+    authorName: "Lê Văn Cường",
+    authorAvatar: "https://i.pravatar.cc/150?img=7",
     rating: 5,
     date: "3 tuần trước",
     content: "Không gian lãng mạn, thích hợp hẹn hò. Rượu vang quán chọn kèm cũng rất hợp vị.",
@@ -150,8 +178,9 @@ export const pizzaBellaReviews: Review[] = [
 export const bunBoHueReviews: Review[] = [
   {
     id: "bbh-1",
-    authorName: "Phan Mạnh Quỳnh",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Quynh",
+    customerId: "cust-4",
+    authorName: "Phạm Thị Dung",
+    authorAvatar: "https://i.pravatar.cc/150?img=9",
     rating: 5,
     date: "Hôm qua",
     content: "Nước lèo đậm đà, mắm ruốc thơm lừng nhưng không bị nồng. Giò heo to, thịt mềm.",
@@ -160,7 +189,9 @@ export const bunBoHueReviews: Review[] = [
   },
   {
     id: "bbh-2",
-    authorName: "Mỹ Tâm",
+    customerId: "cust-1",
+    authorName: "Nguyễn Văn An",
+    authorAvatar: "https://i.pravatar.cc/150?img=1",
     rating: 5,
     date: "3 ngày trước",
     content: "Sa tế cay xè lưỡi nhưng ăn rất đã. Rau sống tươi sạch. 10 điểm!",
@@ -168,17 +199,20 @@ export const bunBoHueReviews: Review[] = [
   },
   {
     id: "bbh-3",
-    authorName: "David Nguyen",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=David",
+    customerId: "cust-2",
+    authorName: "Trần Thị Bình",
+    authorAvatar: "https://i.pravatar.cc/150?img=5",
     rating: 4,
     date: "1 tuần trước",
-    content: "Good spicy noodle soup. A bit too spicy for me but very tasty.",
+    content: "Bún ngon, rau thơm. Nước lèo đậm đà hơi cay một chút.",
     tenure: "Tourist",
     location: "Australia"
   },
   {
     id: "bbh-4",
-    authorName: "Lê Cát Trọng Lý",
+    customerId: "cust-5",
+    authorName: "Hoàng Văn Em",
+    authorAvatar: "https://i.pravatar.cc/150?img=11",
     rating: 5,
     date: "2 tuần trước",
     content: "Quán bình dân nhưng chất lượng tuyệt vời. Bún sợi to đúng chuẩn Huế.",
@@ -189,8 +223,9 @@ export const bunBoHueReviews: Review[] = [
 export const cafeDeParisReviews: Review[] = [
   {
     id: "cdp-1",
-    authorName: "Nguyễn Cao Kỳ Duyên",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Duyen",
+    customerId: "cust-2",
+    authorName: "Trần Thị Bình",
+    authorAvatar: "https://i.pravatar.cc/150?img=5",
     rating: 5,
     date: "Sáng nay",
     content: "Croissant ở đây là đỉnh nhất Sài Gòn! Thơm mùi bơ Pháp, lớp vỏ ngàn lớp giòn tan.",
@@ -199,16 +234,19 @@ export const cafeDeParisReviews: Review[] = [
   },
   {
     id: "cdp-2",
-    authorName: "Emily in Paris",
+    customerId: "cust-4",
+    authorName: "Phạm Thị Dung",
+    authorAvatar: "https://i.pravatar.cc/150?img=9",
     rating: 5,
     date: "2 ngày trước",
-    content: "Such a chic cafe. The latte art is beautiful and the macarons are to die for.",
+    content: "Cafe đẹp lắm, latte art cũng xinh. Macaron ngon tuyệt!",
     tenure: "Influencer"
   },
   {
     id: "cdp-3",
-    authorName: "Trấn Thành",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Thanh",
+    customerId: "cust-3",
+    authorName: "Lê Văn Cường",
+    authorAvatar: "https://i.pravatar.cc/150?img=7",
     rating: 4,
     date: "1 tuần trước",
     content: "Không gian sang trọng, nhạc du dương. Giá hơi chát nhưng xứng đáng trải nghiệm.",
@@ -216,10 +254,12 @@ export const cafeDeParisReviews: Review[] = [
   },
   {
     id: "cdp-4",
-    authorName: "Hari Won",
+    customerId: "cust-1",
+    authorName: "Nguyễn Văn An",
+    authorAvatar: "https://i.pravatar.cc/150?img=1",
     rating: 5,
     date: "1 tuần trước",
-    content: "Bánh ngọt ở đây siêu ngon nha mọi người. View sống ảo cũng đẹp nữa.",
+    content: "Bánh ngọt ở đây siêu ngon. View sống ảo cũng đẹp nữa.",
     tenure: "Singer"
   }
 ];
@@ -227,17 +267,20 @@ export const cafeDeParisReviews: Review[] = [
 export const kbbqReviews: Review[] = [
   {
     id: "kbbq-1",
-    authorName: "Park Seo Joon",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Park",
+    customerId: "cust-1",
+    authorName: "Nguyễn Văn An",
+    authorAvatar: "https://i.pravatar.cc/150?img=1",
     rating: 5,
     date: "Hôm qua",
-    content: "Thịt bò nướng mềm, tẩm ướp đậm đà. Panchan (món phụ) siêu nhiều và  được refill thoải mái.",
+    content: "Thịt bò nướng mềm, tẩm ướp đậm đà. Panchan (món phụ) siêu nhiều và được refill thoải mái.",
     tenure: "Korean Food Fan",
     location: "District 7"
   },
   {
     id: "kbbq-2",
-    authorName: "Diệu Nhi",
+    customerId: "cust-4",
+    authorName: "Phạm Thị Dung",
+    authorAvatar: "https://i.pravatar.cc/150?img=9",
     rating: 5,
     date: "4 ngày trước",
     content: "Nướng tại bàn rất vui. Nhân viên nướng giúp mình nên không lo bị cháy. Kimchi canh ngon tuyệt.",
@@ -245,8 +288,9 @@ export const kbbqReviews: Review[] = [
   },
   {
     id: "kbbq-3",
-    authorName: "Anh Tú",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tu",
+    customerId: "cust-5",
+    authorName: "Hoàng Văn Em",
+    authorAvatar: "https://i.pravatar.cc/150?img=11",
     rating: 4,
     date: "2 tuần trước",
     content: "Buffet nhiều món, ăn no căng bụng. Nên đặt bàn trước vì quán rất đông.",
@@ -254,10 +298,12 @@ export const kbbqReviews: Review[] = [
   },
   {
     id: "kbbq-4",
-    authorName: "Lan Ngọc",
+    customerId: "cust-2",
+    authorName: "Trần Thị Bình",
+    authorAvatar: "https://i.pravatar.cc/150?img=5",
     rating: 5,
     date: "3 tuần trước",
-    content: "Thịt ba chỉ nướng giòn ăn kèn lá mè và tỏi nướng là hết sẩy!",
+    content: "Thịt ba chỉ nướng giòn ăn kèm lá mè và tỏi nướng là hết sẩy!",
     tenure: "Actress"
   }
 ];
@@ -265,8 +311,9 @@ export const kbbqReviews: Review[] = [
 export const thaiSpiceReviews: Review[] = [
   {
     id: "ts-1",
-    authorName: "Hoàng Thùy Linh",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Linh",
+    customerId: "cust-5",
+    authorName: "Hoàng Văn Em",
+    authorAvatar: "https://i.pravatar.cc/150?img=11",
     rating: 5,
     date: "2 ngày trước",
     content: "Lẩu Thái Tomyum chua cay đúng vị, hải sản tươi. Xôi xoài tráng miệng rất ngon.",
@@ -274,7 +321,9 @@ export const thaiSpiceReviews: Review[] = [
   },
   {
     id: "ts-2",
-    authorName: "Gil Lê",
+    customerId: "cust-3",
+    authorName: "Lê Văn Cường",
+    authorAvatar: "https://i.pravatar.cc/150?img=7",
     rating: 4,
     date: "5 ngày trước",
     content: "Pad Thái hơi ngọt so với khẩu vị mình nhưng vẫn ngon. Trà sữa Thái đỏ đậm đà.",
@@ -282,11 +331,12 @@ export const thaiSpiceReviews: Review[] = [
   },
   {
     id: "ts-3",
-    authorName: "Sarah Connor",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
+    customerId: "cust-1",
+    authorName: "Nguyễn Văn An",
+    authorAvatar: "https://i.pravatar.cc/150?img=1",
     rating: 5,
     date: "2 tuần trước",
-    content: "Authentic Thai flavors. The green curry is spicy and creamy, just perfect.",
+    content: "Món Thái ở đây authentic lắm. Green curry cay và béo, rất ngon!",
     tenure: "Expat"
   }
 ];
@@ -294,8 +344,9 @@ export const thaiSpiceReviews: Review[] = [
 export const burgerBrosReviews: Review[] = [
   {
     id: "bb-1",
-    authorName: "Tùng Sơn",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Son",
+    customerId: "cust-5",
+    authorName: "Hoàng Văn Em",
+    authorAvatar: "https://i.pravatar.cc/150?img=11",
     rating: 5,
     date: "Hôm nay",
     content: "Bò nướng than thơm lừng, juicy mọng nước. Bánh mì brioche mềm mịn. Burger ngon nhất khu vực!",
@@ -304,7 +355,9 @@ export const burgerBrosReviews: Review[] = [
   },
   {
     id: "bb-2",
-    authorName: "Lâm Vỹ Dạ",
+    customerId: "cust-2",
+    authorName: "Trần Thị Bình",
+    authorAvatar: "https://i.pravatar.cc/150?img=5",
     rating: 4,
     date: "3 ngày trước",
     content: "Khoai tây chiên giòn, sốt chấm lạ miệng. Burger hơi to nên ăn khó hết.",
@@ -312,11 +365,12 @@ export const burgerBrosReviews: Review[] = [
   },
   {
     id: "bb-3",
-    authorName: "Big Smoke",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Smoke",
+    customerId: "cust-4",
+    authorName: "Phạm Thị Dung",
+    authorAvatar: "https://i.pravatar.cc/150?img=9",
     rating: 5,
     date: "1 tháng trước",
-    content: "I'll have two number 9s... Just kidding. The double cheeseburger is massive and delicious.",
+    content: "Double cheeseburger siêu to, siêu ngon. Giá hợp lý!",
     tenure: "Legend"
   }
 ];
@@ -324,8 +378,9 @@ export const burgerBrosReviews: Review[] = [
 export const dimSumReviews: Review[] = [
   {
     id: "ds-1",
-    authorName: "Lương Bích Hữu",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Huu",
+    customerId: "cust-1",
+    authorName: "Nguyễn Văn An",
+    authorAvatar: "https://i.pravatar.cc/150?img=1",
     rating: 5,
     date: "Cuối tuần trước",
     content: "Há cảo tôm tươi, vỏ mỏng dai. Chân gà hấp tàu xì mềm rục, thấm vị. Trà hoa cúc thơm.",
@@ -333,7 +388,9 @@ export const dimSumReviews: Review[] = [
   },
   {
     id: "ds-2",
-    authorName: "Chí Tài Fan",
+    customerId: "cust-3",
+    authorName: "Lê Văn Cường",
+    authorAvatar: "https://i.pravatar.cc/150?img=7",
     rating: 5,
     date: "2 tuần trước",
     content: "Không gian đậm chất Trung Hoa. Phục vụ nhanh, đồ ăn nóng hổi.",
@@ -341,11 +398,12 @@ export const dimSumReviews: Review[] = [
   },
   {
     id: "ds-3",
-    authorName: "Andy Lau",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Andy",
+    customerId: "cust-4",
+    authorName: "Phạm Thị Dung",
+    authorAvatar: "https://i.pravatar.cc/150?img=9",
     rating: 4,
     date: "3 tuần trước",
-    content: "Good Dim Sum place. Bao buns are fluffy and tasty.",
+    content: "Dimsum ngon, giá ok. Bao buns mềm và ngọt.",
     tenure: "Tourist"
   }
 ];
@@ -353,8 +411,9 @@ export const dimSumReviews: Review[] = [
 export const medReviews: Review[] = [
   {
     id: "md-1",
-    authorName: "H'Hen Niê",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Hen",
+    customerId: "cust-1",
+    authorName: "Nguyễn Văn An",
+    authorAvatar: "https://i.pravatar.cc/150?img=1",
     rating: 5,
     date: "Hôm qua",
     content: "Món ăn healthy, nhiều rau củ tươi. Hummus và bánh Pita là sự kết hợp hoàn hảo.",
@@ -363,16 +422,19 @@ export const medReviews: Review[] = [
   },
   {
     id: "md-2",
-    authorName: "Gordon Ramsay Fan",
+    customerId: "cust-5",
+    authorName: "Hoàng Văn Em",
+    authorAvatar: "https://i.pravatar.cc/150?img=11",
     rating: 5,
     date: "1 tuần trước",
-    content: "Fresh ingredients, vibrant colors. grilled lamb chops are cooked to perfection.",
+    content: "Nguyên liệu tươi, màu sắc rực rỡ. Sườn cừu nướng chín vừa tuyệt!",
     tenure: "Chef Wannabe"
   },
   {
     id: "md-3",
-    authorName: "Minh Tú",
-    authorAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tu",
+    customerId: "cust-2",
+    authorName: "Trần Thị Bình",
+    authorAvatar: "https://i.pravatar.cc/150?img=5",
     rating: 4,
     date: "2 tuần trước",
     content: "Không gian thoáng đãng, decor đẹp. Salad Hy Lạp rất tươi ngon.",

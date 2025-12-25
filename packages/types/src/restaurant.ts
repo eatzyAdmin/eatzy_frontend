@@ -8,6 +8,7 @@ export type RestaurantCategory = {
 
 export type Review = {
   id: string;
+  customerId?: string; // Links to Customer in localStorage
   authorName: string;
   authorAvatar?: string;
   rating: number;
