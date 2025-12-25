@@ -43,9 +43,12 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Stop loading on navigation complete
+  // Stop loading on navigation complete with 1s delay
   useEffect(() => {
-    stopLoading();
+    const timer = setTimeout(() => {
+      stopLoading();
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [pathname, stopLoading]);
 
   // Update active section based on pathname
