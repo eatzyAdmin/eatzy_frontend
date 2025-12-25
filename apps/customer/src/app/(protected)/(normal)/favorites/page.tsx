@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { ArrowLeft, Heart, Search, X, Store } from "@repo/ui/icons";
-import { useLoading, useNotification } from "@repo/ui";
+import { useLoading, useNotification, RestaurantCardShimmer } from "@repo/ui";
 import type { Restaurant } from "@repo/types";
 import { getFavoriteIds } from "@/features/favorites/data/mockFavorites";
 import { mockSearchRestaurants } from "@/features/search/data/mockSearchData";
@@ -14,12 +14,17 @@ export default function FavoritesPage() {
   const router = useRouter();
   const { hide, show } = useLoading();
   const { showNotification } = useNotification();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInputValue, setSearchInputValue] = useState("");
+  const [actualSearchQuery, setActualSearchQuery] = useState("");
   const [removedIds, setRemovedIds] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const t = setTimeout(() => hide(), 1500);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => {
+      hide();
+      setIsLoading(false);
+    }, 3000);
+    return () => clearTimeout(timer);
   }, [hide]);
 
   // Get favorite restaurants
@@ -32,15 +37,15 @@ export default function FavoritesPage() {
 
   // Filter by search query
   const filteredRestaurants = useMemo(() => {
-    if (!searchQuery) return favoriteRestaurants;
+    if (!actualSearchQuery) return favoriteRestaurants;
 
-    const query = searchQuery.toLowerCase();
+    const query = actualSearchQuery.toLowerCase();
     return favoriteRestaurants.filter((restaurant) =>
       restaurant.name.toLowerCase().includes(query) ||
       restaurant.description?.toLowerCase().includes(query) ||
       restaurant.categories.some((cat) => cat.name.toLowerCase().includes(query))
     );
-  }, [favoriteRestaurants, searchQuery]);
+  }, [favoriteRestaurants, actualSearchQuery]);
 
   const handleRestaurantClick = (restaurant: Restaurant) => {
     show("Đang tải thông tin quán ăn...");
@@ -54,6 +59,14 @@ export default function FavoritesPage() {
       message: "Đã xóa khỏi danh sách yêu thích",
       format: `Đã xóa ${name} khỏi danh sách yêu thích của bạn`,
     });
+  };
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setActualSearchQuery(searchInputValue);
+      setIsLoading(true);
+      setTimeout(() => setIsLoading(false), 1400);
+    }
   };
 
   return (
@@ -92,14 +105,15 @@ export default function FavoritesPage() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Search favorites..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search favorites... (Nhấn Enter)"
+                    value={searchInputValue}
+                    onChange={(e) => setSearchInputValue(e.target.value)}
+                    onKeyDown={handleSearch}
                     className="pl-10 pr-10 py-3 w-72 rounded-2xl bg-white border border-gray-200 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all shadow-sm"
                   />
-                  {searchQuery && (
+                  {searchInputValue && (
                     <button
-                      onClick={() => setSearchQuery("")}
+                      onClick={() => setSearchInputValue("")}
                       className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-all"
                     >
                       <X className="w-3 h-3 text-gray-600" />
@@ -115,7 +129,11 @@ export default function FavoritesPage() {
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-[1400px] mx-auto px-8 py-8">
-          {filteredRestaurants.length > 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <RestaurantCardShimmer cardCount={6} />
+            </div>
+          ) : filteredRestaurants.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <AnimatePresence mode="popLayout">
                 {filteredRestaurants.map((restaurant, index) => (
