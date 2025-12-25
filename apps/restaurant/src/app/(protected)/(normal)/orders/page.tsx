@@ -47,12 +47,20 @@ export default function OrdersPage() {
         : order
     ));
     handleCloseDrawer();
+
+    // Show loading shimmer for 1s after action
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 1000);
   };
 
   const handleRejectOrder = (orderId: string, reason: string) => {
     console.log(`Rejected order ${orderId} with reason: ${reason}`);
     setOrders(prev => prev.filter(order => order.id !== orderId));
     handleCloseDrawer();
+
+    // Show loading shimmer for 1s after action
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 1000);
   };
 
   const handleCompleteOrder = (orderId: string) => {
@@ -62,6 +70,10 @@ export default function OrdersPage() {
         : order
     ));
     handleCloseDrawer();
+
+    // Show loading shimmer for 1s after action
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 1000);
   };
 
   return (

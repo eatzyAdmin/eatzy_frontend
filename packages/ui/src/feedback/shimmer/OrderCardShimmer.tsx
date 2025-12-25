@@ -21,19 +21,11 @@ const OrderCardShimmer = ({ cardCount = 2 }) => {
     animate: { opacity: 1, y: 0, scale: 1 },
   };
 
-  // Shimmer card component
+  // Shimmer card component matching OrderCard structure exactly
   const ShimmerCard = ({ index }: { index: number }) => {
-
-    // Style config
-    const cardStyle = {
-      gradient: "from-gray-50/90 via-white/50 to-gray-50",
-      border: "border-gray-100",
-      shadow: "shadow-sm",
-    };
-
     return (
       <motion.div
-        className={`relative bg-gradient-to-br ${cardStyle.gradient} rounded-2xl ${cardStyle.shadow} p-5 border ${cardStyle.border} overflow-hidden mb-4`}
+        className="bg-white rounded-2xl p-4 shadow-md border-2 border-transparent mb-3"
         variants={cardVariants}
         initial="initial"
         animate="animate"
@@ -45,96 +37,38 @@ const OrderCardShimmer = ({ cardCount = 2 }) => {
           stiffness: 100,
         }}
       >
-        {/* Header: Order ID & Time */}
-        <div className="flex justify-between items-center mb-4">
-          {/* Order ID bg */}
-          <motion.div
-            className="h-6 w-20 bg-gray-200 rounded-lg"
-            variants={shimmerVariants}
-            initial="initial"
-            animate="animate"
-            style={{
-              background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
-              backgroundSize: '200% 100%',
-            }}
-          />
-          {/* Time */}
-          <motion.div
-            className="h-4 w-16 bg-gray-100 rounded"
-            variants={shimmerVariants}
-            initial="initial"
-            animate="animate"
-            style={{
-              background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
-              backgroundSize: '200% 100%',
-            }}
-          />
-        </div>
-
-        {/* Divider */}
-        <div className="h-px bg-gray-100 mb-4" />
-
-        {/* Order Items */}
-        <div className="space-y-3 mb-4">
-          {[1, 2].map((i) => (
-            <div key={i} className="flex justify-between items-start">
-              <div className="flex gap-3 w-full">
-                {/* Quantity */}
-                <motion.div
-                  className="h-5 w-5 bg-gray-200 rounded shrink-0"
-                  variants={shimmerVariants}
-                  initial="initial"
-                  animate="animate"
-                  style={{
-                    background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
-                    backgroundSize: '200% 100%',
-                  }}
-                />
-                <div className="space-y-1 w-full">
-                  {/* Item Name */}
-                  <motion.div
-                    className="h-5 w-3/4 bg-gray-200 rounded"
-                    variants={shimmerVariants}
-                    initial="initial"
-                    animate="animate"
-                    style={{
-                      background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
-                      backgroundSize: '200% 100%',
-                    }}
-                  />
-                  {/* Note */}
-                  <motion.div
-                    className="h-3 w-1/2 bg-gray-100 rounded"
-                    variants={shimmerVariants}
-                    initial="initial"
-                    animate="animate"
-                    style={{
-                      background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
-                      backgroundSize: '200% 100%',
-                    }}
-                  />
-                </div>
-              </div>
+        {/* Header: Code + Time | Badge */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1">
+            {/* Order Code - text-lg height ~28px */}
+            <motion.div
+              className="h-7 w-28 bg-gray-200 rounded-md mb-1"
+              variants={shimmerVariants}
+              initial="initial"
+              animate="animate"
+              style={{
+                background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
+                backgroundSize: '200% 100%',
+              }}
+            />
+            {/* Time - text-xs with icon, height ~16px */}
+            <div className="flex items-center gap-1 mt-1">
+              <div className="w-3 h-3 rounded-full bg-gray-300" />
+              <motion.div
+                className="h-3 w-32 bg-gray-100 rounded"
+                variants={shimmerVariants}
+                initial="initial"
+                animate="animate"
+                style={{
+                  background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
+                  backgroundSize: '200% 100%',
+                }}
+              />
             </div>
-          ))}
-        </div>
-
-        {/* Total Price & Action */}
-        <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
-          {/* Price */}
+          </div>
+          {/* Badge - px-3 py-1 */}
           <motion.div
-            className="h-6 w-24 bg-gray-200 rounded-lg"
-            variants={shimmerVariants}
-            initial="initial"
-            animate="animate"
-            style={{
-              background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
-              backgroundSize: '200% 100%',
-            }}
-          />
-          {/* Button */}
-          <motion.div
-            className="h-9 w-24 bg-blue-100 rounded-xl"
+            className="h-6 w-16 bg-primary/10 rounded-full"
             variants={shimmerVariants}
             initial="initial"
             animate="animate"
@@ -143,6 +77,94 @@ const OrderCardShimmer = ({ cardCount = 2 }) => {
               backgroundSize: '200% 100%',
             }}
           />
+        </div>
+
+        {/* Address - mb-3 */}
+        <div className="flex items-start gap-2 mb-3">
+          {/* MapPin icon w-4 h-4 */}
+          <div className="w-4 h-4 bg-gray-300 rounded mt-0.5 flex-shrink-0" />
+          {/* Address text - text-sm, can be 2 lines */}
+          <div className="flex-1 space-y-1">
+            <motion.div
+              className="h-3.5 w-full bg-gray-100 rounded"
+              variants={shimmerVariants}
+              initial="initial"
+              animate="animate"
+              style={{
+                background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
+                backgroundSize: '200% 100%',
+              }}
+            />
+            <motion.div
+              className="h-3.5 w-3/4 bg-gray-100 rounded"
+              variants={shimmerVariants}
+              initial="initial"
+              animate="animate"
+              style={{
+                background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
+                backgroundSize: '200% 100%',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Items Preview - mb-3, space-y-1 */}
+        <div className="mb-3 space-y-1">
+          {/* Each item is flex items-center gap-2, text-xs */}
+          {[1, 2].map((i) => (
+            <div key={i} className="flex items-center gap-2">
+              {/* Quantity - font-semibold */}
+              <motion.div
+                className="h-3 w-5 bg-gray-200 rounded"
+                variants={shimmerVariants}
+                initial="initial"
+                animate="animate"
+                style={{
+                  background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
+                  backgroundSize: '200% 100%',
+                }}
+              />
+              {/* Item name */}
+              <motion.div
+                className="h-3 flex-1 bg-gray-100 rounded"
+                variants={shimmerVariants}
+                initial="initial"
+                animate="animate"
+                style={{
+                  background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
+                  backgroundSize: '200% 100%',
+                }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Price - pt-3, border-t */}
+        <div className="pt-3 border-t border-gray-100">
+          <div className="flex items-center justify-between">
+            {/* Label "Tổng tiền" - text-sm */}
+            <motion.div
+              className="h-3.5 w-16 bg-gray-100 rounded"
+              variants={shimmerVariants}
+              initial="initial"
+              animate="animate"
+              style={{
+                background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
+                backgroundSize: '200% 100%',
+              }}
+            />
+            {/* Price value - text-lg, font-anton */}
+            <motion.div
+              className="h-5 w-24 bg-gray-200 rounded-lg"
+              variants={shimmerVariants}
+              initial="initial"
+              animate="animate"
+              style={{
+                background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
+                backgroundSize: '200% 100%',
+              }}
+            />
+          </div>
         </div>
       </motion.div>
     );
