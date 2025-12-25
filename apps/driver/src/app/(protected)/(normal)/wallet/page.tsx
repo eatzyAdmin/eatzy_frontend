@@ -2,13 +2,13 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion, useScroll, AnimatePresence } from "@repo/ui/motion";
-import { useLoading } from "@repo/ui";
+import { useLoading, TextShimmer, TransactionCardShimmer } from "@repo/ui";
 import { mockWalletStats, mockTransactions, WalletTransaction } from "@/features/wallet/data/mockWalletData";
 import WalletOverview from "@/features/wallet/components/WalletOverview";
 import TransactionCard from "@/features/wallet/components/TransactionCard";
 import TopUpDrawer from "@/features/wallet/components/TopUpDrawer";
 import WithdrawDrawer from "@/features/wallet/components/WithdrawDrawer";
-import { History } from "@repo/ui/icons";
+import { History, Wallet, ArrowUpRight, ArrowDownLeft } from "@repo/ui/icons";
 
 import { useNormalLoading } from "../context/NormalLoadingContext";
 
@@ -16,12 +16,13 @@ export default function WalletPage() {
   const { hide } = useLoading();
   const { stopLoading } = useNormalLoading();
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     stopLoading();
   }, [stopLoading]);
-  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
-  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
 
   // Scroll animation state
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -55,9 +56,12 @@ export default function WalletPage() {
   }, [scrollY]);
 
   useEffect(() => {
-    const t = setTimeout(() => hide(), 1000);
+    const timer = setTimeout(() => {
+      hide();
+      setIsLoading(false);
+    }, 1800);
     setTransactions(mockTransactions);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [hide]);
 
   return (
@@ -83,11 +87,51 @@ export default function WalletPage() {
               WALLET
             </h1>
 
-            <WalletOverview
-              stats={mockWalletStats}
-              onTopUp={() => setIsTopUpOpen(true)}
-              onWithdraw={() => setIsWithdrawOpen(true)}
-            />
+            {isLoading ? (
+              <div className="relative overflow-hidden rounded-[32px] bg-[#1A1A1A] text-white p-6 shadow-xl shadow-black/10">
+                {/* Background decoration */}
+                <div className="absolute top-0 right-0 p-8 opacity-10">
+                  <Wallet className="w-32 h-32 text-white" />
+                </div>
+
+                <div className="relative z-10">
+                  <p className="text-white/60 text-sm font-medium mb-1">Số dư khả dụng</p>
+                  <TextShimmer width={180} height={40} rounded="md" color="rgba(255,255,255,0.2)" className="mb-6" />
+
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="bg-white/10 rounded-2xl p-3 backdrop-blur-md">
+                      <p className="text-white/60 text-xs mb-1">Thu nhập hôm nay</p>
+                      <TextShimmer width={100} height={28} rounded="md" color="rgba(255,255,255,0.2)" />
+                    </div>
+                    <div className="bg-white/10 rounded-2xl p-3 backdrop-blur-md">
+                      <p className="text-white/60 text-xs mb-1">Đang xử lý</p>
+                      <TextShimmer width={100} height={28} rounded="md" color="rgba(255,255,255,0.2)" />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="flex-1 bg-white/10 text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 backdrop-blur-md">
+                      <div className="bg-green-500/20 p-1 rounded-full">
+                        <ArrowDownLeft className="w-4 h-4 text-green-400" />
+                      </div>
+                      Nạp tiền
+                    </div>
+                    <div className="flex-1 bg-[var(--primary)] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[var(--primary)]/30">
+                      <div className="bg-white/20 p-1 rounded-full">
+                        <ArrowUpRight className="w-4 h-4 text-white" />
+                      </div>
+                      Rút tiền
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <WalletOverview
+                stats={mockWalletStats}
+                onTopUp={() => setIsTopUpOpen(true)}
+                onWithdraw={() => setIsWithdrawOpen(true)}
+              />
+            )}
           </div>
         </motion.div>
 
@@ -112,24 +156,30 @@ export default function WalletPage() {
         className="flex-1 overflow-y-auto px-5 pb-32 pt-2 scroll-smooth"
       >
         <div className="space-y-3">
-          <AnimatePresence mode="popLayout">
-            {transactions.map((tx, index) => (
-              <motion.div
-                key={tx.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <TransactionCard transaction={tx} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
+          {isLoading ? (
+            <TransactionCardShimmer cardCount={3} />
+          ) : (
+            <>
+              <AnimatePresence mode="popLayout">
+                {transactions.map((tx, index) => (
+                  <motion.div
+                    key={tx.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <TransactionCard transaction={tx} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
 
-          {/* Spacer to Ensure Scrolling Logic works smoothly at bottom - Large enough to allow scrolling with few items */}
-          <div className="h-[60vh]" />
+              {/* Spacer to Ensure Scrolling Logic works smoothly at bottom - Large enough to allow scrolling with few items */}
+              <div className="h-[60vh]" />
 
-          {transactions.length === 0 && (
-            <div className="text-center py-10 text-gray-400 text-sm">Chưa có giao dịch nào</div>
+              {transactions.length === 0 && (
+                <div className="text-center py-10 text-gray-400 text-sm">Chưa có giao dịch nào</div>
+              )}
+            </>
           )}
         </div>
       </div>

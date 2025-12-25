@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import type { DriverActiveOrder } from "@repo/types";
 import { Phone, Compass, DollarSign, MapPin, Utensils, ChevronDown } from "@repo/ui/icons";
+import { DotsLoader } from "@repo/ui";
 
 type OrderStage = 'AT_STORE' | 'PICKED_UP' | 'AT_DROPOFF' | 'DELIVERED' | 'COMPLETED';
 
@@ -10,6 +11,7 @@ export default function CurrentOrderPanel({ order, onComplete }: { order: Driver
   const [isExpanded, setIsExpanded] = useState(true);
   const [stage, setStage] = useState<OrderStage>('AT_STORE');
   const [isVisible, setIsVisible] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const stageConfig = {
     'AT_STORE': { title: 'Đang lấy đơn hàng', buttonText: 'Đã đến cửa hàng' },
@@ -19,16 +21,27 @@ export default function CurrentOrderPanel({ order, onComplete }: { order: Driver
     'COMPLETED': { title: '', buttonText: '' }
   };
 
-  const handleButtonClick = () => {
+  const handleButtonClick = async () => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+
+    // Simulate processing delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     if (stage === 'AT_STORE') {
       setStage('PICKED_UP');
+      setIsProcessing(false);
     } else if (stage === 'PICKED_UP') {
       setStage('AT_DROPOFF');
+      setIsProcessing(false);
     } else if (stage === 'AT_DROPOFF') {
       setStage('DELIVERED');
+      setIsProcessing(false);
     } else if (stage === 'DELIVERED') {
       // Trigger exit animation
       setIsVisible(false);
+      setIsProcessing(false);
       // Call onComplete after animation finishes
       setTimeout(() => {
         onComplete?.();
@@ -212,23 +225,29 @@ export default function CurrentOrderPanel({ order, onComplete }: { order: Driver
                     {/* Arrived button */}
                     <motion.button
                       onClick={handleButtonClick}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="relative w-full h-14 rounded-xl bg-[var(--primary)] text-white font-semibold text-xl tracking-tight shadow-md overflow-hidden"
+                      whileHover={isProcessing ? {} : { scale: 1.02 }}
+                      whileTap={isProcessing ? {} : { scale: 0.98 }}
+                      disabled={isProcessing}
+                      className={`relative w-full h-14 rounded-xl font-semibold text-xl tracking-tight shadow-md overflow-hidden ${isProcessing ? 'bg-white border-2 border-[var(--primary)] text-[var(--primary)] cursor-wait' : 'bg-[var(--primary)] text-white'
+                        }`}
                       style={{ fontStretch: "condensed" }}
                     >
-                      <AnimatePresence mode="wait">
-                        <motion.span
-                          key={stage}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -8 }}
-                          transition={{ duration: 0.2 }}
-                          className="absolute inset-0 flex items-center justify-center"
-                        >
-                          {buttonText}
-                        </motion.span>
-                      </AnimatePresence>
+                      {isProcessing ? (
+                        <DotsLoader color="var(--primary)" size={10} />
+                      ) : (
+                        <AnimatePresence mode="wait">
+                          <motion.span
+                            key={stage}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute inset-0 flex items-center justify-center"
+                          >
+                            {buttonText}
+                          </motion.span>
+                        </AnimatePresence>
+                      )}
                     </motion.button>
                   </div>
                 </motion.div>
