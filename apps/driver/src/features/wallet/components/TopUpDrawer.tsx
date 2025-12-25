@@ -74,7 +74,7 @@ export default function TopUpDrawer({ open, onClose }: { open: boolean, onClose:
                         <CreditCard className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-[#1A1A1A]">Thẻ ngân hàng / ATM</p>
+                        <p className="text-sm font-bold text-[#1A1A1A]">Chuyển khoản ngân hàng</p>
                         <p className="text-xs text-gray-500">Miễn phí giao dịch</p>
                       </div>
                     </div>
