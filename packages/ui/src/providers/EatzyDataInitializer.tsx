@@ -62,8 +62,9 @@ export function EatzyDataInitializer({ children }: { children: React.ReactNode }
         flexDirection: 'column',
         gap: '16px',
       }}>
-        <div style={{ fontSize: '24px' }}>❌</div>
-        <div>Failed to initialize data</div>
+        <div style={{ fontSize: '48px' }}>🍽️</div>
+        <div style={{ fontSize: '24px', fontWeight: 'bold' }}>Welcome to Eatzy</div>
+        <div style={{ fontSize: '14px', color: '#666' }}>Preparing your experience...</div>
       </div>
     );
   }
