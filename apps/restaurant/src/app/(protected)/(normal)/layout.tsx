@@ -64,7 +64,17 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
 
   const handleSectionChange = (sectionId: string) => {
     if (sectionId === 'logout') {
-      router.push('/login');
+      confirm({
+        title: 'Đăng xuất',
+        description: 'Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?',
+        confirmText: 'Đăng xuất',
+        onConfirm: () => {
+          startLoading();
+          setTimeout(() => {
+            router.push('/login');
+          }, 1500);
+        }
+      });
     } else {
       const targetPath = `/${sectionId}`;
       if (!pathname.endsWith(sectionId)) {

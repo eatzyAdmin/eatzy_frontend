@@ -172,7 +172,7 @@ export default function DishEditModal({ dish, onDraftChange, onClose }: DishEdit
                   value={group}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`${isVariant ? 'bg-[var(--primary)]/5 border-2 border-[var(--primary)] shadow-md' : 'bg-white border border-gray-200 shadow-sm'} rounded-3xl overflow-hidden transition-all duration-300`}
+                  className={`${isVariant ? 'bg-[var(--primary)]/5 border-2 border-[var(--primary)] shadow-md' : 'bg-white border border-gray-200 shadow-sm'} rounded-3xl overflow-hidden`}
                 >
                   {/* Group Header */}
                   <div className={`p-4 border-b ${isVariant ? 'bg-[var(--primary)]/10 border-[var(--primary)]/20' : 'bg-gray-50/50 border-gray-100'}`}>
@@ -208,8 +208,8 @@ export default function DishEditModal({ dish, onDraftChange, onClose }: DishEdit
                           <button
                             onClick={() => handleSetVariant(group.id)}
                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${isVariant
-                                ? 'bg-white text-[var(--primary)] border-[var(--primary)]/30 hover:bg-[var(--primary)]/5'
-                                : 'bg-white text-gray-500 border-gray-200 hover:text-[var(--primary)] hover:border-[var(--primary)]'
+                              ? 'bg-white text-[var(--primary)] border-[var(--primary)]/30 hover:bg-[var(--primary)]/5'
+                              : 'bg-white text-gray-500 border-gray-200 hover:text-[var(--primary)] hover:border-[var(--primary)]'
                               }`}
                           >
                             {isVariant ? '✓ Đang là phân loại' : 'Đặt làm phân loại'}
