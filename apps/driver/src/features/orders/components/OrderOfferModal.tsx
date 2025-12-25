@@ -26,7 +26,7 @@ export default function OrderOfferModal({ offer, countdown, onAccept, onReject }
             {/* Header with title */}
             <div className="bg-white px-8 py-6 border-b border-gray-200">
               <div className="text-2xl font-anton font-bold text-[#1A1A1A] tracking-tight" style={{ fontStretch: "condensed" }}>
-                ĐỀ XUẤT ĐƠN HÀNG
+                RECOMMENDED OFFER
               </div>
             </div>
 
@@ -130,7 +130,7 @@ export default function OrderOfferModal({ offer, countdown, onAccept, onReject }
                   whileTap={{ scale: 0.98 }}
                   className="flex-1 h-14 rounded-xl bg-white border-2 border-gray-200 text-[#555] font-semibold text-base flex items-center justify-center gap-2 hover:border-gray-300 transition-colors"
                 >
-                  <span>Từ chối</span>
+                  <span>Reject</span>
                   <motion.span
                     className={`text-sm font-mono px-2 py-0.5 rounded-full ${countdown <= 5 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}
                     animate={countdown <= 5 ? {
@@ -162,7 +162,7 @@ export default function OrderOfferModal({ offer, countdown, onAccept, onReject }
                     duration: 0.8,
                   }}
                 >
-                  Chấp nhận
+                  ACCEPT
                 </motion.button>
               </div>
             </div>

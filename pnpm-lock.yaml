@@ -136,6 +136,9 @@ importers:
       '@repo/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@repo/fonts':
+        specifier: workspace:*
+        version: link:../../packages/fonts
       '@repo/lib':
         specifier: workspace:*
         version: link:../../packages/lib

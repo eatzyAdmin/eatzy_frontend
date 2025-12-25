@@ -90,7 +90,7 @@ export default function CurrentOrderPanel({ order, onComplete }: { order: Driver
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute inset-0 flex items-center text-xl font-anton font-bold text-[#1A1A1A] tracking-tight"
+                      className="absolute inset-0 flex items-center text-xl font-bold text-[#1A1A1A] tracking-tight"
                       style={{ fontStretch: "condensed" }}
                     >
                       {title}
@@ -214,7 +214,7 @@ export default function CurrentOrderPanel({ order, onComplete }: { order: Driver
                       onClick={handleButtonClick}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="relative w-full h-14 rounded-xl bg-[var(--primary)] text-white font-anton font-semibold text-xl tracking-tight shadow-md overflow-hidden"
+                      className="relative w-full h-14 rounded-xl bg-[var(--primary)] text-white font-semibold text-xl tracking-tight shadow-md overflow-hidden"
                       style={{ fontStretch: "condensed" }}
                     >
                       <AnimatePresence mode="wait">

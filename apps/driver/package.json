@@ -17,6 +17,7 @@
     "@repo/api": "workspace:*",
     "@repo/store": "workspace:*",
     "@repo/types": "workspace:*",
+    "@repo/fonts": "workspace:*",
     "mapbox-gl": "^3.16.0",
     "react-map-gl": "^8.1.0"
   },
