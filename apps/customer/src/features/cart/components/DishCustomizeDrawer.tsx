@@ -55,12 +55,13 @@ export default function DishCustomizeDrawer({
 
   const VARIANT_PREFIX = "variant";
   const variantGroup: OptionGroup | null = useMemo(() => {
-    const byTitle = optionGroups.find((g) => String(g.title || "").toLowerCase().startsWith(VARIANT_PREFIX));
+    const byTitle = optionGroups.find((g) => g.type === 'variant' || String(g.title || "").toLowerCase().startsWith(VARIANT_PREFIX));
     return byTitle ?? null;
   }, [optionGroups]);
 
   const nonVariantGroups: OptionGroup[] = useMemo(() => {
     return optionGroups.filter((g) => {
+      if (g.type === 'variant') return false;
       const title = String(g.title || "").toLowerCase();
       return !title.startsWith(VARIANT_PREFIX);
     });
@@ -424,14 +425,14 @@ export default function DishCustomizeDrawer({
                             ...(
                               variantGroup && variant
                                 ? [
-                                    {
-                                      id: String(variantGroup.id),
-                                      title: String(variantGroup.title || ""),
-                                      options: [
-                                        { id: String(variant.id), name: String(variant.name), price: Number(variant.price) },
-                                      ],
-                                    },
-                                  ]
+                                  {
+                                    id: String(variantGroup.id),
+                                    title: String(variantGroup.title || ""),
+                                    options: [
+                                      { id: String(variant.id), name: String(variant.name), price: Number(variant.price) },
+                                    ],
+                                  },
+                                ]
                                 : []
                             ),
                             ...nonVariantGroups

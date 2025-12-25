@@ -13,6 +13,7 @@ interface SwipeConfirmationConfig {
   confirmText?: string;
   onConfirm: () => void | Promise<void>;
   type?: 'warning' | 'success' | 'danger' | 'info';
+  processingDuration?: number;
 }
 
 const SwipeConfirmationContext = createContext<SwipeConfirmationContextType | undefined>(undefined);
@@ -35,8 +36,8 @@ export function SwipeConfirmationProvider({ children }: { children: ReactNode })
   const handleConfirm = async () => {
     setIsProcessing(true);
 
-    // Simulate 2s loading
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Simulate loading
+    await new Promise(resolve => setTimeout(resolve, config.processingDuration ?? 2000));
 
     if (config?.onConfirm) {
       await config.onConfirm();

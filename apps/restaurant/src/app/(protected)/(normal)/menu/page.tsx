@@ -1,3 +1,5 @@
-export default function MenuPage() {
-  return <div>Trang Thực đơn</div>;
+import MenuPage from "@/features/menu/MenuPage";
+
+export default function Page() {
+  return <MenuPage />;
 }
