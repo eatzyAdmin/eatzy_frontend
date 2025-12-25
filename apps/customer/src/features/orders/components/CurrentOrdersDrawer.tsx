@@ -1,24 +1,85 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { X, MapPin, Store, ClipboardList, ChefHat, Bike, BadgeCheck, Clock, XCircle } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
 import type { Order } from "@repo/types";
-import { getOrders } from "@/features/orders/data/mockOrders";
-import { getRestaurantById } from "@/features/search/data/mockSearchData";
+import { STORAGE_KEYS } from "@repo/ui";
 import { useSwipeConfirmation, useNotification, useLoading } from "@repo/ui";
 
 const OrderMapView = dynamic(() => import("@/features/orders/components/OrderMapView"), { ssr: false });
 import OrderStatusSteps from "@/features/orders/components/OrderStatusSteps";
 
+// Helper to get restaurant by ID from localStorage
+function getRestaurantById(id: string) {
+  try {
+    const restaurantsStr = localStorage.getItem(STORAGE_KEYS.RESTAURANTS);
+    if (!restaurantsStr) return null;
+    const restaurants = JSON.parse(restaurantsStr);
+    return restaurants.find((r: any) => r.id === id);
+  } catch {
+    return null;
+  }
+}
+
+// Helper to get current customer ID
+function getCurrentCustomerId(): string | null {
+  try {
+    const currentUserStr = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+    if (!currentUserStr) return null;
+    const user = JSON.parse(currentUserStr);
+
+    // Get customer by userId
+    const customersStr = localStorage.getItem(STORAGE_KEYS.CUSTOMERS);
+    if (!customersStr) return null;
+    const customers = JSON.parse(customersStr);
+    const customer = customers.find((c: any) => c.userId === user.id);
+    return customer?.id || null;
+  } catch {
+    return null;
+  }
+}
+
+// Helper to load current orders from localStorage
+function getCurrentOrders(): Order[] {
+  try {
+    const customerId = getCurrentCustomerId();
+    if (!customerId) return [];
+
+    const ordersStr = localStorage.getItem(STORAGE_KEYS.ORDERS);
+    if (!ordersStr) return [];
+
+    const allOrders = JSON.parse(ordersStr);
+
+    // Filter: only this customer's orders that are NOT delivered or cancelled
+    return allOrders.filter((o: Order) =>
+      o.customerId === customerId &&
+      o.status !== "DELIVERED" &&
+      o.status !== "CANCELLED"
+    );
+  } catch (error) {
+    console.error('Error loading current orders:', error);
+    return [];
+  }
+}
+
 export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const orders = useMemo(() => getOrders().filter(o => o.status !== "DELIVERED" && o.status !== "CANCELLED"), []);
-  const [activeOrderId, setActiveOrderId] = useState<string>(orders[0]?.id ?? "");
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [activeOrderId, setActiveOrderId] = useState<string>("");
   const activeOrder = orders.find((o) => o.id === activeOrderId) ?? orders[0];
   const { confirm } = useSwipeConfirmation();
   const { showNotification } = useNotification();
   const { show: showLoading, hide: hideLoading } = useLoading();
+
+  // Load orders from localStorage
+  useEffect(() => {
+    const loadedOrders = getCurrentOrders();
+    setOrders(loadedOrders);
+    if (loadedOrders.length > 0 && !activeOrderId) {
+      setActiveOrderId(loadedOrders[0].id);
+    }
+  }, [open]); // Reload when drawer opens
 
   const handleCancelOrder = () => {
     confirm({

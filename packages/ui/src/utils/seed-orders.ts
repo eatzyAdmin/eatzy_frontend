@@ -3,6 +3,7 @@
  * ORDERS SEED DATA
  * ========================================
  * 10 orders for main customer (cust-1)
+ * ALL orders are DELIVERED or CANCELLED - NO current/active orders initially
  * With accurate relationships to restaurants, driver, fees calculated from system params
  */
 
@@ -28,15 +29,15 @@ function calculateFee(distance: number): number {
 
 export const SEED_ORDERS: Order[] = [
   // ========================================
-  // ORDER 1: PENDING (chưa có driver)
+  // ORDER 1: DELIVERED (completed)
   // ========================================
   {
     id: 'ord-1000',
     code: 'EZ-1000',
     customerId: 'cust-1',
-    driverId: undefined,
+    driverId: 'drv-1',
     restaurantId: 'rest-1', // Phở Hà Nội
-    status: 'PENDING',
+    status: 'DELIVERED',
     items: [
       {
         id: 'dish-1-2',
@@ -61,13 +62,13 @@ export const SEED_ORDERS: Order[] = [
     total: 125000,
     deliveryLocation: { lat: 10.7742, lng: 106.7056, address: 'Lê Thánh Tôn, Quận 1, TP.HCM' },
     restaurantLocation: { lat: 10.7798, lng: 106.6923, name: 'Phở Hà Nội' },
-    driverLocation: { lat: 0, lng: 0, name: '' },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    driverLocation: { lat: 10.7742, lng: 106.7056, name: 'Trần Văn Bình' },
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
   },
 
   // ========================================
-  // ORDER 2: PLACED (driver assigned)
+  // ORDER 2: DELIVERED (completed)
   // ========================================
   {
     id: 'ord-1001',
@@ -75,7 +76,7 @@ export const SEED_ORDERS: Order[] = [
     customerId: 'cust-1',
     driverId: 'drv-1', // Main driver
     restaurantId: 'rest-1',
-    status: 'PLACED',
+    status: 'DELIVERED',
     items: [
       {
         id: 'dish-1-1',
@@ -101,12 +102,12 @@ export const SEED_ORDERS: Order[] = [
     deliveryLocation: { lat: 10.7757, lng: 106.7009, address: 'Nguyễn Huệ, Quận 1, TP.HCM' },
     restaurantLocation: { lat: 10.7798, lng: 106.6923, name: 'Phở Hà Nội' },
     driverLocation: { lat: 10.7705, lng: 106.7039, name: 'Trần Văn Bình' },
-    createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 7).toISOString(),
   },
 
   // ========================================
-  // ORDER 3: PREPARED (đang chuẩn bị)
+  // ORDER 3: DELIVERED (completed)
   // ========================================
   {
     id: 'ord-1002',
@@ -114,7 +115,7 @@ export const SEED_ORDERS: Order[] = [
     customerId: 'cust-1',
     driverId: 'drv-1',
     restaurantId: 'rest-2', // Sushi Sakura
-    status: 'PREPARED',
+    status: 'DELIVERED',
     items: [
       {
         id: 'dish-2-1',
@@ -140,12 +141,12 @@ export const SEED_ORDERS: Order[] = [
     deliveryLocation: { lat: 10.7762, lng: 106.6885, address: 'Lê Lợi, Quận 1, TP.HCM' },
     restaurantLocation: { lat: 10.7722, lng: 106.7007, name: 'Sushi Sakura' },
     driverLocation: { lat: 10.7688, lng: 106.6956, name: 'Trần Văn Bình' },
-    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 11).toISOString(),
   },
 
   // ========================================
-  // ORDER 4: PICKED (driver đã lấy hàng)
+  // ORDER 4: DELIVERED (completed)
   // ========================================
   {
     id: 'ord-1003',
@@ -153,7 +154,7 @@ export const SEED_ORDERS: Order[] = [
     customerId: 'cust-1',
     driverId: 'drv-1',
     restaurantId: 'rest-3', // Pizza Bella Italia
-    status: 'PICKED',
+    status: 'DELIVERED',
     items: [
       {
         id: 'dish-3-1',
@@ -178,9 +179,9 @@ export const SEED_ORDERS: Order[] = [
     total: 310000,
     deliveryLocation: { lat: 10.7626, lng: 106.6765, address: 'Pasteur, Quận 3, TP.HCM' },
     restaurantLocation: { lat: 10.7769, lng: 106.6789, name: 'Pizza Bella Italia' },
-    driverLocation: { lat: 10.7701, lng: 106.6806, name: 'Trần Văn Bình' },
-    createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
+    driverLocation: { lat: 10.7626, lng: 106.6765, name: 'Trần Văn Bình' },
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 18).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 17).toISOString(),
   },
 
   // ========================================

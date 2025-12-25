@@ -19,6 +19,8 @@ export type OrderItem = {
 export type Order = {
   id: string;
   code?: string;
+  customerId: string;
+  driverId?: string;
   restaurantId: string;
   status: OrderStatus;
   deliveryLocation: LngLat & { address?: string };
