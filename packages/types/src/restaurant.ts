@@ -1,4 +1,4 @@
-export type RestaurantStatus = 'ACTIVE' | 'INACTIVE' | 'CLOSED';
+export type RestaurantStatus = 'OPEN' | 'CLOSED' | 'LOCKED';
 
 export type RestaurantCategory = {
   id: string;
@@ -30,4 +30,11 @@ export type Restaurant = {
   category?: RestaurantCategory | string;
   reviews?: Review[];
   reviewCount?: number;
+  // Super Admin specific fields
+  ownerName?: string;
+  ownerPhone?: string;
+  ownerEmail?: string;
+  registrationDate?: string;
+  totalRevenue?: number;
+  totalOrders?: number;
 };

@@ -1,8 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { CheckCircle, XCircle, Archive, Clock, MinusCircle, Lock } from "lucide-react";
+import { CheckCircle, XCircle, Archive, Clock, MinusCircle, Lock, PauseCircle, Store, StoreIcon } from "lucide-react";
 
-export type StatusBadgeProps = { status?: "active" | "closed" | "inTerm" | "disabled" | "inactive" | "blocked" | string; active?: boolean };
+export type StatusBadgeProps = { status?: "active" | "closed" | "inTerm" | "disabled" | "inactive" | "blocked" | "ACTIVE" | "INACTIVE" | "CLOSED" | "OPEN" | "LOCKED" | string; active?: boolean };
 
 const StatusBadge = ({ status = "disabled", active = false }: StatusBadgeProps) => {
   // Config mapping for different statuses
@@ -12,7 +12,14 @@ const StatusBadge = ({ status = "disabled", active = false }: StatusBadgeProps) 
     inTerm: { icon: <Clock className="w-3.5 h-3.5 mr-1" />, text: "Chưa đáo hạn", className: active ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-2 border-blue-400 shadow-lg shadow-blue-500/30" : "bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200", iconColor: active ? "text-white" : "text-blue-500" },
     disabled: { icon: <XCircle className="w-3.5 h-3.5 mr-1" />, text: "Vô hiệu hóa", className: active ? "bg-gradient-to-r from-red-500 to-rose-600 text-white border-2 border-red-400 shadow-lg shadow-red-500/30" : "bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200", iconColor: active ? "text-white" : "text-red-500" },
     inactive: { icon: <XCircle className="w-3.5 h-3.5 mr-1" />, text: "Vô hiệu hóa", className: active ? "bg-gradient-to-r from-red-500 to-rose-600 text-white border-2 border-red-400 shadow-lg shadow-red-500/30" : "bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200", iconColor: active ? "text-white" : "text-red-500" },
-    blocked: { icon: <Lock className="w-3.5 h-3.5 mr-1" />, text: "Đã khóa", className: active ? "bg-gradient-to-r from-red-600 to-rose-700 text-white border-2 border-red-500 shadow-lg shadow-red-600/30" : "bg-gradient-to-r from-red-50 to-red-100 text-red-900 border border-red-200", iconColor: active ? "text-white" : "text-red-600" }
+    blocked: { icon: <Lock className="w-3.5 h-3.5 mr-1" />, text: "Bị khóa", className: active ? "bg-gradient-to-r from-red-600 to-rose-700 text-white border-2 border-red-500 shadow-lg shadow-red-600/30" : "bg-gradient-to-r from-red-50 to-red-100 text-red-900 border border-red-200", iconColor: active ? "text-white" : "text-red-600" },
+    // Restaurant statuses (uppercase)
+    OPEN: { icon: <Store className="w-3.5 h-3.5 mr-1" />, text: "Đang mở cửa", className: active ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-2 border-green-400 shadow-lg shadow-green-500/30" : "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200", iconColor: active ? "text-white" : "text-green-500" },
+    LOCKED: { icon: <Lock className="w-3.5 h-3.5 mr-1" />, text: "Bị khóa", className: active ? "bg-gradient-to-r from-red-600 to-rose-700 text-white border-2 border-red-500 shadow-lg shadow-red-600/30" : "bg-gradient-to-r from-red-50 to-red-100 text-red-900 border border-red-200", iconColor: active ? "text-white" : "text-red-600" },
+    CLOSED: { icon: <XCircle className="w-3.5 h-3.5 mr-1" />, text: "Đã đóng cửa", className: active ? "bg-gradient-to-r from-gray-600 to-slate-700 text-white border-2 border-gray-400 shadow-lg shadow-gray-500/30" : "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border border-gray-200", iconColor: active ? "text-white" : "text-gray-500" },
+    // For backwards compatibility
+    ACTIVE: { icon: <CheckCircle className="w-3.5 h-3.5 mr-1" />, text: "Đang hoạt động", className: active ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-2 border-green-400 shadow-lg shadow-green-500/30" : "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200", iconColor: active ? "text-white" : "text-green-500" },
+    INACTIVE: { icon: <PauseCircle className="w-3.5 h-3.5 mr-1" />, text: "Tạm đóng", className: active ? "bg-gradient-to-r from-amber-500 to-yellow-600 text-white border-2 border-amber-400 shadow-lg shadow-amber-500/30" : "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-200", iconColor: active ? "text-white" : "text-amber-600" },
   };
   const config = statusConfig[status] || statusConfig.disabled!;
   if (!config) return null;

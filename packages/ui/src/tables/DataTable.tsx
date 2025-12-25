@@ -191,13 +191,13 @@ const DataTable = <T extends Record<string, any>>({
         />
       )}
 
-      <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, layout: { type: "tween", ease: "easeOut" } }} ref={tableContainerRef} className={`bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden`} style={{ overflowY: 'hidden' }}>
-        <div className="overflow-x-auto overflow-y-hidden">
-          <table className="min-w-full divide-y divide-gray-100">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} ref={tableContainerRef} className={`bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden w-full`}>
+        <div className="overflow-x-auto w-full" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'thin' }}>
+          <table className="w-full divide-y divide-gray-100" style={{ minWidth: 'max-content' }}>
             <thead className={headerClassName}>
               <tr>
                 {columns.map((column) => (
-                  <th key={column.key} scope="col" className={`px-3 sm:px-4 lg:px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-black/20 transition-colors ${column.className || ''}`} onClick={() => column.sortable !== false && handleSort(column.key)}>
+                  <th key={column.key} scope="col" className={`px-3 sm:px-4 lg:px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-black/20 transition-colors whitespace-nowrap ${column.className || ''}`} onClick={() => column.sortable !== false && handleSort(column.key)}>
                     <div className="flex items-center">
                       <span>{column.label}</span>
                       {sortField === column.key && (
@@ -206,7 +206,7 @@ const DataTable = <T extends Record<string, any>>({
                     </div>
                   </th>
                 ))}
-                <th scope="col" className="px-3 sm:px-4 lg:px-6 py-4 text-right text-xs font-medium uppercase tracking-wider">Thao tác</th>
+                <th scope="col" className="px-3 sm:px-4 lg:px-6 py-4 text-right text-xs font-medium uppercase tracking-wider whitespace-nowrap">Thao tác</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-50">
@@ -224,7 +224,7 @@ const DataTable = <T extends Record<string, any>>({
                 ) : !(showShimmer && (isFilteringData || displayedData.length === 0)) && (
                   <>
                     {displayedData.map((item, i) => (
-                      <motion.tr key={String(item[keyField])} custom={i} variants={tableRowVariants} initial="hidden" animate="visible" exit="exit" className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => onRowClick && onRowClick(item)} layout transition={{ layout: { type: "spring", damping: 15, stiffness: 100 }, opacity: { duration: 0.6 } }}>
+                      <motion.tr key={String(item[keyField])} custom={i} variants={tableRowVariants} initial="hidden" animate="visible" exit="exit" className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => onRowClick && onRowClick(item)}>
                         {columns.map((column) => {
                           if (column.type === 'status') { return (<td key={column.key} className={`px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap ${column.className || ''}`}><StatusBadge status={item[column.key]} /></td>); }
                           let value = item[column.key]; if (column.key.includes('.')) { const keys = column.key.split('.'); value = keys.reduce((obj: any, k: string) => obj && obj[k], item); }
