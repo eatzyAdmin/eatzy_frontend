@@ -1,10 +1,11 @@
 "use client";
 import { motion } from "@repo/ui/motion";
 import { Power } from "@repo/ui/icons";
-import { useSwipeConfirmation } from "@repo/ui";
+import { useSwipeConfirmation, useNotification } from "@repo/ui";
 
 export default function ConnectToggle({ online, onChange, className }: { online: boolean; onChange?: (online: boolean) => void; className?: string }) {
   const { confirm } = useSwipeConfirmation();
+  const { showNotification } = useNotification();
 
   const requestToggle = () => {
     const nextValue = !online;
@@ -16,6 +17,11 @@ export default function ConnectToggle({ online, onChange, className }: { online:
       onConfirm: async () => {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         onChange?.(nextValue);
+        showNotification({
+          type: "success",
+          message: nextValue ? "Đã bật kết nối" : "Đã tắt kết nối",
+          format: nextValue ? "Bạn đã sẵn sàng nhận đơn hàng mới" : "Bạn tạm thời sẽ không nhận đơn hàng mới"
+        });
       },
     });
   };
