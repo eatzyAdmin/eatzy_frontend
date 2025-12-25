@@ -2,6 +2,25 @@ import type { Order } from "@repo/types";
 
 export const mockOrders: Order[] = [
   {
+    id: "ord-1000",
+    code: "EZ-1000",
+    restaurantId: "rest-1",
+    status: "PENDING",
+    deliveryLocation: { lng: 106.7056, lat: 10.7742, address: "Lê Thánh Tôn, Quận 1, TP.HCM" },
+    restaurantLocation: { lng: 106.6923, lat: 10.7798, name: "Phở Hà Nội" },
+    driverLocation: { lng: 0, lat: 0, name: "" }, // No driver assigned yet
+    items: [
+      { id: "dish-1-2", name: "Phở Gà", price: 60000, imageUrl: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400", restaurantId: "rest-1", quantity: 1 },
+      { id: "dish-1-4", name: "Chả Giò", price: 40000, imageUrl: "https://images.unsplash.com/photo-1626082910581-9c47f8649912?w=400", restaurantId: "rest-1", quantity: 1 },
+    ],
+    subtotal: 100000,
+    fee: 15000,
+    discount: 0,
+    total: 115000,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
     id: "ord-1001",
     code: "EZ-1001",
     restaurantId: "rest-1",

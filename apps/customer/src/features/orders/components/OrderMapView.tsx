@@ -17,8 +17,24 @@ export default function OrderMapView({ order }: { order: Order }) {
   const [progressA, setProgressA] = useState(0);
   const [progressB, setProgressB] = useState(0);
 
+  const isPending = order.status === "PENDING";
 
   useEffect(() => {
+    // Skip route fetching for PENDING orders (no driver yet)
+    if (isPending) {
+      setDriverRoute(null);
+      setDeliveryRoute(null);
+      const inst = mapRef.current as MapLike | null;
+      inst?.getMap()?.fitBounds(
+        [
+          [order.restaurantLocation.lng - 0.01, order.restaurantLocation.lat - 0.01],
+          [order.deliveryLocation.lng + 0.01, order.deliveryLocation.lat + 0.01],
+        ],
+        { padding: 60, duration: 900 }
+      );
+      return;
+    }
+
     const fetchRoute = async (start: { lng: number; lat: number }, end: { lng: number; lat: number }) => {
       try {
         const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start.lng},${start.lat};${end.lng},${end.lat}?geometries=geojson&steps=true&overview=full&language=vi&access_token=${token}`;
@@ -65,7 +81,7 @@ export default function OrderMapView({ order }: { order: Order }) {
       };
       requestAnimationFrame(animate);
     })();
-  }, [order, token]);
+  }, [order, token, isPending]);
 
   const partial = (coords: [number, number][], t: number) => {
     const safe = Array.isArray(coords)
@@ -99,18 +115,18 @@ export default function OrderMapView({ order }: { order: Order }) {
       coordinates:
         driverRoute?.geometry?.coordinates && driverRoute?.geometry?.coordinates.length > 1
           ? (() => {
-              const p = partial(driverRoute.geometry.coordinates, progressA);
-              return p.length > 1
-                ? p
-                : [
-                    [order.driverLocation.lng, order.driverLocation.lat],
-                    [order.restaurantLocation.lng, order.restaurantLocation.lat],
-                  ];
-            })()
+            const p = partial(driverRoute.geometry.coordinates, progressA);
+            return p.length > 1
+              ? p
+              : [
+                [order.driverLocation.lng, order.driverLocation.lat],
+                [order.restaurantLocation.lng, order.restaurantLocation.lat],
+              ];
+          })()
           : [
-              [order.driverLocation.lng, order.driverLocation.lat],
-              [order.restaurantLocation.lng, order.restaurantLocation.lat],
-            ],
+            [order.driverLocation.lng, order.driverLocation.lat],
+            [order.restaurantLocation.lng, order.restaurantLocation.lat],
+          ],
     },
     properties: {},
   }), [driverRoute, progressA, order.driverLocation.lng, order.driverLocation.lat, order.restaurantLocation.lng, order.restaurantLocation.lat]);
@@ -122,18 +138,18 @@ export default function OrderMapView({ order }: { order: Order }) {
       coordinates:
         deliveryRoute?.geometry?.coordinates && deliveryRoute?.geometry?.coordinates.length > 1
           ? (() => {
-              const p = partial(deliveryRoute.geometry.coordinates, progressB);
-              return p.length > 1
-                ? p
-                : [
-                    [order.restaurantLocation.lng, order.restaurantLocation.lat],
-                    [order.deliveryLocation.lng, order.deliveryLocation.lat],
-                  ];
-            })()
+            const p = partial(deliveryRoute.geometry.coordinates, progressB);
+            return p.length > 1
+              ? p
+              : [
+                [order.restaurantLocation.lng, order.restaurantLocation.lat],
+                [order.deliveryLocation.lng, order.deliveryLocation.lat],
+              ];
+          })()
           : [
-              [order.restaurantLocation.lng, order.restaurantLocation.lat],
-              [order.deliveryLocation.lng, order.deliveryLocation.lat],
-            ],
+            [order.restaurantLocation.lng, order.restaurantLocation.lat],
+            [order.deliveryLocation.lng, order.deliveryLocation.lat],
+          ],
     },
     properties: {},
   }), [deliveryRoute, progressB, order.restaurantLocation.lng, order.restaurantLocation.lat, order.deliveryLocation.lng, order.deliveryLocation.lat]);
@@ -158,69 +174,71 @@ export default function OrderMapView({ order }: { order: Order }) {
   return (
     <div className="h-full p-4 bg-white">
       <div className="h-full rounded-[36px] overflow-hidden shadow-md border border-gray-200 relative">
-      <Map
-        ref={(ref) => {
-          (mapRef.current as unknown) = ref as unknown;
-        }}
-        mapStyle="mapbox://styles/mapbox/streets-v12"
-        mapboxAccessToken={token}
-        initialViewState={initialView}
-        style={{ width: "100%", height: "100%" }}
-      >
-        <Source id="order-lines" type="geojson" data={lines as unknown as never}>
-          <Layer id="driver-to-restaurant" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#22c55e", "line-width": 5, "line-opacity": 0.95 }} />
-          <Layer id="restaurant-to-delivery" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#3b82f6", "line-width": 5, "line-opacity": 0.95 }} />
-        </Source>
+        <Map
+          ref={(ref) => {
+            (mapRef.current as unknown) = ref as unknown;
+          }}
+          mapStyle="mapbox://styles/mapbox/streets-v12"
+          mapboxAccessToken={token}
+          initialViewState={initialView}
+          style={{ width: "100%", height: "100%" }}
+        >
+          <Source id="order-lines" type="geojson" data={lines as unknown as never}>
+            <Layer id="driver-to-restaurant" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#22c55e", "line-width": 5, "line-opacity": isPending ? 0 : 0.95 }} />
+            <Layer id="restaurant-to-delivery" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#3b82f6", "line-width": 5, "line-opacity": isPending ? 0 : 0.95 }} />
+          </Source>
 
-        <Marker longitude={order.deliveryLocation.lng} latitude={order.deliveryLocation.lat} anchor="center">
-          <div className="relative">
-            <motion.span
-              className="absolute -inset-2 rounded-full border-2 border-blue-500/40"
-              animate={{ scale: [1, 1.6], opacity: [0.7, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
-            />
-            <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
-          </div>
-        </Marker>
-
-        <Marker longitude={order.restaurantLocation.lng} latitude={order.restaurantLocation.lat} anchor="bottom">
-          <div className="flex flex-col items-center -translate-y-1">
+          <Marker longitude={order.deliveryLocation.lng} latitude={order.deliveryLocation.lat} anchor="center">
             <div className="relative">
               <motion.span
-                className="absolute -inset-1 rounded-full border-2 border-orange-500/40"
-                animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
-                transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                className="absolute -inset-2 rounded-full border-2 border-blue-500/40"
+                animate={{ scale: [1, 1.6], opacity: [0.7, 0] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
               />
-              <div className="w-9 h-9 rounded-full bg-orange-500 border-2 border-white shadow-lg flex items-center justify-center">
-                <Store className="w-5 h-5 text-white" />
-              </div>
+              <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
             </div>
-            <div className="w-2 h-2 rounded-full bg-orange-500 mt-1" />
-          </div>
-        </Marker>
+          </Marker>
 
-        <Marker longitude={order.driverLocation.lng} latitude={order.driverLocation.lat} anchor="bottom">
-          <div className="flex flex-col items-center -translate-y-1">
-            <div className="relative">
-              <motion.span
-                className="absolute -inset-1 rounded-full border-2 border-green-500/40"
-                animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
-                transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
-              />
-              <div className="w-9 h-9 rounded-full bg-green-500 border-2 border-white shadow-lg flex items-center justify-center">
-                <Bike className="w-5 h-5 text-white" />
+          <Marker longitude={order.restaurantLocation.lng} latitude={order.restaurantLocation.lat} anchor="bottom">
+            <div className="flex flex-col items-center -translate-y-1">
+              <div className="relative">
+                <motion.span
+                  className="absolute -inset-1 rounded-full border-2 border-orange-500/40"
+                  animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                />
+                <div className="w-9 h-9 rounded-full bg-orange-500 border-2 border-white shadow-lg flex items-center justify-center">
+                  <Store className="w-5 h-5 text-white" />
+                </div>
               </div>
+              <div className="w-2 h-2 rounded-full bg-orange-500 mt-1" />
             </div>
-            <div className="w-2 h-2 rounded-full bg-green-500 mt-1" />
-          </div>
-        </Marker>
+          </Marker>
 
-        {etaText && (
-          <div className="absolute left-3 top-3 bg-white/90 backdrop-blur-sm border border-gray-200 text-xs text-[#1A1A1A] px-2 py-1 rounded shadow-sm">
-            {etaText}
-          </div>
-        )}
-      </Map>
+          {!isPending && (
+            <Marker longitude={order.driverLocation.lng} latitude={order.driverLocation.lat} anchor="bottom">
+              <div className="flex flex-col items-center -translate-y-1">
+                <div className="relative">
+                  <motion.span
+                    className="absolute -inset-1 rounded-full border-2 border-green-500/40"
+                    animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                  />
+                  <div className="w-9 h-9 rounded-full bg-green-500 border-2 border-white shadow-lg flex items-center justify-center">
+                    <Bike className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+                <div className="w-2 h-2 rounded-full bg-green-500 mt-1" />
+              </div>
+            </Marker>
+          )}
+
+          {etaText && (
+            <div className="absolute left-3 top-3 bg-white/90 backdrop-blur-sm border border-gray-200 text-xs text-[#1A1A1A] px-2 py-1 rounded shadow-sm">
+              {etaText}
+            </div>
+          )}
+        </Map>
       </div>
     </div>
   );

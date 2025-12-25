@@ -2,19 +2,45 @@
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { X, MapPin, Store, ClipboardList, ChefHat, Bike, BadgeCheck } from "@repo/ui/icons";
+import { X, MapPin, Store, ClipboardList, ChefHat, Bike, BadgeCheck, Clock, XCircle } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
 import type { Order } from "@repo/types";
 import { getOrders } from "@/features/orders/data/mockOrders";
 import { getRestaurantById } from "@/features/search/data/mockSearchData";
+import { useSwipeConfirmation, useNotification, useLoading } from "@repo/ui";
 
 const OrderMapView = dynamic(() => import("@/features/orders/components/OrderMapView"), { ssr: false });
 import OrderStatusSteps from "@/features/orders/components/OrderStatusSteps";
 
 export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const orders = useMemo(() => getOrders().filter(o => o.status !== "DELIVERED"), []);
+  const orders = useMemo(() => getOrders().filter(o => o.status !== "DELIVERED" && o.status !== "CANCELLED"), []);
   const [activeOrderId, setActiveOrderId] = useState<string>(orders[0]?.id ?? "");
   const activeOrder = orders.find((o) => o.id === activeOrderId) ?? orders[0];
+  const { confirm } = useSwipeConfirmation();
+  const { showNotification } = useNotification();
+  const { show: showLoading, hide: hideLoading } = useLoading();
+
+  const handleCancelOrder = () => {
+    confirm({
+      title: "Hủy đơn hàng",
+      description: "Bạn có chắc chắn muốn hủy đơn hàng này?",
+      confirmText: "Hủy đơn",
+      type: "danger",
+      processingDuration: 1500,
+      onConfirm: async () => {
+        hideLoading();
+
+        showNotification({
+          type: "success",
+          message: "Đã hủy đơn hàng",
+          format: `Đơn hàng ${activeOrder?.code} đã được hủy thành công`,
+        });
+
+        // Close drawer after cancellation
+        setTimeout(() => onClose(), 500);
+      }
+    });
+  };
 
   return (
     <AnimatePresence>
@@ -54,10 +80,12 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                     const active = o.id === activeOrderId;
                     const StatusIcon = (() => {
                       switch (o.status) {
+                        case "PENDING": return Clock;
                         case "PLACED": return ClipboardList;
                         case "PREPARED": return ChefHat;
                         case "PICKED": return Bike;
                         case "DELIVERED": return BadgeCheck;
+                        case "CANCELLED": return XCircle;
                       }
                     })();
                     return (
@@ -141,6 +169,19 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                           <div className="text-2xl font-bold text-[var(--primary)]">{formatVnd(activeOrder.total)}</div>
                         </div>
                       </div>
+
+                      {/* Cancel Button for PENDING orders */}
+                      {activeOrder.status === "PENDING" && (
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleCancelOrder}
+                          className="mt-6 w-full h-12 rounded-xl bg-red-50 border-2 border-red-200 text-red-600 font-semibold text-base flex items-center justify-center gap-2 hover:bg-red-100 transition-all"
+                        >
+                          <XCircle className="w-5 h-5" />
+                          Hủy đơn hàng
+                        </motion.button>
+                      )}
                     </div>
                   </>
                 )}
@@ -155,6 +196,8 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
 
 function statusLabel(s: Order["status"]) {
   switch (s) {
+    case "PENDING":
+      return "Đang tìm tài xế";
     case "PLACED":
       return "Đã đặt";
     case "PREPARED":
@@ -163,5 +206,7 @@ function statusLabel(s: Order["status"]) {
       return "Tài xế đã lấy";
     case "DELIVERED":
       return "Giao thành công";
+    case "CANCELLED":
+      return "Đã hủy";
   }
 }

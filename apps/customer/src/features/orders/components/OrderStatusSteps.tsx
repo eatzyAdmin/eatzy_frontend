@@ -1,11 +1,12 @@
 "use client";
 import { motion } from "@repo/ui/motion";
-import { ClipboardList, ChefHat, Bike, BadgeCheck } from "@repo/ui/icons";
+import { Clock, ClipboardList, ChefHat, Bike, BadgeCheck } from "@repo/ui/icons";
 import type { OrderStatus } from "@repo/types";
 import type { ComponentType } from "react";
 
 type IconType = ComponentType<{ className?: string }>;
 const steps: ReadonlyArray<{ key: OrderStatus; label: string; icon: IconType }> = [
+  { key: "PENDING", label: "Tìm tài xế", icon: Clock as IconType },
   { key: "PLACED", label: "Đã đặt", icon: ClipboardList as IconType },
   { key: "PREPARED", label: "Nhà hàng xong", icon: ChefHat as IconType },
   { key: "PICKED", label: "Tài xế đã lấy", icon: Bike as IconType },
@@ -38,7 +39,7 @@ export default function OrderStatusSteps({ status }: { status: OrderStatus }) {
           />
         )}
       </div>
-      <div className="mt-3 grid grid-cols-4 gap-2">
+      <div className="mt-3 grid grid-cols-5 gap-2">
         {steps.map((s, i) => {
           const Icon = s.icon;
           const active = i <= activeIndex;

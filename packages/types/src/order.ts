@@ -1,6 +1,6 @@
 import { LngLat } from './common';
 
-export type OrderStatus = 'PLACED' | 'PREPARED' | 'PICKED' | 'DELIVERED' | 'CANCELLED';
+export type OrderStatus = 'PENDING' | 'PLACED' | 'PREPARED' | 'PICKED' | 'DELIVERED' | 'CANCELLED';
 
 export type OrderItem = {
   id: string;
