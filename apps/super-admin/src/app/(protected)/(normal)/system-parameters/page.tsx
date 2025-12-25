@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import { Edit2, Save, Percent, Truck, Store, MapPin, DollarSign } from 'lucide-react';
-import { useSwipeConfirmation, useNotification } from '@repo/ui';
+import { useSwipeConfirmation, useNotification, TextShimmer } from '@repo/ui';
 import { mockSystemParameters } from '../../../../data/mockSystemParameters';
 
 export default function SystemParametersPage() {
@@ -20,6 +20,9 @@ export default function SystemParametersPage() {
   const [restaurantCommission, setRestaurantCommission] = useState(initialRestaurantCommission);
   const [deliveryFeePerKm, setDeliveryFeePerKm] = useState(initialDeliveryFee);
 
+  // Loading State
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
   // Editable State
   const [editedDriverCommission, setEditedDriverCommission] = useState(initialDriverCommission);
   const [editedRestaurantCommission, setEditedRestaurantCommission] = useState(initialRestaurantCommission);
@@ -27,6 +30,14 @@ export default function SystemParametersPage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const editFormRef = useRef<HTMLDivElement>(null);
+
+  // Simulate initial data loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoadingData(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Check changes
   const hasChanges = () => {
@@ -122,11 +133,15 @@ export default function SystemParametersPage() {
               >
                 <Truck size={32} className="text-emerald-600" strokeWidth={2} />
               </motion.span>
-              <div className="z-10">
+              <div className="z-10 w-full">
                 <p className="text-sm font-medium text-gray-500 mb-1">Hoa hồng tài xế</p>
-                <p className="text-3xl font-bold text-gray-800">
-                  {driverCommission}%
-                </p>
+                {isLoadingData ? (
+                  <TextShimmer width="60%" height={36} className="mt-1" rounded="lg" />
+                ) : (
+                  <p className="text-3xl font-bold text-gray-800">
+                    {driverCommission}%
+                  </p>
+                )}
               </div>
             </motion.div>
 
@@ -148,11 +163,15 @@ export default function SystemParametersPage() {
               >
                 <Store size={32} className="text-amber-600" strokeWidth={2} />
               </motion.span>
-              <div className="z-10">
+              <div className="z-10 w-full">
                 <p className="text-sm font-medium text-gray-500 mb-1">Hoa hồng quán ăn</p>
-                <p className="text-3xl font-bold text-gray-800">
-                  {restaurantCommission}%
-                </p>
+                {isLoadingData ? (
+                  <TextShimmer width="60%" height={36} className="mt-1" rounded="lg" />
+                ) : (
+                  <p className="text-3xl font-bold text-gray-800">
+                    {restaurantCommission}%
+                  </p>
+                )}
               </div>
             </motion.div>
 
@@ -174,11 +193,15 @@ export default function SystemParametersPage() {
               >
                 <MapPin size={32} className="text-blue-600" strokeWidth={2} />
               </motion.span>
-              <div className="z-10">
+              <div className="z-10 w-full">
                 <p className="text-sm font-medium text-gray-500 mb-1">Giá giao hàng / 1km</p>
-                <p className="text-3xl font-bold text-gray-800">
-                  {formatCurrency(deliveryFeePerKm)} đ
-                </p>
+                {isLoadingData ? (
+                  <TextShimmer width="40%" height={36} className="mt-1" rounded="lg" />
+                ) : (
+                  <p className="text-3xl font-bold text-gray-800">
+                    {formatCurrency(deliveryFeePerKm)} đ
+                  </p>
+                )}
               </div>
             </motion.div>
           </div>
@@ -292,7 +315,7 @@ export default function SystemParametersPage() {
         </AnimatePresence>
 
         {/* Edit Button Float */}
-        {!isEditing && (
+        {!isEditing && !isLoadingData && (
           <div className="flex justify-end sticky bottom-8">
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
