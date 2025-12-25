@@ -23,8 +23,22 @@ export default function MenuPage() {
 
   // Modal States
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
+  const [editingDish, setEditingDish] = useState<Dish | null>(null); // Draft state
   const [dishMode, setDishMode] = useState<'edit' | 'create'>('edit');
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+
+  // Sync editingDish when selectedDish changes (deep copy)
+  useEffect(() => {
+    if (selectedDish) {
+      setEditingDish(JSON.parse(JSON.stringify(selectedDish)));
+    } else {
+      setEditingDish(null);
+    }
+  }, [selectedDish]);
+
+  const handleDraftChange = (updates: Partial<Dish>) => {
+    setEditingDish(prev => prev ? { ...prev, ...updates } : null);
+  };
 
   // Scroll references
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -95,12 +109,10 @@ export default function MenuPage() {
     if (dishMode === 'create') {
       setDishes(prev => [...prev, updatedDish]);
       setDishMode('edit'); // Switch to edit after creation
-      setSelectedDish(updatedDish); // Keep it open if we weren't closing, but now DishInfoCard calls onClose
+      setSelectedDish(updatedDish); // This will trigger useEffect to update editingDish, keeping UI in sync
     } else {
       setDishes(prev => prev.map(d => d.id === updatedDish.id ? updatedDish : d));
-      if (selectedDish && selectedDish.id === updatedDish.id) {
-        setSelectedDish(updatedDish);
-      }
+      setSelectedDish(updatedDish); // Update source of truth
     }
   };
 
@@ -142,6 +154,7 @@ export default function MenuPage() {
 
   const handleCloseEdit = () => {
     setSelectedDish(null);
+    setEditingDish(null);
     setDishMode('edit');
   };
 
@@ -302,7 +315,7 @@ export default function MenuPage() {
 
       {/* DISH EDIT OVERLAY */}
       <AnimatePresence>
-        {selectedDish && (
+        {selectedDish && editingDish && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
@@ -322,8 +335,10 @@ export default function MenuPage() {
                   className="h-full overflow-hidden"
                 >
                   <DishInfoCard
-                    dish={selectedDish}
+                    dish={editingDish}
+                    originalDish={selectedDish}
                     onUpdate={handleDishUpdate}
+                    onDraftChange={handleDraftChange}
                     onClose={handleCloseEdit}
                     mode={dishMode}
                     categories={categories}
@@ -340,8 +355,8 @@ export default function MenuPage() {
                   className="h-full relative overflow-hidden"
                 >
                   <DishEditModal
-                    dish={selectedDish}
-                    onUpdate={handleDishUpdate}
+                    dish={editingDish}
+                    onDraftChange={handleDraftChange}
                     onClose={handleCloseEdit}
                   />
                 </motion.div>

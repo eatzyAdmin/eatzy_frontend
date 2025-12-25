@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import { ImageWithFallback, useSwipeConfirmation, useNotification } from '@repo/ui';
 import { Dish, MenuCategory } from '@repo/types';
@@ -8,97 +8,50 @@ import { Camera, Save, ChevronDown } from '@repo/ui/icons';
 
 interface DishInfoCardProps {
   dish: Dish;
-  onUpdate: (updatedDish: Dish) => void;
+  originalDish?: Dish; // For dirty checking
+  onUpdate: (updatedDish: Dish) => void; // Final save
+  onDraftChange?: (updates: Partial<Dish>) => void; // Update draft
   onClose: () => void;
   mode?: 'edit' | 'create';
   categories?: MenuCategory[];
   layoutId?: string;
 }
 
-export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', categories, layoutId }: DishInfoCardProps) {
+export default function DishInfoCard({ dish, originalDish, onUpdate, onDraftChange, onClose, mode = 'edit', categories, layoutId }: DishInfoCardProps) {
   const { confirm } = useSwipeConfirmation();
   const { showNotification } = useNotification();
-
-  const [name, setName] = useState(dish.name);
-  const [description, setDescription] = useState(dish.description);
-  const [imageUrl, setImageUrl] = useState(dish.imageUrl);
-  const [price, setPrice] = useState(dish.price || 0);
-  const [stockAdjustment, setStockAdjustment] = useState(0);
-  const [currentStock, setCurrentStock] = useState(dish.availableQuantity || 0);
-  const [menuCategoryId, setMenuCategoryId] = useState(dish.menuCategoryId);
   const [isCatOpen, setIsCatOpen] = useState(false);
 
-  // Reset local state when dish changes
-  useEffect(() => {
-    setName(dish.name);
-    setDescription(dish.description);
-    setImageUrl(dish.imageUrl);
-    setPrice(dish.price || 0);
-    setCurrentStock(dish.availableQuantity || 0);
-    setStockAdjustment(0);
-    setMenuCategoryId(dish.menuCategoryId);
-    setIsCatOpen(false);
-  }, [dish.id, dish.name, dish.description, dish.imageUrl, dish.price, dish.availableQuantity, dish.menuCategoryId]);
-
-  const handleStockChange = (delta: number) => {
-    if (mode === 'create') {
-      setCurrentStock(prev => Math.max(0, prev + delta));
-    } else {
-      setStockAdjustment(prev => prev + delta);
+  // Helper to update draft
+  const updateDraft = (updates: Partial<Dish>) => {
+    if (onDraftChange) {
+      onDraftChange(updates);
     }
   };
 
-  const handleApplyStock = () => {
-    if (stockAdjustment === 0) return;
-    const newStock = Math.max(0, currentStock + stockAdjustment);
-    setCurrentStock(newStock);
-    setStockAdjustment(0);
-    onUpdate({ ...dish, availableQuantity: newStock });
+  const handleStockChange = (delta: number) => {
+    const current = dish.availableQuantity || 0;
+    const newStock = Math.max(0, current + delta);
+    updateDraft({ availableQuantity: newStock });
   };
 
   const validate = () => {
-    if (!name || !name.trim()) return 'Vui lòng nhập tên món ăn';
-    if (!description || !description.trim()) return 'Vui lòng nhập mô tả món ăn';
-    if (!menuCategoryId) return 'Vui lòng chọn danh mục';
-    if (price < 0) return 'Giá món ăn không hợp lệ';
+    if (!dish.name || !dish.name.trim()) return 'Vui lòng nhập tên món ăn';
+    if (!dish.description || !dish.description.trim()) return 'Vui lòng nhập mô tả món ăn';
+    if (!dish.menuCategoryId) return 'Vui lòng chọn danh mục';
+    if ((dish.price || 0) < 0) return 'Giá món ăn không hợp lệ';
     return null;
   };
 
   const hasChanges = () => {
     if (mode === 'create') return true;
-    if (name !== dish.name) return true;
-    if ((description || '') !== (dish.description || '')) return true;
-    if (imageUrl !== dish.imageUrl) return true;
-    if (price !== (dish.price || 0)) return true;
-    if (menuCategoryId !== dish.menuCategoryId) return true;
-    if (stockAdjustment !== 0) return true;
-    if (mode === 'edit' && currentStock !== dish.availableQuantity && stockAdjustment === 0) {
-      return false;
-    }
-    return false;
+    if (!originalDish) return false;
+    // Deep comparison
+    return JSON.stringify(dish) !== JSON.stringify(originalDish);
   };
 
   const executeSave = () => {
-    let finalStock = currentStock;
-    if (mode === 'edit') {
-      finalStock = currentStock + stockAdjustment;
-    }
-
-    onUpdate({
-      ...dish,
-      name,
-      description,
-      imageUrl,
-      price,
-      availableQuantity: finalStock,
-      menuCategoryId,
-      optionGroups: dish.optionGroups
-    });
-
-    if (mode === 'edit' && stockAdjustment !== 0) {
-      handleApplyStock();
-    }
-
+    onUpdate(dish);
     showNotification({
       message: mode === 'create' ? 'Đã thêm món mới thành công!' : 'Đã cập nhật món ăn thành công!',
       type: 'success'
@@ -121,7 +74,7 @@ export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', c
     if (mode === 'edit') {
       confirm({
         title: 'Lưu thay đổi?',
-        description: 'Bạn có chắc chắn muốn lưu các thay đổi cho món ăn này không?',
+        description: 'Tất cả thay đổi về thông tin và tùy chọn món sẽ được lưu.',
         confirmText: 'Lưu thay đổi',
         type: 'info',
         processingDuration: 1500,
@@ -142,6 +95,7 @@ export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', c
   return (
     <motion.div
       layoutId={layoutId}
+      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
       className="bg-[#F7F7F7] rounded-[32px] p-8 h-full flex flex-col shadow-2xl border border-white/50 overflow-hidden"
     >
       {/* Scrollable Content */}
@@ -153,7 +107,7 @@ export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', c
               onClick={() => setIsCatOpen(!isCatOpen)}
               className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A1A] flex items-center justify-between hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
             >
-              <span>{categories.find(c => c.id === menuCategoryId)?.name || 'Chọn danh mục...'}</span>
+              <span>{categories.find(c => c.id === dish.menuCategoryId)?.name || 'Chọn danh mục...'}</span>
               <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isCatOpen ? 'rotate-180' : ''}`} />
             </button>
             <AnimatePresence>
@@ -168,11 +122,11 @@ export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', c
                   {categories.map(c => (
                     <button
                       key={c.id}
-                      onClick={() => { setMenuCategoryId(c.id); setIsCatOpen(false); }}
-                      className={`w-full text-left px-4 py-3 text-sm font-medium hover:bg-gray-50 flex items-center justify-between group ${menuCategoryId === c.id ? 'bg-[var(--primary)]/5 text-[var(--primary)]' : 'text-gray-600'}`}
+                      onClick={() => { updateDraft({ menuCategoryId: c.id }); setIsCatOpen(false); }}
+                      className={`w-full text-left px-4 py-3 text-sm font-medium hover:bg-gray-50 flex items-center justify-between group ${dish.menuCategoryId === c.id ? 'bg-[var(--primary)]/5 text-[var(--primary)]' : 'text-gray-600'}`}
                     >
                       <span>{c.name}</span>
-                      {menuCategoryId === c.id && <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]"></div>}
+                      {dish.menuCategoryId === c.id && <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]"></div>}
                     </button>
                   ))}
                 </motion.div>
@@ -186,8 +140,8 @@ export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', c
           <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Tên món</label>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={dish.name}
+            onChange={(e) => updateDraft({ name: e.target.value })}
             className="w-full bg-transparent border-b-2 border-gray-200 focus:border-[var(--primary)] text-[32px] font-anton font-bold text-[#1A1A1A] px-0 py-2 focus:outline-none transition-colors placeholder:text-gray-300"
             style={{ fontFamily: 'var(--font-anton), sans-serif' }}
             placeholder="NHẬP TÊN MÓN..."
@@ -198,8 +152,8 @@ export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', c
         <div>
           <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Mô tả</label>
           <textarea
-            value={description || ''}
-            onChange={(e) => setDescription(e.target.value)}
+            value={dish.description || ''}
+            onChange={(e) => updateDraft({ description: e.target.value })}
             rows={3}
             className="w-full bg-white/50 rounded-xl border border-gray-200 p-4 text-sm text-[#555] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 resize-none transition-all"
             placeholder="Mô tả món ăn..."
@@ -211,11 +165,11 @@ export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', c
           <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Giá gốc (VNĐ)</label>
           <input
             type="text"
-            value={price === 0 ? '' : price.toLocaleString('vi-VN')}
+            value={dish.price === 0 ? '' : dish.price.toLocaleString('vi-VN')}
             onChange={(e) => {
               const rawValue = e.target.value.replace(/\./g, '');
               if (/^\d*$/.test(rawValue)) {
-                setPrice(Number(rawValue));
+                updateDraft({ price: Number(rawValue) });
               }
             }}
             className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-lg font-bold text-[#1A1A1A] focus:outline-none focus:border-[var(--primary)]"
@@ -229,7 +183,7 @@ export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', c
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
               {mode === 'create' ? 'Số lượng ban đầu' : 'Tồn kho hiện tại'}
             </label>
-            <span className="text-xl font-bold text-[#1A1A1A]">{currentStock}</span>
+            <span className="text-xl font-bold text-[#1A1A1A]">{dish.availableQuantity}</span>
           </div>
 
           <div className="flex items-center justify-between gap-4">
@@ -238,34 +192,17 @@ export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', c
               <button onClick={() => handleStockChange(-1)} className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold transition-colors text-xs">-1</button>
             </div>
 
-            {mode === 'edit' && (
-              <div className={`text-lg font-bold ${stockAdjustment > 0 ? 'text-green-600' : stockAdjustment < 0 ? 'text-red-500' : 'text-gray-400'}`}>
-                {stockAdjustment > 0 ? '+' : ''}{stockAdjustment}
-              </div>
-            )}
-
             <div className="flex items-center gap-2">
               <button onClick={() => handleStockChange(1)} className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold transition-colors text-xs">+1</button>
               <button onClick={() => handleStockChange(10)} className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold transition-colors text-xs">+10</button>
             </div>
           </div>
-
-          {mode === 'edit' && stockAdjustment !== 0 && (
-            <motion.button
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              onClick={handleApplyStock}
-              className="w-full mt-3 bg-[#1A1A1A] text-white rounded-xl py-2 text-xs font-bold uppercase tracking-wide hover:bg-black transition-colors"
-            >
-              Cập nhật tồn kho
-            </motion.button>
-          )}
         </div>
 
         {/* Image Edit */}
         <div className="relative aspect-[16/10] bg-gray-100 rounded-[24px] overflow-hidden group border border-gray-200 shrink-0">
-          {imageUrl ? (
-            <ImageWithFallback src={imageUrl} alt={name} fill className="object-cover" />
+          {dish.imageUrl ? (
+            <ImageWithFallback src={dish.imageUrl} alt={dish.name} fill className="object-cover" />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-gray-400">
               <Camera className="w-8 h-8 opacity-50" />
@@ -273,7 +210,7 @@ export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', c
           )}
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <button className="bg-white/90 text-[#1A1A1A] px-4 py-2 rounded-full text-xs font-bold shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all">
-              {imageUrl ? 'Đổi ảnh' : 'Thêm ảnh'}
+              {dish.imageUrl ? 'Đổi ảnh' : 'Thêm ảnh'}
             </button>
           </div>
         </div>
@@ -283,10 +220,13 @@ export default function DishInfoCard({ dish, onUpdate, onClose, mode = 'edit', c
       <div className="mt-4 pt-4 border-t border-gray-200/50">
         <button
           onClick={handleSaveDetails}
-          className="w-full py-4 bg-[var(--primary)] text-white rounded-2xl font-bold shadow-lg shadow-[var(--primary)]/30 hover:shadow-[var(--primary)]/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          className={`w-full py-4 text-white rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all ${hasChanges()
+              ? 'bg-[var(--primary)] shadow-[var(--primary)]/30 hover:shadow-[var(--primary)]/50 hover:scale-[1.02] active:scale-[0.98]'
+              : 'bg-gray-300 shadow-none cursor-not-allowed opacity-70'
+            }`}
         >
           <Save className="w-5 h-5" />
-          <span>{mode === 'create' ? 'TẠO MÓN' : 'LƯU THAY ĐỔI'}</span>
+          <span>{mode === 'create' ? 'TẠO MÓN' : hasChanges() ? 'LƯU THAY ĐỔI' : 'ĐÃ LƯU'}</span>
         </button>
       </div>
     </motion.div>

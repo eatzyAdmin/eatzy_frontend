@@ -7,24 +7,26 @@ import { Plus, Trash2, GripVertical, X, ChevronDown, ChevronUp } from '@repo/ui/
 
 interface DishEditModalProps {
   dish: Dish;
-  onUpdate: (updatedDish: Dish) => void;
+  onDraftChange?: (updates: Partial<Dish>) => void;
   onClose: () => void;
+  onUpdate?: any; // Deprecated but might be passed by parent if not fully cleaned up, ignore it
 }
 
-export default function DishEditModal({ dish, onUpdate, onClose }: DishEditModalProps) {
-  const [optionGroups, setOptionGroups] = useState<OptionGroup[]>(dish.optionGroups || []);
+export default function DishEditModal({ dish, onDraftChange, onClose }: DishEditModalProps) {
+  const optionGroups = dish.optionGroups || [];
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
+  // Initialize expanded state only once or when new groups are added
   useEffect(() => {
-    setOptionGroups(dish.optionGroups || []);
-    const initialExpanded: Record<string, boolean> = {};
-    (dish.optionGroups || []).forEach(g => initialExpanded[g.id] = true);
-    setExpandedGroups(initialExpanded);
-  }, [dish.id]);
+    // We don't overwrite expanded state on every render, just ensure we have keys? 
+    // Actually, let's just keep expandedGroups local.
+    // If a new group is added, we set it to expanded in the handler.
+  }, []);
 
   const updateGroups = (newGroups: OptionGroup[]) => {
-    setOptionGroups(newGroups);
-    onUpdate({ ...dish, optionGroups: newGroups });
+    if (onDraftChange) {
+      onDraftChange({ optionGroups: newGroups });
+    }
   };
 
   const handleAddGroup = () => {
@@ -206,8 +208,8 @@ export default function DishEditModal({ dish, onUpdate, onClose }: DishEditModal
                           <button
                             onClick={() => handleSetVariant(group.id)}
                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${isVariant
-                              ? 'bg-white text-[var(--primary)] border-[var(--primary)]/30 hover:bg-[var(--primary)]/5'
-                              : 'bg-white text-gray-500 border-gray-200 hover:text-[var(--primary)] hover:border-[var(--primary)]'
+                                ? 'bg-white text-[var(--primary)] border-[var(--primary)]/30 hover:bg-[var(--primary)]/5'
+                                : 'bg-white text-gray-500 border-gray-200 hover:text-[var(--primary)] hover:border-[var(--primary)]'
                               }`}
                           >
                             {isVariant ? '✓ Đang là phân loại' : 'Đặt làm phân loại'}
