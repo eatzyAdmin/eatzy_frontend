@@ -12,8 +12,11 @@ import CurrentOrderPanel from "@/features/orders/components/CurrentOrderPanel";
 import { LocateFixed, Bike } from "@repo/ui/icons";
 import type { DriverActiveOrder } from "@repo/types";
 
+import { useNormalLoading } from "../context/NormalLoadingContext";
+
 export default function Page() {
   const { hide } = useLoading();
+  const { stopLoading } = useNormalLoading();
   const [online, setOnline] = useState(false);
   const [locateVersion, setLocateVersion] = useState(0);
   const [activeOrder, setActiveOrder] = useState<DriverActiveOrder | null>(null);
@@ -24,8 +27,9 @@ export default function Page() {
     const timer = setTimeout(() => {
       hide();
     }, 1500);
+    stopLoading();
     return () => clearTimeout(timer);
-  }, [hide]);
+  }, [hide, stopLoading]);
 
   return (
     <div className="w-full h-full">

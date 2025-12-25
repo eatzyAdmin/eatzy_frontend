@@ -2,6 +2,7 @@
 
 import { motion } from "@repo/ui/motion";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useSwipeConfirmation, useLoading, useNotification } from "@repo/ui";
 import {
   User, Settings, CreditCard, ShieldCheck,
@@ -11,11 +12,18 @@ import { mockDriverProfile } from "@/features/profile/data/mockProfileData";
 import DriverProfileCard from "@/features/profile/components/DriverProfileCard";
 import ProfileMenuItem from "@/features/profile/components/ProfileMenuItem";
 
+import { useNormalLoading } from "../context/NormalLoadingContext";
+
 export default function ProfilePage() {
   const router = useRouter();
   const { confirm } = useSwipeConfirmation();
   const { show, hide } = useLoading();
   const { showNotification } = useNotification();
+  const { stopLoading } = useNormalLoading();
+
+  useEffect(() => {
+    stopLoading();
+  }, [stopLoading]);
 
   const handleLogout = () => {
     confirm({

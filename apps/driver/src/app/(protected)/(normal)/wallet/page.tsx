@@ -10,9 +10,16 @@ import TopUpDrawer from "@/features/wallet/components/TopUpDrawer";
 import WithdrawDrawer from "@/features/wallet/components/WithdrawDrawer";
 import { History } from "@repo/ui/icons";
 
+import { useNormalLoading } from "../context/NormalLoadingContext";
+
 export default function WalletPage() {
   const { hide } = useLoading();
+  const { stopLoading } = useNormalLoading();
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+
+  useEffect(() => {
+    stopLoading();
+  }, [stopLoading]);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
 

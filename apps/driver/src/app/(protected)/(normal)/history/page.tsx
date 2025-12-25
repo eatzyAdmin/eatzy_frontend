@@ -9,9 +9,11 @@ import HistoryStats from "@/features/history/components/HistoryStats";
 import HistoryFilter from "@/features/history/components/HistoryFilter";
 import DriverHistoryCard from "@/features/history/components/DriverHistoryCard";
 import DriverOrderDetailDrawer from "@/features/history/components/DriverOrderDetailDrawer";
+import { useNormalLoading } from "../context/NormalLoadingContext";
 
 export default function HistoryPage() {
   const { hide } = useLoading();
+  const { stopLoading } = useNormalLoading();
   const [orders, setOrders] = useState<DriverHistoryOrder[]>([]);
   const [filter, setFilter] = useState<"ALL" | "DELIVERED" | "CANCELLED">("ALL");
   const [selectedOrder, setSelectedOrder] = useState<DriverHistoryOrder | null>(null);
@@ -39,8 +41,9 @@ export default function HistoryPage() {
     // Initial load
     const t = setTimeout(() => hide(), 1500);
     setOrders(getDriverHistory());
+    stopLoading();
     return () => clearTimeout(t);
-  }, [hide]);
+  }, [hide, stopLoading]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
