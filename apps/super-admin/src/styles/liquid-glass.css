@@ -1,0 +1,99 @@
+/* Liquid Glass Navigation Styles - Final Fix */
+.liquid-glass-nav-item {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  color: rgb(55, 65, 81);
+  /* Text Gray 600 */
+  background: transparent;
+  box-shadow: none;
+}
+
+.liquid-glass-nav-item:hover {
+  background: transparent !important;
+  box-shadow: inset 0 0 12px 8px rgba(255, 255, 255, 0.35) !important;
+  /* Inner shadow only */
+  color: rgb(31, 41, 55);
+}
+
+.liquid-glass-nav-item.active {
+  background: transparent !important;
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 18px 12px rgba(255, 255, 255, 0.7) !important;
+  /* Stronger inner shadow */
+  color: rgb(31, 41, 55);
+}
+
+.liquid-glass-container:hover .profile-section {
+  box-shadow: inset 0 0 24px 16px rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Scrollbar styles */
+.liquid-glass-scrollbar::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.liquid-glass-container:hover .liquid-glass-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.liquid-glass-scrollbar::-webkit-scrollbar-track {
+  background: rgba(55, 65, 81, 0.1);
+  border-radius: 10px;
+  margin: 4px 0;
+}
+
+.liquid-glass-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg,
+      rgba(55, 65, 81, 0.4) 0%,
+      rgba(75, 85, 99, 0.3) 100%);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 8px 4px rgba(255, 255, 255, 0.3);
+}
+
+.liquid-glass-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg,
+      rgba(55, 65, 81, 0.6) 0%,
+      rgba(75, 85, 99, 0.5) 100%);
+  box-shadow: inset 0 0 12px 6px rgba(255, 255, 255, 0.4);
+}
+
+.liquid-glass-scrollbar {
+  scrollbar-width: none;
+  scrollbar-color: rgba(55, 65, 81, 0.4) rgba(55, 65, 81, 0.1);
+  transition: scrollbar-width 0.3s ease;
+}
+
+.liquid-glass-container:hover .liquid-glass-scrollbar {
+  scrollbar-width: thin;
+}
+
+/* Logout item specific styles */
+.logout-item:hover {
+  background: transparent !important;
+  box-shadow: inset 0 0 12px 8px rgba(239, 68, 68, 0.35) !important;
+  color: rgb(239, 68, 68);
+}
+
+/* Text styles */
+.liquid-glass-nav-item .nav-text {
+  color: rgb(55, 65, 81);
+  /* Text Gray 600 */
+  transition: color 0.3s ease;
+}
+
+.liquid-glass-nav-item:hover .nav-text,
+.liquid-glass-nav-item.active .nav-text {
+  color: rgb(31, 41, 55);
+}
+
+.logout-item:hover .nav-text {
+  color: rgb(239, 68, 68);
+}
