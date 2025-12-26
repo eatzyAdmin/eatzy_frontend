@@ -3,9 +3,11 @@ import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "@repo/ui/motion";
-import { MapPin, Hand, useSwipeConfirmation, useNotification, useLoading } from "@repo/ui";
+import { MapPin, Hand, useSwipeConfirmation, useNotification, useLoading, STORAGE_KEYS } from "@repo/ui";
 const MapView = dynamic(() => import("@/features/checkout/components/MapView"), { ssr: false });
 import { formatVnd } from "@repo/lib";
+import { useCartStore } from "@repo/store";
+import type { Order } from "@repo/types";
 
 export default function RightSidebar({
   restaurantName,
@@ -22,7 +24,13 @@ export default function RightSidebar({
   const router = useRouter();
   const { confirm } = useSwipeConfirmation();
   const { showNotification } = useNotification();
-  const { show: showLoading } = useLoading();
+  const { show: showLoading, hide: hideLoading } = useLoading();
+
+  // Get cart data
+  const items = useCartStore((s) => s.items);
+  const activeRestaurantId = useCartStore((s) => s.activeRestaurantId);
+  const clearCart = useCartStore((s) => s.clearCart);
+  const subtotal = useCartStore((s) => s.total());
 
   useEffect(() => {
     const el = rightColRef.current;
@@ -37,19 +45,109 @@ export default function RightSidebar({
       type: "success",
       processingDuration: 1500,
       onConfirm: async () => {
-        showLoading("Đang xử lý đơn hàng...");
+        try {
+          showLoading("Đang xử lý đơn hàng...");
 
-        // Navigate to home first
-        router.push('/home');
+          // Get current user
+          const currentUserStr = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+          if (!currentUserStr || !activeRestaurantId || items.length === 0) {
+            console.error('Missing data:', { hasUser: !!currentUserStr, restaurantId: activeRestaurantId, itemCount: items.length });
+            throw new Error('Missing required data');
+          }
 
-        // Show notification after navigation
-        setTimeout(() => {
+          const currentUser = JSON.parse(currentUserStr);
+
+          // Get customer ID
+          const customersStr = localStorage.getItem(STORAGE_KEYS.CUSTOMERS);
+          if (!customersStr) throw new Error('No customers data');
+          const customers = JSON.parse(customersStr);
+          const customer = customers.find((c: any) => c.userId === currentUser.id);
+          if (!customer) throw new Error('Customer not found');
+
+          // Get restaurant
+          const restaurantsStr = localStorage.getItem(STORAGE_KEYS.RESTAURANTS);
+          if (!restaurantsStr) throw new Error('No restaurants data');
+          const restaurants = JSON.parse(restaurantsStr);
+          const restaurant = restaurants.find((r: any) => r.id === activeRestaurantId);
+          if (!restaurant) throw new Error('Restaurant not found');
+
+          // Get all orders to generate new order code
+          const ordersStr = localStorage.getItem(STORAGE_KEYS.ORDERS);
+          const existingOrders = ordersStr ? JSON.parse(ordersStr) : [];
+          const orderNumber = existingOrders.length + 1000;
+
+          // Create new order
+          const newOrder: Order = {
+            id: `ord-${orderNumber}`,
+            code: `EZ-${orderNumber}`,
+            customerId: customer.id,
+            driverId: undefined, // No driver yet (PENDING state)
+            restaurantId: activeRestaurantId,
+            status: 'PENDING',
+            items: items.map(item => ({
+              id: item.id,
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              imageUrl: item.imageUrl,
+              restaurantId: activeRestaurantId,
+              options: item.options,
+            })),
+            subtotal: subtotal,
+            fee: totalPayable - subtotal - 0, // Assuming no discount for now
+            discount: 0,
+            total: totalPayable,
+            deliveryLocation: {
+              lat: 10.7729,
+              lng: 106.6998,
+              address: 'Delivery address' // You can get this from the form
+            },
+            restaurantLocation: {
+              lat: 10.7769,
+              lng: 106.6923,
+              name: restaurant.name
+            },
+            driverLocation: {
+              lat: 0,
+              lng: 0,
+              name: ''
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          // Save to localStorage
+          const updatedOrders = [...existingOrders, newOrder];
+          localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updatedOrders));
+
+          // Clear cart
+          clearCart();
+
+          // Hide loading
+          hideLoading();
+
+          // Navigate to home
+          router.push('/home');
+
+          // Show notification
+          setTimeout(() => {
+            showNotification({
+              type: "success",
+              message: "Đặt hàng thành công",
+              format: `Đơn hàng ${newOrder.code} đã được đặt thành công. Đang tìm tài xế...`,
+            });
+          }, 800);
+        } catch (error) {
+          console.error('❌ FULL ERROR:', error);
+          console.error('Error type:', typeof error);
+          console.error('Error message:', error instanceof Error ? error.message : String(error));
+          hideLoading();
           showNotification({
-            type: "success",
-            message: "Đặt hàng thành công",
-            format: `Đơn hàng của bạn đã được đặt thành công. Đang tìm tài xế...`,
+            type: "error",
+            message: "Lỗi tạo đơn hàng",
+            format: error instanceof Error ? error.message : "Không thể tạo đơn hàng. Vui lòng thử lại.",
           });
-        }, 800);
+        }
       }
     });
   };
