@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { ImageWithFallback } from "@repo/ui";
+import { ImageWithFallback, STORAGE_KEYS } from "@repo/ui";
 import {
   X,
   MapPin,
@@ -20,20 +20,33 @@ import {
 } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
 import type { Order } from "@repo/types";
-import { getRestaurantById } from "@/features/search/data/mockSearchData";
 
 const OrderReviewTab = dynamic(() => import("@/features/orders/components/OrderReviewTab"), { ssr: false });
 
-// Mock driver data - in real app this would come from API
-const mockDriverData = {
-  name: "Nguyễn Văn A",
-  phone: "0901234567",
-  vehicleType: "Xe máy",
-  licensePlate: "59A-12345",
-  rating: 4.8,
-  totalTrips: 1234,
-  profilePhoto: "https://i.pravatar.cc/150?img=33",
-};
+// Helper to get restaurant from localStorage
+function getRestaurantById(id: string) {
+  try {
+    const restaurantsStr = localStorage.getItem(STORAGE_KEYS.RESTAURANTS);
+    if (!restaurantsStr) return null;
+    const restaurants = JSON.parse(restaurantsStr);
+    return restaurants.find((r: any) => r.id === id) || null;
+  } catch {
+    return null;
+  }
+}
+
+// Helper to get driver from localStorage
+function getDriverById(id: string | undefined) {
+  if (!id) return null;
+  try {
+    const driversStr = localStorage.getItem(STORAGE_KEYS.DRIVERS);
+    if (!driversStr) return null;
+    const drivers = JSON.parse(driversStr);
+    return drivers.find((d: any) => d.id === id) || null;
+  } catch {
+    return null;
+  }
+}
 
 export default function OrderDetailDrawer({
   open,
@@ -46,6 +59,7 @@ export default function OrderDetailDrawer({
 }) {
   const [activeTab, setActiveTab] = useState<"details" | "reviews">("details");
   const restaurant = useMemo(() => (order ? getRestaurantById(order.restaurantId) : null), [order]);
+  const driver = useMemo(() => (order ? getDriverById(order.driverId) : null), [order]);
 
   useEffect(() => {
     if (open) {
@@ -295,63 +309,69 @@ export default function OrderDetailDrawer({
                       style={{ scrollbarWidth: 'none' }}
                     >
                       {/* Driver Info - Compact */}
-                      <div className="bg-white rounded-[32px] p-5 pr-6 shadow-[0_6px_20px_rgba(0,0,0,0.06)] border border-gray-100 flex items-center justify-between gap-4">
-                        {/* Left Side: Avatar + Name */}
-                        <div className="flex-1 flex flex-col items-center justify-center text-center">
-                          {/* Avatar */}
-                          <div className="relative w-20 h-20 mb-2">
-                            <div className="w-full h-full rounded-full overflow-hidden relative z-10 border-[3px] border-white shadow-sm">
-                              <ImageWithFallback
-                                src={mockDriverData.profilePhoto}
-                                alt={mockDriverData.name}
-                                fill
-                                className="object-cover"
-                              />
+                      {driver ? (
+                        <div className="bg-white rounded-[32px] p-5 pr-6 shadow-[0_6px_20px_rgba(0,0,0,0.06)] border border-gray-100 flex items-center justify-between gap-4">
+                          {/* Left Side: Avatar + Name */}
+                          <div className="flex-1 flex flex-col items-center justify-center text-center">
+                            {/* Avatar */}
+                            <div className="relative w-20 h-20 mb-2">
+                              <div className="w-full h-full rounded-full overflow-hidden relative z-10 border-[3px] border-white shadow-sm">
+                                <ImageWithFallback
+                                  src={driver.profilePhoto || "https://i.pravatar.cc/150?img=12"}
+                                  alt={driver.fullName}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                              <div className="absolute bottom-0 right-0 z-20 bg-[var(--primary)] text-white w-6 h-6 flex items-center justify-center rounded-full border-2 border-white shadow-md">
+                                <Star className="w-3 h-3 fill-white" />
+                              </div>
                             </div>
-                            <div className="absolute bottom-0 right-0 z-20 bg-[var(--primary)] text-white w-6 h-6 flex items-center justify-center rounded-full border-2 border-white shadow-md">
-                              <Star className="w-3 h-3 fill-white" />
+
+                            {/* Name & Role */}
+                            <div className="space-y-0.5">
+                              <h2 className="text-lg font-bold text-[#1A1A1A] leading-tight tracking-tight">
+                                {driver.fullName}
+                              </h2>
+                              <div className="flex items-center justify-center gap-1 text-xs text-[#5E5E5E] font-medium">
+                                <Award className="w-3 h-3 text-[#5E5E5E]" />
+                                <span>{driver.licensePlate}</span>
+                              </div>
                             </div>
                           </div>
 
-                          {/* Name & Role */}
-                          <div className="space-y-0.5">
-                            <h2 className="text-lg font-bold text-[#1A1A1A] leading-tight tracking-tight">
-                              {mockDriverData.name}
-                            </h2>
-                            <div className="flex items-center justify-center gap-1 text-xs text-[#5E5E5E] font-medium">
-                              <Award className="w-3 h-3 text-[#5E5E5E]" />
-                              <span>{mockDriverData.licensePlate}</span>
+                          {/* Right Side: Stats List */}
+                          <div className="flex flex-col gap-3 py-1 min-w-[100px]">
+                            {/* Stat 1: Rating */}
+                            <div className="text-left">
+                              <div className="flex items-center gap-1 text-xl font-bold text-[#1A1A1A] leading-none mb-0.5">
+                                {driver.rating} <Star className="w-3.5 h-3.5 fill-[#1A1A1A]" />
+                              </div>
+                              <div className="text-[10px] text-[#222222] font-medium leading-tight">Đánh giá</div>
+                            </div>
+
+                            <div className="w-full h-[1px] bg-gray-100" />
+
+                            {/* Stat 2: Total Trips */}
+                            <div className="text-left">
+                              <div className="text-xl font-bold text-[#1A1A1A] leading-none mb-0.5">{driver.totalTrips}</div>
+                              <div className="text-[10px] text-[#222222] font-medium leading-tight">Chuyến đi</div>
+                            </div>
+
+                            <div className="w-full h-[1px] bg-gray-100" />
+
+                            {/* Stat 3: Vehicle Type */}
+                            <div className="text-left">
+                              <div className="text-lg font-bold text-[#1A1A1A] leading-none mb-0.5 truncate">{driver.vehicleType}</div>
+                              <div className="text-[10px] text-[#222222] font-medium leading-tight">Phương tiện</div>
                             </div>
                           </div>
                         </div>
-
-                        {/* Right Side: Stats List */}
-                        <div className="flex flex-col gap-3 py-1 min-w-[100px]">
-                          {/* Stat 1: Rating */}
-                          <div className="text-left">
-                            <div className="flex items-center gap-1 text-xl font-bold text-[#1A1A1A] leading-none mb-0.5">
-                              {mockDriverData.rating} <Star className="w-3.5 h-3.5 fill-[#1A1A1A]" />
-                            </div>
-                            <div className="text-[10px] text-[#222222] font-medium leading-tight">Đánh giá</div>
-                          </div>
-
-                          <div className="w-full h-[1px] bg-gray-100" />
-
-                          {/* Stat 2: Total Trips */}
-                          <div className="text-left">
-                            <div className="text-xl font-bold text-[#1A1A1A] leading-none mb-0.5">{mockDriverData.totalTrips}</div>
-                            <div className="text-[10px] text-[#222222] font-medium leading-tight">Chuyến đi</div>
-                          </div>
-
-                          <div className="w-full h-[1px] bg-gray-100" />
-
-                          {/* Stat 3: Vehicle Type */}
-                          <div className="text-left">
-                            <div className="text-lg font-bold text-[#1A1A1A] leading-none mb-0.5 truncate">{mockDriverData.vehicleType}</div>
-                            <div className="text-[10px] text-[#222222] font-medium leading-tight">Phương tiện</div>
-                          </div>
+                      ) : (
+                        <div className="bg-white rounded-[32px] p-5 shadow-[0_6px_20px_rgba(0,0,0,0.06)] border border-gray-100 text-center">
+                          <div className="text-gray-500 text-sm">Chưa có tài xế</div>
                         </div>
-                      </div>
+                      )}
 
                       {/* Delivery Route */}
                       <div className="rounded-[24px] p-8 border-2 border-gray-200">
@@ -448,7 +468,7 @@ export default function OrderDetailDrawer({
                   >
                     <OrderReviewTab
                       order={order}
-                      driver={mockDriverData}
+                      driver={driver}
                       restaurant={restaurant ?? null}
                     />
                   </motion.div>

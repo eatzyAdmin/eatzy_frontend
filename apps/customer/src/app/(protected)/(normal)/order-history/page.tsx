@@ -4,9 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { ArrowLeft, Calendar, Receipt, Filter, Search, X } from "@repo/ui/icons";
-import { useLoading, RestaurantCardShimmer } from "@repo/ui";
+import { useLoading, RestaurantCardShimmer, STORAGE_KEYS } from "@repo/ui";
 import type { Order, OrderStatus } from "@repo/types";
-import { getOrders } from "@/features/orders/data/mockOrders";
 import OrderHistoryCard from "@/features/orders/components/OrderHistoryCard";
 import OrderDetailDrawer from "@/features/orders/components/OrderDetailDrawer";
 
@@ -15,6 +14,40 @@ const statusFilters: { value: OrderStatus | "ALL"; label: string }[] = [
   { value: "DELIVERED", label: "Hoàn thành" },
   { value: "CANCELLED", label: "Đã hủy" },
 ];
+
+// Helper to get order history from localStorage
+function getOrderHistory(): Order[] {
+  try {
+    // Get current user
+    const currentUserStr = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+    if (!currentUserStr) return [];
+
+    const currentUser = JSON.parse(currentUserStr);
+
+    // Get customer by userId
+    const customersStr = localStorage.getItem(STORAGE_KEYS.CUSTOMERS);
+    if (!customersStr) return [];
+
+    const customers = JSON.parse(customersStr);
+    const customer = customers.find((c: any) => c.userId === currentUser.id);
+    if (!customer) return [];
+
+    // Get all orders
+    const ordersStr = localStorage.getItem(STORAGE_KEYS.ORDERS);
+    if (!ordersStr) return [];
+
+    const allOrders = JSON.parse(ordersStr);
+
+    // Filter: only this customer's DELIVERED or CANCELLED orders
+    return allOrders.filter((o: Order) =>
+      o.customerId === customer.id &&
+      (o.status === "DELIVERED" || o.status === "CANCELLED")
+    );
+  } catch (error) {
+    console.error('Error loading order history:', error);
+    return [];
+  }
+}
 
 export default function OrderHistoryPage() {
   const router = useRouter();
@@ -36,8 +69,8 @@ export default function OrderHistoryPage() {
   }, [hide]);
 
   useEffect(() => {
-    // Simulate fetching orders from API
-    const fetchedOrders = getOrders();
+    // Load orders from localStorage
+    const fetchedOrders = getOrderHistory();
     setOrders(fetchedOrders);
   }, []);
 
