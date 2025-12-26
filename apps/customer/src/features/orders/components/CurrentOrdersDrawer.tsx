@@ -82,6 +82,8 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
   }, [open]); // Reload when drawer opens
 
   const handleCancelOrder = () => {
+    if (!activeOrder) return;
+
     confirm({
       title: "Hủy đơn hàng",
       description: "Bạn có chắc chắn muốn hủy đơn hàng này?",
@@ -89,16 +91,53 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
       type: "danger",
       processingDuration: 1500,
       onConfirm: async () => {
-        hideLoading();
+        try {
+          // Get all orders from localStorage
+          const ordersStr = localStorage.getItem(STORAGE_KEYS.ORDERS);
+          if (!ordersStr) {
+            throw new Error('No orders found');
+          }
 
-        showNotification({
-          type: "success",
-          message: "Đã hủy đơn hàng",
-          format: `Đơn hàng ${activeOrder?.code} đã được hủy thành công`,
-        });
+          const allOrders = JSON.parse(ordersStr);
 
-        // Close drawer after cancellation
-        setTimeout(() => onClose(), 500);
+          // Remove the cancelled order
+          const updatedOrders = allOrders.filter((o: Order) => o.id !== activeOrder.id);
+
+          // Save back to localStorage
+          localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updatedOrders));
+
+          // Update local state
+          const newCurrentOrders = getCurrentOrders();
+          setOrders(newCurrentOrders);
+
+          // Update active order
+          if (newCurrentOrders.length > 0) {
+            setActiveOrderId(newCurrentOrders[0].id);
+          } else {
+            setActiveOrderId('');
+          }
+
+          hideLoading();
+
+          showNotification({
+            type: "success",
+            message: "Đã hủy đơn hàng",
+            format: `Đơn hàng ${activeOrder.code} đã được hủy và xóa thành công`,
+          });
+
+          // Close drawer after cancellation if no orders left
+          if (newCurrentOrders.length === 0) {
+            setTimeout(() => onClose(), 500);
+          }
+        } catch (error) {
+          console.error('Error cancelling order:', error);
+          hideLoading();
+          showNotification({
+            type: "error",
+            message: "Lỗi",
+            format: "Không thể hủy đơn hàng. Vui lòng thử lại.",
+          });
+        }
       }
     });
   };
