@@ -2,9 +2,12 @@
 
 import { ImageWithFallback } from "@repo/ui";
 import { Star, Award } from "@repo/ui/icons";
-import { DriverProfile } from "../data/mockProfileData";
 
-export default function DriverProfileCard({ profile }: { profile: DriverProfile }) {
+export default function DriverProfileCard({ profile }: { profile: any }) {
+  // Support both mock data (name) and localStorage data (fullName)
+  const displayName = profile.fullName || profile.name || "Tài xế";
+  const displayYears = profile.yearsActive || 2; // Default 2 years if not available
+
   return (
     <div className="bg-white rounded-[32px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col items-center">
       {/* Avatar & Badge */}
@@ -12,7 +15,7 @@ export default function DriverProfileCard({ profile }: { profile: DriverProfile 
         <div className="w-full h-full rounded-full overflow-hidden relative z-10 border-4 border-white shadow-lg">
           <ImageWithFallback
             src={profile.profilePhoto}
-            alt={profile.name}
+            alt={displayName}
             fill
             className="object-cover"
           />
@@ -24,7 +27,7 @@ export default function DriverProfileCard({ profile }: { profile: DriverProfile 
 
       {/* Name & Info */}
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold font-anton text-[#1A1A1A] mb-1">{profile.name}</h2>
+        <h2 className="text-2xl font-bold font-anton text-[#1A1A1A] mb-1">{displayName}</h2>
         <div className="flex items-center justify-center gap-2 text-sm text-gray-500 font-medium bg-gray-50 px-3 py-1 rounded-full border border-gray-100 mx-auto w-fit">
           <Award className="w-4 h-4" />
           <span>{profile.licensePlate}</span>
@@ -44,7 +47,7 @@ export default function DriverProfileCard({ profile }: { profile: DriverProfile 
           <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Chuyến xe</div>
         </div>
         <div className="text-center border-l border-gray-200">
-          <div className="text-xl font-bold text-[#1A1A1A] mb-1">{profile.yearsActive}</div>
+          <div className="text-xl font-bold text-[#1A1A1A] mb-1">{displayYears}</div>
           <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Năm h.động</div>
         </div>
       </div>

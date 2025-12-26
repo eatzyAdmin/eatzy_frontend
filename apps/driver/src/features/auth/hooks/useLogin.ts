@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { authApi } from "@repo/api";
 import { useAuthStore } from "@repo/store";
 import { LoginFormData } from "@repo/lib";
+import { STORAGE_KEYS } from "@repo/ui";
 
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,59 +12,85 @@ export const useLogin = () => {
     setIsLoading(true);
     setError(null);
 
-    // Clear old token before login to prevent sending invalid token in Authorization header
-    // causing backend to reject the request with 401/403 despite login endpoint being public
+    // Clear old token before login
     localStorage.removeItem("access_token");
 
     try {
-      const res = await authApi.login({
-        username: data.email,
-        password: data.password,
+      // Get users from localStorage
+      const usersStr = localStorage.getItem(STORAGE_KEYS.USERS);
+      if (!usersStr) {
+        setError("Không tìm thấy dữ liệu người dùng");
+        setIsLoading(false);
+        return false;
+      }
+
+      const users = JSON.parse(usersStr);
+
+      // Find user by email and password
+      const user = users.find(
+        (u: any) => u.email === data.email && u.password === data.password
+      );
+
+      if (!user) {
+        setError("Email hoặc mật khẩu không đúng");
+        setIsLoading(false);
+        return false;
+      }
+
+      // Check if user is a driver
+      if (user.role !== 'driver') {
+        setError("Tài khoản này không phải là tài khoản tài xế");
+        setIsLoading(false);
+        return false;
+      }
+
+      // Get driver profile
+      const driversStr = localStorage.getItem(STORAGE_KEYS.DRIVERS);
+      if (!driversStr) {
+        setError("Không tìm thấy thông tin tài xế");
+        setIsLoading(false);
+        return false;
+      }
+
+      const drivers = JSON.parse(driversStr);
+      const driverProfile = drivers.find((d: any) => d.userId === user.id);
+
+      if (!driverProfile) {
+        setError("Không tìm thấy hồ sơ tài xế");
+        setIsLoading(false);
+        return false;
+      }
+
+      // Check driver status
+      if (driverProfile.status === 'disabled') {
+        setError("Tài khoản tài xế đã bị vô hiệu hóa");
+        setIsLoading(false);
+        return false;
+      }
+
+      // Generate mock token
+      const mockToken = `driver_token_${user.id}_${Date.now()}`;
+
+      // Save login state
+      setLogin(mockToken, user);
+      localStorage.setItem("access_token", mockToken);
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+
+      // Set cookie for Driver middleware authentication
+      document.cookie = "driver_auth=1; path=/; max-age=86400"; // 1 day expiry
+
+      console.log('✅ Driver login successful:', {
+        user: user.email,
+        driver: driverProfile.fullName,
+        driverId: driverProfile.id
       });
 
-      if (res.data?.access_token && res.data?.user) {
-        setLogin(res.data.access_token, res.data.user);
-        localStorage.setItem("access_token", res.data.access_token);
-
-        // CRITICAL: Set cookie for Driver middleware authentication
-        // Middleware at apps/driver/src/middleware.ts checks for 'driver_auth=1' cookie
-        // Without this, middleware redirects /home -> /login causing infinite loop
-        document.cookie = "driver_auth=1; path=/; max-age=86400"; // 1 day expiry
-
-        // DO NOT setIsLoading(false) here on success to keep spinner during redirect
-        return true;
-      }
-
-      // FIX: Handle case where response is OK but data is invalid (e.g. Proxy error)
-      setError("Đăng nhập thất bại. Phản hồi không hợp lệ.");
-      setIsLoading(false);
-      return false;
+      // Keep loading during redirect
+      return true;
 
     } catch (err: unknown) {
-      if (typeof err === "object" && err !== null) {
-        const maybeMessage = (err as { message?: string | string[] }).message;
-        if (maybeMessage) {
-          if (Array.isArray(maybeMessage)) {
-            setError(maybeMessage[0]);
-          } else {
-            setError(maybeMessage);
-          }
-        } else {
-          const maybeError = (err as { error?: string | string[] }).error;
-          if (maybeError) {
-            if (Array.isArray(maybeError)) {
-              setError(maybeError[0]);
-            } else {
-              setError(maybeError);
-            }
-          } else {
-            setError("Đã có lỗi xảy ra. Vui lòng thử lại.");
-          }
-        }
-      } else {
-        setError("Đã có lỗi xảy ra. Vui lòng thử lại.");
-      }
-
+      console.error('Driver login error:', err);
+      setError("Đã có lỗi xảy ra. Vui lòng thử lại.");
       setIsLoading(false);
       return false;
     }
