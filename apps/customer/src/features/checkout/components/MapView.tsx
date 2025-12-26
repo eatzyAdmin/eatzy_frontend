@@ -41,28 +41,37 @@ export default function MapView({
   };
 
   useEffect(() => {
-    let cancelled = false;
     if (!navigator.geolocation) {
       setError("Trình duyệt không hỗ trợ định vị");
+      // Fallback to default Ho Chi Minh City location
+      const defaultPos = { lng: 106.6927, lat: 10.7769 };
+      setUserPos(defaultPos);
+      setPickupPosState(defaultPos);
       return;
     }
-    const id = navigator.geolocation.watchPosition(
+
+    // Try to get current position first (one-time)
+    navigator.geolocation.getCurrentPosition(
       (p) => {
-        if (cancelled) return;
         const next = { lng: p.coords.longitude, lat: p.coords.latitude };
         setUserPos(next);
         setPickupPosState((prev) => prev ?? next);
+        setError(null);
       },
       (err) => {
-        if (cancelled) return;
-        setError(err.message || "Không thể lấy vị trí");
+        console.warn('Geolocation error:', err);
+        setError("Không lấy được vị trí - dùng vị trí mặc định");
+        // Fallback to default Ho Chi Minh City location
+        const defaultPos = { lng: 106.6927, lat: 10.7769 };
+        setUserPos(defaultPos);
+        setPickupPosState(defaultPos);
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
+      {
+        enableHighAccuracy: false, // Faster but less accurate
+        timeout: 10000,
+        maximumAge: 60000
+      }
     );
-    return () => {
-      cancelled = true;
-      if (typeof id === "number") navigator.geolocation.clearWatch(id);
-    };
   }, []);
 
   useEffect(() => {
