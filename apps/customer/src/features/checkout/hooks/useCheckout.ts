@@ -5,9 +5,9 @@ import type { Voucher, PaymentMethod } from "@repo/types";
 import { getRestaurantById, getVouchersForRestaurant } from "@/features/search/data/mockSearchData";
 
 export function useCheckout() {
-  const items = useCartStore((s) => s.items);
-  const totalFromStore = useCartStore((s) => s.total());
   const activeRestaurantId = useCartStore((s) => s.activeRestaurantId);
+  const items = useCartStore((s) => s.items.filter(i => !activeRestaurantId || i.restaurantId === activeRestaurantId));
+  const totalFromStore = useCartStore((s) => s.total(activeRestaurantId ?? undefined));
   const restaurant = useMemo(() => activeRestaurantId ? getRestaurantById(activeRestaurantId) : undefined, [activeRestaurantId]);
   const vouchers: Voucher[] = useMemo(() => activeRestaurantId ? getVouchersForRestaurant(activeRestaurantId) : [], [activeRestaurantId]);
 

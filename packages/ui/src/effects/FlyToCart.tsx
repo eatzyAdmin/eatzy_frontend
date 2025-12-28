@@ -21,7 +21,7 @@ export function useFlyToCart() {
     setGhosts((g) => [...g, ghost]);
     setTimeout(() => {
       setGhosts((g) => g.filter((x) => x.id !== id));
-    }, 800);
+    }, 1200);
   };
 
   return { ghosts, fly };
@@ -34,7 +34,7 @@ export function FlyToCartLayer({ ghosts }: { ghosts: FlightGhost[] }) {
         {ghosts.map((g) => {
           const midX = (g.start.x + g.end.x) / 2 + 80;
           const midY = (g.start.y + g.end.y) / 2 - 120;
-          const size = Math.min(g.start.width, g.start.height) * 0.6;
+          const size = Math.min(g.start.width, g.start.height) * 0.8; // Larger size factor
           return (
             <motion.div
               key={g.id}
@@ -42,10 +42,10 @@ export function FlyToCartLayer({ ghosts }: { ghosts: FlightGhost[] }) {
               animate={{
                 x: [g.start.x, midX, g.end.x],
                 y: [g.start.y, midY, g.end.y],
-                scale: [1, 0.6, 0.3],
-                opacity: [1, 0.8, 0],
+                scale: [1, 1.3, 0.2], // Puff up then shrink
+                opacity: [1, 1, 1], // Keep opacity full until end
               }}
-              transition={{ duration: 0.65, ease: "easeInOut" }}
+              transition={{ duration: 1.0, times: [0, 0.4, 1], ease: [0.22, 1, 0.36, 1] }}
               style={{ position: "absolute", width: size, height: size, borderRadius: 9999, overflow: "hidden" }}
             >
               {g.imageUrl ? (

@@ -80,6 +80,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               onSearchClick={() => setSearchOpen(true)}
               onCartClick={() => setCartOpen(true)}
               hideSearchIcon={isSearchMode || isRestaurantDetail || isOrderHistory || isFavorites}
+              hideCart={isRestaurantDetail}
               onLogoClick={() => {
                 const next = new URLSearchParams(searchParams.toString());
                 next.delete('q');

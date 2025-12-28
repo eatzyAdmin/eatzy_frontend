@@ -17,6 +17,7 @@ import {
 } from "@/features/search/data/mockSearchData";
 import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer";
 import { ReviewsModal } from "@/features/search/components/ReviewsModal";
+import FloatingRestaurantCart from "@/features/cart/components/FloatingRestaurantCart";
 
 export default function RestaurantDetailPage() {
   const params = useParams() as { slug: string };
@@ -509,7 +510,7 @@ export default function RestaurantDetailPage() {
           const variantId = payload.variant?.id ?? "base";
           const addonIds = payload.addons.map((a) => a.id).sort();
           const uniqueId = `${drawerDish.id}::${variantId}::${addonIds.join(".")}`;
-          const endEl = document.getElementById("header-cart-button");
+          const endEl = document.getElementById("local-cart-fab") || document.getElementById("header-cart-button");
           if (startRect && endEl) {
             fly({
               start: startRect,
@@ -541,6 +542,7 @@ export default function RestaurantDetailPage() {
         }}
       />
       <ReviewsModal restaurant={restaurant} isOpen={isReviewsOpen} onClose={() => setIsReviewsOpen(false)} />
+      <FloatingRestaurantCart restaurantId={restaurant.id} restaurantName={restaurant.name} />
     </div>
   );
 }

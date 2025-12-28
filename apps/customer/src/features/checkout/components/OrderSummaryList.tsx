@@ -4,7 +4,8 @@ import { formatVnd } from "@repo/lib";
 import { useCartStore } from "@repo/store";
 
 export default function OrderSummaryList() {
-  const items = useCartStore((s) => s.items);
+  const activeRestaurantId = useCartStore((s) => s.activeRestaurantId);
+  const items = useCartStore((s) => s.items.filter(i => !activeRestaurantId || i.restaurantId === activeRestaurantId));
   return (
     <div className="p-4">
       <div className="text-[14px] font-semibold text-[#1A1A1A] mb-3">Thông tin đơn hàng</div>

@@ -22,8 +22,9 @@ export interface CartState {
   removeItem: (id: string) => void;
   setQuantity: (id: string, qty: number) => void;
   clearCart: () => void;
+  removeItemsByRestaurant: (restaurantId: string) => void;
   setActiveRestaurant: (restaurantId: string) => void;
-  total: () => number;
+  total: (restaurantId?: string) => number;
 }
 
 export const useCartStore = create<CartState>()(
@@ -33,13 +34,10 @@ export const useCartStore = create<CartState>()(
       items: [],
       addItem: (item) => {
         const qty = item.quantity ?? 1;
-        const currentRestaurant = get().activeRestaurantId;
-        if (currentRestaurant && currentRestaurant !== item.restaurantId) {
-          set({ items: [], activeRestaurantId: item.restaurantId });
-        }
-        if (!currentRestaurant) {
-          set({ activeRestaurantId: item.restaurantId });
-        }
+        // Logic to support multiple restaurants: Do NOT clear items if restaurant changes
+        // Just update activeRestaurantId to the latest one being added to
+        set({ activeRestaurantId: item.restaurantId });
+
         const existing = get().items.find((i) => i.id === item.id);
         if (existing) {
           set({
@@ -74,11 +72,22 @@ export const useCartStore = create<CartState>()(
         });
       },
       clearCart: () => set({ items: [] }),
-      setActiveRestaurant: (restaurantId) => {
-        const current = get().activeRestaurantId;
-        if (current !== restaurantId) set({ items: [], activeRestaurantId: restaurantId });
+      // Remove all items for a specific restaurant
+      removeItemsByRestaurant: (restaurantId: string) => {
+        set({
+          items: get().items.filter((i) => i.restaurantId !== restaurantId)
+        });
       },
-      total: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+      setActiveRestaurant: (restaurantId) => {
+        set({ activeRestaurantId: restaurantId });
+      },
+      // Calculate total for optionally specific restaurant
+      total: (restaurantId?: string) => {
+        const items = restaurantId
+          ? get().items.filter(i => i.restaurantId === restaurantId)
+          : get().items;
+        return items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+      },
     }),
     { name: "eatzy-cart" }
   )
