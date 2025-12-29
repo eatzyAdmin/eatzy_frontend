@@ -38,6 +38,8 @@ export { default as MagazineLayout8Shimmer } from "./feedback/shimmer/MagazineLa
 export { default as CartOverlayShimmer } from "./feedback/shimmer/CartOverlayShimmer";
 export { default as CurrentOrdersDrawerShimmer } from "./feedback/shimmer/CurrentOrdersDrawerShimmer";
 export { default as OrderDetailDrawerShimmer } from "./feedback/shimmer/OrderDetailDrawerShimmer";
+export { default as RestaurantDetailShimmer } from "./feedback/shimmer/RestaurantDetailShimmer";
+export { default as FloatingRestaurantCartShimmer } from "./feedback/shimmer/FloatingRestaurantCartShimmer";
 export { default as NumberInput } from "./forms/NumberInput";
 export { default as DateRangePicker } from "./forms/DateRangePicker";
 export { default as StatusBadge } from "./feedback/StatusBadge";
