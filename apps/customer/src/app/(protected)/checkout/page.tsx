@@ -16,8 +16,11 @@ export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    hide();
-    const t = setTimeout(() => setIsLoading(false), 1500);
+    // Keep global loading active until local loading finishes
+    const t = setTimeout(() => {
+      setIsLoading(false);
+      hide();
+    }, 1500);
     return () => clearTimeout(t);
   }, [hide]);
   useEffect(() => { setMounted(true); }, []);
