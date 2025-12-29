@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { useLoading, useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
+import { useLoading, useHoverHighlight, HoverHighlightOverlay, CheckoutShimmer } from "@repo/ui";
 import { useCheckout } from "@/features/checkout/hooks/useCheckout";
 import AddressForm from "@/features/checkout/components/AddressForm";
 import NotesInput from "@/features/checkout/components/NotesInput";
@@ -13,9 +13,11 @@ const OrderSummaryList = dynamic(() => import("@/features/checkout/components/Or
 
 export default function CheckoutPage() {
   const { hide } = useLoading();
+  const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => hide(), 1500);
+    hide();
+    const t = setTimeout(() => setIsLoading(false), 1500);
     return () => clearTimeout(t);
   }, [hide]);
   useEffect(() => { setMounted(true); }, []);
@@ -56,12 +58,12 @@ export default function CheckoutPage() {
     if (!leftCol) return;
     const obs = new IntersectionObserver(
       (entries) => {
-        const visible = entries.filter(e => e.isIntersecting).sort((a,b) => (a.boundingClientRect.top - b.boundingClientRect.top));
+        const visible = entries.filter(e => e.isIntersecting).sort((a, b) => (a.boundingClientRect.top - b.boundingClientRect.top));
         if (visible[0]) setActiveSection(visible[0].target.getAttribute("data-id"));
       },
       { root: leftCol, rootMargin: "-120px 0px -60% 0px", threshold: 0.2 }
     );
-    ["address","notes","summary","method","promo","payment"].forEach(id => {
+    ["address", "notes", "summary", "method", "promo", "payment"].forEach(id => {
       const node = sectionRefs.current[id];
       if (node) obs.observe(node);
     });
@@ -78,6 +80,12 @@ export default function CheckoutPage() {
     leftCol.scrollTo({ top: offsetTop, behavior: "smooth" });
   };
 
+
+
+  if (isLoading) {
+    return <CheckoutShimmer />;
+  }
+
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7]">
       <div className="flex-1 overflow-hidden">
@@ -93,9 +101,8 @@ export default function CheckoutPage() {
                         <button
                           key={t.id}
                           onClick={() => scrollToSection(t.id)}
-                          className={`text-[22px] font-bold uppercase tracking-wide transition-all relative pb-1 whitespace-nowrap ${
-                            activeSection === t.id ? "text-[#1A1A1A]" : "text-gray-400"
-                          }`}
+                          className={`text-[22px] font-bold uppercase tracking-wide transition-all relative pb-1 whitespace-nowrap ${activeSection === t.id ? "text-[#1A1A1A]" : "text-gray-400"
+                            }`}
                           style={{
                             fontStretch: "condensed",
                             letterSpacing: "-0.01em",
