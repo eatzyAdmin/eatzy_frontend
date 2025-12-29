@@ -25,22 +25,36 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isRestaurantDetail = pathname?.startsWith("/restaurants/") ?? false;
   const isOrderHistory = pathname?.startsWith("/order-history") ?? false;
   const isFavorites = pathname?.startsWith("/favorites") ?? false;
-  const isSearchBarCompact = !isHeaderVisible && isSearchMode;
+  const [isRecommendedMode, setIsRecommendedMode] = useState(false);
+
+  // Combine search mode and recommended mode for layout purposes
+  const effectiveSearchMode = isSearchMode || isRecommendedMode;
+  const isSearchBarCompact = !isHeaderVisible && effectiveSearchMode;
 
   useEffect(() => {
     const handleHeaderVisibility = (e: Event) => {
       const customEvent = e as CustomEvent<{ visible: boolean }>;
       setIsHeaderVisible(customEvent.detail.visible);
     };
+
+    const handleRecommendedMode = (e: Event) => {
+      const customEvent = e as CustomEvent<{ active: boolean }>;
+      setIsRecommendedMode(customEvent.detail.active);
+    };
+
     window.addEventListener('searchHeaderVisibility', handleHeaderVisibility);
-    return () => window.removeEventListener('searchHeaderVisibility', handleHeaderVisibility);
+    window.addEventListener('recommendedModeChange', handleRecommendedMode);
+    return () => {
+      window.removeEventListener('searchHeaderVisibility', handleHeaderVisibility);
+      window.removeEventListener('recommendedModeChange', handleRecommendedMode);
+    };
   }, []);
 
   useEffect(() => {
-    if (!isSearchMode) {
+    if (!effectiveSearchMode) {
       setIsHeaderVisible(true);
     }
-  }, [isSearchMode]);
+  }, [effectiveSearchMode]);
 
   const handleSearch = (query: string, filters?: any) => {
     performSearch(query, filters);
@@ -53,7 +67,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       <AnimatePresence>
-        {((isSearchMode || isRestaurantDetail || isOrderHistory || isFavorites) && isHeaderVisible) && (
+        {((effectiveSearchMode || isRestaurantDetail || isOrderHistory || isFavorites) && isHeaderVisible) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -64,12 +78,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
       <AnimatePresence>
-        {(!isSearchMode || isHeaderVisible) && (
+        {((!effectiveSearchMode) || isHeaderVisible) && (
           <motion.div
             initial={{ y: 0, opacity: 1 }}
             animate={{
-              y: isSearchMode && !isHeaderVisible ? -100 : 0,
-              opacity: isSearchMode && !isHeaderVisible ? 0 : 1,
+              y: effectiveSearchMode && !isHeaderVisible ? -100 : 0,
+              opacity: effectiveSearchMode && !isHeaderVisible ? 0 : 1,
             }}
             exit={{ y: -100, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
@@ -79,7 +93,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               onFavoritesClick={() => setOrdersOpen(true)}
               onSearchClick={() => setSearchOpen(true)}
               onCartClick={() => setCartOpen(true)}
-              hideSearchIcon={isSearchMode || isRestaurantDetail || isOrderHistory || isFavorites}
+              hideSearchIcon={effectiveSearchMode || isRestaurantDetail || isOrderHistory || isFavorites}
               hideCart={isRestaurantDetail}
               onLogoClick={() => {
                 const next = new URLSearchParams(searchParams.toString());
@@ -97,7 +111,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
         onSearch={handleSearch}
-        isSearchMode={isSearchMode}
+        isSearchMode={effectiveSearchMode}
         isSearchBarCompact={isSearchBarCompact}
         isSearching={isSearching}
       />

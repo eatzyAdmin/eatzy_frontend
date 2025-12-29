@@ -34,6 +34,7 @@ export { default as ReviewStatsShimmer } from "./feedback/shimmer/ReviewStatsShi
 export { default as HistoryCardShimmer } from "./feedback/shimmer/HistoryCardShimmer";
 export { default as TransactionCardShimmer } from "./feedback/shimmer/TransactionCardShimmer";
 export { default as RestaurantCardShimmer } from "./feedback/shimmer/RestaurantCardShimmer";
+export { default as MagazineLayout8Shimmer } from "./feedback/shimmer/MagazineLayout8Shimmer";
 export { default as NumberInput } from "./forms/NumberInput";
 export { default as DateRangePicker } from "./forms/DateRangePicker";
 export { default as StatusBadge } from "./feedback/StatusBadge";

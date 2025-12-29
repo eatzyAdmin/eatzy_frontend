@@ -17,6 +17,15 @@ declare global {
   }
 }
 
+import FloatingScrollTrigger from '@/features/home/components/FloatingScrollTrigger';
+import RecommendedSection from '@/features/home/components/RecommendedSection';
+import {
+  searchRestaurants,
+  getDishesForRestaurant,
+  getMenuCategoriesForRestaurant
+} from '@/features/search/data/mockSearchData';
+import type { RestaurantWithMenu } from '@/features/search/hooks/useSearch';
+
 export default function HomePage() {
   const {
     categories,
@@ -30,6 +39,10 @@ export default function HomePage() {
   } = useHomePage();
 
   const [showAllCategories, setShowAllCategories] = useState(false);
+
+  // Recommended Section State
+  const [showRecommended, setShowRecommended] = useState(false);
+  const [recommendedResults, setRecommendedResults] = useState<RestaurantWithMenu[]>([]);
 
   // Handle global loading state (transition from Login)
   const { hide } = useLoading();
@@ -57,11 +70,61 @@ export default function HomePage() {
     };
   }, [clearSearch]);
 
+  // Load recommended data once
+  useEffect(() => {
+    const restaurants = searchRestaurants('');
+    const resultsWithMenu: RestaurantWithMenu[] = restaurants.map(restaurant => ({
+      restaurant,
+      dishes: getDishesForRestaurant(restaurant.id),
+      menuCategories: getMenuCategoriesForRestaurant(restaurant.id),
+      layoutType: Math.floor(Math.random() * 10) + 1,
+    }));
+    setRecommendedResults(resultsWithMenu);
+  }, []);
+
+  // Handle Scroll/Wheel Trigger
+  useEffect(() => {
+    if (isSearchMode || showRecommended) return;
+
+    let processing = false;
+    const handleWheel = (e: WheelEvent) => {
+      if (processing) return;
+      if (e.deltaY > 50) { // Significant scroll down
+        processing = true;
+        setShowRecommended(true);
+        // Add a small cooldown or rely on component unmount/state change
+        setTimeout(() => { processing = false; }, 1000);
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel);
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, [isSearchMode, showRecommended]);
+
+  // Sync Layout State
+  useEffect(() => {
+    // Return header to visible when entering recommended mode
+    window.dispatchEvent(new CustomEvent('searchHeaderVisibility', {
+      detail: { visible: true }
+    }));
+
+    window.dispatchEvent(new CustomEvent('recommendedModeChange', {
+      detail: { active: showRecommended }
+    }));
+  }, [showRecommended]);
+
+  // Reset recommended mode if search mode starts
+  useEffect(() => {
+    if (isSearchMode) {
+      setShowRecommended(false);
+    }
+  }, [isSearchMode]);
+
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
-      {/* Animated Food Background - slides up when in search mode */}
+      {/* Animated Food Background - slides up when in search mode OR recommended mode */}
       <AnimatePresence>
-        {!isSearchMode && (
+        {!isSearchMode && !showRecommended && (
           <motion.div
             initial={{ y: 0 }}
             exit={{
@@ -72,15 +135,15 @@ export default function HomePage() {
             <BackgroundTransition
               imageUrl={backgroundImage}
               categoryName={activeCategory?.name || ""}
-              slideUp={isSearchMode}
+              slideUp={isSearchMode || showRecommended}
             />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* All Categories Button - hides when in search mode */}
+      {/* All Categories Button - hides when in search mode OR recommended mode */}
       <AnimatePresence>
-        {!isSearchMode && (
+        {!isSearchMode && !showRecommended && (
           <motion.button
             layoutId="all-categories"
             initial={{ opacity: 0, y: 80 }}
@@ -105,9 +168,9 @@ export default function HomePage() {
         )}
       </AnimatePresence>
 
-      {/* Main Content Layout - hides when in search mode */}
+      {/* Main Content Layout - hides when in search mode OR recommended mode */}
       <AnimatePresence>
-        {!isSearchMode && (
+        {!isSearchMode && !showRecommended && (
           <motion.main
             initial={{ opacity: 1, y: 0 }}
             exit={{ y: '100vh', transition: { delay: 0.15, duration: 0.8, ease: [0.33, 1, 0.68, 1] } }}
@@ -152,7 +215,21 @@ export default function HomePage() {
                 </motion.div>
               </AnimatePresence>
             </motion.section>
+
+            {/* Scroll Trigger */}
+            <FloatingScrollTrigger onClick={() => setShowRecommended(true)} />
+
           </motion.main>
+        )}
+      </AnimatePresence>
+
+      {/* Recommended Section (appears below/replaces home) */}
+      <AnimatePresence>
+        {showRecommended && !isSearchMode && (
+          <RecommendedSection
+            results={recommendedResults}
+            onBackToHome={() => setShowRecommended(false)}
+          />
         )}
       </AnimatePresence>
 
@@ -228,3 +305,4 @@ export default function HomePage() {
     </div>
   );
 }
+
