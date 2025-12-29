@@ -1,32 +1,50 @@
 "use client";
 import { AnimatePresence, motion } from "@repo/ui/motion";
-import { Search, X } from "@repo/ui/icons";
+import { Search, X, SlidersHorizontal } from "@repo/ui/icons";
 import { useState, useEffect, KeyboardEvent } from "react";
+import FilterModal from "./FilterModal";
 
 interface SearchOverlayProps {
   open: boolean;
   onClose: () => void;
-  onSearch?: (query: string) => void;
+  onSearch?: (query: string, filters?: any) => void;
   isSearchMode?: boolean;
   isSearchBarCompact?: boolean;
   isSearching?: boolean;
 }
 
-const quickSearchTags = ["Sushi", "Bún bò", "Cà phê", "Pizza", "Burger", "Phở"];
 
-export default function SearchOverlay({ 
-  open, 
-  onClose, 
+
+const quickSearchTags = ["Cơm", "Phở/Bún", "Trà sữa", "Cà phê", "Ăn vặt", "Healthy"];
+
+export default function SearchOverlay({
+  open,
+  onClose,
   onSearch,
   isSearchMode = false,
   isSearchBarCompact = false,
   isSearching = false,
 }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    minPrice: 0,
+    maxPrice: 500000,
+    sort: 'recommended',
+    category: null as string | null
+  });
 
   const handleSearch = () => {
     if (query.trim() && onSearch) {
-      onSearch(query.trim());
+      onSearch(query.trim(), filters);
+    }
+  };
+
+  const handleApplyFilter = (newFilters: any) => {
+    setFilters(newFilters);
+    setFilterOpen(false);
+    if (query.trim() && onSearch) {
+      onSearch(query.trim(), newFilters);
     }
   };
 
@@ -62,11 +80,11 @@ export default function SearchOverlay({
               className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-md"
               onClick={onClose}
             />
-          <motion.div
-            layoutId="search-bar"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
+            <motion.div
+              layoutId="search-bar"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
               transition={{
                 duration: 0.2,
                 layout: {
@@ -95,17 +113,17 @@ export default function SearchOverlay({
                   placeholder="Tìm món, nhà hàng, khu vực..."
                   className="flex-1 bg-transparent text-white font-medium placeholder:text-white/60 focus:outline-none"
                 />
-                <button 
-                  onClick={onClose} 
+                <button
+                  onClick={onClose}
                   className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
             </motion.div>
-            
+
             {/* Quick search tags */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -138,13 +156,13 @@ export default function SearchOverlay({
         )}
       </AnimatePresence>
 
-      {/* Compact search bar for search mode */}
+      {/* Compact search bar + Filter Button */}
       <AnimatePresence>
         {isSearchMode && (
           <motion.div
             layoutId="search-bar"
             initial={{ scale: 0.85, y: 0 }}
-            animate={{ 
+            animate={{
               scale: 0.85,
               y: isSearchBarCompact ? -100 : 0,
             }}
@@ -156,9 +174,9 @@ export default function SearchOverlay({
                 stiffness: 150,
               }
             }}
-            className="fixed z-[50] left-48 right-80 top-4 -translate-x-1/2 max-w-[92vw]"
+            className="fixed z-[50] left-48 right-48 top-4 -translate-x-1/2 flex items-center justify-center gap-3"
           >
-            <div className="relative flex items-center gap-3 px-5 h-20 text-xl rounded-full bg-white shadow-2xl border border-gray-200 overflow-hidden">
+            <div className="relative flex items-center gap-3 px-5 h-20 text-xl rounded-full bg-white shadow-2xl border border-gray-200 overflow-hidden flex-1 max-w-3xl">
               {isSearching && (
                 <motion.div
                   initial={{ x: "-100%" }}
@@ -175,14 +193,47 @@ export default function SearchOverlay({
                 placeholder="Tìm món, nhà hàng, khu vực..."
                 className="flex-1 bg-transparent text-gray-900 font-medium placeholder:text-gray-400 focus:outline-none"
               />
-              <button 
-                onClick={handleSearch} 
+              <button
+                onClick={() => handleSearch()}
                 className="w-12 h-12 rounded-full bg-[var(--primary)] text-white flex items-center justify-center hover:bg-[var(--primary)]/90 transition-colors"
               >
                 <Search className="w-6 h-6" />
               </button>
             </div>
+
+            <AnimatePresence>
+              {!filterOpen && (
+                <motion.button
+                  layoutId="filter-modal"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{
+                    type: "spring",
+                    damping: 18,
+                    stiffness: 100,
+                  }}
+                  onClick={() => setFilterOpen(true)}
+                  className="h-20 px-8 bg-white rounded-[30px] shadow-2xl border border-gray-100 text-[var(--primary)] font-bold text-xl hover:bg-gray-50 transition-colors whitespace-nowrap flex items-center gap-2"
+                >
+                  <SlidersHorizontal className="w-6 h-6" />
+                  Filter
+                </motion.button>
+              )}
+            </AnimatePresence>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {filterOpen && (
+          <FilterModal
+            open={filterOpen}
+            onClose={() => setFilterOpen(false)}
+            layoutId="filter-modal"
+            filters={filters}
+            onApply={handleApplyFilter}
+          />
         )}
       </AnimatePresence>
     </>

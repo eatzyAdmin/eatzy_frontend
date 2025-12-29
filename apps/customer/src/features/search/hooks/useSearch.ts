@@ -24,10 +24,19 @@ export function useSearch() {
   const [hasSearched, setHasSearched] = useState(false);
 
   // Check if we're in search mode (has search query param)
+  // Parse filters from URL
+  const filters = {
+    minPrice: Number(searchParams.get('minPrice')) || 0,
+    maxPrice: Number(searchParams.get('maxPrice')) || 500000,
+    sort: searchParams.get('sort') || 'recommended',
+    category: searchParams.get('category') || null,
+  };
+
+  // Check if we're in search mode (has search query param)
   const isSearchMode = searchParams.has('q');
 
   // Perform search
-  const performSearch = useCallback(async (query: string) => {
+  const performSearch = useCallback(async (query: string, newFilters?: any) => {
     if (!query.trim()) {
       return;
     }
@@ -35,11 +44,24 @@ export function useSearch() {
     const alreadyInSearchMode = searchParams.has('q');
     setIsSearching(true);
 
+    // Construct URL Params
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('q', query);
+
+    // Apply new filters or keep existing if not provided (but if specifically passed as object? assume passed = override)
+    // Actually, usually performSearch is called with NEW values.
+    const filtersToUse = newFilters || filters;
+
+    if (filtersToUse.minPrice !== undefined) params.set('minPrice', filtersToUse.minPrice.toString());
+    if (filtersToUse.maxPrice !== undefined) params.set('maxPrice', filtersToUse.maxPrice.toString());
+    if (filtersToUse.sort) params.set('sort', filtersToUse.sort);
+    if (filtersToUse.category) params.set('category', filtersToUse.category);
+    else params.delete('category');
+
+
     // If we're already in search mode (compact search bar), push URL first so other instances react immediately
     if (alreadyInSearchMode) {
-      const paramsEarly = new URLSearchParams(searchParams.toString());
-      paramsEarly.set('q', query);
-      router.push(`?${paramsEarly.toString()}`, { scroll: false });
+      router.push(`?${params.toString()}`, { scroll: false });
     }
 
     // Simulate loading for 2 seconds
@@ -63,11 +85,9 @@ export function useSearch() {
 
     // If we were NOT in search mode (overlay search on home), only update URL after loading finishes
     if (!alreadyInSearchMode) {
-      const paramsLate = new URLSearchParams(searchParams.toString());
-      paramsLate.set('q', query);
-      router.push(`?${paramsLate.toString()}`, { scroll: false });
+      router.push(`?${params.toString()}`, { scroll: false });
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, filters]); // Added filters to dep
 
   // Clear search and return to home
   const clearSearch = useCallback(() => {
@@ -75,9 +95,13 @@ export function useSearch() {
     setSearchResults([]);
     setHasSearched(false);
     setIsSearching(false);
-    
+
     const next = new URLSearchParams(searchParams.toString());
     next.delete('q');
+    next.delete('minPrice');
+    next.delete('maxPrice');
+    next.delete('sort');
+    next.delete('category');
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   }, [router, searchParams, pathname]);
 
@@ -87,10 +111,25 @@ export function useSearch() {
     if (!query) return;
     if (isSearching) return;
     // Trigger when URL param changes OR on reload when we haven't searched yet
-    if (query !== searchQuery || !hasSearched) {
-      performSearch(query);
+    // Also trigger if filters changed?
+    // We can check if params changed roughly.
+    // For simplicity, strict check or just react to searchParams
+    const currentParams = new URLSearchParams(searchParams.toString());
+    const queryChanged = query !== searchQuery;
+    const filtersChanged =
+      Number(currentParams.get('minPrice') || 0) !== filters.minPrice ||
+      Number(currentParams.get('maxPrice') || 500000) !== filters.maxPrice ||
+      (currentParams.get('sort') || 'recommended') !== filters.sort ||
+      (currentParams.get('category') || null) !== filters.category;
+
+    if (queryChanged || filtersChanged || !hasSearched) {
+      // Pass null to newFilters to let performSearch use current URL/state filters
+      // But performSearch uses 'filters' from closure which might be stale?
+      // Actually 'filters' is derived from 'searchParams' at top level.
+      // So calling performSearch(query, filters) works.
+      performSearch(query, filters);
     }
-  }, [searchParams, searchQuery, performSearch, isSearching, hasSearched]);
+  }, [searchParams, searchQuery, performSearch, isSearching, hasSearched]); // Removed filters from dep loop to avoid strict object eq issues, relying on searchParams
 
   return {
     searchQuery,
@@ -101,5 +140,6 @@ export function useSearch() {
     isSearchMode,
     performSearch,
     clearSearch,
+    filters,
   };
 }

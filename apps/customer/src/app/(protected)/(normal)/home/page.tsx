@@ -46,6 +46,7 @@ export default function HomePage() {
     isSearchMode,
     clearSearch,
     searchQuery,
+    filters,
   } = useSearch();
 
   // Expose clearSearch to window for menu navigation
@@ -162,6 +163,7 @@ export default function HomePage() {
             results={searchResults}
             searchQuery={searchQuery}
             isLoading={isSearching}
+            filters={filters}
           />
         )}
       </AnimatePresence>

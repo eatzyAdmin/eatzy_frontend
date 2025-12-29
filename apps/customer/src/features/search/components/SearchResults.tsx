@@ -1,5 +1,6 @@
 import { motion } from '@repo/ui/motion';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
+import { Flame, Star, MapPin, Sparkles, Tag } from "@repo/ui/icons";
 import type { RestaurantWithMenu } from '../hooks/useSearch';
 import MagazineLayout1 from './layouts/MagazineLayout1';
 import MagazineLayout2 from './layouts/MagazineLayout2';
@@ -16,11 +17,58 @@ interface Props {
   results: RestaurantWithMenu[];
   searchQuery: string;
   isLoading?: boolean;
+  filters?: {
+    minPrice: number;
+    maxPrice: number;
+    sort: string;
+    category: string | null;
+  };
 }
 
-export default function SearchResults({ results, searchQuery, isLoading = false }: Props) {
+export default function SearchResults({ results, searchQuery, isLoading = false, filters }: Props) {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
+
+  // Client-side filtering logic
+  const filteredResults = useMemo(() => {
+    return results.filter(item => {
+      // Category Filter
+      if (filters?.category) {
+        const restCats = item.restaurant.categories || [];
+        const menuCats = item.menuCategories?.map(c => c.name) || [];
+        const allCats = [...restCats, ...menuCats];
+        const match = allCats.some(c =>
+          typeof c === 'string' && c.toLowerCase().includes(filters.category!.split("/")[0].toLowerCase())
+        );
+        if (!match) return false;
+      }
+
+      // Price Filter
+      if (filters && (filters.minPrice > 0 || filters.maxPrice < 500000)) {
+        const min = filters.minPrice || 0;
+        const max = filters.maxPrice || Infinity;
+        const dishes = item.dishes || [];
+        if (dishes.length === 0) return true; // Keep if no dishes loaded (fallback)
+        const hasDishInRange = dishes.some(d => d.price >= min && d.price <= max);
+        if (!hasDishInRange) return false;
+      }
+
+      return true;
+    }).sort((a, b) => {
+      const sortBy = filters?.sort || 'recommended';
+      switch (sortBy) {
+        case 'rating':
+          return (b.restaurant.rating || 0) - (a.restaurant.rating || 0);
+        case 'cheapest':
+          const minA = a.dishes?.length ? Math.min(...a.dishes.map(d => d.price)) : 999999;
+          const minB = b.dishes?.length ? Math.min(...b.dishes.map(d => d.price)) : 999999;
+          return minA - minB;
+        case 'bestseller':
+          return (b.restaurant.totalOrders || 0) - (a.restaurant.totalOrders || 0);
+        default: return 0;
+      }
+    });
+  }, [results, filters]);
 
   useEffect(() => {
     let ticking = false;
@@ -29,7 +77,7 @@ export default function SearchResults({ results, searchQuery, isLoading = false 
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
-          
+
           if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
             setIsHeaderVisible(false);
           } else if (currentScrollY < lastScrollY.current) {
@@ -51,8 +99,8 @@ export default function SearchResults({ results, searchQuery, isLoading = false 
   // Notify parent about scroll state
   useEffect(() => {
     // Dispatch custom event for header visibility
-    window.dispatchEvent(new CustomEvent('searchHeaderVisibility', { 
-      detail: { visible: isHeaderVisible } 
+    window.dispatchEvent(new CustomEvent('searchHeaderVisibility', {
+      detail: { visible: isHeaderVisible }
     }));
   }, [isHeaderVisible]);
 
@@ -107,16 +155,16 @@ export default function SearchResults({ results, searchQuery, isLoading = false 
               Search Results
             </h1>
             <p className="text-xl text-gray-600">
-              Found <span className="font-bold text-amber-600">{results.length}</span> restaurant
-              {results.length !== 1 ? 's' : ''} matching{' '}
+              Found <span className="font-bold text-amber-600">{filteredResults.length}</span> restaurant
+              {filteredResults.length !== 1 ? 's' : ''} matching{' '}
               <span className="font-bold text-gray-900">&quot;{searchQuery}&quot;</span>
             </p>
           </motion.div>
 
           {/* Results */}
-          {results.length > 0 ? (
+          {filteredResults.length > 0 ? (
             <div>
-              {results.map((item) => renderLayout(item))}
+              {filteredResults.map((item) => renderLayout(item))}
             </div>
           ) : (
             <motion.div

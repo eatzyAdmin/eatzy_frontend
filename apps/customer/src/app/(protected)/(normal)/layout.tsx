@@ -42,8 +42,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [isSearchMode]);
 
-  const handleSearch = (query: string) => {
-    performSearch(query);
+  const handleSearch = (query: string, filters?: any) => {
+    performSearch(query, filters);
   };
 
   useEffect(() => {
