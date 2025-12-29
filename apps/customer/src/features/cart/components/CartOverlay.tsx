@@ -7,7 +7,7 @@ import { ImageWithFallback } from "@repo/ui";
 import { formatVnd } from "@repo/lib";
 import { getRestaurantById } from "@/features/search/data/mockSearchData";
 import { useRouter } from "next/navigation";
-import { useLoading } from "@repo/ui";
+import { useLoading, CartOverlayShimmer } from "@repo/ui";
 
 export default function CartOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { items, addItem, removeItemsByRestaurant, setActiveRestaurant } = useCartStore();
@@ -15,6 +15,15 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
   const { show } = useLoading();
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedRestIds, setSelectedRestIds] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setIsLoading(true);
+      const timer = setTimeout(() => setIsLoading(false), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
 
   // Dummy data initialization
   useEffect(() => {
@@ -72,10 +81,11 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
   };
 
   return (
-    <AnimatePresence>
-      {open && (
-        <>
+    <>
+      <AnimatePresence>
+        {open && (
           <motion.div
+            key="cart-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -83,7 +93,12 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
             className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-md"
             onClick={onClose}
           />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {open && (
           <motion.div
+            key="cart-panel"
             initial={{ x: 480, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 480, opacity: 0 }}
@@ -123,7 +138,12 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
 
             {/* List */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {carts.length === 0 ? (
+              {isLoading ? (
+                <>
+                  <CartOverlayShimmer />
+                  <CartOverlayShimmer />
+                </>
+              ) : carts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-400 space-y-4">
                   <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
                     <Trash className="w-8 h-8 opacity-20" />
@@ -244,8 +264,8 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
             </AnimatePresence>
 
           </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
