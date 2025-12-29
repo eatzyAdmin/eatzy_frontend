@@ -391,23 +391,23 @@ export default function RestaurantDetailPage() {
                           return (
                             <div
                               key={d.id}
-                              className="group relative bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
+                              className="group relative bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
                               onMouseEnter={(e) =>
                                 menuMove(e, {
-                                  borderRadius: 16,
-                                  backgroundColor: "rgba(0,0,0,0.06)",
+                                  borderRadius: 24,
+                                  backgroundColor: "rgba(0,0,0,0.04)",
                                   opacity: 1,
                                   scaleEnabled: true,
-                                  scale: 1.1,
+                                  scale: 1.02,
                                 })
                               }
                               onMouseMove={(e) =>
                                 menuMove(e, {
-                                  borderRadius: 16,
-                                  backgroundColor: "rgba(0,0,0,0.06)",
+                                  borderRadius: 24,
+                                  backgroundColor: "rgba(0,0,0,0.04)",
                                   opacity: 1,
                                   scaleEnabled: true,
-                                  scale: 1.1,
+                                  scale: 1.02,
                                 })
                               }
                               onMouseLeave={menuClear}
@@ -417,21 +417,22 @@ export default function RestaurantDetailPage() {
                                   src={d.imageUrl}
                                   alt={d.name}
                                   fill
-                                  className="object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                                  className="object-cover group-hover:scale-110 transition-transform duration-700"
                                 />
                                 {d.isAvailable === false && (
-                                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs font-semibold">
+                                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center text-white text-sm font-bold uppercase tracking-widest">
                                     Hết hàng
                                   </div>
                                 )}
-                                <div className="absolute top-3 right-3">
+                                <div className="absolute top-3 right-3 z-10">
                                   {count > 0 ? (
                                     <motion.div
                                       layoutId={`item-${d.id}-btn`}
-                                      className="rounded-full bg-[var(--primary)] text-white shadow flex items-center gap-2 px-3 h-9"
+                                      className="rounded-full bg-white/90 backdrop-blur text-[#1A1A1A] shadow-lg flex items-center gap-2 px-1 py-1 h-10 border border-gray-100"
                                     >
                                       <button
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                          e.stopPropagation();
                                           const target = items.find(
                                             (it) =>
                                               it.id === d.id ||
@@ -439,20 +440,21 @@ export default function RestaurantDetailPage() {
                                           );
                                           if (target) removeItem(target.id);
                                         }}
-                                        className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+                                        className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                                       >
                                         <Minus className="w-4 h-4" />
                                       </button>
-                                      <span className="text-sm font-semibold">
+                                      <span className="text-sm font-bold min-w-[20px] text-center">
                                         {count}
                                       </span>
                                       <button
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                          e.stopPropagation();
                                           setActiveRestaurant(restaurant.id);
                                           setDrawerDish(d);
                                           setDrawerOpen(true);
                                         }}
-                                        className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+                                        className="w-8 h-8 rounded-full bg-[var(--primary)] text-white hover:brightness-110 flex items-center justify-center shadow-md shadow-[var(--primary)]/30 transition-all"
                                       >
                                         <Plus className="w-4 h-4" />
                                       </button>
@@ -460,31 +462,36 @@ export default function RestaurantDetailPage() {
                                   ) : (
                                     <motion.button
                                       layoutId={`item-${d.id}-btn`}
-                                      onClick={() => {
+                                      onClick={(e) => {
+                                        e.stopPropagation();
                                         setActiveRestaurant(restaurant.id);
                                         setDrawerDish(d);
                                         setDrawerOpen(true);
                                       }}
-                                      className="w-9 h-9 rounded-full bg-[var(--primary)] text-white shadow flex items-center justify-center hover:scale-105 transition-transform"
+                                      className="w-10 h-10 rounded-full bg-white text-[#1A1A1A] shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group/btn"
                                     >
-                                      <Plus className="w-5 h-5" />
+                                      <Plus className="w-5 h-5 group-hover/btn:text-[var(--primary)] transition-colors" />
                                     </motion.button>
                                   )}
                                 </div>
                               </div>
-                              <div className="p-4">
-                                <div className="font-semibold text-[#1A1A1A] mb-1 line-clamp-1">
-                                  {d.name}
+                              <div className="p-5">
+                                <div className="flex justify-between items-start gap-2 mb-2">
+                                  <h3 className="font-bold text-[17px] text-[#1A1A1A] leading-snug line-clamp-2">
+                                    {d.name}
+                                  </h3>
                                 </div>
-                                <div className="text-[13px] text-[#555] line-clamp-2 mb-2 min-h-[2.5rem]">
+                                <p className="text-[13px] text-gray-500 line-clamp-2 mb-4 min-h-[2.5em] leading-relaxed">
                                   {d.description}
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <div className="text-[16px] font-bold text-[var(--primary)]">
-                                    {formatVnd(minPrice)}
+                                </p>
+                                <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                                  <div className="flex items-baseline gap-1">
+                                    <span className="text-[18px] font-bold text-[var(--primary)]">
+                                      {formatVnd(minPrice)}
+                                    </span>
                                   </div>
-                                  <div className="text-[11px] text-gray-500">
-                                    SL: {d.availableQuantity}
+                                  <div className="text-[12px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
+                                    Còn {d.availableQuantity}
                                   </div>
                                 </div>
                               </div>
