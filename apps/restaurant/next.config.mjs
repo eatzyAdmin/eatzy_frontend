@@ -5,7 +5,7 @@ const nextConfig = {
     return [
       {
         source: '/api/proxy/:path*',
-        destination: 'http://113.177.135.214:38284/:path*', // Proxy to Backend
+        destination: 'https://eatzy-be.hoanduong.net/:path*', // Proxy to Backend
       },
     ];
   },
