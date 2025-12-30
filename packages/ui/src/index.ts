@@ -42,6 +42,7 @@ export { default as RestaurantDetailShimmer } from "./feedback/shimmer/Restauran
 export { default as FloatingRestaurantCartShimmer } from "./feedback/shimmer/FloatingRestaurantCartShimmer";
 export { default as CheckoutShimmer } from "./feedback/shimmer/CheckoutShimmer";
 export { default as DriverOrderDetailDrawerShimmer } from "./feedback/shimmer/DriverOrderDetailDrawerShimmer";
+export { default as RestaurantMenuShimmer } from "./feedback/shimmer/RestaurantMenuShimmer";
 export { default as NumberInput } from "./forms/NumberInput";
 export { default as DateRangePicker } from "./forms/DateRangePicker";
 export { default as StatusBadge } from "./feedback/StatusBadge";
