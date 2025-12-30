@@ -7,8 +7,6 @@ import { DriverHistoryOrder } from "../data/mockDriverHistory";
 
 export default function DriverHistoryCard({ order, onClick }: { order: DriverHistoryOrder; onClick: () => void }) {
   const isDelivered = order.status === "DELIVERED";
-  const statusColor = isDelivered ? "text-green-600" : "text-red-500";
-  const statusBg = isDelivered ? "bg-green-50" : "bg-red-50";
 
   // Format date
   const date = new Date(order.createdAt || 0);
@@ -19,62 +17,79 @@ export default function DriverHistoryCard({ order, onClick }: { order: DriverHis
     <motion.div
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="bg-white rounded-[24px] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col gap-4 relative overflow-hidden"
+      className="bg-white rounded-[24px] p-0 shadow-sm border-2 border-gray-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300"
     >
-      {/* Top Row: Date & Earnings */}
-      <div className="flex items-start justify-between">
-        <div className="flex flex-col">
-          <h3 className="font-bold text-[#1A1A1A] text-lg leading-none">
-            {order.restaurantLocation?.name}
-          </h3>
-          <div className="flex items-center gap-2 text-gray-400 text-xs font-medium mt-1.5">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>{dateStr} • {timeStr}</span>
+      {/* Header section with light background */}
+      <div className="p-4 pb-2 border-b-2 border-gray-200 flex justify-between items-center">
+        <div className="flex gap-3 items-center">
+          <div className="w-10 h-10 rounded-2xl bg-white border border-gray-100 flex items-center justify-center shadow-sm text-[var(--primary)]">
+            {/* Show ChefHat icon for restaurant context */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z" /><line x1="6" y1="17" x2="18" y2="17" /></svg>
+          </div>
+          <div>
+            <h3 className="font-bold text-[#1A1A1A] text-sm line-clamp-1">{order.restaurantLocation?.name}</h3>
+            <span className="text-xs text-gray-400 font-medium tracking-wide">#{order.code || 'ORD'}</span>
           </div>
         </div>
-        <div className={`font-anton font-semibold text-xl leading-none ${isDelivered ? 'text-[var(--primary)]' : 'text-gray-400'}`}>
-          {isDelivered ? `+${formatVnd(order.earnings)}` : "Đã hủy"}
+        <div className={`text-base font-bold font-anton ${isDelivered ? 'text-[var(--primary)]' : 'text-gray-400'} tracking-wide`}>
+          {isDelivered ? `+${formatVnd(order.earnings)}` : "0đ"}
         </div>
       </div>
 
-      <div className="h-px bg-gray-50 -mx-5" />
+      {/* Body Section */}
+      <div className="p-4 pt-0 pb-4">
+        {/* Visual Route */}
+        <div className="relative pt-6 pb-2 pl-1">
+          {/* Connecting Line */}
+          <div className="absolute left-[8.5px] top-8 bottom-8 w-[2px] border-l-2 border-dashed border-gray-200" />
 
-      {/* Simplified Route Info - Compact & Clean */}
-      <div className="space-y-3">
-        {/* Pickup */}
-        <div className="flex items-center gap-3">
-          <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] shrink-0" />
-          <div className="text-sm text-gray-600 truncate flex-1">{order.restaurantLocation?.name}</div>
-        </div>
-
-        {/* Dropoff */}
-        <div className="flex items-center gap-3">
-          <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-          <div className="text-sm text-[#1A1A1A] font-medium truncate flex-1">{order.deliveryLocation?.address}</div>
-        </div>
-      </div>
-
-      {/* Footer Info */}
-      <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-4 text-xs font-semibold text-gray-500">
-          <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
-            <Navigation className="w-3.5 h-3.5" />
-            <span>{order.distance} km</span>
+          {/* Pickup Point */}
+          <div className="flex gap-3 relative mb-5">
+            <div className="w-3 h-3 rounded-full border-[3px] border-[var(--primary)] bg-white z-10 shrink-0 mt-1 shadow-sm" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Nhận đơn</p>
+              <p className="text-sm font-semibold text-[#1A1A1A] line-clamp-1">{order.restaurantLocation?.name}</p>
+            </div>
           </div>
-          {order.duration > 0 && (
-            <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{order.duration} phút</span>
+
+          {/* Dropoff Point */}
+          <div className="flex gap-3 relative">
+            <div className="w-3 h-3 rounded-full border-[3px] border-red-500 bg-white z-10 shrink-0 mt-1 shadow-sm" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Giao hàng</p>
+              <p className="text-sm font-semibold text-[#1A1A1A] line-clamp-1">{order.deliveryLocation?.address}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Details */}
+        <div className="flex items-center gap-3 pt-4 mt-2 border-t border-gray-200">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1.5 rounded-lg">
+            <Clock className="w-3.5 h-3.5" />
+            <span>{timeStr}, {dateStr}</span>
+          </div>
+
+          {/* Distance Pill */}
+          {order.distance > 0 && (
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-gray-50 px-2.5 py-1.5 rounded-lg">
+              <Navigation className="w-3.5 h-3.5" />
+              <span>{order.distance} km</span>
+            </div>
+          )}
+
+          {/* Status Badge */}
+          {isDelivered ? (
+            <div className="ml-auto px-2.5 py-1.5 rounded-lg bg-emerald-50 text-[var(--primary)] text-xs font-bold flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span className="uppercase text-[10px]">Hoàn tất</span>
+            </div>
+          ) : (
+            <div className="ml-auto px-2.5 py-1.5 rounded-lg bg-red-50 text-red-500 text-xs font-bold flex items-center gap-1.5">
+              <XCircle className="w-3.5 h-3.5" />
+              <span className="uppercase text-[10px]">Đã hủy</span>
             </div>
           )}
         </div>
-
-        {/* Status Badge */}
-        {!isDelivered && (
-          <div className={`flex items-center gap-1 pl-2 text-xs font-bold ${statusColor}`}>
-            <span>Đã hủy</span>
-          </div>
-        )}
       </div>
     </motion.div>
   );
