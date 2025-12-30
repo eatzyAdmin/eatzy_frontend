@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "@repo/ui/motion";
+import { motion, AnimatePresence } from "@repo/ui/motion";
 import { Home, History, Wallet, User } from "@repo/ui/icons";
 
 import { NormalLoadingProvider, useNormalLoading, NormalLoadingOverlay } from "./context/NormalLoadingContext";
@@ -17,41 +17,46 @@ function Navigation() {
   ];
 
   return (
-    <motion.nav
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="pointer-events-auto mx-auto flex items-center justify-between gap-1 rounded-3xl border border-white/60 bg-white/80 shadow-[0_8px_30px_rgba(0,0,0,0.08)] backdrop-blur-xl px-1 py-1"
-    >
+    <nav className="pointer-events-auto mx-auto flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white p-2 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
       {tabs.map(({ id, label, href, Icon }) => {
         const active = pathname === href;
         return (
           <Link
             key={id}
             href={href}
-            className="flex-1"
-            onClick={() => {
-              if (pathname !== href) {
-                startLoading();
-              }
-            }}
+            onClick={() => pathname !== href && startLoading()}
+            className={`group relative flex h-14 items-center justify-center overflow-hidden rounded-full transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${active ? "flex-[2.5]" : "flex-1"
+              }`}
           >
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              className={`w-full flex flex-col items-center justify-center rounded-2xl px-2 py-1.5 transition-all ${active
-                ? "bg-white text-[#1A1A1A] shadow-[0_6px_20px_rgba(0,0,0,0.12)] border border-[var(--primary)]/40"
-                : "text-[#1A1A1A] hover:bg-white/70"
+            {/* Background pill */}
+            <div
+              className={`absolute inset-0 transition-colors duration-500 ${active ? "bg-[var(--primary)]" : "bg-transparent group-hover:bg-gray-50"
                 }`}
-            >
-              <div className={`flex items-center justify-center w-8 h-8 rounded-xl ${active ? "text-[var(--primary)]" : "text-gray-600"}`}>
-                <Icon size={24} strokeWidth={2.5} />
-              </div>
-              <span className={`mt-0.5 text-[10px] font-semibold ${active ? "text-[var(--primary)]" : "text-gray-700"}`}>{label}</span>
-            </motion.button>
+            />
+
+            {/* Content */}
+            <div className={`relative z-10 flex items-center justify-center gap-2 px-2 ${active ? "text-white" : "text-gray-400"}`}>
+              <Icon size={24} strokeWidth={active ? 2.5 : 2} className="shrink-0" />
+
+              <AnimatePresence mode="wait">
+                {active && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.2, delay: 0.1 }}
+                    className="whitespace-nowrap font-bold text-sm overflow-hidden font-anton tracking-wide"
+                    style={{ fontFamily: 'var(--font-anton), sans-serif' }}
+                  >
+                    {label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
           </Link>
         );
       })}
-    </motion.nav>
+    </nav>
   );
 }
 
