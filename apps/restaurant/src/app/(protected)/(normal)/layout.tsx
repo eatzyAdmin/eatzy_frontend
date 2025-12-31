@@ -259,12 +259,12 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
         </div>
       </div >
 
-      <div className="flex-1 ml-28 flex flex-col">
+      <div className="flex-1 ml-28 flex flex-col overflow-x-hidden max-w-full">
         {/* Header */}
         {/* Header Removed */}
 
         {/* Page Content */}
-        <div className="flex-1">{children}</div>
+        <div className="flex-1 overflow-x-hidden max-w-full">{children}</div>
       </div>
     </div >
   );
