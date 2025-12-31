@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AnimatePresence } from '@repo/ui/motion';
-import { useLoading, OrderCardShimmer } from '@repo/ui';
-import { ClipboardList, ChefHat, Bike } from '@repo/ui/icons';
+import { AnimatePresence, motion } from '@repo/ui/motion';
+import { useLoading, OrderCardShimmer, useSwipeConfirmation, useNotification } from '@repo/ui';
+import { ClipboardList, ChefHat, Bike, Power } from '@repo/ui/icons';
 import type { Order } from '@repo/types';
 import { mockRestaurantOrders } from '@/data/mockOrders';
 import OrderCard from '@/components/OrderCard';
@@ -11,7 +11,10 @@ import OrderDrawer from '@/components/OrderDrawer';
 import '@repo/ui/styles/scrollbar.css';
 
 export default function OrdersPage() {
+  const { confirm } = useSwipeConfirmation();
+  const { showNotification } = useNotification();
   const { hide } = useLoading();
+  const [isAppActive, setIsAppActive] = useState(true);
   const [orders, setOrders] = useState<Order[]>(mockRestaurantOrders);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -24,6 +27,32 @@ export default function OrdersPage() {
     }, 1500);
     return () => clearTimeout(timer);
   }, [hide]);
+
+  const handleToggleApp = () => {
+    const newStatus = !isAppActive;
+    confirm({
+      title: newStatus ? 'Bật ứng dụng' : 'Tắt ứng dụng',
+      description: newStatus
+        ? 'Bật ứng dụng để nhận đơn hàng mới từ khách hàng.'
+        : 'Tắt ứng dụng sẽ ngừng nhận đơn hàng mới. Bạn có chắc chắn?',
+      confirmText: newStatus ? 'Bật' : 'Tắt',
+      onConfirm: () => {
+        setIsAppActive(newStatus);
+
+        // Show notification after successful toggle
+        showNotification({
+          message: newStatus
+            ? 'Mở nhà hàng thành công!'
+            : 'Nhà hàng đã tạm đóng cửa.',
+          type: 'success', // Both on/off are successful operations
+          format: newStatus
+            ? 'Nhà hàng đang mở và sẵn sàng nhận đơn hàng mới!'
+            : 'Nhà hàng đã tạm đóng cửa. Bạn sẽ không nhận được đơn hàng mới.',
+          autoHideDuration: 3000
+        });
+      }
+    });
+  };
 
   const pendingOrders = orders.filter(o => o.status === 'PLACED');
   const inProgressOrders = orders.filter(o => o.status === 'PREPARED');
@@ -77,11 +106,32 @@ export default function OrdersPage() {
   };
 
   return (
+
     <>
-      {/* Fixed height container - no page scroll */}
-      <div className="h-[calc(100vh-88px)] overflow-hidden">
+      <div className="flex flex-col h-full">
+        {/* Header moved from Layout to Orders Page */}
+        <div className="border-b border-gray-200 px-8 py-4 shrink-0">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-anton font-bold text-[#1A1A1A]">
+              NHÀ HÀNG ABC
+            </h1>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleToggleApp}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${isAppActive
+                ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                : 'bg-gray-200 text-gray-600'
+                }`}
+            >
+              <Power className="w-5 h-5" />
+              <span>{isAppActive ? 'Đang mở' : 'Đã đóng'}</span>
+            </motion.button>
+          </div>
+        </div>
+
         {/* 3 Column Layout */}
-        <div className="grid grid-cols-3 gap-8 px-8 py-6 h-full">
+        <div className="grid grid-cols-3 gap-8 px-8 py-6 flex-1 overflow-hidden">
           {/* Column 1: Pending Confirmation */}
           <div className="flex flex-col h-full min-h-0">
             <div className="mb-4 flex items-center justify-center gap-3 flex-shrink-0">

@@ -14,10 +14,10 @@ import {
   Wallet,
   User,
   LogOut,
-  Power
+
 } from '@repo/ui/icons';
 import RestaurantNavItem from '../../../components/RestaurantNavItem';
-import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation, useNotification } from '@repo/ui';
+import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation } from '@repo/ui';
 
 const restaurantMenuItems = [
   { id: 'orders', icon: ShoppingCart, text: 'Đơn hàng' },
@@ -35,13 +35,11 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { confirm } = useSwipeConfirmation();
-  const { showNotification } = useNotification();
   const { startLoading, stopLoading } = useNormalLoading();
   const [activeSection, setActiveSection] = useState('orders');
   const [profileData] = useState({ fullName: 'Nhà hàng ABC', email: 'restaurant@eatzy.com' });
   const [navHovered, setNavHovered] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [isAppActive, setIsAppActive] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -93,28 +91,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
     }
   };
 
-  const handleToggleApp = () => {
-    const newStatus = !isAppActive;
-    confirm({
-      title: newStatus ? 'Bật ứng dụng' : 'Tắt ứng dụng',
-      description: newStatus
-        ? 'Bật ứng dụng để nhận đơn hàng mới từ khách hàng.'
-        : 'Tắt ứng dụng sẽ ngừng nhận đơn hàng mới. Bạn có chắc chắn?',
-      confirmText: newStatus ? 'Bật' : 'Tắt',
-      onConfirm: () => {
-        setIsAppActive(newStatus);
 
-        // Show notification after successful toggle
-        showNotification({
-          message: newStatus
-            ? 'Nhà hàng đang mở và sẵn sàng nhận đơn hàng mới!'
-            : 'Nhà hàng đã đóng. Bạn sẽ không nhận được đơn hàng mới.',
-          type: 'success', // Both on/off are successful operations
-          autoHideDuration: 3000
-        });
-      }
-    });
-  };
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -284,25 +261,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
 
       <div className="flex-1 ml-28 flex flex-col">
         {/* Header */}
-        <div className="border-b border-gray-200 px-8 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-anton font-bold text-[#1A1A1A]">
-              NHÀ HÀNG ABC
-            </h1>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleToggleApp}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${isAppActive
-                ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                : 'bg-gray-200 text-gray-600'
-                }`}
-            >
-              <Power className="w-5 h-5" />
-              <span>{isAppActive ? 'Đang mở' : 'Đã đóng'}</span>
-            </motion.button>
-          </div>
-        </div>
+        {/* Header Removed */}
 
         {/* Page Content */}
         <div className="flex-1">{children}</div>
