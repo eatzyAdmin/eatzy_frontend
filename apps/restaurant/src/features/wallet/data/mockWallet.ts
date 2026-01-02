@@ -18,7 +18,7 @@ export const mockWallet = {
       type: 'revenue',
       description: 'Order #ORD-7721 Revenue',
       amount: 450000,
-      status: 'completed',
+      status: 'success',
       category: 'Food Order'
     },
     {
@@ -27,7 +27,7 @@ export const mockWallet = {
       type: 'revenue',
       description: 'Order #ORD-7720 Revenue',
       amount: 120000,
-      status: 'pending',
+      status: 'failed',
       category: 'Food Order'
     },
     {
@@ -36,7 +36,7 @@ export const mockWallet = {
       type: 'withdrawal',
       description: 'Withdrawal to VCB *9988',
       amount: -5000000,
-      status: 'completed',
+      status: 'success',
       category: 'Payout'
     },
     {
@@ -45,7 +45,7 @@ export const mockWallet = {
       type: 'fee',
       description: 'Commission Fee (Order #ORD-7719)',
       amount: -45000,
-      status: 'completed',
+      status: 'success',
       category: 'Platform Fee'
     },
     {
@@ -54,7 +54,7 @@ export const mockWallet = {
       type: 'revenue',
       description: 'Order #ORD-7719 Revenue',
       amount: 890000,
-      status: 'completed',
+      status: 'failed',
       category: 'Food Order'
     },
     {
@@ -63,7 +63,7 @@ export const mockWallet = {
       type: 'revenue',
       description: 'Order #ORD-7718 Revenue',
       amount: 250000,
-      status: 'completed',
+      status: 'success',
       category: 'Food Order'
     },
     {
@@ -72,7 +72,7 @@ export const mockWallet = {
       type: 'adjustment',
       description: 'Refund Adjustment #ORD-7700',
       amount: -150000,
-      status: 'completed',
+      status: 'success',
       category: 'Refund'
     }
   ]

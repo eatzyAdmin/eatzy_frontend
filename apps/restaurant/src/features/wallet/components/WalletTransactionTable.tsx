@@ -1,97 +1,332 @@
-import { DataTable, ColumnDef, StatusBadge } from '@repo/ui';
+import { DataTable, ColumnDef } from '@repo/ui';
 import { motion } from '@repo/ui/motion';
 import { mockWallet, Transaction } from '../data/mockWallet';
-import { ArrowDownLeft, ArrowUpRight, Search, Filter, Download } from '@repo/ui/icons';
-import { useState } from 'react';
+import { ArrowDownLeft, ArrowUpRight, Search, Filter, Download, FileText, CheckCircle, AlertCircle, X } from '@repo/ui/icons';
+import { useState, useMemo } from 'react';
+import WalletSearchPopup from './WalletSearchPopup';
+import WalletFilterModal from './WalletFilterModal';
 
 const columns: ColumnDef<Transaction>[] = [
   {
-    label: 'Transaction ID',
+    label: 'TRANSACTION ID',
     key: 'id',
-    formatter: (value, item) => <span className="font-mono text-sm text-gray-500">#{item.id}</span>
+    className: 'w-[140px]',
+    formatter: (value, item) => (
+      <span className="font-mono text-xs font-medium text-gray-500 bg-white px-2 py-1.5 rounded border border-gray-100">
+        #{item.id.split('-')[1]}
+      </span>
+    )
   },
   {
-    label: 'Description',
+    label: 'TYPE & DESCRIPTION',
     key: 'description',
+    className: 'min-w-[280px]',
     formatter: (value, item) => (
-      <div className="flex flex-col">
-        <span className="font-bold text-[#1A1A1A] text-sm">{item.description}</span>
-        <span className="text-xs text-gray-400">{item.category}</span>
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">{item.category}</span>
+        <span className="font-bold text-gray-900 text-sm md:text-base font-heading">{item.description}</span>
       </div>
     )
   },
   {
-    label: 'Date',
+    label: 'DATE',
     key: 'date',
+    className: 'min-w-[140px]',
     formatter: (value, item) => {
       const date = new Date(item.date);
       return (
-        <div className="text-sm text-gray-600">
-          {date.toLocaleDateString('vi-VN')} <span className="text-gray-400 text-xs ml-1">{date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+        <div className="flex flex-col">
+          <span className="text-gray-900 font-semibold text-sm">
+            {date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+          </span>
+          <span className="text-gray-400 text-xs font-medium mt-0.5">
+            at {date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+          </span>
         </div>
       )
     }
   },
   {
-    label: 'Amount',
+    label: 'AMOUNT',
     key: 'amount',
+    className: 'min-w-[160px]',
     formatter: (value, item) => {
       const isPositive = item.amount > 0;
       return (
-        <div className={`flex items-center gap-1 font-bold ${isPositive ? 'text-green-600' : 'text-red-500'}`}>
-          {isPositive ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
-          <span>
-            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Math.abs(item.amount))}
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isPositive ? 'bg-lime-100 text-lime-600' : 'bg-red-50 text-red-500'}`}>
+            {isPositive ? <ArrowDownLeft className="w-4 h-4" strokeWidth={2.5} /> : <ArrowUpRight className="w-4 h-4" strokeWidth={2.5} />}
+          </div>
+          <span className={`text-base font-bold font-mono tracking-tight ${isPositive ? 'text-lime-600' : 'text-red-500'}`}>
+            {isPositive ? '+' : ''}{new Intl.NumberFormat('vi-VN').format(item.amount)} <span className="text-xs text-gray-400 font-sans font-normal align-top">₫</span>
           </span>
         </div>
       );
     }
   },
   {
-    label: 'Status',
+    label: 'STATUS',
     key: 'status',
-    formatter: (value, item) => (
-      <StatusBadge status={item.status as any} />
-    )
+    formatter: (value, item) => {
+      const isSuccess = item.status === 'success';
+      return (
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border tracking-wide shadow-sm ${isSuccess
+          ? 'bg-lime-100 text-lime-700 border-lime-200'
+          : 'bg-red-100 text-red-700 border-red-200'
+          }`}>
+          {isSuccess ? <CheckCircle className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+          {isSuccess ? 'Thành công' : 'Thất bại'}
+        </span>
+      )
+    }
   }
 ];
 
 export default function WalletTransactionTable() {
   const [data] = useState(mockWallet.transactions);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Transaction; direction: 'asc' | 'desc' } | null>(null);
+
+  // Search State
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [searchFields, setSearchFields] = useState({
+    id: '',
+    description: ''
+  });
+
+  // Filter State
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [filterFields, setFilterFields] = useState<{
+    status: string;
+    dateRange: { from: Date | null; to: Date | null };
+    amountRange: { min: number; max: number };
+  }>({
+    status: '',
+    dateRange: { from: null, to: null },
+    amountRange: { min: 0, max: 100000000 }
+  });
+
+  const handleSort = (key: string) => {
+    const typedKey = key as keyof Transaction;
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === typedKey && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key: typedKey, direction });
+  };
+
+  const toggleSearch = () => {
+    if (!isSearchExpanded) setIsFilterModalOpen(false);
+    setIsSearchExpanded(!isSearchExpanded);
+  };
+
+  const isFiltered = useMemo(() => {
+    return filterFields.status !== '' ||
+      filterFields.dateRange.from !== null ||
+      filterFields.dateRange.to !== null ||
+      filterFields.amountRange.min > 0 ||
+      filterFields.amountRange.max < 100000000;
+  }, [filterFields]);
+
+  const clearFilters = () => {
+    setFilterFields({
+      status: '',
+      dateRange: { from: null, to: null },
+      amountRange: { min: 0, max: 100000000 }
+    });
+  };
+
+  const openFilterModal = () => {
+    setIsSearchExpanded(false);
+    setIsFilterModalOpen(true);
+  };
+
+  const closeFilterModal = () => {
+    setIsFilterModalOpen(false);
+  };
+
+  const filteredAndSortedData = useMemo(() => {
+    let result = [...data];
+
+    // Apply Search
+    result = result.filter(item => {
+      const idMatch = searchFields.id === '' || item.id.toLowerCase().includes(searchFields.id.toLowerCase());
+      const descMatch = searchFields.description === '' || item.description.toLowerCase().includes(searchFields.description.toLowerCase());
+      return idMatch && descMatch;
+    });
+
+    // Apply Filter
+    result = result.filter(item => {
+      let dateMatch = true;
+      const itemDate = new Date(item.date);
+
+      if (filterFields.dateRange.from) {
+        if (itemDate < filterFields.dateRange.from) dateMatch = false;
+      }
+
+      if (filterFields.dateRange.to) {
+        const endDate = new Date(filterFields.dateRange.to);
+        endDate.setHours(23, 59, 59, 999);
+        if (itemDate > endDate) dateMatch = false;
+      }
+
+      const statusMatch = filterFields.status === '' || item.status.toLowerCase() === filterFields.status.toLowerCase();
+
+      const amountMatch = item.amount >= filterFields.amountRange.min && item.amount <= filterFields.amountRange.max;
+
+      return dateMatch && statusMatch && amountMatch;
+    });
+
+    // Apply Sort
+    if (sortConfig) {
+      result.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return result;
+  }, [data, sortConfig, searchFields, filterFields]);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
-      className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden"
+      className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 overflow-hidden"
     >
-      <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="pb-4 p-8 border-b border-gray-50 flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white">
         <div>
-          <h3 className="text-lg font-bold text-[#1A1A1A]">Transaction History</h3>
-          <p className="text-sm text-gray-500">Detailed records of your income and withdrawals</p>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-1.5 h-6 bg-lime-400 rounded-full" />
+            <h3 className="text-2xl font-anton uppercase tracking-tight text-gray-900">Transactions</h3>
+          </div>
+          <p className="text-sm font-medium text-gray-400 pl-3.5">
+            History of your earnings and payouts
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors tooltip" aria-label="Search">
-            <Search className="w-5 h-5" />
+          <button
+            onClick={toggleSearch}
+            className={`w-12 h-12 rounded-full bg-gray-100 border transition-all shadow-sm flex items-center justify-center group ${isSearchExpanded ? 'bg-lime-100 border-lime-200 text-lime-700' : 'border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200'}`}
+            title="Search"
+          >
+            <Search className="w-5 h-5 group-hover:scale-110 transition-transform" />
           </button>
-          <button className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            <span className="hidden sm:inline text-sm font-medium">Filter</span>
-          </button>
-          <button className="p-2.5 rounded-xl bg-gray-900 text-white hover:bg-black transition-colors flex items-center gap-2 shadow-md">
-            <Download className="w-5 h-5" />
-            <span className="hidden sm:inline text-sm font-bold">Export</span>
+
+          {isFiltered ? (
+            <div className="flex items-center gap-1 p-1 pr-2 bg-lime-500 rounded-xl shadow-lg shadow-lime-200/50 border border-lime-400 group transition-all animate-in fade-in zoom-in duration-200">
+              <button
+                onClick={openFilterModal}
+                className="flex items-center gap-2 px-3 py-1.5 hover:bg-lime-600 rounded-lg transition-colors"
+              >
+                <Filter className="w-4 h-4 text-white fill-current" />
+                <span className="text-xs font-bold text-white uppercase tracking-wide">Filtered</span>
+              </button>
+              <div className="w-px h-4 bg-lime-400 mx-0.5" />
+              <button
+                onClick={clearFilters}
+                className="p-1.5 hover:bg-lime-600 text-white rounded-lg transition-colors"
+                title="Clear all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={openFilterModal}
+              className="w-12 h-12 rounded-full bg-gray-100 border transition-all shadow-sm flex items-center justify-center group border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200"
+              title="Filter"
+            >
+              <Filter className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
+          )}
+
+          <button className="px-5 py-2.5 rounded-xl bg-[#1A1A1A] text-white hover:bg-black transition-all flex items-center gap-2 shadow-lg shadow-gray-200 active:scale-95 ml-2">
+            <Download className="w-4 h-4" />
+            <span className="text-sm font-bold uppercase tracking-wide">Export</span>
           </button>
         </div>
       </div>
 
-      <div className="p-2">
+      <div className="px-6 relative">
+        <WalletSearchPopup
+          isOpen={isSearchExpanded}
+          onClose={() => setIsSearchExpanded(false)}
+          searchFields={searchFields}
+          handleSearchChange={(key: string, value: string) => setSearchFields(prev => ({ ...prev, [key]: value }))}
+          clearSearchFields={() => setSearchFields({ id: '', description: '' })}
+        />
+
+        <WalletFilterModal
+          isOpen={isFilterModalOpen}
+          onClose={closeFilterModal}
+          filterFields={filterFields}
+          onApply={(newFilters) => setFilterFields(newFilters)}
+        />
+
+        {isFiltered && (
+          <div className="px-8 pt-4 pb-0 flex flex-wrap items-center gap-2 animate-in slide-in-from-top-2 duration-300">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-1">Active Filters:</span>
+
+            {filterFields.status && (
+              <button
+                onClick={() => setFilterFields(prev => ({ ...prev, status: '' }))}
+                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+              >
+                <span>Status: <span className="text-lime-600 uppercase group-hover:text-red-500 transition-colors">{filterFields.status}</span></span>
+                <X className="w-3 h-3 opacity-0 w-0 group-hover:opacity-100 group-hover:w-3 transition-all duration-300 ease-out" />
+              </button>
+            )}
+
+            {(filterFields.dateRange.from || filterFields.dateRange.to) && (
+              <button
+                onClick={() => setFilterFields(prev => ({ ...prev, dateRange: { from: null, to: null } }))}
+                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+              >
+                <span>Date: <span className="text-lime-600 group-hover:text-red-500 transition-colors">
+                  {filterFields.dateRange.from?.toLocaleDateString()} - {filterFields.dateRange.to?.toLocaleDateString()}
+                </span></span>
+                <X className="w-3 h-3 opacity-0 w-0 group-hover:opacity-100 group-hover:w-3 transition-all duration-300 ease-out" />
+              </button>
+            )}
+
+            {(filterFields.amountRange.min > 0 || filterFields.amountRange.max < 100000000) && (
+              <button
+                onClick={() => setFilterFields(prev => ({ ...prev, amountRange: { min: 0, max: 100000000 } }))}
+                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+              >
+                <span>Amount: <span className="text-lime-600 group-hover:text-red-500 transition-colors">
+                  {filterFields.amountRange.min.toLocaleString()} - {filterFields.amountRange.max.toLocaleString()}
+                </span></span>
+                <X className="w-3 h-3 opacity-0 w-0 group-hover:opacity-100 group-hover:w-3 transition-all duration-300 ease-out" />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="p-4">
         <DataTable<Transaction>
-          data={data}
+          data={filteredAndSortedData}
           columns={columns}
-          handleSort={() => { }}
+          handleSort={handleSort}
+          sortField={sortConfig?.key}
+          sortDirection={sortConfig?.direction}
+          renderActions={() => (
+            <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-all duration-300 group" title="View Details">
+              <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            </button>
+          )}
+          headerClassName="bg-slate-200 text-gray-700 border-none rounded-xl text-[11px] font-bold uppercase tracking-widest py-4 mb-2"
         />
       </div>
     </motion.div>
