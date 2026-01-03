@@ -16,6 +16,7 @@ interface WalletSearchPopupProps {
   searchFields: Record<string, string>;
   handleSearchChange: (key: string, value: string) => void;
   clearSearchFields: () => void;
+  placeholders?: { id?: string; description?: string };
 }
 
 const WalletSearchPopup: React.FC<WalletSearchPopupProps> = ({
@@ -23,7 +24,8 @@ const WalletSearchPopup: React.FC<WalletSearchPopupProps> = ({
   onClose,
   searchFields,
   handleSearchChange,
-  clearSearchFields
+  clearSearchFields,
+  placeholders
 }) => {
   const [localSearchFields, setLocalSearchFields] = useState(searchFields);
 
@@ -67,12 +69,14 @@ const WalletSearchPopup: React.FC<WalletSearchPopupProps> = ({
 
   const handleClear = () => {
     setLocalSearchFields({ id: '', description: '' });
-    clearSearchFields();
+    if (searchFields['id'] || searchFields['description']) {
+      clearSearchFields();
+    }
   };
 
   const searchFieldsConfig: SearchFieldConfig[] = [
-    { key: 'id', label: 'ID', icon: Hash, placeholder: 'Search ID...' },
-    { key: 'description', label: 'Description', icon: Type, placeholder: 'Search Description...' },
+    { key: 'id', label: 'ID', icon: Hash, placeholder: placeholders?.id || 'Search ID...' },
+    { key: 'description', label: 'Description', icon: Type, placeholder: placeholders?.description || 'Search Description...' },
   ];
 
   // Use Portal to escape parent transforms/overflows

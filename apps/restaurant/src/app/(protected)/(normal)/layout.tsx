@@ -7,7 +7,7 @@ import { motion } from '@repo/ui/motion';
 import {
   ShoppingCart,
   UtensilsCrossed,
-  Percent,
+  History,
   Star,
   Store,
   TrendingUp,
@@ -22,7 +22,7 @@ import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation } from '@repo/ui';
 const restaurantMenuItems = [
   { id: 'orders', icon: ShoppingCart, text: 'Đơn hàng' },
   { id: 'menu', icon: UtensilsCrossed, text: 'Thực đơn' },
-  { id: 'promotions', icon: Percent, text: 'Khuyến mãi' },
+  { id: 'history', icon: History, text: 'Lịch sử đơn hàng' },
   { id: 'reviews', icon: Star, text: 'Đánh giá' },
   { id: 'store', icon: Store, text: 'Cửa hàng' },
   { id: 'finances', icon: TrendingUp, text: 'Tài chính' },

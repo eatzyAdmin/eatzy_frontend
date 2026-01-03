@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import WalletStatsCards from '@/features/wallet/components/WalletStatsCards';
 import WalletTransactionTable from '@/features/wallet/components/WalletTransactionTable';
 import WalletBankInfo from '@/features/wallet/components/WalletBankInfo';
-import WalletSkeleton from '@/features/wallet/components/WalletSkeleton';
 import WithdrawModal from '@/features/wallet/components/WithdrawModal';
 import { useLoading, useNotification } from '@repo/ui';
 import { ChevronLeft, ChevronRight } from '@repo/ui/icons';
@@ -25,7 +24,7 @@ export default function WalletPage() {
     hide();
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 800);
+    }, 1500); // Increased slightly to show off shimmer
     return () => clearTimeout(timer);
   }, [hide]);
 
@@ -75,10 +74,6 @@ export default function WalletPage() {
     });
   };
 
-  if (isLoading) {
-    return <WalletSkeleton />;
-  }
-
   return (
     <div className="min-h-screen pb-20 px-6 pt-8 w-full max-w-full overflow-x-hidden">
       {/* Header Section */}
@@ -94,10 +89,10 @@ export default function WalletPage() {
           onScroll={handleScroll}
           className="overflow-x-auto -mx-6 px-6 w-full pb-6 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
-          <WalletStatsCards onWithdraw={() => setIsWithdrawModalOpen(true)}>
+          <WalletStatsCards onWithdraw={() => setIsWithdrawModalOpen(true)} isLoading={isLoading}>
             {/* Bank Info Card */}
             <div className="min-w-[400px] snap-start">
-              <WalletBankInfo />
+              <WalletBankInfo isLoading={isLoading} />
             </div>
 
             {/* Finance Help Widget */}

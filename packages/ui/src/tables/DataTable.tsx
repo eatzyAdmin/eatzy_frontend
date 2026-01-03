@@ -209,7 +209,7 @@ const DataTable = <T extends Record<string, any>>({
                 <th scope="col" className="px-3 sm:px-4 lg:px-6 py-4 text-right text-xs font-medium uppercase tracking-wider whitespace-nowrap">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-50">
+            <tbody className="bg-white divide-y divide-gray-100">
               <AnimatePresence mode="wait">
                 {showShimmer && (isFilteringData || displayedData.length === 0) ? (
                   Array.from({ length: itemsPerPage }, (_, index) => (<DataTableRowShimmer key={`filter-shimmer-${index}`} columnCount={columns.length} index={index} />))

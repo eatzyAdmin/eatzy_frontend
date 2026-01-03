@@ -4,11 +4,12 @@ import { motion } from '@repo/ui/motion';
 interface WalletPriceRangeFilterProps {
   min: number;
   max: number;
+  step?: number;
   value: { min: number; max: number };
   onChange: (range: { min: number; max: number }) => void;
 }
 
-export default function WalletPriceRangeFilter({ min, max, value, onChange }: WalletPriceRangeFilterProps) {
+export default function WalletPriceRangeFilter({ min, max, step = 1, value, onChange }: WalletPriceRangeFilterProps) {
   const [localRange, setLocalRange] = useState<[number, number]>([value.min || min, value.max || max]);
   const trackRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef<'min' | 'max' | null>(null);
@@ -31,7 +32,13 @@ export default function WalletPriceRangeFilter({ min, max, value, onChange }: Wa
 
     const rect = trackRef.current.getBoundingClientRect();
     const percent = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-    const newVal = Math.round(min + (percent / 100) * (max - min));
+    let newVal = min + (percent / 100) * (max - min);
+
+    // Apply step
+    newVal = Math.round(newVal / step) * step;
+
+    // Clamp
+    newVal = Math.max(min, Math.min(max, newVal));
 
     setLocalRange(prev => {
       const newRange = [...prev] as [number, number];
@@ -44,7 +51,7 @@ export default function WalletPriceRangeFilter({ min, max, value, onChange }: Wa
       }
       return newRange;
     });
-  }, [min, max]);
+  }, [min, max, step]);
 
   const handleMouseUp = useCallback(() => {
     if (isDragging.current) {

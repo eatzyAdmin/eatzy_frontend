@@ -2,7 +2,7 @@ import { motion } from '@repo/ui/motion';
 import { mockWallet } from '../data/mockWallet';
 import { CreditCard, ShieldCheck } from '@repo/ui/icons';
 
-export default function WalletBankInfo() {
+export default function WalletBankInfo({ isLoading = false }: { isLoading?: boolean }) {
   const { bank_account } = mockWallet;
 
   return (
@@ -14,7 +14,9 @@ export default function WalletBankInfo() {
 
         <div className="relative z-10 flex flex-col h-full gap-6 justify-center">
           <div className="flex justify-between items-start">
-            <div className="text-xl font-bold tracking-wider font-anton">{bank_account.bank_name}</div>
+            <div className="text-xl font-bold tracking-wider font-anton">
+              {isLoading ? <div className="h-7 w-32 bg-white/20 animate-pulse rounded-md" /> : bank_account.bank_name}
+            </div>
             <CreditCard className="w-8 h-8 opacity-80" />
           </div>
 
@@ -29,18 +31,22 @@ export default function WalletBankInfo() {
               <ShieldCheck className="w-6 h-6 opacity-60" />
             </div>
             <div className="font-mono text-2xl tracking-widest drop-shadow-md">
-              {bank_account.account_number}
+              {isLoading ? <div className="h-8 w-56 bg-white/20 animate-pulse rounded-md" /> : bank_account.account_number}
             </div>
           </div>
 
           <div className="flex justify-between items-end">
             <div>
               <div className="text-[10px] uppercase opacity-70 tracking-widest mb-1">Card Holder</div>
-              <div className="font-bold tracking-wide text-sm">{bank_account.holder_name}</div>
+              <div className="font-bold tracking-wide text-sm">
+                {isLoading ? <div className="h-4 w-32 bg-white/20 animate-pulse rounded mt-1" /> : bank_account.holder_name}
+              </div>
             </div>
             <div className="text-right">
               <div className="text-[10px] uppercase opacity-70 tracking-widest mb-1">Branch</div>
-              <div className="font-bold text-xs">{bank_account.branch}</div>
+              <div className="font-bold text-xs">
+                {isLoading ? <div className="h-4 w-20 bg-white/20 animate-pulse rounded mt-1 ml-auto" /> : bank_account.branch}
+              </div>
             </div>
           </div>
         </div>

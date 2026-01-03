@@ -6,7 +6,7 @@ const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 };
 
-export default function WalletStatsCards({ onWithdraw, children }: { onWithdraw?: () => void, children?: React.ReactNode }) {
+export default function WalletStatsCards({ onWithdraw, isLoading = false, children }: { onWithdraw?: () => void, isLoading?: boolean, children?: React.ReactNode }) {
   const { balance } = mockWallet;
 
   return (
@@ -28,7 +28,11 @@ export default function WalletStatsCards({ onWithdraw, children }: { onWithdraw?
             <span className="text-sm font-medium uppercase tracking-wider">Available Balance</span>
           </div>
           <div className="text-4xl font-anton tracking-wide mb-1">
-            {formatCurrency(balance.available)}
+            {isLoading ? (
+              <div className="h-10 w-48 bg-white/20 animate-pulse rounded-lg" />
+            ) : (
+              formatCurrency(balance.available)
+            )}
           </div>
           <div className="text-xs text-white/60 font-medium">Updated just now</div>
         </div>
@@ -59,14 +63,23 @@ export default function WalletStatsCards({ onWithdraw, children }: { onWithdraw?
             <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">Today's Earnings</span>
           </div>
           <div className="text-3xl font-anton text-[#1A1A1A] relative z-10">
-            {formatCurrency(balance.total_earnings_today)}
+            {isLoading ? (
+              <div className="h-9 w-40 bg-gray-200 animate-pulse rounded-lg" />
+            ) : (
+              formatCurrency(balance.total_earnings_today)
+            )}
           </div>
         </div>
 
         <div className="text-sm text-gray-500 font-medium relative z-10">
-          <span className="text-green-600 font-bold flex items-center gap-1">
-            <ArrowUpRight className="w-3 h-3" /> +12.5%
-          </span> vs yesterday
+          {isLoading ? (
+            <div className="h-4 w-24 bg-gray-100 animate-pulse rounded mt-1" />
+          ) : (
+            <span className="text-green-600 font-bold flex items-center gap-1">
+              <ArrowUpRight className="w-3 h-3" /> +12.5%
+              <span className="text-gray-500 font-medium ml-1">vs yesterday</span>
+            </span>
+          )}
         </div>
       </motion.div>
 
