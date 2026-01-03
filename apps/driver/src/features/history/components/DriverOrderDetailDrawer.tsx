@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { DriverOrderDetailDrawerShimmer } from "@repo/ui";
-import { X, MapPin, Store, User, Clock, Navigation, DollarSign } from "@repo/ui/icons";
+import { X } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
 import { DriverHistoryOrder } from "../data/mockDriverHistory";
 
@@ -75,10 +75,12 @@ export default function DriverOrderDetailDrawer({
                       <div className="text-lg font-bold text-[#1A1A1A] font-anton">{order.distance}km</div>
                     </div>
                     <div className="text-center flex-1">
-                      <div className="text-xs text-gray-500 mb-1">Thời gian</div>
-                      <div className="text-lg font-bold text-[#1A1A1A] font-anton">{order.duration}p</div>
+                      <div className="text-xs text-gray-500 mb-1">Loại đơn</div>
+                      <div className="text-lg font-bold text-[#1A1A1A] font-anton">Food</div>
                     </div>
                   </div>
+
+
 
                   {/* Route - USING NEW DESIGN */}
                   <div className="bg-white rounded-[24px] p-5 shadow-sm border-2 border-gray-200">
@@ -121,9 +123,54 @@ export default function DriverOrderDetailDrawer({
                         </div>
                       ))}
                       <div className="h-px bg-gray-200 my-2" />
+
+                      <div className="space-y-2 mb-2 pt-1">
+                        <div className="flex justify-between text-sm text-gray-500">
+                          <span>Tạm tính</span>
+                          <span>{formatVnd(order.subtotal)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-500">
+                          <span>Phí giao hàng</span>
+                          <span>{formatVnd(order.fee)}</span>
+                        </div>
+                        {order.discount > 0 && (
+                          <div className="flex justify-between text-sm text-green-600">
+                            <span>Mã giảm giá {order.voucherCode ? `(${order.voucherCode})` : ''}</span>
+                            <span>-{formatVnd(order.discount)}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="h-px bg-gray-200 my-2" />
+
                       <div className="flex justify-between items-center pt-1">
-                        <span className="text-sm font-medium text-gray-500">Tổng tiền đơn hàng</span>
-                        <span className="text-base font-bold text-[#1A1A1A]">{formatVnd(order.total)}</span>
+                        <span className="text-sm font-bold text-[#1A1A1A]">Tổng tiền</span>
+                        <span className="text-lg font-bold font-anton text-[var(--primary)]">{formatVnd(order.total)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Breakdown */}
+                  <div className="bg-white rounded-[24px] p-5 shadow-sm border-2 border-gray-200">
+                    <h3 className="text-lg font-bold font-anton text-[#1A1A1A] mb-4">PAYMENT DETAILS</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center text-gray-600">
+                        <span className="text-sm font-medium">Gross Earnings</span>
+                        <span className="text-sm font-bold">{formatVnd(order.earnings + (order.platformFee || 0))}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-red-500">
+                        <span className="text-sm font-medium">
+                          Platform Fee
+                          <span className="ml-1 text-xs opacity-75">
+                            ({Math.round(((order.platformFee || 0) / (order.earnings + (order.platformFee || 0) || 1)) * 100)}%)
+                          </span>
+                        </span>
+                        <span className="text-sm font-bold">-{formatVnd(order.platformFee || 0)}</span>
+                      </div>
+                      <div className="h-px bg-gray-100 my-2" />
+                      <div className="flex justify-between items-center text-[var(--primary)]">
+                        <span className="text-base font-bold">Net Income</span>
+                        <span className="text-xl font-bold font-anton">{formatVnd(order.earnings)}</span>
                       </div>
                     </div>
                   </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "@repo/ui/motion";
-import { Calendar, Navigation, Clock, CheckCircle2, XCircle, MapPin } from "@repo/ui/icons";
+import { Navigation, Clock, CheckCircle2, XCircle } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
 import { DriverHistoryOrder } from "../data/mockDriverHistory";
 
@@ -17,10 +17,10 @@ export default function DriverHistoryCard({ order, onClick }: { order: DriverHis
     <motion.div
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="bg-white rounded-[24px] p-0 shadow-sm border-2 border-gray-200 flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300"
+      className="bg-white rounded-[24px] p-0 shadow-sm flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300"
     >
       {/* Header section with light background */}
-      <div className="p-4 pb-2 border-b-2 border-gray-200 flex justify-between items-center">
+      <div className="p-4 pb-2 border-b border-gray-200 flex justify-between items-center">
         <div className="flex gap-3 items-center">
           <div className="w-10 h-10 rounded-2xl bg-white border border-gray-100 flex items-center justify-center shadow-sm text-[var(--primary)]">
             {/* Show ChefHat icon for restaurant context */}

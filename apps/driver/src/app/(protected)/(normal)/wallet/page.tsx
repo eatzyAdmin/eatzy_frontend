@@ -8,6 +8,8 @@ import WalletOverview from "@/features/wallet/components/WalletOverview";
 import TransactionCard from "@/features/wallet/components/TransactionCard";
 import TopUpDrawer from "@/features/wallet/components/TopUpDrawer";
 import WithdrawDrawer from "@/features/wallet/components/WithdrawDrawer";
+import DriverOrderDetailDrawer from "@/features/history/components/DriverOrderDetailDrawer";
+import { mockDriverHistory, DriverHistoryOrder } from "@/features/history/data/mockDriverHistory";
 import { History, Wallet, ArrowUpRight, ArrowDownLeft } from "@repo/ui/icons";
 
 import { useNormalLoading } from "../context/NormalLoadingContext";
@@ -19,6 +21,32 @@ export default function WalletPage() {
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState<DriverHistoryOrder | null>(null);
+  const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
+  const [filterType, setFilterType] = useState<'ALL' | 'IN' | 'OUT'>('ALL');
+
+  const filteredTransactions = transactions.filter(tx => {
+    if (filterType === 'ALL') return true;
+    const isPositive = tx.type === 'EARNING' || tx.type === 'TOP_UP';
+    return filterType === 'IN' ? isPositive : !isPositive;
+  });
+
+  const handleFilterChange = (type: 'ALL' | 'IN' | 'OUT') => {
+    if (type === filterType) return;
+    setFilterType(type);
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 500);
+  };
+
+  const handleTransactionClick = (tx: WalletTransaction) => {
+    if (tx.type === "EARNING" && tx.referenceId) {
+      const order = mockDriverHistory.find(o => o.id === tx.referenceId || o.code === tx.referenceId);
+      if (order) {
+        setSelectedOrder(order);
+        setIsOrderDrawerOpen(true);
+      }
+    }
+  };
 
   useEffect(() => {
     stopLoading();
@@ -67,7 +95,7 @@ export default function WalletPage() {
   return (
     <div className="flex flex-col h-full bg-[#F7F7F7]">
       {/* Sticky Header */}
-      <div className="flex-none sticky top-0 z-40 bg-[#F7F7F7]/95 backdrop-blur-xl border-b border-gray-100 transition-all duration-300">
+      <div className="flex-none sticky top-0 z-40 bg-[#F7F7F7]/95 backdrop-blur-xl transition-all duration-300 border-none shadow-none ring-0">
         <motion.div
           initial={false}
           animate={{
@@ -146,8 +174,32 @@ export default function WalletPage() {
             </div>
             Lịch sử giao dịch
           </h3>
-          <button className="text-xs font-bold text-[var(--primary)] hover:underline">Xem tất cả</button>
         </motion.div>
+
+        {/* Filter Chips */}
+        <div className="px-5 pb-4 flex gap-2 overflow-x-auto no-scrollbar bg-inherit">
+          <button
+            onClick={() => handleFilterChange('ALL')}
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${filterType === 'ALL' ? 'bg-[#1A1A1A] text-white shadow-lg shadow-black/10' : 'bg-gray-100 text-gray-500'}`}
+          >
+            <History className="w-3.5 h-3.5" />
+            Tất cả
+          </button>
+          <button
+            onClick={() => handleFilterChange('IN')}
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${filterType === 'IN' ? 'bg-[var(--primary)] text-white shadow-lg shadow-[var(--primary)]/30' : 'bg-gray-100 text-gray-500'}`}
+          >
+            <ArrowDownLeft className="w-3.5 h-3.5" />
+            Tiền vào
+          </button>
+          <button
+            onClick={() => handleFilterChange('OUT')}
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${filterType === 'OUT' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-gray-100 text-gray-500'}`}
+          >
+            <ArrowUpRight className="w-3.5 h-3.5" />
+            Tiền ra
+          </button>
+        </div>
       </div>
 
       {/* Transaction List */}
@@ -161,14 +213,14 @@ export default function WalletPage() {
           ) : (
             <>
               <AnimatePresence mode="popLayout">
-                {transactions.map((tx, index) => (
+                {filteredTransactions.map((tx, index) => (
                   <motion.div
                     key={tx.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <TransactionCard transaction={tx} />
+                    <TransactionCard transaction={tx} onClick={() => handleTransactionClick(tx)} />
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -176,7 +228,7 @@ export default function WalletPage() {
               {/* Spacer to Ensure Scrolling Logic works smoothly at bottom - Large enough to allow scrolling with few items */}
               <div className="h-[60vh]" />
 
-              {transactions.length === 0 && (
+              {filteredTransactions.length === 0 && (
                 <div className="text-center py-10 text-gray-400 text-sm">Chưa có giao dịch nào</div>
               )}
             </>
@@ -189,6 +241,12 @@ export default function WalletPage() {
         open={isWithdrawOpen}
         onClose={() => setIsWithdrawOpen(false)}
         balance={mockWalletStats.availableBalance}
+      />
+
+      <DriverOrderDetailDrawer
+        open={isOrderDrawerOpen}
+        order={selectedOrder}
+        onClose={() => setIsOrderDrawerOpen(false)}
       />
     </div>
   );

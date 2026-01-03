@@ -3,7 +3,7 @@
 import { motion } from "@repo/ui/motion";
 import { formatVnd } from "@repo/lib";
 import { WalletTransaction } from "../data/mockWalletData";
-import { CheckCircle2, Clock, AlertCircle, ArrowUpRight, ArrowDownLeft, Bike, DollarSign } from "@repo/ui/icons";
+import { CheckCircle2, ArrowUpRight, ArrowDownLeft, Bike, DollarSign } from "@repo/ui/icons";
 
 const getIcon = (type: WalletTransaction["type"]) => {
   switch (type) {
@@ -39,14 +39,15 @@ const getStatusColor = (status: WalletTransaction["status"]) => {
   }
 };
 
-export default function TransactionCard({ transaction }: { transaction: WalletTransaction }) {
+export default function TransactionCard({ transaction, onClick }: { transaction: WalletTransaction; onClick?: () => void }) {
   const isPositive = transaction.type === "EARNING" || transaction.type === "TOP_UP";
   const date = new Date(transaction.timestamp);
 
   return (
     <motion.div
       whileTap={{ scale: 0.98 }}
-      className="bg-white p-4 rounded-2xl flex items-center justify-between shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100"
+      onClick={onClick}
+      className="bg-white p-4 rounded-2xl flex items-center justify-between shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 cursor-pointer"
     >
       <div className="flex items-center gap-3">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getBgColor(transaction.type)}`}>

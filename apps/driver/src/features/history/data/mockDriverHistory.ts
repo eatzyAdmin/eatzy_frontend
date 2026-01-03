@@ -125,10 +125,12 @@ const mockRestaurants: Restaurant[] = [
 ];
 
 export interface DriverHistoryOrder extends Order {
-  earnings: number;
+  earnings: number; // Net Income
+  platformFee: number;
   distance: number; // in km
   duration: number; // in minutes
   customerName: string;
+  voucherCode?: string;
 }
 
 const getRestaurant = (id: string) => mockRestaurants.find((r: Restaurant) => r.id === id);
@@ -160,6 +162,7 @@ export const mockDriverHistory: DriverHistoryOrder[] = [
     total: 215000,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
     earnings: 35000,
+    platformFee: 5000,
     distance: 4.2,
     duration: 25,
     customerName: "Nguyễn Văn A",
@@ -187,9 +190,11 @@ export const mockDriverHistory: DriverHistoryOrder[] = [
     subtotal: 210000,
     fee: 15000,
     discount: 20000,
+    voucherCode: "SALE20K",
     total: 205000,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
     earnings: 42000,
+    platformFee: 6000,
     distance: 3.5,
     duration: 20,
     customerName: "Trần Thị B",
@@ -219,6 +224,7 @@ export const mockDriverHistory: DriverHistoryOrder[] = [
     total: 90000,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
     earnings: 0,
+    platformFee: 0,
     distance: 2.1,
     duration: 0,
     customerName: "Lê Văn C",
@@ -249,6 +255,7 @@ export const mockDriverHistory: DriverHistoryOrder[] = [
     total: 324000,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 50).toISOString(), // 2 days ago
     earnings: 55000,
+    platformFee: 8000,
     distance: 6.8,
     duration: 35,
     customerName: "Phạm Minh D",
@@ -276,9 +283,11 @@ export const mockDriverHistory: DriverHistoryOrder[] = [
     subtotal: 145000,
     fee: 15000,
     discount: 10000,
+    voucherCode: "CAFE10",
     total: 150000,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 120).toISOString(), // 5 days ago
     earnings: 25000,
+    platformFee: 4000,
     distance: 1.5,
     duration: 15,
     customerName: "Hoàng Yến E",
