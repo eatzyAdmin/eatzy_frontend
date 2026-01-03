@@ -21,9 +21,22 @@ export default function WalletFilterModal({ isOpen, onClose, filterFields, onApp
   const [localFilters, setLocalFilters] = useState(filterFields);
 
   // Sync local state when modal opens or props change
+  // Dynamic slider bounds based on filter selection
+  const [sliderBounds, setSliderBounds] = useState({ min: -100000000, max: 100000000 });
+
+  // Sync local state when modal opens or props change
   useEffect(() => {
     if (isOpen) {
       setLocalFilters(filterFields);
+
+      // Smart bounds adjustment
+      if (filterFields.amountRange.min >= 0) {
+        setSliderBounds({ min: 0, max: 100000000 });
+      } else if (filterFields.amountRange.max <= 0) {
+        setSliderBounds({ min: -100000000, max: 0 });
+      } else {
+        setSliderBounds({ min: -100000000, max: 100000000 });
+      }
     }
   }, [isOpen, filterFields]);
 
@@ -43,8 +56,9 @@ export default function WalletFilterModal({ isOpen, onClose, filterFields, onApp
     setLocalFilters({
       status: '',
       dateRange: { from: null, to: null },
-      amountRange: { min: 0, max: 100000000 }
+      amountRange: { min: -100000000, max: 100000000 }
     });
+    setSliderBounds({ min: -100000000, max: 100000000 });
   };
 
   const handleApply = () => {
@@ -149,12 +163,50 @@ export default function WalletFilterModal({ isOpen, onClose, filterFields, onApp
                         <CreditCard size={18} className="text-lime-600" />
                         Amount Range
                       </label>
-                      <WalletPriceRangeFilter
-                        min={0}
-                        max={100000000}
-                        value={localFilters.amountRange}
-                        onChange={setAmountRange}
-                      />
+                      <div className="flex flex-col gap-3">
+                        <WalletPriceRangeFilter
+                          min={sliderBounds.min}
+                          max={sliderBounds.max}
+                          step={100000}
+                          value={localFilters.amountRange}
+                          onChange={setAmountRange}
+                        />
+                        <div className="grid grid-cols-2 gap-3 mt-4">
+                          <button
+                            onClick={() => {
+                              setAmountRange({ min: 0, max: 100000000 });
+                              setSliderBounds({ min: 0, max: 100000000 });
+                            }}
+                            className={`w-full py-3 px-3 text-sm font-bold rounded-xl transition-all border-2 text-left flex items-center justify-between group ${localFilters.amountRange.min >= 0 && localFilters.amountRange.max > 0
+                                ? 'bg-lime-50 text-lime-800 border-lime-500 shadow-lg shadow-lime-100'
+                                : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                              }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${localFilters.amountRange.min >= 0 && localFilters.amountRange.max > 0 ? 'bg-lime-500' : 'bg-gray-300'}`} />
+                              Money In
+                            </span>
+                            {localFilters.amountRange.min >= 0 && localFilters.amountRange.max > 0 && <CheckCircle className="w-5 h-5 text-lime-600" />}
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setAmountRange({ min: -100000000, max: 0 });
+                              setSliderBounds({ min: -100000000, max: 0 });
+                            }}
+                            className={`w-full py-3 px-3 text-sm font-bold rounded-xl transition-all border-2 text-left flex items-center justify-between group ${localFilters.amountRange.max <= 0 && localFilters.amountRange.min < 0
+                                ? 'bg-red-50 text-red-800 border-red-500 shadow-lg shadow-red-100'
+                                : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                              }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${localFilters.amountRange.max <= 0 && localFilters.amountRange.min < 0 ? 'bg-red-500' : 'bg-gray-300'}`} />
+                              Money Out
+                            </span>
+                            {localFilters.amountRange.max <= 0 && localFilters.amountRange.min < 0 && <AlertCircle className="w-5 h-5 text-red-600" />}
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Section 3: Status */}

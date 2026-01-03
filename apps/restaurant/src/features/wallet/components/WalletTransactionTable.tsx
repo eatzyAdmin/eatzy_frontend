@@ -1,11 +1,13 @@
 import { DataTable, ColumnDef } from '@repo/ui';
 import { motion } from '@repo/ui/motion';
 import { mockWallet, Transaction } from '../data/mockWallet';
+import { mockOrderHistory, OrderHistoryItem } from '@/features/history/data/mockHistory';
 import { ArrowDownLeft, ArrowUpRight, Search, Filter, Download, FileText, CheckCircle, AlertCircle, X } from '@repo/ui/icons';
 import { useState, useMemo } from 'react';
 import WalletSearchPopup from './WalletSearchPopup';
 import WalletFilterModal from './WalletFilterModal';
 import WalletExportModal from './WalletExportModal';
+import OrderDetailsModal from '@/features/history/components/OrderDetailsModal';
 
 const columns: ColumnDef<Transaction>[] = [
   {
@@ -58,9 +60,14 @@ const columns: ColumnDef<Transaction>[] = [
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isPositive ? 'bg-lime-100 text-lime-600' : 'bg-red-50 text-red-500'}`}>
             {isPositive ? <ArrowDownLeft className="w-4 h-4" strokeWidth={2.5} /> : <ArrowUpRight className="w-4 h-4" strokeWidth={2.5} />}
           </div>
-          <span className={`text-base font-bold font-mono tracking-tight ${isPositive ? 'text-lime-600' : 'text-red-500'}`}>
-            {isPositive ? '+' : ''}{new Intl.NumberFormat('vi-VN').format(item.amount)} <span className="text-xs text-gray-400 font-sans font-normal align-top">₫</span>
-          </span>
+          <div className="flex flex-col">
+            <span className={`font-bold text-sm ${isPositive ? 'text-lime-600' : 'text-red-500'}`}>
+              {isPositive ? '+' : ''}{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.amount)}
+            </span>
+            <span className="text-[10px] text-gray-400 font-medium tracking-wide">
+              Bal: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.balanceAfter)}
+            </span>
+          </div>
         </div>
       );
     }
@@ -103,8 +110,11 @@ export default function WalletTransactionTable() {
   }>({
     status: '',
     dateRange: { from: null, to: null },
-    amountRange: { min: 0, max: 100000000 }
+    amountRange: { min: -100000000, max: 100000000 }
   });
+
+  // Order Details Modal State
+  const [selectedOrder, setSelectedOrder] = useState<OrderHistoryItem | null>(null);
 
   const handleSort = (key: string) => {
     const typedKey = key as keyof Transaction;
@@ -124,7 +134,7 @@ export default function WalletTransactionTable() {
     return filterFields.status !== '' ||
       filterFields.dateRange.from !== null ||
       filterFields.dateRange.to !== null ||
-      filterFields.amountRange.min > 0 ||
+      filterFields.amountRange.min > -100000000 ||
       filterFields.amountRange.max < 100000000;
   }, [filterFields]);
 
@@ -132,7 +142,7 @@ export default function WalletTransactionTable() {
     setFilterFields({
       status: '',
       dateRange: { from: null, to: null },
-      amountRange: { min: 0, max: 100000000 }
+      amountRange: { min: -100000000, max: 100000000 }
     });
   };
 
@@ -192,6 +202,10 @@ export default function WalletTransactionTable() {
         const aValue = a[sortConfig.key];
         const bValue = b[sortConfig.key];
 
+        if (aValue === undefined && bValue === undefined) return 0;
+        if (aValue === undefined) return 1;
+        if (bValue === undefined) return -1;
+
         if (aValue < bValue) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
@@ -204,6 +218,15 @@ export default function WalletTransactionTable() {
 
     return result;
   }, [data, sortConfig, searchFields, filterFields]);
+
+  const handleRowClick = (item: Transaction) => {
+    if (item.category === 'Food Order' && item.orderId) {
+      const order = mockOrderHistory.find(o => o.id === item.orderId);
+      if (order) {
+        setSelectedOrder(order);
+      }
+    }
+  };
 
   return (
     <motion.div
@@ -319,9 +342,9 @@ export default function WalletTransactionTable() {
               </button>
             )}
 
-            {(filterFields.amountRange.min > 0 || filterFields.amountRange.max < 100000000) && (
+            {(filterFields.amountRange.min > -100000000 || filterFields.amountRange.max < 100000000) && (
               <button
-                onClick={() => setFilterFields(prev => ({ ...prev, amountRange: { min: 0, max: 100000000 } }))}
+                onClick={() => setFilterFields(prev => ({ ...prev, amountRange: { min: -100000000, max: 100000000 } }))}
                 className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
               >
                 <span>Amount: <span className="text-lime-600 group-hover:text-red-500 transition-colors">
@@ -341,14 +364,29 @@ export default function WalletTransactionTable() {
           handleSort={handleSort}
           sortField={sortConfig?.key}
           sortDirection={sortConfig?.direction}
-          renderActions={() => (
-            <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-all duration-300 group" title="View Details">
-              <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            </button>
-          )}
+          onRowClick={handleRowClick}
+          renderActions={(item) =>
+            item.category === 'Food Order' ? (
+              <button
+                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-all duration-300 group"
+                title="View Order Details"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRowClick(item);
+                }}
+              >
+                <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              </button>
+            ) : null
+          }
           headerClassName="bg-slate-200 text-gray-700 border-none rounded-xl text-[11px] font-bold uppercase tracking-widest py-4 mb-2"
         />
       </div>
+
+      <OrderDetailsModal
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+      />
     </motion.div>
   );
 }
