@@ -64,7 +64,7 @@ export const mockOrderHistory: OrderHistoryItem[] = Array.from({ length: 50 }).m
     netIncome,
     totalAmount,
     paymentMethod: Math.random() > 0.5 ? 'vnpay' : 'cash',
-    status: status as any,
+    status: status as 'completed' | 'cancelled' | 'refunded',
     itemsCount: items.length,
     items,
     driverName: DRIVER_NAMES[Math.floor(Math.random() * DRIVER_NAMES.length)],

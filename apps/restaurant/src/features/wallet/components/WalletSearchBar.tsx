@@ -5,7 +5,7 @@ import { Search, X, Hash, Type } from '@repo/ui/icons';
 interface SearchFieldConfig {
   key: string;
   label: string;
-  icon: any;
+  icon: React.ElementType;
   placeholder: string;
 }
 
@@ -39,7 +39,7 @@ const WalletSearchBar: React.FC<WalletSearchBarProps> = ({
   };
 
   const handleLocalSearchChange = (key: string, value: string) => {
-    setLocalSearchFields((prev: any) => ({
+    setLocalSearchFields((prev) => ({
       ...prev,
       [key]: value
     }));

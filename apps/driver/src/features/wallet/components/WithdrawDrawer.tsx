@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { X, ChevronRight, CreditCard } from "@repo/ui/icons";
+import { X, ChevronRight } from "@repo/ui/icons";
 import { useState } from "react";
 import { formatVnd } from "@repo/lib";
 import { useSwipeConfirmation, useNotification } from "@repo/ui";

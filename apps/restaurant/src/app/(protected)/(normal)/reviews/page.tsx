@@ -125,7 +125,7 @@ export default function ReviewsPage() {
   }, [reviews]);
 
   const filteredReviews = useMemo(() => {
-    let result = reviews.filter(review =>
+    const result = reviews.filter(review =>
       (review.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
         review.authorName.toLowerCase().includes(searchQuery.toLowerCase())) &&
       (selectedRating === null || Math.floor(review.rating) === selectedRating)

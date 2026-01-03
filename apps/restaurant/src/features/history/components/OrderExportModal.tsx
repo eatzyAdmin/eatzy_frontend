@@ -85,7 +85,7 @@ const OrderExportModal: React.FC<OrderExportModalProps> = ({
   // State for tracking column animations  
   const [columnAnimations, setColumnAnimations] = useState<Record<string, 'adding' | 'removing' | null>>({});
   const [lastAddedColumn, setLastAddedColumn] = useState<string | null>(null);
-  const [lastRemovedColumn, setLastRemovedColumn] = useState<string | null>(null);
+  // Removed unused lastRemovedColumn
 
   // State for ghost columns (visual duplicates during animation)
   const [ghostColumns, setGhostColumns] = useState<Record<string, { value: boolean; position: { left: number; width: number } }>>({});
@@ -120,7 +120,6 @@ const OrderExportModal: React.FC<OrderExportModalProps> = ({
     // Create ghost effect for animation
     if (selectedColumns[key]) {
       // Column is being removed
-      setLastRemovedColumn(key);
 
       // Capture position before removing
       const position = findColumnPosition(key);
@@ -163,82 +162,14 @@ const OrderExportModal: React.FC<OrderExportModalProps> = ({
       }));
 
       // Reset last added/removed column
-      if (selectedColumns[key]) {
-        setLastRemovedColumn(null);
-      } else {
+      if (!selectedColumns[key]) {
         setLastAddedColumn(null);
       }
     }, 500);
   };
 
-  const selectAllInGroup = (groupKey: string, isSelect: boolean) => {
-    const group = COLUMN_GROUPS[groupKey as keyof typeof COLUMN_GROUPS];
-    const newSelected = { ...selectedColumns };
-    const newAnimations: Record<string, 'adding' | 'removing' | null> = {};
-    const newGhosts: Record<string, { value: boolean; position: { left: number; width: number } }> = { ...ghostColumns };
-
-    // Store previous state
-    previousSelectedColumns.current = { ...selectedColumns };
-
-    let hasChanges = false;
-    let lastChanged: string | null = null;
-    let lastAdded: string | null = null;
-
-    group.columns.forEach(col => {
-      // Check if state actually changes
-      if (newSelected[col.key] !== isSelect) {
-        hasChanges = true;
-        newSelected[col.key] = isSelect;
-        lastChanged = col.key;
-
-        if (isSelect) {
-          // Adding
-          newAnimations[col.key] = 'adding';
-          lastAdded = col.key;
-        } else {
-          // Removing
-          newAnimations[col.key] = 'removing';
-          // Capture position for ghost - DOM exists for removing cols
-          const pos = findColumnPosition(col.key);
-          newGhosts[col.key] = { value: true, position: pos };
-        }
-      }
-    });
-
-    if (!hasChanges) return;
-
-    // Batch updates
-    setSelectedColumns(newSelected);
-    setColumnAnimations(prev => ({ ...prev, ...newAnimations }));
-
-    if (Object.keys(newGhosts).length > 0) {
-      setGhostColumns(newGhosts);
-      setTimeout(() => {
-        setGhostColumns(prev => {
-          const cleaned = { ...prev };
-          Object.keys(newGhosts).forEach(k => delete cleaned[k]);
-          return cleaned;
-        });
-      }, 500);
-    }
-
-    // Update tracking states
-    if (lastChanged) setLastChangedColumn(lastChanged);
-    if (lastAdded) setLastAddedColumn(lastAdded);
-
-    // Cleanup animations
-    setTimeout(() => {
-      setColumnAnimations(prev => {
-        const cleaned = { ...prev };
-        Object.keys(newAnimations).forEach(k => cleaned[k] = null);
-        return cleaned;
-      });
-      if (lastAdded) setLastAddedColumn(null);
-    }, 500);
-  };
-
   const activeColumnsList = useMemo(() => {
-    const list: any[] = [];
+    const list: { key: string; label: string; icon: React.ReactNode }[] = [];
     Object.values(COLUMN_GROUPS).forEach(group => {
       group.columns.forEach(col => {
         if (selectedColumns[col.key]) list.push(col);

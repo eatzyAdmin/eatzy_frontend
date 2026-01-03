@@ -11,7 +11,7 @@ interface DateRange {
 
 interface WalletFilterBarProps {
   filterFields: { status: string; dateRange: DateRange; amountRange: { min: number; max: number } };
-  handleFilterChange: (key: string, value: any) => void;
+  handleFilterChange: (key: string, value: string | DateRange | { min: number; max: number } | number) => void;
   clearFilterFields: () => void;
   isExpanded: boolean;
   toggleExpanded: () => void;

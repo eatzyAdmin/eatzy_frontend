@@ -3,16 +3,15 @@ import { ImageWithFallback, StatusBadge } from "@repo/ui";
 import { MapPin, Star, Phone, Camera } from "@repo/ui/icons";
 
 interface StoreHeaderProps {
-  store: any;
-  onEdit: () => void;
+  store: { imageUrl?: string; name: string; status: string; rating: number; reviewCount: number; address: string; phone: string;[key: string]: unknown };
 }
 
-export default function StoreHeader({ store, onEdit }: StoreHeaderProps) {
+export default function StoreHeader({ store }: StoreHeaderProps) {
   return (
     <div className="relative h-[300px] w-full shrink-0 group rounded-b-[40px] overflow-hidden">
       <div className="absolute inset-0">
         <ImageWithFallback
-          src={store.imageUrl}
+          src={store.imageUrl || ''}
           alt={store.name}
           fill
           className="object-cover"

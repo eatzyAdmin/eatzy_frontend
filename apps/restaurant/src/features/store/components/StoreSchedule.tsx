@@ -1,8 +1,19 @@
 import { motion } from "@repo/ui/motion";
 import { Clock, Edit2 } from "@repo/ui/icons";
 
+interface Shift {
+  open: string;
+  close: string;
+}
+
+interface DaySchedule {
+  day: string;
+  isOpen: boolean;
+  shifts: Shift[];
+}
+
 interface StoreScheduleProps {
-  store: any;
+  store: { openingHours: DaySchedule[] };
   onEdit: () => void;
   layoutId?: string;
 }
@@ -32,7 +43,7 @@ export default function StoreSchedule({ store, onEdit, layoutId }: StoreSchedule
       </div>
 
       <div className="space-y-4">
-        {store.openingHours.map((item: any, index: number) => (
+        {store.openingHours.map((item: DaySchedule) => (
           <div key={item.day} className="flex items-end justify-between py-2 group">
             {/* Day Name */}
             <div className={`text-base font-bold shrink-0 ${item.isOpen ? 'text-[#1A1A1A]' : 'text-gray-300'}`}>
@@ -46,7 +57,7 @@ export default function StoreSchedule({ store, onEdit, layoutId }: StoreSchedule
             <div className="text-right shrink-0">
               {item.isOpen && item.shifts && item.shifts.length > 0 ? (
                 <div className="flex flex-col items-end gap-1">
-                  {item.shifts.map((shift: any, i: number) => (
+                  {item.shifts.map((shift: Shift, i: number) => (
                     <span key={i} className="text-sm font-bold text-[#1A1A1A] tracking-wide">
                       {shift.open} - {shift.close}
                     </span>

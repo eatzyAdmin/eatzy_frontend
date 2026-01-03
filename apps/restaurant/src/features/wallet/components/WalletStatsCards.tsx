@@ -60,7 +60,7 @@ export default function WalletStatsCards({ onWithdraw, isLoading = false, childr
             <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center group-hover:rotate-12 transition-transform">
               <TrendingUp className="w-5 h-5" />
             </div>
-            <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">Today's Earnings</span>
+            <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">Today&apos;s Earnings</span>
           </div>
           <div className="text-3xl font-anton text-[#1A1A1A] relative z-10">
             {isLoading ? (

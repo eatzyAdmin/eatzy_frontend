@@ -56,7 +56,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [effectiveSearchMode]);
 
-  const handleSearch = (query: string, filters?: any) => {
+  const handleSearch = (query: string, filters?: { minPrice?: number; maxPrice?: number; sort?: string; category?: string | null }) => {
     performSearch(query, filters);
   };
 

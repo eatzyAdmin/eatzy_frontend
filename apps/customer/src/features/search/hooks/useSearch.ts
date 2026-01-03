@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import {
@@ -25,18 +25,20 @@ export function useSearch() {
 
   // Check if we're in search mode (has search query param)
   // Parse filters from URL
-  const filters = {
+  // Check if we're in search mode (has search query param)
+  // Parse filters from URL
+  const filters = useMemo(() => ({
     minPrice: Number(searchParams.get('minPrice')) || 0,
     maxPrice: Number(searchParams.get('maxPrice')) || 500000,
     sort: searchParams.get('sort') || 'recommended',
     category: searchParams.get('category') || null,
-  };
+  }), [searchParams]);
 
   // Check if we're in search mode (has search query param)
   const isSearchMode = searchParams.has('q');
 
   // Perform search
-  const performSearch = useCallback(async (query: string, newFilters?: any) => {
+  const performSearch = useCallback(async (query: string, newFilters?: Partial<typeof filters>) => {
     if (!query.trim()) {
       return;
     }
@@ -129,7 +131,7 @@ export function useSearch() {
       // So calling performSearch(query, filters) works.
       performSearch(query, filters);
     }
-  }, [searchParams, searchQuery, performSearch, isSearching, hasSearched]); // Removed filters from dep loop to avoid strict object eq issues, relying on searchParams
+  }, [searchParams, searchQuery, performSearch, isSearching, hasSearched, filters]); // Removed filters from dep loop to avoid strict object eq issues, relying on searchParams
 
   return {
     searchQuery,

@@ -4,8 +4,8 @@ import { FileText, X, Save, Edit2 } from "@repo/ui/icons";
 import { useNotification, useSwipeConfirmation } from "@repo/ui";
 
 interface StoreGeneralInfoEditProps {
-  store: any;
-  onSave: (updates: any) => void;
+  store: { name: string; description: string; phone: string; email: string;[key: string]: unknown };
+  onSave: (updates: { name: string; description: string; phone: string; email: string }) => void;
   onClose: () => void;
   layoutId?: string;
 }
@@ -16,8 +16,8 @@ export default function StoreGeneralInfoEdit({ store, onSave, onClose, layoutId 
   const { confirm } = useSwipeConfirmation();
   const [initialJson] = useState(() => JSON.stringify(store));
 
-  const handleChange = (field: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, [field]: value }));
+  const handleChange = (field: string, value: string | number) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = () => {

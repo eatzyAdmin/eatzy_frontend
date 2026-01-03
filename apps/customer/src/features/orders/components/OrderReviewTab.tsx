@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Star, Send, Award, ShieldCheck, Quote } from "@repo/ui/icons";
 import { ImageWithFallback } from "@repo/ui";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { useSwipeConfirmation, useLoading, useNotification } from "@repo/ui";
+import { useSwipeConfirmation, useNotification } from "@repo/ui";
 import type { Order } from "@repo/types";
 
 interface OrderReviewTabProps {
@@ -21,12 +21,11 @@ interface OrderReviewTabProps {
 }
 
 export default function OrderReviewTab({
-  order,
   driver,
   restaurant,
 }: OrderReviewTabProps) {
   const { confirm } = useSwipeConfirmation();
-  const { show, hide } = useLoading();
+  // const { show, hide } = useLoading();
   const { showNotification } = useNotification();
 
   const [restaurantRating, setRestaurantRating] = useState(0);
@@ -173,7 +172,7 @@ export default function OrderReviewTab({
               ))}
             </div>
             <p className="text-[#1A1A1A] text-sm italic leading-relaxed">
-              "{restaurantComment || "Không có nhận xét"}"
+              &quot;{restaurantComment || "Không có nhận xét"}&quot;
             </p>
           </div>
 
@@ -278,7 +277,7 @@ export default function OrderReviewTab({
               ))}
             </div>
             <p className="text-[#1A1A1A] text-sm italic leading-relaxed">
-              "{driverComment || "Không có nhận xét"}"
+              &quot;{driverComment || "Không có nhận xét"}&quot;
             </p>
           </div>
 

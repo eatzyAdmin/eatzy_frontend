@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { ArrowLeft, Calendar, Receipt, Filter, Search, X } from "@repo/ui/icons";
+import { ArrowLeft, Receipt, Filter, Search, X } from "@repo/ui/icons";
 import { useLoading, RestaurantCardShimmer } from "@repo/ui";
 import type { Order, OrderStatus } from "@repo/types";
 import { getOrders } from "@/features/orders/data/mockOrders";

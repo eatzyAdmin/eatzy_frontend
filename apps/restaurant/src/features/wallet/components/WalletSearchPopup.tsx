@@ -6,7 +6,7 @@ import { Search, X, Hash, Type } from '@repo/ui/icons';
 interface SearchFieldConfig {
   key: string;
   label: string;
-  icon: any;
+  icon: React.ElementType;
   placeholder: string;
 }
 
@@ -36,7 +36,7 @@ const WalletSearchPopup: React.FC<WalletSearchPopupProps> = ({
   }, [isOpen, searchFields]);
 
   const handleLocalSearchChange = (key: string, value: string) => {
-    setLocalSearchFields((prev: any) => ({
+    setLocalSearchFields((prev) => ({
       ...prev,
       [key]: value
     }));
@@ -65,7 +65,6 @@ const WalletSearchPopup: React.FC<WalletSearchPopupProps> = ({
   };
 
   // Check if any search is active
-  const hasActiveSearch = localSearchFields.id || localSearchFields.description;
 
   const handleClear = () => {
     setLocalSearchFields({ id: '', description: '' });

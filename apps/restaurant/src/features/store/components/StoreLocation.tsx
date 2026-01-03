@@ -3,7 +3,7 @@ import { MapPin, Edit2 } from "@repo/ui/icons";
 import StoreLocationMap from "./StoreLocationMap";
 
 interface StoreLocationProps {
-  store: any;
+  store: { address: string; coords: { lat: number; lng: number };[key: string]: unknown };
   onEdit: () => void;
   layoutId?: string;
 }

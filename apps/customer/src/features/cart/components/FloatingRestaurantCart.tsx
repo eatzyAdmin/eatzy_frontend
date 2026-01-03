@@ -10,7 +10,7 @@ import { useLoading } from "@repo/ui";
 import { useRouter } from "next/navigation";
 
 export default function FloatingRestaurantCart({ restaurantId, restaurantName }: { restaurantId: string, restaurantName?: string }) {
-  const { items, total, setActiveRestaurant, removeItem, setQuantity, addItem } = useCartStore();
+  const { items, setActiveRestaurant, removeItem, addItem } = useCartStore();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { show } = useLoading();

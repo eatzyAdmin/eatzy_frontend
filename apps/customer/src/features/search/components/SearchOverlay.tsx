@@ -4,10 +4,17 @@ import { Search, X, SlidersHorizontal } from "@repo/ui/icons";
 import { useState, useEffect, KeyboardEvent } from "react";
 import FilterModal from "./FilterModal";
 
+interface SearchFilters {
+  minPrice: number;
+  maxPrice: number;
+  sort: string;
+  category: string | null;
+}
+
 interface SearchOverlayProps {
   open: boolean;
   onClose: () => void;
-  onSearch?: (query: string, filters?: any) => void;
+  onSearch?: (query: string, filters?: Partial<SearchFilters>) => void;
   isSearchMode?: boolean;
   isSearchBarCompact?: boolean;
   isSearching?: boolean;
@@ -27,11 +34,11 @@ export default function SearchOverlay({
 }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<SearchFilters>({
     minPrice: 0,
     maxPrice: 500000,
     sort: 'recommended',
-    category: null as string | null
+    category: null
   });
 
   const handleSearch = () => {
@@ -40,7 +47,7 @@ export default function SearchOverlay({
     }
   };
 
-  const handleApplyFilter = (newFilters: any) => {
+  const handleApplyFilter = (newFilters: SearchFilters) => {
     setFilters(newFilters);
     setFilterOpen(false);
     if (query.trim() && onSearch) {

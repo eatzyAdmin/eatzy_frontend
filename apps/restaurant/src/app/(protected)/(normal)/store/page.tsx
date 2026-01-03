@@ -32,7 +32,7 @@ export default function StorePage() {
     return () => clearTimeout(timer);
   }, [hide]);
 
-  const handleUpdateStore = (updates: any) => {
+  const handleUpdateStore = (updates: Partial<typeof mockStore>) => {
     setStore(prev => ({ ...prev, ...updates }));
     setActiveSection(null);
     showNotification({ message: 'Thông tin cửa hàng đã được cập nhật!', type: 'success', format: 'Nếu các thông tin chưa cập nhật ngay, hãy thử tải lại nhé.' });
@@ -44,7 +44,7 @@ export default function StorePage() {
 
   return (
     <div className="min-h-screen pb-20 pr-8 pl-4">
-      <StoreHeader store={store} onEdit={() => { }} />
+      <StoreHeader store={store} />
 
       <main className="px-8 -mt-20 relative z-10 w-full max-w-[1600px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -80,7 +80,6 @@ export default function StorePage() {
               <StoreMedia
                 store={store}
                 onEdit={() => setActiveSection('media')}
-                onChange={() => { }}
                 layoutId="store-card-media"
               />
             </motion.div>

@@ -3,7 +3,7 @@ import { FileText, Phone, Mail, Edit2, ShieldCheck, Star } from "@repo/ui/icons"
 import { ImageWithFallback } from "@repo/ui";
 
 interface StoreGeneralInfoProps {
-  store: any;
+  store: { name: string; imageUrl?: string; commissionRate: number; description: string; phone: string; email: string;[key: string]: unknown };
   onEdit: () => void;
   layoutId?: string;
 }
@@ -40,7 +40,7 @@ export default function StoreGeneralInfo({ store, onEdit, layoutId }: StoreGener
             <div className="relative w-32 h-32 mb-4">
               <div className="w-full h-full rounded-full overflow-hidden border-4 border-white shadow-md relative">
                 <ImageWithFallback
-                  src={store.imageUrl}
+                  src={store.imageUrl || ''}
                   alt={store.name}
                   fill
                   className="object-cover"

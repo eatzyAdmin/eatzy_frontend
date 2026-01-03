@@ -18,7 +18,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
   const activeOrder = orders.find((o) => o.id === activeOrderId) ?? orders[0];
   const { confirm } = useSwipeConfirmation();
   const { showNotification } = useNotification();
-  const { show: showLoading, hide: hideLoading } = useLoading();
+  const { hide: hideLoading } = useLoading();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {

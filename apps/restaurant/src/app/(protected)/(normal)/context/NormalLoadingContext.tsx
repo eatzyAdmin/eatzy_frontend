@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
-import { usePathname } from "next/navigation";
+// import { usePathname } from "next/navigation";
 
 interface NormalLoadingContextType {
   isLoading: boolean;
@@ -14,7 +14,7 @@ const NormalLoadingContext = createContext<NormalLoadingContextType | undefined>
 export function NormalLoadingProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [startTime, setStartTime] = useState<number>(0);
-  const pathname = usePathname();
+  // const pathname = usePathname();
 
   const startLoading = useCallback(() => {
     setIsLoading(true);

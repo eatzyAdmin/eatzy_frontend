@@ -1,13 +1,27 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { Clock, X, Save, Trash2, Plus, Check } from "@repo/ui/icons";
 import { TimeInput, useNotification, useSwipeConfirmation } from "@repo/ui";
 
+interface DaySchedule {
+  day: string;
+  isOpen: boolean;
+  shifts: Shift[];
+  open?: string;
+  close?: string;
+}
+
 interface StoreScheduleEditProps {
-  store: any;
-  onSave: (updates: any) => void;
+  store: { openingHours: DaySchedule[] };
+  onSave: (updates: { openingHours: DaySchedule[] }) => void;
   onClose: () => void;
   layoutId?: string;
+}
+
+interface Shift {
+  open: string;
+  close: string;
+  isTemp?: boolean;
 }
 
 const PASTEL_PALETTE = [
@@ -35,9 +49,9 @@ const formatMinutesToTime = (minutes: number) => {
 };
 
 export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: StoreScheduleEditProps) {
-  const [openingHours, setOpeningHours] = useState<any[]>(() => {
+  const [openingHours, setOpeningHours] = useState<DaySchedule[]>(() => {
     const data = JSON.parse(JSON.stringify(store.openingHours));
-    data.forEach((day: any) => {
+    data.forEach((day: DaySchedule) => {
       if (!day.shifts) {
         day.shifts = [];
         if (day.open && day.close) day.shifts.push({ open: day.open, close: day.close });
@@ -107,13 +121,11 @@ export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: 
       const dayShifts = currentHours[dayIndex].shifts;
       const currentShift = dayShifts[shiftIndex];
 
-      const otherShifts = dayShifts.filter((_: any, idx: number) => idx !== shiftIndex);
+      const otherShifts = dayShifts.filter((_: Shift, idx: number) => idx !== shiftIndex);
 
       // Validate
-      let safe = true;
       const otherMins = edge === 'start' ? parseTimeToMinutes(currentShift.close) : parseTimeToMinutes(currentShift.open);
 
-      // 1. Check self-integrity (start < end) - Minimum 30 mins or 1 hour? User said 1 hour for creation. Let's enforce 30 mins min for resize flexibility? Or 1 hour?
       // 1. Check self-integrity (start < end) - Minimum 1 hour
       const MIN_DURATION = 60;
       let isTooShort = false;
@@ -225,7 +237,7 @@ export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: 
     return { top: `${topPerc}%`, height: `${heightPerc}%` };
   };
 
-  const getHoverGap = () => {
+  const getHoverGap = useCallback(() => {
     if (hoverDayIndex === null || !hoverTime) return null;
     const hoverMins = parseTimeToMinutes(hoverTime);
     const day = openingHours[hoverDayIndex];
@@ -234,7 +246,7 @@ export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: 
     const dayShifts = day.shifts;
 
     // Sort shifts
-    const sortedShifts = [...dayShifts].sort((a: any, b: any) => parseTimeToMinutes(a.open) - parseTimeToMinutes(b.open));
+    const sortedShifts = [...dayShifts].sort((a: Shift, b: Shift) => parseTimeToMinutes(a.open) - parseTimeToMinutes(b.open));
 
     let startBound = 0;
     let endBound = 24 * 60;
@@ -260,9 +272,9 @@ export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: 
       start: formatMinutesToTime(startBound),
       end: formatMinutesToTime(endBound)
     };
-  };
+  }, [hoverDayIndex, hoverTime, openingHours]);
 
-  const hoverGap = useMemo(() => getHoverGap(), [hoverDayIndex, hoverTime, openingHours]);
+  const hoverGap = useMemo(() => getHoverGap(), [getHoverGap]);
 
   const cancelEdit = () => {
     if (selectedShift) {
@@ -342,7 +354,7 @@ export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: 
 
     const conflicts: number[] = [];
 
-    dayShifts.forEach((shift: any, index: number) => {
+    dayShifts.forEach((shift: Shift, index: number) => {
       if (index === currentShiftIndex) return; // Skip self
       const s = parseTimeToMinutes(shift.open);
       const e = parseTimeToMinutes(shift.close);
@@ -372,8 +384,8 @@ export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: 
     }
 
     const newHours = [...openingHours];
-    const shift = { ...draftShift };
-    delete (shift as any).isTemp;
+    const shift = { ...draftShift } as Shift;
+    delete shift.isTemp;
     newHours[selectedShift.dayIndex].shifts[selectedShift.shiftIndex] = shift;
     setOpeningHours(newHours);
     setSelectedShift(null);
@@ -627,7 +639,7 @@ export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: 
 
                   {/* Actual Shifts */}
                   <AnimatePresence>
-                    {day.isOpen && day.shifts.map((shift: any, shiftIndex: number) => {
+                    {day.isOpen && day.shifts.map((shift: Shift, shiftIndex: number) => {
                       const pos = getPositionStyle(shift.open, shift.close);
                       const isSelected = selectedShift?.dayIndex === dayIndex && selectedShift?.shiftIndex === shiftIndex;
                       const isConflict = conflictShifts.some(c => c.dayIndex === dayIndex && c.shiftIndex === shiftIndex);

@@ -7,8 +7,14 @@ import {
   Calendar, CreditCard, Hash, FileType, AlignLeft, AlertCircle
 } from '@repo/ui/icons';
 
+interface ColumnConfig {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+}
+
 // Define Column Groups Configuration
-const COLUMN_GROUPS = {
+const COLUMN_GROUPS: Record<string, { label: string; icon: React.ReactNode; columns: ColumnConfig[] }> = {
   general: {
     label: 'General Info',
     icon: <Hash className="w-4 h-4" />,
@@ -40,7 +46,7 @@ interface WalletExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onExport: (format: 'pdf' | 'excel', scope: 'current' | 'all', columns: string[]) => Promise<void>;
-  previewData?: any[];
+  previewData?: Record<string, unknown>[];
 }
 
 const WalletExportModal: React.FC<WalletExportModalProps> = ({
@@ -82,7 +88,7 @@ const WalletExportModal: React.FC<WalletExportModalProps> = ({
   // State for tracking column animations  
   const [columnAnimations, setColumnAnimations] = useState<Record<string, 'adding' | 'removing' | null>>({});
   const [lastAddedColumn, setLastAddedColumn] = useState<string | null>(null);
-  const [lastRemovedColumn, setLastRemovedColumn] = useState<string | null>(null);
+  // Removed unused lastRemovedColumn
 
   // State for ghost columns (visual duplicates during animation)
   const [ghostColumns, setGhostColumns] = useState<Record<string, { value: boolean; position: { left: number; width: number } }>>({});
@@ -117,7 +123,7 @@ const WalletExportModal: React.FC<WalletExportModalProps> = ({
     // Create ghost effect for animation
     if (selectedColumns[key]) {
       // Column is being removed
-      setLastRemovedColumn(key);
+      // setLastRemovedColumn(key); // Removed unused
 
       // Capture position before removing
       const position = findColumnPosition(key);
@@ -161,84 +167,17 @@ const WalletExportModal: React.FC<WalletExportModalProps> = ({
 
       // Reset last added/removed column
       if (selectedColumns[key]) {
-        setLastRemovedColumn(null);
+        // setLastRemovedColumn(null); // Removed unused
       } else {
         setLastAddedColumn(null);
       }
     }, 500); // Match this with the animation duration
   };
 
-  const selectAllInGroup = (groupKey: string, isSelect: boolean) => {
-    const group = COLUMN_GROUPS[groupKey as keyof typeof COLUMN_GROUPS];
-    const newSelected = { ...selectedColumns };
-    const newAnimations: Record<string, 'adding' | 'removing' | null> = {};
-    const newGhosts: Record<string, { value: boolean; position: { left: number; width: number } }> = { ...ghostColumns };
-
-    // Store previous state
-    previousSelectedColumns.current = { ...selectedColumns };
-
-    let hasChanges = false;
-    let lastChanged: string | null = null;
-    let lastAdded: string | null = null;
-
-    group.columns.forEach(col => {
-      // Check if state actually changes
-      if (newSelected[col.key] !== isSelect) {
-        hasChanges = true;
-        newSelected[col.key] = isSelect;
-        lastChanged = col.key;
-
-        if (isSelect) {
-          // Adding
-          newAnimations[col.key] = 'adding';
-          lastAdded = col.key;
-        } else {
-          // Removing
-          newAnimations[col.key] = 'removing';
-          // Capture position for ghost - DOM exists for removing cols
-          const pos = findColumnPosition(col.key);
-          newGhosts[col.key] = { value: true, position: pos };
-        }
-      }
-    });
-
-    if (!hasChanges) return;
-
-    // Batch updates
-    setSelectedColumns(newSelected);
-    setColumnAnimations(prev => ({ ...prev, ...newAnimations }));
-
-    if (Object.keys(newGhosts).length > 0) {
-      // Small delay to ensure position capture if needed or just set immediately
-      setGhostColumns(newGhosts);
-
-      // Schedule ghost cleanup
-      setTimeout(() => {
-        setGhostColumns(prev => {
-          const cleaned = { ...prev };
-          Object.keys(newGhosts).forEach(k => delete cleaned[k]);
-          return cleaned;
-        });
-      }, 500);
-    }
-
-    // Update tracking states
-    if (lastChanged) setLastChangedColumn(lastChanged);
-    if (lastAdded) setLastAddedColumn(lastAdded);
-
-    // Cleanup animations after duration
-    setTimeout(() => {
-      setColumnAnimations(prev => {
-        const cleaned = { ...prev };
-        Object.keys(newAnimations).forEach(k => cleaned[k] = null);
-        return cleaned;
-      });
-      if (lastAdded) setLastAddedColumn(null);
-    }, 500);
-  };
+  // Removed selectAllInGroup
 
   const activeColumnsList = useMemo(() => {
-    const list: any[] = [];
+    const list: ColumnConfig[] = [];
     Object.values(COLUMN_GROUPS).forEach(group => {
       group.columns.forEach(col => {
         if (selectedColumns[col.key]) list.push(col);
@@ -322,19 +261,19 @@ const WalletExportModal: React.FC<WalletExportModalProps> = ({
   }, [selectedColumns, lastChangedColumn]);
 
   // Helper to format preview data
-  const formatCell = (item: any, key: string) => {
+  const formatCell = (item: Record<string, unknown>, key: string) => {
     const val = item[key];
-    if (key === 'amount') return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
-    if (key === 'date') return new Date(val).toLocaleDateString('vi-VN');
-    if (key === 'status') return (
+    if (key === 'amount' && (typeof val === 'number' || typeof val === 'bigint')) return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+    if (key === 'date' && (typeof val === 'string' || typeof val === 'number' || val instanceof Date)) return new Date(val).toLocaleDateString('vi-VN');
+    if (key === 'status' && typeof val === 'string') return (
       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${val === 'success' ? 'bg-green-100 text-green-700' :
         val === 'failed' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
         }`}>
         {val}
       </span>
     );
-    if (key === 'type') return <span className="capitalize">{val}</span>;
-    return val;
+    if (key === 'type' && typeof val === 'string') return <span className="capitalize">{val}</span>;
+    return String(val);
   };
 
   return (

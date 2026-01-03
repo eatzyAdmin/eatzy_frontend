@@ -4,8 +4,8 @@ import { X, Save, Trash2, Image as ImageIcon, RotateCcw, GripVertical } from "@r
 import { ImageWithFallback, useNotification, useSwipeConfirmation } from "@repo/ui";
 
 interface StoreMediaEditProps {
-  store: any;
-  onSave: (updates: any) => void;
+  store: { images?: string[];[key: string]: unknown };
+  onSave: (updates: { images: string[] }) => void;
   onClose: () => void;
   layoutId?: string;
 }
@@ -20,6 +20,7 @@ interface MediaItem {
 export default function StoreMediaEdit({ store, onSave, onClose, layoutId }: StoreMediaEditProps) {
   const { showNotification } = useNotification();
   const { confirm } = useSwipeConfirmation();
+  const objectUrls = useRef<string[]>([]);
 
   // Initialize Items
   const [items, setItems] = useState<MediaItem[]>(() => {
@@ -62,6 +63,7 @@ export default function StoreMediaEdit({ store, onSave, onClose, layoutId }: Sto
     Array.from(files).forEach(file => {
       if (file.type.startsWith('image/')) {
         const url = URL.createObjectURL(file);
+        objectUrls.current.push(url);
         newItems.push({
           id: Math.random().toString(36).substr(2, 9),
           url,
@@ -83,7 +85,7 @@ export default function StoreMediaEdit({ store, onSave, onClose, layoutId }: Sto
   };
 
   // Reorder Logic (Swap)
-  const handleItemDragStart = (e: React.DragEvent, id: string) => {
+  const handleItemDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
     setDraggingId(id);
     // Needed for HTML5 DnD to work
     e.dataTransfer.effectAllowed = "move";
@@ -94,7 +96,7 @@ export default function StoreMediaEdit({ store, onSave, onClose, layoutId }: Sto
     e.dataTransfer.setDragImage(emptyImage, 0, 0);
   };
 
-  const handleItemDragEnter = (e: React.DragEvent, targetId: string) => {
+  const handleItemDragEnter = (e: React.DragEvent<HTMLDivElement>, targetId: string) => {
     if (draggingId === null || draggingId === targetId) return;
 
     // Throttle: Prevent rapid-fire swaps (jitter) during animation
@@ -160,10 +162,9 @@ export default function StoreMediaEdit({ store, onSave, onClose, layoutId }: Sto
 
   // Cleanup ObjectURLs
   useEffect(() => {
+    const urls = objectUrls.current;
     return () => {
-      items.forEach(item => {
-        if (item.file) URL.revokeObjectURL(item.url);
-      });
+      urls.forEach(url => URL.revokeObjectURL(url));
     };
   }, []);
 
@@ -259,7 +260,7 @@ export default function StoreMediaEdit({ store, onSave, onClose, layoutId }: Sto
         {/* Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-1">
           <AnimatePresence>
-            {items.map((item, index) => (
+            {items.map((item) => (
               <motion.div
                 layout
                 key={item.id}
@@ -271,8 +272,8 @@ export default function StoreMediaEdit({ store, onSave, onClose, layoutId }: Sto
                   ${draggingId === item.id ? 'opacity-0' : ''}
                 `}
                 draggable={!item.isDeleted}
-                onDragStart={(e) => handleItemDragStart(e as any, item.id)}
-                onDragEnter={(e) => handleItemDragEnter(e as any, item.id)}
+                onDragStart={(e) => handleItemDragStart(e as unknown as React.DragEvent<HTMLDivElement>, item.id)}
+                onDragEnter={(e) => handleItemDragEnter(e as unknown as React.DragEvent<HTMLDivElement>, item.id)}
                 onDragEnd={handleItemDragEnd}
                 onDragOver={(e) => e.preventDefault()}
               >

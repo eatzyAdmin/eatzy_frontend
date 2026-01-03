@@ -3,14 +3,12 @@ import { Image as ImageIcon, Settings } from "@repo/ui/icons";
 import { motion } from "@repo/ui/motion";
 
 interface StoreMediaProps {
-  store: any;
-  isEditing?: boolean;
+  store: { images: string[];[key: string]: unknown };
   onEdit: () => void;
-  onChange: (updates: any) => void;
   layoutId?: string; // Add this
 }
 
-export default function StoreMedia({ store, isEditing, onEdit, onChange, layoutId }: StoreMediaProps) {
+export default function StoreMedia({ store, onEdit, layoutId }: StoreMediaProps) {
   return (
     <motion.div
       layoutId={layoutId} // Apply to root

@@ -1,4 +1,4 @@
-import type { Restaurant } from '@repo/types';
+// import type { Restaurant } from '@repo/types';
 
 // Mock favorite restaurants - in real app this would come from API/database
 export const mockFavoriteRestaurantIds = [

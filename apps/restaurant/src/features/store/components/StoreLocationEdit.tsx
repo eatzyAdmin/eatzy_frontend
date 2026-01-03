@@ -5,8 +5,8 @@ import { useNotification, useSwipeConfirmation } from "@repo/ui";
 import StoreLocationMap from "./StoreLocationMap";
 
 interface StoreLocationEditProps {
-  store: any;
-  onSave: (updates: any) => void;
+  store: { address: string; coords: { lat: number; lng: number };[key: string]: unknown };
+  onSave: (updates: { address: string; coords: { lat: number; lng: number } }) => void;
   onClose: () => void;
   layoutId?: string;
 }

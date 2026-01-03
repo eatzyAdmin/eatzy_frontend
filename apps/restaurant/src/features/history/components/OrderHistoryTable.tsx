@@ -7,7 +7,6 @@ import WalletSearchPopup from '@/features/wallet/components/WalletSearchPopup';
 import OrderHistoryFilterModal from './OrderHistoryFilterModal';
 import OrderDetailsModal from './OrderDetailsModal';
 import OrderExportModal from './OrderExportModal';
-import { useNotification } from '@repo/ui';
 
 const columns: ColumnDef<OrderHistoryItem>[] = [
   {
@@ -120,7 +119,7 @@ const columns: ColumnDef<OrderHistoryItem>[] = [
 
 export default function OrderHistoryTable() {
   const [data] = useState(mockOrderHistory);
-  const { showNotification } = useNotification();
+  // const { showNotification } = useNotification();
   const [sortConfig, setSortConfig] = useState<{ key: keyof OrderHistoryItem; direction: 'asc' | 'desc' } | null>(null);
   // Details Modal State
   const [selectedOrder, setSelectedOrder] = useState<OrderHistoryItem | null>(null);

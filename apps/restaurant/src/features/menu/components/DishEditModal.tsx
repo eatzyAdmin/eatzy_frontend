@@ -9,7 +9,7 @@ interface DishEditModalProps {
   dish: Dish;
   onDraftChange?: (updates: Partial<Dish>) => void;
   onClose: () => void;
-  onUpdate?: any; // Deprecated but might be passed by parent if not fully cleaned up, ignore it
+  // onUpdate: any; // Removed unused prop
 }
 
 export default function DishEditModal({ dish, onDraftChange, onClose }: DishEditModalProps) {
@@ -160,7 +160,7 @@ export default function DishEditModal({ dish, onDraftChange, onClose }: DishEdit
         {optionGroups.length === 0 ? (
           <div className="h-40 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-3xl">
             <p className="text-sm font-medium">Chưa có nhóm tùy chọn nào</p>
-            <p className="text-xs mt-1">Bấm "Thêm nhóm" để bắt đầu</p>
+            <p className="text-xs mt-1">Bấm &quot;Thêm nhóm&quot; để bắt đầu</p>
           </div>
         ) : (
           <Reorder.Group axis="y" values={optionGroups} onReorder={updateGroups} className="space-y-6">

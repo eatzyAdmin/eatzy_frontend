@@ -32,7 +32,6 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
   ];
 
   const reviews = useMemo(() => restaurant.reviews || [], [restaurant.reviews]);
-  const reviewCount = restaurant.reviewCount || reviews.length;
   // Use restaurant.rating if available, else calculate average
   const rating = restaurant.rating || (reviews.reduce((acc, r) => acc + r.rating, 0) / (reviews.length || 1));
 
@@ -61,7 +60,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
   }, [reviews]);
 
   const filteredReviews = useMemo(() => {
-    let result = reviews.filter(review =>
+    const result = reviews.filter(review =>
       (review.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
         review.authorName.toLowerCase().includes(searchQuery.toLowerCase())) &&
       (selectedRating === null || Math.floor(review.rating) === selectedRating)
