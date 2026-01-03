@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
-import { useLoading, useNotification, useSwipeConfirmation } from '@repo/ui';
+import { useLoading, useNotification } from '@repo/ui';
 import StoreHeader from '@/features/store/components/StoreHeader';
 import StoreGeneralInfo from '@/features/store/components/StoreGeneralInfo';
 import StoreLocation from '@/features/store/components/StoreLocation';

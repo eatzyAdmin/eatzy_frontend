@@ -2,12 +2,13 @@
 
 import { motion } from "@repo/ui/motion";
 import { ImageWithFallback, useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
-import { Store, MapPin, Calendar, Clock, ChefHat, Bike, BadgeCheck, ClipboardList, X } from "@repo/ui/icons";
+import { Store, MapPin, Calendar, ChefHat, Bike, BadgeCheck, ClipboardList, X, Clock } from "@repo/ui/icons";
 import type { Order } from "@repo/types";
 import { formatVnd } from "@repo/lib";
 import { getRestaurantById } from "@/features/search/data/mockSearchData";
 
 const statusConfig = {
+  PENDING: { label: "Chờ xác nhận", icon: Clock, color: "text-yellow-600", bg: "bg-yellow-50", border: "border-yellow-200" },
   PLACED: { label: "Đã đặt", icon: ClipboardList, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
   PREPARED: { label: "Đã nấu", icon: ChefHat, color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-200" },
   PICKED: { label: "Đang giao", icon: Bike, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },

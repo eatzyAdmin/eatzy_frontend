@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ImageWithFallback, RestaurantDetailShimmer, FloatingRestaurantCartShimmer } from "@repo/ui";
-import { ChevronLeft, ChevronRight, Tag, Star, Clock, MapPin, ArrowLeft, ChefHat, Plus, Minus } from "@repo/ui/icons";
+import { ChevronLeft, ChevronRight, Tag, Star, MapPin, ArrowLeft, Plus, Minus } from "@repo/ui/icons";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useLoading, useHoverHighlight, HoverHighlightOverlay, useFlyToCart, FlyToCartLayer } from "@repo/ui";
 import type { Restaurant, Dish, MenuCategory, Voucher } from "@repo/types";

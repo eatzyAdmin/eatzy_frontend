@@ -1,5 +1,5 @@
 import { motion } from "@repo/ui/motion";
-import { MapPin, Navigation, Edit2 } from "@repo/ui/icons";
+import { MapPin, Edit2 } from "@repo/ui/icons";
 import StoreLocationMap from "./StoreLocationMap";
 
 interface StoreLocationProps {

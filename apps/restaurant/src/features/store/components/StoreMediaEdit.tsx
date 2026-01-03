@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { X, Save, Upload, Trash2, Plus, Image as ImageIcon, RotateCcw, Cloud, GripVertical, Check } from "@repo/ui/icons";
+import { X, Save, Trash2, Image as ImageIcon, RotateCcw, GripVertical } from "@repo/ui/icons";
 import { ImageWithFallback, useNotification, useSwipeConfirmation } from "@repo/ui";
 
 interface StoreMediaEditProps {

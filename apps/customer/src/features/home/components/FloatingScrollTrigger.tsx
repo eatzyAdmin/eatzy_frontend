@@ -2,7 +2,6 @@
 
 import { motion } from "@repo/ui/motion";
 import { ChevronDown } from "@repo/ui/icons";
-import { useEffect, useState } from "react";
 
 interface Props {
   onClick: () => void;

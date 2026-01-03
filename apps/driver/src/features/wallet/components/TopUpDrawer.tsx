@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "@repo/ui/motion";
 import { X, CreditCard, Wallet } from "@repo/ui/icons";
 import { useState } from "react";
 import { formatVnd } from "@repo/lib";
-import { useSwipeConfirmation, useLoading, useNotification } from "@repo/ui";
+import { useSwipeConfirmation, useNotification } from "@repo/ui";
 
 export default function TopUpDrawer({ open, onClose }: { open: boolean, onClose: () => void }) {
   const [amount, setAmount] = useState("");

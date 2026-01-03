@@ -1,5 +1,5 @@
 import { motion } from "@repo/ui/motion";
-import { User, FileText, Phone, Mail, Edit2, ShieldCheck, Star } from "@repo/ui/icons";
+import { FileText, Phone, Mail, Edit2, ShieldCheck, Star } from "@repo/ui/icons";
 import { ImageWithFallback } from "@repo/ui";
 
 interface StoreGeneralInfoProps {

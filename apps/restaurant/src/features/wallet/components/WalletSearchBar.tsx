@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from '@repo/ui/motion';
+import { motion } from '@repo/ui/motion';
 import { Search, X, Hash, Type } from '@repo/ui/icons';
 
 interface SearchFieldConfig {

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
-import { X, DollarSign, CreditCard, ChevronRight, ChevronLeft, AlertTriangle, Wallet } from '@repo/ui/icons';
+import { X, ChevronRight, ChevronLeft, AlertTriangle, Wallet } from '@repo/ui/icons';
 import { SwipeToConfirm } from '@repo/ui';
 import { mockWallet } from '../data/mockWallet';
 

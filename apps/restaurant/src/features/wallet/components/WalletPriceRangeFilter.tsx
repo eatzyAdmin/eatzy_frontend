@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion } from '@repo/ui/motion';
 
 interface WalletPriceRangeFilterProps {
   min: number;

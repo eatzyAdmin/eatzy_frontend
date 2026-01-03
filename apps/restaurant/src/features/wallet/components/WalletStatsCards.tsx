@@ -1,5 +1,5 @@
 import { motion } from '@repo/ui/motion';
-import { CreditCard, TrendingUp, Clock, DollarSign, ArrowUpRight } from '@repo/ui/icons';
+import { CreditCard, TrendingUp, DollarSign, ArrowUpRight } from '@repo/ui/icons';
 import { mockWallet } from '../data/mockWallet';
 
 const formatCurrency = (amount: number) => {

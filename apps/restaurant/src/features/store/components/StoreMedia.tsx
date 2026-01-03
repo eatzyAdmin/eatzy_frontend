@@ -1,6 +1,6 @@
 import { ImageWithFallback } from "@repo/ui";
-import { Image as ImageIcon, Settings, Plus } from "@repo/ui/icons";
-import { motion, AnimatePresence } from "@repo/ui/motion";
+import { Image as ImageIcon, Settings } from "@repo/ui/icons";
+import { motion } from "@repo/ui/motion";
 
 interface StoreMediaProps {
   store: any;

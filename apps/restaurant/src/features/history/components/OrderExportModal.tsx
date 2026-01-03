@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from '@repo/ui/motion';
 import {
   X, Download, FileText, Check, LayoutGrid, ListFilter,
   ChevronDown, Eye, CheckCircle, Database,
-  Calendar, CreditCard, Hash, User, ShoppingBag, Phone, MapPin, AlertCircle, RotateCcw, Clock
+  Calendar, CreditCard, Hash, User, ShoppingBag, Phone, MapPin, AlertCircle
 } from '@repo/ui/icons';
 import { OrderHistoryItem } from '../data/mockHistory';
 

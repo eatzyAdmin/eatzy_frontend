@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from '@repo/ui/motion';
-import { Filter, X, CheckCircle, AlertCircle, Calendar, CreditCard } from '@repo/ui/icons';
+import { Filter, X, CheckCircle, Calendar, CreditCard } from '@repo/ui/icons';
 import WalletDateRangePicker from './WalletDateRangePicker';
 import WalletPriceRangeFilter from './WalletPriceRangeFilter';
 

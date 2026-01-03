@@ -3,7 +3,7 @@ import { useNotification } from '@repo/ui';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import {
   X, Download, FileText, Check, LayoutGrid, ListFilter,
-  ChevronDown, ChevronRight, Eye, CheckCircle, Database,
+  ChevronDown, Eye, CheckCircle, Database,
   Calendar, CreditCard, Hash, FileType, AlignLeft, AlertCircle
 } from '@repo/ui/icons';
 

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import { ImageWithFallback } from '@repo/ui';
-import { X, User, MapPin, Clock, Calendar, ShieldCheck, Star, Package, Store, Phone, CheckCircle, AlertCircle, RotateCcw, Banknote } from '@repo/ui/icons';
+import { X, User, MapPin, Clock, ShieldCheck, Package, Store, CheckCircle, AlertCircle, RotateCcw, Banknote } from '@repo/ui/icons';
 import { OrderHistoryItem } from '../data/mockHistory';
 
 interface OrderDetailsModalProps {

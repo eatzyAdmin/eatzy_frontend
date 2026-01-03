@@ -1,6 +1,6 @@
 "use client";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { X, Trash, ChevronRight, CheckCircle2, Store } from "@repo/ui/icons";
+import { X, Trash, CheckCircle2, Store } from "@repo/ui/icons";
 import { useCartStore, CartItem } from "@repo/store";
 import { useEffect, useMemo, useState } from "react";
 import { ImageWithFallback } from "@repo/ui";

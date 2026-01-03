@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
-import { X, CheckCircle, AlertCircle, Calendar, CreditCard, Filter, Check, RotateCcw, Wallet, Banknote } from '@repo/ui/icons';
+import { X, CheckCircle, AlertCircle, Calendar, CreditCard, Filter, Check, RotateCcw, Banknote } from '@repo/ui/icons';
 import WalletDateRangePicker from '@/features/wallet/components/WalletDateRangePicker';
 import WalletPriceRangeFilter from '@/features/wallet/components/WalletPriceRangeFilter';
 
@@ -181,8 +181,8 @@ export default function OrderHistoryFilterModal({ isOpen, onClose, filterFields,
                               key={method}
                               onClick={() => togglePaymentMethod(method)}
                               className={`w-full py-3.5 px-4 text-sm font-bold rounded-xl transition-all border-2 text-left flex items-center justify-between group ${active
-                                  ? 'bg-lime-50 text-lime-800 border-lime-500 shadow-lg shadow-lime-100'
-                                  : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                                ? 'bg-lime-50 text-lime-800 border-lime-500 shadow-lg shadow-lime-100'
+                                : 'bg-white text-gray-600 border-gray-100 hover:border-gray-200 hover:bg-gray-50'
                                 }`}
                             >
                               <span className="capitalize">{method === '' ? 'All Methods' : method === 'vnpay' ? 'VNPAY' : method}</span>

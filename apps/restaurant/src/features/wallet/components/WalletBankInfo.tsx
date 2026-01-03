@@ -1,4 +1,3 @@
-import { motion } from '@repo/ui/motion';
 import { mockWallet } from '../data/mockWallet';
 import { CreditCard, ShieldCheck } from '@repo/ui/icons';
 

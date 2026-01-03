@@ -1,6 +1,5 @@
 import { motion } from '@repo/ui/motion';
 import { useEffect, useState, useRef, useMemo } from 'react';
-import { Flame, Star, MapPin, Sparkles, Tag } from "@repo/ui/icons";
 import type { RestaurantWithMenu } from '../hooks/useSearch';
 import MagazineLayout1 from './layouts/MagazineLayout1';
 import MagazineLayout2 from './layouts/MagazineLayout2';

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "@repo/ui/motion";
 import { X, ChevronRight, CreditCard } from "@repo/ui/icons";
 import { useState } from "react";
 import { formatVnd } from "@repo/lib";
-import { useSwipeConfirmation, useLoading, useNotification } from "@repo/ui";
+import { useSwipeConfirmation, useNotification } from "@repo/ui";
 
 export default function WithdrawDrawer({ open, onClose, balance }: { open: boolean, onClose: () => void, balance: number }) {
   const [amount, setAmount] = useState("");

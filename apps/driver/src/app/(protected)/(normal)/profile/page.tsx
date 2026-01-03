@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSwipeConfirmation, useLoading, useNotification } from "@repo/ui";
 import {
-  User, Settings, CreditCard, ShieldCheck,
-  LogOut, ChevronRight, Bike, Bell, HelpCircle, FileText
+  User, CreditCard, ShieldCheck,
+  LogOut, Bike, Bell, HelpCircle
 } from "@repo/ui/icons";
 import { mockDriverProfile } from "@/features/profile/data/mockProfileData";
 import DriverProfileCard from "@/features/profile/components/DriverProfileCard";

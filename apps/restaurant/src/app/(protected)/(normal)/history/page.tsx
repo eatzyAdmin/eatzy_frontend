@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import OrderHistoryStats from '@/features/history/components/OrderHistoryStats';
 import OrderHistoryTable from '@/features/history/components/OrderHistoryTable';
 import { useLoading } from '@repo/ui';
 

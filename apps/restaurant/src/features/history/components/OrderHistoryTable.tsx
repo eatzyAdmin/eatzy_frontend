@@ -1,7 +1,7 @@
 import { DataTable, ColumnDef } from '@repo/ui';
 import { motion } from '@repo/ui/motion';
 import { mockOrderHistory, OrderHistoryItem } from '../data/mockHistory';
-import { Search, Filter, Download, FileText, CheckCircle, AlertCircle, X, Clock, User, CreditCard, RotateCcw, Banknote } from '@repo/ui/icons';
+import { Search, Filter, Download, FileText, CheckCircle, AlertCircle, X, Clock, User, CreditCard, RotateCcw } from '@repo/ui/icons';
 import { useState, useMemo } from 'react';
 import WalletSearchPopup from '@/features/wallet/components/WalletSearchPopup';
 import OrderHistoryFilterModal from './OrderHistoryFilterModal';

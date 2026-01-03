@@ -1,5 +1,5 @@
 import { motion } from "@repo/ui/motion";
-import { Clock, Calendar, Edit2 } from "@repo/ui/icons";
+import { Clock, Edit2 } from "@repo/ui/icons";
 
 interface StoreScheduleProps {
   store: any;

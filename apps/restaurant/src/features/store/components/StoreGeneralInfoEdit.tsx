@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "@repo/ui/motion";
-import { User, FileText, Phone, Mail, X, Save, Edit2 } from "@repo/ui/icons";
+import { FileText, X, Save, Edit2 } from "@repo/ui/icons";
 import { useNotification, useSwipeConfirmation } from "@repo/ui";
 
 interface StoreGeneralInfoEditProps {

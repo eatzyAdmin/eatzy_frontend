@@ -1,5 +1,5 @@
 import { motion } from '@repo/ui/motion';
-import { ShoppingBag, TrendingUp, XCircle, CheckCircle, ArrowUpRight } from '@repo/ui/icons';
+import { ShoppingBag, TrendingUp, XCircle } from '@repo/ui/icons';
 import { mockOrderHistory } from '../data/mockHistory';
 
 const formatCurrency = (amount: number) => {

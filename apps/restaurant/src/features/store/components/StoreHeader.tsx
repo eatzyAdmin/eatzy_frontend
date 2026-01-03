@@ -1,7 +1,6 @@
 import { motion } from "@repo/ui/motion";
 import { ImageWithFallback, StatusBadge } from "@repo/ui";
 import { MapPin, Star, Phone, Camera } from "@repo/ui/icons";
-import { RestaurantStatus } from "@repo/types";
 
 interface StoreHeaderProps {
   store: any;
