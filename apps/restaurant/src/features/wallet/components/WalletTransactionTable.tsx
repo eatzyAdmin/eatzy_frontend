@@ -5,6 +5,7 @@ import { ArrowDownLeft, ArrowUpRight, Search, Filter, Download, FileText, CheckC
 import { useState, useMemo } from 'react';
 import WalletSearchPopup from './WalletSearchPopup';
 import WalletFilterModal from './WalletFilterModal';
+import WalletExportModal from './WalletExportModal';
 
 const columns: ColumnDef<Transaction>[] = [
   {
@@ -140,6 +141,15 @@ export default function WalletTransactionTable() {
     setIsFilterModalOpen(true);
   };
 
+  // Export State
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const handleExportData = async (format: 'pdf' | 'excel', scope: 'current' | 'all', columns: string[]) => {
+    // Simulate API/Processing delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    console.log(`Exporting ${scope} data as ${format} with columns:`, columns);
+    // Future: Implement actual file generation here
+  };
+
   const closeFilterModal = () => {
     setIsFilterModalOpen(false);
   };
@@ -250,7 +260,10 @@ export default function WalletTransactionTable() {
             </button>
           )}
 
-          <button className="px-5 py-2.5 rounded-xl bg-[#1A1A1A] text-white hover:bg-black transition-all flex items-center gap-2 shadow-lg shadow-gray-200 active:scale-95 ml-2">
+          <button
+            onClick={() => setIsExportModalOpen(true)}
+            className="px-5 py-2.5 rounded-xl bg-[#1A1A1A] text-white hover:bg-black transition-all flex items-center gap-2 shadow-lg shadow-gray-200 active:scale-95 ml-2"
+          >
             <Download className="w-4 h-4" />
             <span className="text-sm font-bold uppercase tracking-wide">Export</span>
           </button>
@@ -271,6 +284,13 @@ export default function WalletTransactionTable() {
           onClose={closeFilterModal}
           filterFields={filterFields}
           onApply={(newFilters) => setFilterFields(newFilters)}
+        />
+
+        <WalletExportModal
+          isOpen={isExportModalOpen}
+          onClose={() => setIsExportModalOpen(false)}
+          onExport={handleExportData}
+          previewData={filteredAndSortedData.slice(0, 5)}
         />
 
         {isFiltered && (
