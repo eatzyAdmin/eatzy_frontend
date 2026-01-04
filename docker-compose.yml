@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  customer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: customer
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: admin
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  driver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: driver
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  restaurant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: restaurant
+    ports:
+      - "3003:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  super-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: super-admin
+    ports:
+      - "3004:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
