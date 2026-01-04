@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "@repo/ui/motion";
 import { Home, History, Wallet, User } from "@repo/ui/icons";
 
 import { NormalLoadingProvider, useNormalLoading, NormalLoadingOverlay } from "./context/NormalLoadingContext";
+import { BottomNavProvider, useBottomNav } from "./context/BottomNavContext";
 
 function Navigation() {
   const pathname = usePathname();
@@ -60,18 +61,33 @@ function Navigation() {
   );
 }
 
+function AnimatedNavigation() {
+  const { isVisible } = useBottomNav();
+
+  return (
+    <motion.div
+      initial={{ y: 0, x: "-50%" }}
+      animate={{ y: isVisible ? 0 : 200, x: "-50%" }}
+      transition={{ duration: isVisible ? 0.4 : 0.8, ease: [0.33, 1, 0.68, 1] }} // Smooth cubic bezier
+      className="absolute bottom-3 left-1/2 w-[94%] max-w-xl"
+    >
+      <Navigation />
+    </motion.div>
+  );
+}
+
 export default function NormalLayout({ children }: { children: React.ReactNode }) {
   return (
     <NormalLoadingProvider>
-      <div className="fixed inset-0 overflow-hidden">
-        <div className="absolute inset-0">{children}</div>
-        <NormalLoadingOverlay />
-        <div className="pointer-events-none absolute inset-0 z-50">
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-xl">
-            <Navigation />
+      <BottomNavProvider>
+        <div className="fixed inset-0 overflow-hidden">
+          <div className="absolute inset-0">{children}</div>
+          <NormalLoadingOverlay />
+          <div className="pointer-events-none absolute inset-0 z-50">
+            <AnimatedNavigation />
           </div>
         </div>
-      </div>
+      </BottomNavProvider>
     </NormalLoadingProvider>
   );
 }

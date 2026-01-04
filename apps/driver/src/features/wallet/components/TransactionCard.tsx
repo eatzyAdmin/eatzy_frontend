@@ -54,7 +54,7 @@ export default function TransactionCard({ transaction, onClick }: { transaction:
           {getIcon(transaction.type)}
         </div>
         <div>
-          <p className="text-sm font-bold text-[#1A1A1A]">{transaction.description}</p>
+          <p className="text-sm font-bold text-[#1A1A1A] line-clamp-1">{transaction.description}</p>
           <p className="text-xs text-gray-400 font-medium">
             {date.toLocaleDateString('vi-VN')} • {date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
           </p>
@@ -62,7 +62,7 @@ export default function TransactionCard({ transaction, onClick }: { transaction:
       </div>
 
       <div className="text-right">
-        <p className={`font-bold font-anton text-base ${isPositive ? 'text-[var(--primary)]' : 'text-[#1A1A1A]'}`}>
+        <p className={`font-bold font-anton text-base ${isPositive ? 'text-[var(--primary)]' : 'text-[#1A1A1A]'} whitespace-nowrap shrink-0`}>
           {isPositive ? '+' : ''}{formatVnd(transaction.amount)}
         </p>
         {transaction.status !== 'COMPLETED' && (

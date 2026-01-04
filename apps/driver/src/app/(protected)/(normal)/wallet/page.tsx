@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, TouchEvent, WheelEvent } from "react";
 import { motion, useScroll, AnimatePresence } from "@repo/ui/motion";
 import { useLoading, TextShimmer, TransactionCardShimmer } from "@repo/ui";
 import { mockWalletStats, mockTransactions, WalletTransaction } from "@/features/wallet/data/mockWalletData";
@@ -11,13 +11,15 @@ import WithdrawDrawer from "@/features/wallet/components/WithdrawDrawer";
 import TransactionDetailDrawer from "@/features/wallet/components/TransactionDetailDrawer";
 import DriverOrderDetailDrawer from "@/features/history/components/DriverOrderDetailDrawer";
 import { mockDriverHistory, DriverHistoryOrder } from "@/features/history/data/mockDriverHistory";
-import { History, Wallet, ArrowUpRight, ArrowDownLeft } from "@repo/ui/icons";
+import { History, Wallet, ArrowUpRight, ArrowDownLeft, ChevronUp, CheckCircle2 } from "@repo/ui/icons";
 
 import { useNormalLoading } from "../context/NormalLoadingContext";
+import { useBottomNav } from "../context/BottomNavContext";
 
 export default function WalletPage() {
   const { hide } = useLoading();
   const { stopLoading } = useNormalLoading();
+  const { setIsVisible } = useBottomNav();
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
@@ -38,6 +40,7 @@ export default function WalletPage() {
     if (type === filterType) return;
     setFilterType(type);
     setIsLoading(true);
+    containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     setTimeout(() => setIsLoading(false), 500);
   };
 
@@ -61,34 +64,98 @@ export default function WalletPage() {
 
   // Scroll animation state
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll({ container: containerRef });
 
-  useEffect(() => {
-    return scrollY.on("change", (latest) => {
-      const previous = scrollY.getPrevious() ?? 0;
+  // Gesture checking state
+  const gestureState = useRef({ startY: 0, startScrollTop: 0 });
+  const lastWheelTime = useRef<number>(0);
 
-      const diff = latest - previous;
-      const isScrollingDown = diff > 0;
-      const isScrollingUp = diff < 0;
+  const handleTouchStart = (e: TouchEvent) => {
+    if (!containerRef.current) return;
+    gestureState.current = {
+      startY: e.touches[0].clientY,
+      startScrollTop: containerRef.current.scrollTop
+    };
+  };
 
-      // Check if near bottom to prevent bouncing/jank
-      let isNearBottom = false;
-      if (containerRef.current) {
-        const { scrollHeight, clientHeight, scrollTop } = containerRef.current;
-        // Tolerance of 100px from bottom
-        if (scrollHeight - scrollTop - clientHeight < 100) {
-          isNearBottom = true;
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!containerRef.current) return;
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - gestureState.current.startY;
+    const { startScrollTop } = gestureState.current;
+
+    // Scroll Down Gesture (diff < 0)
+    if (diff < -10 && isHeaderVisible) {
+      setIsHeaderVisible(false);
+    }
+
+    // Scroll Up Gesture (diff > 0)
+    else if (diff > 10 && !isHeaderVisible) {
+      // Only trigger if we started at the top of the list (with slight buffer)
+      if (startScrollTop < 2) {
+        setIsHeaderVisible(true);
+      }
+    }
+  };
+
+  const handleWheel = (e: WheelEvent) => {
+    if (!containerRef.current) return;
+    const isAtTop = containerRef.current.scrollTop <= 0;
+    const now = Date.now();
+    const timeDiff = now - lastWheelTime.current;
+    lastWheelTime.current = now;
+
+    // DeltaY > 0 is Down
+    if (e.deltaY > 0 && isHeaderVisible) {
+      setIsHeaderVisible(false);
+    }
+    // DeltaY < 0 is Up
+    else if (e.deltaY < 0 && !isHeaderVisible) {
+      if (isAtTop) {
+        // Only reveal if this is a fresh gesture (gap > 200ms from last event)
+        // This filters out momentum/inertia arriving at the top
+        if (timeDiff > 200) {
+          setIsHeaderVisible(true);
         }
       }
+    }
+  };
 
-      if (isScrollingUp) {
-        setIsHeaderVisible(true);
-      } else if (isScrollingDown && latest > 50 && !isNearBottom) {
-        setIsHeaderVisible(false);
+  useEffect(() => {
+    return scrollY.on("change", (latest) => {
+      const velocity = scrollY.getVelocity();
+
+      // --- Scroll To Top Button Logic ---
+      // Hide button when near top
+      if (latest < 100) {
+        if (showScrollToTop) setShowScrollToTop(false);
+        setIsVisible(true); // Always show nav at top
+      } else {
+        // Show when scrolling UP, Hide when scrolling DOWN
+        if (velocity < -20) {
+          if (!showScrollToTop) setShowScrollToTop(true);
+          setIsVisible(true);
+        } else if (velocity > 20) {
+          if (showScrollToTop) setShowScrollToTop(false);
+          setIsVisible(false);
+        }
       }
     });
-  }, [scrollY]);
+  }, [scrollY, showScrollToTop, setIsVisible]);
+
+  const scrollToTop = () => {
+    setIsHeaderVisible(true);
+    // Use timeout to ensure state update processes before scrolling (if needed) 
+    // or just scroll immediately. With overflow-hidden logic, hidden -> visible unlocks/locks?
+    // If we set Visible -> List becomes Locked (Overflow Hidden).
+    // So scrollToTop might fail if it's locked?
+    // Actually, if it's locked, scrollTo will work programmatically, but user can't scroll.
+    // However, header appearing pushes list down.
+    // We should scroll 0.
+    containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -100,7 +167,7 @@ export default function WalletPage() {
   }, [hide]);
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7]">
+    <div className="flex flex-col h-full bg-[#F7F7F7] relative">
       {/* Sticky Header */}
       <div className="flex-none sticky top-0 z-40 bg-[#F7F7F7]/95 backdrop-blur-xl transition-all duration-300 border-none shadow-none ring-0">
         <motion.div
@@ -212,11 +279,15 @@ export default function WalletPage() {
       {/* Transaction List */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto px-5 pb-32 pt-2 scroll-smooth"
+        className={`flex-1 px-5 pb-32 pt-2 scroll-smooth ${isHeaderVisible ? 'overflow-hidden' : 'overflow-y-auto'}`}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onWheel={handleWheel}
       >
         <div className="space-y-3">
           {isLoading ? (
-            <TransactionCardShimmer cardCount={3} />
+            // Increased card count to prevent scroll jumping when filtering
+            <TransactionCardShimmer cardCount={8} />
           ) : (
             <>
               <AnimatePresence mode="popLayout">
@@ -232,16 +303,41 @@ export default function WalletPage() {
                 ))}
               </AnimatePresence>
 
-              {/* Spacer to Ensure Scrolling Logic works smoothly at bottom - Large enough to allow scrolling with few items */}
-              <div className="h-[60vh]" />
-
-              {filteredTransactions.length === 0 && (
+              {filteredTransactions.length === 0 ? (
                 <div className="text-center py-10 text-gray-400 text-sm">Chưa có giao dịch nào</div>
+              ) : (
+                <div className="py-12 flex items-center justify-center gap-4 opacity-60">
+                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
+                    </div>
+                    <span className="text-[14px] font-bold text-gray-400 uppercase font-anton">End of list</span>
+                  </div>
+                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                </div>
               )}
             </>
           )}
         </div>
       </div>
+
+      {/* Scroll To Top Floating Button */}
+      <AnimatePresence>
+        {showScrollToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={scrollToTop}
+            className="absolute bottom-24 right-5 p-3 bg-[var(--primary)] text-white rounded-full shadow-lg shadow-[var(--primary)]/30 z-50 transition-colors"
+          >
+            <ChevronUp className="w-6 h-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       <TopUpDrawer open={isTopUpOpen} onClose={() => setIsTopUpOpen(false)} />
       <WithdrawDrawer

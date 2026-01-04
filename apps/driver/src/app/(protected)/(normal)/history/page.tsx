@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, TouchEvent, WheelEvent } from "react";
 import { motion, AnimatePresence, useScroll } from "@repo/ui/motion";
-import { Search, Inbox } from "@repo/ui/icons";
+import { Search, Inbox, ChevronUp, CheckCircle2, Wallet, Bike } from "@repo/ui/icons";
 import { useLoading, TextShimmer, HistoryCardShimmer } from "@repo/ui";
 import { getDriverHistory, DriverHistoryOrder } from "@/features/history/data/mockDriverHistory";
 import HistoryStats from "@/features/history/components/HistoryStats";
@@ -10,11 +10,12 @@ import HistoryFilter from "@/features/history/components/HistoryFilter";
 import DriverHistoryCard from "@/features/history/components/DriverHistoryCard";
 import DriverOrderDetailDrawer from "@/features/history/components/DriverOrderDetailDrawer";
 import { useNormalLoading } from "../context/NormalLoadingContext";
-import { Wallet, Bike } from "@repo/ui/icons";
+import { useBottomNav } from "../context/BottomNavContext";
 
 export default function HistoryPage() {
   const { hide } = useLoading();
   const { stopLoading } = useNormalLoading();
+  const { setIsVisible } = useBottomNav();
   const [orders, setOrders] = useState<DriverHistoryOrder[]>([]);
   const [filter, setFilter] = useState<"ALL" | "DELIVERED" | "CANCELLED">("ALL");
   const [selectedOrder, setSelectedOrder] = useState<DriverHistoryOrder | null>(null);
@@ -25,19 +26,91 @@ export default function HistoryPage() {
 
   // Scroll animation state
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll({ container: containerRef });
 
+  // Gesture checking state
+  const gestureState = useRef({ startY: 0, startScrollTop: 0 });
+  const lastWheelTime = useRef<number>(0);
+
+  const handleTouchStart = (e: TouchEvent) => {
+    if (!containerRef.current) return;
+    gestureState.current = {
+      startY: e.touches[0].clientY,
+      startScrollTop: containerRef.current.scrollTop
+    };
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!containerRef.current) return;
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - gestureState.current.startY;
+    const { startScrollTop } = gestureState.current;
+
+    // Scroll Down Gesture (diff < 0)
+    if (diff < -10 && isHeaderVisible) {
+      setIsHeaderVisible(false);
+    }
+
+    // Scroll Up Gesture (diff > 0)
+    else if (diff > 10 && !isHeaderVisible) {
+      // Only trigger if we started at the top of the list (with slight buffer)
+      if (startScrollTop < 2) {
+        setIsHeaderVisible(true);
+      }
+    }
+  };
+
+  const handleWheel = (e: WheelEvent) => {
+    if (!containerRef.current) return;
+    const isAtTop = containerRef.current.scrollTop <= 0;
+    const now = Date.now();
+    const timeDiff = now - lastWheelTime.current;
+    lastWheelTime.current = now;
+
+    // DeltaY > 0 is Down
+    if (e.deltaY > 0 && isHeaderVisible) {
+      setIsHeaderVisible(false);
+    }
+    // DeltaY < 0 is Up
+    else if (e.deltaY < 0 && !isHeaderVisible) {
+      if (isAtTop) {
+        // Only reveal if this is a fresh gesture (gap > 200ms from last event)
+        // This filters out momentum/inertia arriving at the top
+        if (timeDiff > 200) {
+          setIsHeaderVisible(true);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     return scrollY.on("change", (latest) => {
-      const previous = scrollY.getPrevious() ?? 0;
-      if (latest > previous && latest > 50) {
-        setIsHeaderVisible(false); // Scrolling down & past threshold -> Hide
-      } else if (latest < previous) {
-        setIsHeaderVisible(true); // Scrolling up -> Show
+      const velocity = scrollY.getVelocity();
+
+      // --- Scroll To Top Button Logic ---
+      // Hide button when near top
+      if (latest < 100) {
+        if (showScrollToTop) setShowScrollToTop(false);
+        setIsVisible(true); // Always show nav at top
+      } else {
+        // Show when scrolling UP, Hide when scrolling DOWN
+        if (velocity < -20) {
+          if (!showScrollToTop) setShowScrollToTop(true);
+          setIsVisible(true);
+        } else if (velocity > 20) {
+          if (showScrollToTop) setShowScrollToTop(false);
+          setIsVisible(false);
+        }
       }
     });
-  }, [scrollY]);
+  }, [scrollY, showScrollToTop, setIsVisible]);
+
+  const scrollToTop = () => {
+    setIsHeaderVisible(true);
+    containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Simulated data fetch & loading
   useEffect(() => {
@@ -73,6 +146,7 @@ export default function HistoryPage() {
     if (newFilter === filter) return;
     setFilter(newFilter);
     setIsLoading(true);
+    containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     setTimeout(() => setIsLoading(false), 1000);
   };
 
@@ -80,14 +154,15 @@ export default function HistoryPage() {
     if (e.key === 'Enter') {
       setActualSearchQuery(searchInputValue);
       setIsLoading(true);
+      containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
       setTimeout(() => setIsLoading(false), 1200);
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7]">
+    <div className="flex flex-col h-full bg-[#F7F7F7] relative">
       {/* Sticky Header - Z-index high to stay above content */}
-      <div className="flex-none sticky top-0 z-40 bg-[#F7F7F7]/95 backdrop-blur-xl border-b border-gray-100 transition-all duration-300">
+      <div className="flex-none sticky top-0 z-40 bg-[#F7F7F7]/95 backdrop-blur-xl border-none shadow-none ring-0 transition-all duration-300">
         <motion.div
           initial={false}
           animate={{
@@ -98,7 +173,8 @@ export default function HistoryPage() {
           transition={{ duration: 0.3, ease: "easeInOut" }}
           className="overflow-hidden px-5"
         >
-          <div className="pt-8">
+          {/* Add padding top only if visible to avoid jumpiness when animating height */}
+          <div className={`${isHeaderVisible ? "pt-8" : "pt-0"}`}>
             <h1
               className="text-4xl font-bold font-anton text-[#1A1A1A] leading-tight mb-1"
               style={{ fontFamily: 'var(--font-anton), sans-serif', letterSpacing: '0.01em' }}
@@ -164,46 +240,81 @@ export default function HistoryPage() {
       {/* Scrollable Content Area */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto px-5 pb-32 pt-2 scroll-smooth"
+        className={`flex-1 px-5 pb-32 pt-2 scroll-smooth ${isHeaderVisible ? 'overflow-hidden' : 'overflow-y-auto'}`}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onWheel={handleWheel}
       >
         {/* Orders List */}
         <div className="space-y-4">
           {isLoading ? (
             <HistoryCardShimmer cardCount={2} />
           ) : (
-            <AnimatePresence mode="popLayout">
-              {filteredOrders.length > 0 ? (
-                filteredOrders.map((order, index) => (
+            <>
+              <AnimatePresence mode="popLayout">
+                {filteredOrders.length > 0 ? (
+                  filteredOrders.map((order, index) => (
+                    <motion.div
+                      key={order.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <DriverHistoryCard
+                        order={order}
+                        onClick={() => handleOrderClick(order)}
+                      />
+                    </motion.div>
+                  ))
+                ) : (
                   <motion.div
-                    key={order.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: index * 0.05 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col items-center justify-center py-10 text-center"
                   >
-                    <DriverHistoryCard
-                      order={order}
-                      onClick={() => handleOrderClick(order)}
-                    />
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                      <Inbox className="w-10 h-10" />
+                    </div>
+                    <h3 className="text-lg font-bold text-[#1A1A1A]">Không tìm thấy đơn hàng</h3>
+                    <p className="text-gray-500 text-sm max-w-[200px]">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
                   </motion.div>
-                ))
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex flex-col items-center justify-center py-10 text-center"
-                >
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
-                    <Inbox className="w-10 h-10" />
+                )}
+              </AnimatePresence>
+
+              {filteredOrders.length > 0 && (
+                <div className="py-12 flex items-center justify-center gap-4 opacity-60">
+                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
+                    </div>
+                    <span className="text-[14px] font-bold text-gray-400 uppercase font-anton">End of list</span>
                   </div>
-                  <h3 className="text-lg font-bold text-[#1A1A1A]">Không tìm thấy đơn hàng</h3>
-                  <p className="text-gray-500 text-sm max-w-[200px]">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
-                </motion.div>
+                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                </div>
               )}
-            </AnimatePresence>
+            </>
           )}
         </div>
       </div>
+
+      {/* Scroll To Top Floating Button */}
+      <AnimatePresence>
+        {showScrollToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={scrollToTop}
+            className="absolute bottom-24 right-5 p-3 bg-[var(--primary)] text-white rounded-full shadow-lg shadow-[var(--primary)]/30 z-50 transition-colors"
+          >
+            <ChevronUp className="w-6 h-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Detail Drawer - Always Rendered, Controlled by 'open' prop */}
       <DriverOrderDetailDrawer
