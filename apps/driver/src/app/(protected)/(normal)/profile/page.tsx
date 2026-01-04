@@ -45,11 +45,11 @@ export default function ProfilePage() {
   return (
     <div className="h-full overflow-y-auto bg-[#F7F7F7] pb-40 scroll-smooth">
       {/* Header Title */}
-      <div className="px-6 pt-8 pb-4">
+      {/* <div className="px-6 pt-4 pb-4">
         <h1 className="text-4xl font-bold font-anton text-[#1A1A1A]">PROFILE</h1>
-      </div>
+      </div> */}
 
-      <div className="px-5 space-y-8">
+      <div className="px-5 pt-5 space-y-8">
         {/* Main Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

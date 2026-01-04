@@ -181,13 +181,13 @@ export default function WalletPage() {
           className="overflow-hidden px-5"
         >
           {/* Add padding top only if visible to avoid jumpiness when animating height */}
-          <div className={`${isHeaderVisible ? "pt-8" : "pt-0"}`}>
-            <h1
+          <div className={`${isHeaderVisible ? "pt-5" : "pt-0"}`}>
+            {/* <h1
               className="text-4xl font-bold font-anton text-[#1A1A1A] leading-tight ml-2 mb-2"
               style={{ fontFamily: 'var(--font-anton), sans-serif', letterSpacing: '0.01em' }}
             >
               WALLET
-            </h1>
+            </h1> */}
 
             {isLoading ? (
               <div className="relative overflow-hidden rounded-[32px] bg-[#1A1A1A] text-white p-6 shadow-xl shadow-black/10">

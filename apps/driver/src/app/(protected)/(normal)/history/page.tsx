@@ -174,14 +174,14 @@ export default function HistoryPage() {
           className="overflow-hidden px-5"
         >
           {/* Add padding top only if visible to avoid jumpiness when animating height */}
-          <div className={`${isHeaderVisible ? "pt-8" : "pt-0"}`}>
-            <h1
+          <div className={`${isHeaderVisible ? "pt-5" : "pt-0"}`}>
+            {/* <h1
               className="text-4xl font-bold font-anton text-[#1A1A1A] leading-tight mb-1"
               style={{ fontFamily: 'var(--font-anton), sans-serif', letterSpacing: '0.01em' }}
             >
               HISTORY
             </h1>
-            <p className="text-gray-500 text-sm font-medium">Lịch sử hoạt động của bạn</p>
+            <p className="text-gray-500 text-sm font-medium">Lịch sử hoạt động của bạn</p> */}
 
             {/* Stats */}
             <div className="mt-4">
