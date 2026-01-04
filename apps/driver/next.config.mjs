@@ -7,7 +7,6 @@ const withSerwist = withSerwistInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
   transpilePackages: ["@repo/ui", "@repo/models", "@repo/api"],
   images: {
     remotePatterns: [
