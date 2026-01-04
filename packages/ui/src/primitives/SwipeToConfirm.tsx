@@ -14,12 +14,14 @@ export function SwipeToConfirm({
   onComplete,
   text = "Quẹt để xác nhận",
   disabled = false,
+  isLoading = false,
   className,
   type = "primary",
 }: {
   onComplete?: () => void;
   text?: string;
   disabled?: boolean;
+  isLoading?: boolean;
   className?: string;
   type?: SwipeType;
 }) {
@@ -42,18 +44,18 @@ export function SwipeToConfirm({
   }, []);
 
   useEffect(() => {
-    if (disabled) reset();
-  }, [disabled]);
+    if (disabled && !isLoading && !isComplete) reset();
+  }, [disabled, isLoading, isComplete]);
 
   const startDrag = (e: React.MouseEvent | React.TouchEvent) => {
-    if (disabled || isComplete) return;
+    if (disabled || isComplete || isLoading) return;
     const pos = isTouchEvent(e) ? e.touches[0]?.clientX ?? 0 : (e as React.MouseEvent).clientX;
     initialPos.current = pos;
     setIsDragging(true);
   };
 
   const onDrag = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging || disabled || isComplete) return;
+    if (!isDragging || disabled || isComplete || isLoading) return;
     e.preventDefault();
     const pos = isTouchEvent(e) ? e.touches[0]?.clientX ?? 0 : (e as React.MouseEvent).clientX;
     const knobWidth = knobRef.current ? knobRef.current.offsetWidth : 50;
@@ -71,7 +73,7 @@ export function SwipeToConfirm({
   };
 
   const endDrag = () => {
-    if (!isDragging || isComplete) return;
+    if (!isDragging || isComplete || isLoading) return;
     setIsDragging(false);
     if (!isComplete) {
       reset();
@@ -84,7 +86,7 @@ export function SwipeToConfirm({
     setHasCompleted(false);
   };
 
-  const percent = Math.min(
+  const percent = isLoading ? 100 : Math.min(
     100,
     (dragPosition / (sliderWidth - (knobRef.current?.offsetWidth || 50) - 8)) * 100
   );
@@ -118,16 +120,17 @@ export function SwipeToConfirm({
   return (
     <div
       ref={sliderRef}
-      className={`relative flex items-center rounded-full h-14 w-80 sm:w-80 shadow-md select-none overflow-hidden ${className || ""} ${
-        disabled ? "opacity-70" : ""
-      }`}
+      className={`relative flex items-center rounded-full h-14 w-80 sm:w-80 select-none overflow-hidden ${className || ""} ${!isLoading ? "shadow-md" : ""} ${disabled && !isLoading ? "opacity-70" : ""
+        }`}
       style={{
-        background: `linear-gradient(to right, ${theme.start} ${percent}%, ${theme.end} ${percent}%)`,
+        background: isLoading
+          ? `linear-gradient(to right, #6b7280, #4b5563)`
+          : `linear-gradient(to right, ${theme.start} ${percent}%, ${theme.end} ${percent}%)`,
       }}
     >
       {/* Shimmering overlay effect */}
       <div className={`absolute inset-0 z-0 ${styles.shimmerOverlay}`} />
-      
+
       {/* Touch/click capture area */}
       <div
         className="absolute inset-0 z-10"
@@ -141,23 +144,27 @@ export function SwipeToConfirm({
       />
 
       {/* Slider Knob with shimmering effect */}
-      <div
-        ref={knobRef}
-        className="absolute left-0 top-1/2 -translate-y-1/2 p-1.5 z-20 pointer-events-none"
-        style={{
-          transform: `translate(${dragPosition}px, -50%)`,
-          transition: isDragging ? "none" : "transform 0.3s ease-out",
-        }}
-      >
-        <div className="bg-white rounded-full h-11 w-11 flex items-center justify-center shadow-md overflow-hidden">
-          <div className={styles.shimmerContainer}>
-            <ChevronsRight size={28} className={`text-neutral-700 ${styles.shimmerIcon}`} strokeWidth={2.5} />
+      {/* Slider Knob with shimmering effect */}
+      {!isLoading && (
+        <div
+          ref={knobRef}
+          className="absolute left-0 top-1/2 -translate-y-1/2 p-1.5 z-20 pointer-events-none"
+          style={{
+            transform: `translate(${dragPosition}px, -50%)`,
+            transition: isDragging ? "none" : "transform 0.3s ease-out",
+          }}
+        >
+          <div className="bg-white rounded-full h-11 w-11 flex items-center justify-center shadow-md overflow-hidden">
+            <div className={styles.shimmerContainer}>
+              <ChevronsRight size={28} className={`text-neutral-700 ${styles.shimmerIcon}`} strokeWidth={2.5} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Text with shimmering effect */}
-      <span className="flex-grow text-center text-white text-lg font-semibold pl-10 pr-4">
+      <span className={`flex-grow flex items-center justify-center gap-2 text-white text-lg font-semibold transition-all ${isLoading ? 'px-0' : 'pl-10 pr-4'}`}>
+        {isLoading && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
         {text}
       </span>
     </div>

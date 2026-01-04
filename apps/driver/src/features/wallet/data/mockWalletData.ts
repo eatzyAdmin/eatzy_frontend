@@ -1,4 +1,4 @@
-export type TransactionType = "EARNING" | "WITHDRAWAL" | "TOP_UP" | "COD_REMITTANCE";
+export type TransactionType = "EARNING" | "WITHDRAWAL" | "TOP_UP" | "ORDER_PAYMENT";
 
 export interface WalletTransaction {
   id: string;
@@ -45,11 +45,12 @@ export const mockTransactions: WalletTransaction[] = [
   },
   {
     id: "tx-3",
-    type: "COD_REMITTANCE",
-    amount: -500000,
-    description: "Nộp tiền COD về hệ thống",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
+    type: "ORDER_PAYMENT",
+    amount: -185000,
+    description: "Thanh toán/Ứng tiền đơn #9921 (Tiền mặt)",
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2.1).toISOString(), // 2.1 hours ago
     status: "COMPLETED",
+    referenceId: "#9921",
   },
   {
     id: "tx-4",
@@ -78,11 +79,11 @@ export const mockTransactions: WalletTransaction[] = [
   },
   {
     id: "tx-7",
-    type: "EARNING",
-    amount: 25000,
-    description: "Thu nhập đơn #7744",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 50).toISOString(), // 2 days ago
+    type: "ORDER_PAYMENT",
+    amount: -320000,
+    description: "Thanh toán/Ứng tiền đơn #3399 (Tiền mặt)",
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48.1).toISOString(), // 2 days ago
     status: "COMPLETED",
-    referenceId: "#7744",
+    referenceId: "#3399",
   },
 ];

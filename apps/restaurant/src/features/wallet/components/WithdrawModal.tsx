@@ -204,6 +204,7 @@ export default function WithdrawModal({ isOpen, onClose, onConfirm }: { isOpen: 
                           text={isCompleted ? "Processing..." : "Swipe to withdraw"}
                           onComplete={handleSwipeComplete}
                           disabled={isProcessing || isCompleted}
+                          isLoading={isProcessing}
                         />
                       </div>
                       <p className="text-center text-xs text-gray-400 mt-4">

@@ -13,8 +13,8 @@ const getIcon = (type: WalletTransaction["type"]) => {
       return <ArrowUpRight className="w-5 h-5 text-red-500" />;
     case "TOP_UP":
       return <ArrowDownLeft className="w-5 h-5 text-green-500" />;
-    case "COD_REMITTANCE":
-      return <DollarSign className="w-5 h-5 text-orange-500" />;
+    case "ORDER_PAYMENT":
+      return <DollarSign className="w-5 h-5 text-purple-500" />;
     default:
       return <CheckCircle2 className="w-5 h-5 text-gray-500" />;
   }
@@ -25,7 +25,7 @@ const getBgColor = (type: WalletTransaction["type"]) => {
     case "EARNING": return "bg-[var(--primary)]/10";
     case "WITHDRAWAL": return "bg-red-50";
     case "TOP_UP": return "bg-green-50";
-    case "COD_REMITTANCE": return "bg-orange-50";
+    case "ORDER_PAYMENT": return "bg-purple-50";
     default: return "bg-gray-50";
   }
 };

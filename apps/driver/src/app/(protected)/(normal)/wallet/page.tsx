@@ -8,6 +8,7 @@ import WalletOverview from "@/features/wallet/components/WalletOverview";
 import TransactionCard from "@/features/wallet/components/TransactionCard";
 import TopUpDrawer from "@/features/wallet/components/TopUpDrawer";
 import WithdrawDrawer from "@/features/wallet/components/WithdrawDrawer";
+import TransactionDetailDrawer from "@/features/wallet/components/TransactionDetailDrawer";
 import DriverOrderDetailDrawer from "@/features/history/components/DriverOrderDetailDrawer";
 import { mockDriverHistory, DriverHistoryOrder } from "@/features/history/data/mockDriverHistory";
 import { History, Wallet, ArrowUpRight, ArrowDownLeft } from "@repo/ui/icons";
@@ -23,6 +24,8 @@ export default function WalletPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<DriverHistoryOrder | null>(null);
   const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<WalletTransaction | null>(null);
+  const [isTransactionDrawerOpen, setIsTransactionDrawerOpen] = useState(false);
   const [filterType, setFilterType] = useState<'ALL' | 'IN' | 'OUT'>('ALL');
 
   const filteredTransactions = transactions.filter(tx => {
@@ -45,6 +48,10 @@ export default function WalletPage() {
         setSelectedOrder(order);
         setIsOrderDrawerOpen(true);
       }
+    } else {
+      // Handle other transaction types (Withdrawal, TopUp, COD)
+      setSelectedTransaction(tx);
+      setIsTransactionDrawerOpen(true);
     }
   };
 
@@ -247,6 +254,12 @@ export default function WalletPage() {
         open={isOrderDrawerOpen}
         order={selectedOrder}
         onClose={() => setIsOrderDrawerOpen(false)}
+      />
+
+      <TransactionDetailDrawer
+        open={isTransactionDrawerOpen}
+        transaction={selectedTransaction}
+        onClose={() => setIsTransactionDrawerOpen(false)}
       />
     </div>
   );

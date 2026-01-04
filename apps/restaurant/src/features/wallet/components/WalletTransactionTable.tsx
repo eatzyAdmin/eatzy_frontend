@@ -2,12 +2,13 @@ import { DataTable, ColumnDef } from '@repo/ui';
 import { motion } from '@repo/ui/motion';
 import { mockWallet, Transaction } from '../data/mockWallet';
 import { mockOrderHistory, OrderHistoryItem } from '@/features/history/data/mockHistory';
-import { ArrowDownLeft, ArrowUpRight, Search, Filter, Download, FileText, CheckCircle, AlertCircle, X } from '@repo/ui/icons';
+import { ArrowDownLeft, ArrowUpRight, Search, Filter, Download, FileText, CheckCircle, AlertCircle, X, Utensils, Landmark } from '@repo/ui/icons';
 import { useState, useMemo } from 'react';
 import WalletSearchPopup from './WalletSearchPopup';
 import WalletFilterModal from './WalletFilterModal';
 import WalletExportModal from './WalletExportModal';
 import OrderDetailsModal from '@/features/history/components/OrderDetailsModal';
+import WithdrawalDetailsModal from './WithdrawalDetailsModal';
 
 const columns: ColumnDef<Transaction>[] = [
   {
@@ -24,12 +25,32 @@ const columns: ColumnDef<Transaction>[] = [
     label: 'TYPE & DESCRIPTION',
     key: 'description',
     className: 'min-w-[280px]',
-    formatter: (value, item) => (
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">{item.category}</span>
-        <span className="font-bold text-gray-900 text-sm md:text-base font-heading">{item.description}</span>
-      </div>
-    )
+    formatter: (value, item) => {
+      const isFoodOrder = item.category === 'Food Order';
+      const isWithdrawal = item.category === 'Withdrawal';
+
+      return (
+        <div className="flex items-start gap-3">
+          <div className={`mt-0.5 w-9 h-9 rounded-full flex items-center justify-center border shadow-sm shrink-0 ${isFoodOrder
+            ? 'bg-lime-50 text-lime-600 border-lime-100'
+            : isWithdrawal
+              ? 'bg-red-50 text-red-600 border-red-100'
+              : 'bg-gray-50 text-gray-500 border-gray-100'
+            }`}>
+            {isFoodOrder && <Utensils className="w-4 h-4" />}
+            {isWithdrawal && <Landmark className="w-4 h-4" />}
+            {!isFoodOrder && !isWithdrawal && <FileText className="w-4 h-4" />}
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span className={`text-[10px] uppercase tracking-widest font-bold ${isFoodOrder ? 'text-lime-600' : isWithdrawal ? 'text-red-600' : 'text-gray-400'
+              }`}>
+              {item.category}
+            </span>
+            <span className="font-bold text-gray-900 text-sm md:text-base font-heading line-clamp-1">{item.description}</span>
+          </div>
+        </div>
+      );
+    }
   },
   {
     label: 'DATE',
@@ -113,8 +134,9 @@ export default function WalletTransactionTable() {
     amountRange: { min: -100000000, max: 100000000 }
   });
 
-  // Order Details Modal State
+  // Modal States
   const [selectedOrder, setSelectedOrder] = useState<OrderHistoryItem | null>(null);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState<Transaction | null>(null);
 
   const handleSort = (key: string) => {
     const typedKey = key as keyof Transaction;
@@ -225,6 +247,8 @@ export default function WalletTransactionTable() {
       if (order) {
         setSelectedOrder(order);
       }
+    } else if (item.category === 'Withdrawal') {
+      setSelectedWithdrawal(item);
     }
   };
 
@@ -365,20 +389,18 @@ export default function WalletTransactionTable() {
           sortField={sortConfig?.key}
           sortDirection={sortConfig?.direction}
           onRowClick={handleRowClick}
-          renderActions={(item) =>
-            item.category === 'Food Order' ? (
-              <button
-                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-all duration-300 group"
-                title="View Order Details"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRowClick(item);
-                }}
-              >
-                <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              </button>
-            ) : null
-          }
+          renderActions={(item) => (
+            <button
+              className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-all duration-300 group"
+              title="View Details"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRowClick(item);
+              }}
+            >
+              <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            </button>
+          )}
           headerClassName="bg-slate-200 text-gray-700 border-none rounded-xl text-[11px] font-bold uppercase tracking-widest py-4 mb-2"
         />
       </div>
@@ -386,6 +408,11 @@ export default function WalletTransactionTable() {
       <OrderDetailsModal
         order={selectedOrder}
         onClose={() => setSelectedOrder(null)}
+      />
+
+      <WithdrawalDetailsModal
+        transaction={selectedWithdrawal}
+        onClose={() => setSelectedWithdrawal(null)}
       />
     </motion.div>
   );

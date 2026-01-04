@@ -44,7 +44,7 @@ export default function DriverOrderDetailDrawer({
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            transition={{ type: "spring", damping: 18, stiffness: 100 }}
             className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-[32px] overflow-hidden max-h-[90vh] flex flex-col"
           >
             {isLoading ? (
@@ -112,7 +112,7 @@ export default function DriverOrderDetailDrawer({
                   {/* Order Items - REVERTED TO SOPHISTICATED DESIGN */}
                   <div className="space-y-4 p-5 border-2 border-gray-200 rounded-[24px]">
                     <h3 className="text-lg font-bold font-anton text-[#1A1A1A]">ORDER ITEMS</h3>
-                    <div className="bg-gray-50 p-4 space-y-3">
+                    <div className="bg-gray-50 rounded-[20px] p-4 space-y-3">
                       {order.items.map((item) => (
                         <div key={item.id} className="flex item-start justify-between">
                           <div className="flex gap-3">
