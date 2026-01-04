@@ -1,0 +1,99 @@
+
+services:
+  # Customer App
+  customer:
+    image: ${DOCKERHUB_USER:-your-dockerhub-username}/eatzy_frontend_customer:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: customer
+    container_name: eatzy-customer
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - eatzy-network
+
+  # Admin App
+  admin:
+    image: ${DOCKERHUB_USER:-your-dockerhub-username}/eatzy_frontend_admin:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: admin
+    container_name: eatzy-admin
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - eatzy-network
+
+  # Driver App
+  driver:
+    image: ${DOCKERHUB_USER:-your-dockerhub-username}/eatzy_frontend_driver:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: driver
+    container_name: eatzy-driver
+    ports:
+      - "3003:3000"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - eatzy-network
+
+  # Restaurant App
+  restaurant:
+    image: ${DOCKERHUB_USER:-your-dockerhub-username}/eatzy_frontend_restaurant:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: restaurant
+    container_name: eatzy-restaurant
+    ports:
+      - "3004:3000"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - eatzy-network
+
+  # Super Admin App
+  # super-admin:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     args:
+  #       APP_NAME: super-admin
+  #   container_name: eatzy-super-admin
+  #   ports:
+  #     - "3005:3000"
+  #   environment:
+  #     - NODE_ENV=production
+  #   env_file:
+  #     - .env
+  #   restart: unless-stopped
+  #   networks:
+  #     - eatzy-network
+
+networks:
+  eatzy-network:
+    driver: bridge
