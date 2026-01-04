@@ -1,5 +1,6 @@
 "use client";
 import { useRef } from 'react';
+import Image from "next/image";
 import { Camera } from "@repo/ui/icons";
 import { Button } from '@repo/ui';
 
@@ -25,7 +26,14 @@ export default function UploadCard({ label, value, onChange }: { label: string; 
       </div>
       {value && (
         <div className="mt-3">
-          <img src={value} alt={label} className="w-full h-40 object-cover rounded-xl border" />
+          <div className="relative w-full h-40">
+            <Image
+              src={value}
+              alt={label}
+              fill
+              className="object-cover rounded-xl border"
+            />
+          </div>
           <div className="mt-2 flex justify-end">
             <Button variant="outline" size="sm" className="text-xs px-3 py-1" onClick={() => inputRef.current?.click()}>Thay ảnh</Button>
           </div>

@@ -10,6 +10,15 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
 
+declare global {
+  interface Window {
+    MSStream: unknown;
+  }
+  interface Navigator {
+    standalone?: boolean;
+  }
+}
+
 export default function PwaInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -17,11 +26,11 @@ export default function PwaInstallPrompt() {
 
   useEffect(() => {
     // Check if iOS
-    const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(isIosDevice);
 
     // Check if already installed
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone;
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
     if (isStandalone) return;
 
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -118,7 +127,7 @@ export default function PwaInstallPrompt() {
                   <div className="text-sm text-blue-800">
                     <p className="font-bold mb-1">Dành cho iOS:</p>
                     <p className="opacity-90 leading-tight">
-                      Nhấn vào nút <span className="font-bold">Chia sẻ</span> bên dưới trình duyệt, sau đó chọn <span className="font-bold">"Thêm vào Màn hình chính"</span>.
+                      Nhấn vào nút <span className="font-bold">Chia sẻ</span> bên dưới trình duyệt, sau đó chọn <span className="font-bold">&quot;Thêm vào Màn hình chính&quot;</span>.
                     </p>
                   </div>
                 </div>

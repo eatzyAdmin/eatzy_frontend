@@ -15,7 +15,7 @@ export default function TransactionDetailDrawer({
   open: boolean;
   onClose: () => void;
 }) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
 
   if (!transaction && !open) return null;
