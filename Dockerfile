@@ -71,6 +71,14 @@ COPY --from=builder /app/apps/${APP_NAME}/package.json ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP_NAME}/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP_NAME}/.next/static ./apps/${APP_NAME}/.next/static
 
+# Copy public folder if exists (for PWA assets, manifest.json, service worker)
+RUN --mount=type=bind,from=builder,source=/app/apps,target=/tmp/apps \
+    if [ -d /tmp/apps/${APP_NAME}/public ]; then \
+      mkdir -p ./apps/${APP_NAME}/public && \
+      cp -r /tmp/apps/${APP_NAME}/public/* ./apps/${APP_NAME}/public/ && \
+      chown -R nextjs:nodejs ./apps/${APP_NAME}/public; \
+    fi
+
 USER nextjs
 
 EXPOSE 3000
