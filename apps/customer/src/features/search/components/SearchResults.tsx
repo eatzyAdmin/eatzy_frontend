@@ -139,7 +139,7 @@ export default function SearchResults({ results, searchQuery, isLoading = false,
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, delay: 1.0 }}
-      className="min-h-screen bg-white pt-32 pb-20 px-6 magazine-scroll"
+      className="min-h-screen bg-white pt-28 md:pt-32 pb-20 px-4 md:px-6 magazine-scroll"
     >
       {!isLoading && (
         <div className="max-w-7xl mx-auto">
@@ -148,12 +148,12 @@ export default function SearchResults({ results, searchQuery, isLoading = false,
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="mb-12"
+            className="mb-8 md:mb-12"
           >
-            <h1 className="text-5xl font-bold text-gray-900 mb-3">
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-3">
               Search Results
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-base md:text-xl text-gray-600">
               Found <span className="font-bold text-amber-600">{filteredResults.length}</span> restaurant
               {filteredResults.length !== 1 ? 's' : ''} matching{' '}
               <span className="font-bold text-gray-900">&quot;{searchQuery}&quot;</span>
@@ -170,11 +170,11 @@ export default function SearchResults({ results, searchQuery, isLoading = false,
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-white rounded-2xl shadow p-12"
+              className="bg-white rounded-2xl shadow p-6 md:p-12"
             >
-              <div className="grid grid-cols-3 gap-8 items-center">
-                <div className="col-span-2">
-                  <h2 className="text-5xl font-black" style={{ fontFamily: 'serif' }}>No Matches Found</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                <div className="col-span-1 md:col-span-2">
+                  <h2 className="text-3xl md:text-5xl font-black" style={{ fontFamily: 'serif' }}>No Matches Found</h2>
                   <p className="mt-4 text-gray-600">Try different keywords or explore curated selections below.</p>
                 </div>
                 <div className="bg-amber-50 p-6 rounded-xl">

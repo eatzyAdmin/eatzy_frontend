@@ -5,7 +5,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import type { Dish, DishVariant, OptionGroup, OptionChoice } from "@repo/types";
 import { formatVnd } from "@repo/lib";
 import { useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
-import { ChefHat } from "@repo/ui/icons";
+import { ChefHat, X } from "@repo/ui/icons";
 
 export default function DishCustomizeDrawer({
   open,
@@ -167,17 +167,37 @@ export default function DishCustomizeDrawer({
             onClick={onClose}
           />
           <motion.div
-            initial={{ y: 480, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 480, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 260, damping: 26 }}
-            className="fixed z-[70] left-0 right-0 bottom-0 max-h-[88vh] rounded-t-[48px] bg-[#F7F7F7] border-t border-gray-200 overflow-hidden"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 100, damping: 18 }}
+            className="fixed z-[70] left-0 right-0 bottom-0 h-auto max-h-[90vh] md:h-auto md:max-h-[88vh] rounded-t-[32px] md:rounded-t-[48px] bg-[#F7F7F7] border-t border-gray-200 overflow-y-auto md:overflow-hidden"
           >
-            <div className="grid grid-cols-[40%_60%] gap-0 h-full">
-              <div className="relative overflow-y-auto no-scrollbar p-8 pb-24">
-                <div>
+            {/* Mobile Sticky Header */}
+            <div className="md:hidden sticky top-0 left-0 right-0 z-[80] bg-[#F7F7F7] px-6 py-4 border-b border-gray-200 flex items-start gap-4">
+              <div className="flex-1 min-w-0 pt-1">
+                <div className="text-[28px] font-anton font-extrabold text-[#1A1A1A] leading-tight line-clamp-1">
+                  {dish.name.toUpperCase()}
+                </div>
+                {dish.description && (
+                  <div className="text-xs text-[#555] mt-0.5 line-clamp-2 leading-snug">
+                    {dish.description}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={onClose}
+                className="shrink-0 p-4 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+
+            <div className="flex flex-col md:grid md:grid-cols-[40%_60%] gap-0">
+              <div className="relative shrink-0 h-auto md:h-full md:overflow-y-auto no-scrollbar p-5 pt-0 md:p-8 md:pt-8 md:pb-24">
+                <div className="hidden md:block">
                   <div
-                    className="text-[48px] font-anton font-extrabold text-[#1A1A1A]"
+                    className="text-[32px] md:text-[48px] font-anton font-extrabold text-[#1A1A1A] leading-tight"
                     style={{}}
                   >
                     {dish.name.toUpperCase()}
@@ -186,7 +206,7 @@ export default function DishCustomizeDrawer({
                     {dish.description}
                   </div>
                 </div>
-                <div className="flex items-center justify-center gap-16 bg-gray-200 rounded-3xl px-6 py-4 mx-28 mt-6 mb-6 shadow-sm">
+                <div className="flex items-center justify-center gap-8 md:gap-16 bg-gray-200 rounded-3xl px-4 py-3 md:px-6 md:py-4 mx-8 md:mx-28 mt-5 md:mt-6 mb-5 md:mb-6 shadow-sm">
                   <motion.button
                     whileHover={{ scale: 1.06 }}
                     whileTap={{ scale: 0.92 }}
@@ -242,7 +262,7 @@ export default function DishCustomizeDrawer({
                     +
                   </motion.button>
                 </div>
-                <div className="mt-4 mx-8 relative rounded-[30px] overflow-hidden bg-white shadow">
+                <div className="hidden md:block mt-4 mx-0 md:mx-8 relative rounded-[20px] md:rounded-[30px] overflow-hidden bg-white shadow">
                   <div className="relative aspect-[16/7]">
                     <ImageWithFallback
                       src={dish.imageUrl}
@@ -254,23 +274,14 @@ export default function DishCustomizeDrawer({
                 </div>
                 {(variantGroup && variantGroup.options?.length > 0) ? (
                   <div className="mt-6">
-                    <div
-                      className="text-3xl text-gray-600 font-semibold text-[#1A1A1A] tracking-wide mb-2"
-                      style={{
-                        fontStretch: "condensed",
-                        letterSpacing: "-0.01em",
-                      }}
-                    >
-                      Variant
-                    </div>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3">
                       {(variantGroup?.options ?? []).map((v: OptionChoice) => (
                         <motion.button
                           whileHover={{ scale: 1.03 }}
                           whileTap={{ scale: 0.97 }}
                           key={v.id}
                           onClick={() => setSelectedVariantId(v.id)}
-                          className={`px-8 py-4 rounded-2xl text-md font-medium transition-all shadow-sm border ${currentVariantId === v.id ? "bg-[var(--primary)] text-white border-[var(--primary)]" : "bg-gray-300 text-gray-400 border-gray-300 hover:bg-gray-100"} `}
+                          className={`px-2 py-4 md:px-8 rounded-2xl text-md font-medium transition-all shadow-sm border flex flex-col items-center justify-center md:block text-center ${currentVariantId === v.id ? "bg-[var(--primary)] text-white border-[var(--primary)]" : "bg-gray-300 text-gray-400 border-gray-300 hover:bg-gray-100"} `}
                         >
                           {v.name} • {formatVnd((dish?.price ?? 0) + Number(v.price || 0))}
                         </motion.button>
@@ -281,20 +292,20 @@ export default function DishCustomizeDrawer({
               </div>
               <div
                 ref={rightColRef}
-                className="relative overflow-y-auto px-12 p-6 pb-24 bg-white border-l border-gray-100"
+                className="relative flex-1 h-auto md:h-full md:overflow-y-auto px-5 py-6 pb-32 md:px-12 md:p-6 md:pb-24 bg-white border-t md:border-t-0 md:border-l border-gray-100"
               >
                 {nonVariantGroups && nonVariantGroups.length > 0 && (
-                  <div className="sticky top-0 z-10 -mt-6 pt-6 bg-white">
+                  <div className="sticky top-0 z-10 -mt-6 md:pt-6 bg-white">
                     <div
                       ref={addonContainerRef}
-                      className="relative mb-12 border-b-2 border-gray-300"
+                      className="relative mb-6 md:mb-12 border-b-2 border-gray-300"
                     >
                       <HoverHighlightOverlay
                         rect={addonRect}
                         style={addonStyle}
                       />
                       <div className="overflow-x-auto">
-                        <div className="inline-flex items-center gap-6 px-1 py-3">
+                        <div className="inline-flex items-center gap-4 md:gap-6 px-1 py-1 md:py-3">
                           {nonVariantGroups.map((g) => {
                             const set =
                               selectedAddonIds[g.id] ?? new Set<string>();
@@ -313,7 +324,7 @@ export default function DishCustomizeDrawer({
                                   })
                                 }
                                 onMouseLeave={addonClear}
-                                className={`relative text-2xl font-semibold font-anton ${activeGroupId === g.id ? "text-[#1A1A1A]" : "text-[#555]"} px-3 py-2`}
+                                className={`relative text-lg md:text-2xl font-semibold font-anton ${activeGroupId === g.id ? "text-[#1A1A1A]" : "text-[#555]"} px-3 py-2`}
                               >
                                 {String(g.title || "").toUpperCase()}
                                 {unmet && (
@@ -348,7 +359,7 @@ export default function DishCustomizeDrawer({
                             </span>
                           )}
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {(g.options ?? []).map((opt) => {
                             const set =
                               selectedAddonIds[g.id] ?? new Set<string>();
@@ -410,75 +421,77 @@ export default function DishCustomizeDrawer({
                     </div>
                   </div>
                 )}
-                <div className="flex items-center justify-center mt-8 border-t border-gray-100 bg-white">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    disabled={!canConfirm}
-                    ref={confirmRef}
-                    onClick={() =>
-                      onConfirm(
-                        {
-                          variant,
-                          addons,
-                          groups: [
-                            ...(
-                              variantGroup && variant
-                                ? [
-                                  {
-                                    id: String(variantGroup.id),
-                                    title: String(variantGroup.title || ""),
-                                    options: [
-                                      { id: String(variant.id), name: String(variant.name), price: Number(variant.price) },
-                                    ],
-                                  },
-                                ]
-                                : []
-                            ),
-                            ...nonVariantGroups
-                              .map((g) => {
-                                const set = selectedAddonIds[g.id] ?? new Set<string>();
-                                const opts = (g.options ?? []).filter((o) => set.has(o.id));
-                                return {
-                                  id: String(g.id),
-                                  title: String(g.title || ""),
-                                  options: opts.map((o) => ({ id: String(o.id), name: String(o.name || ""), price: Number(o.price || 0) })),
-                                };
-                              })
-                              .filter((g) => g.options.length > 0),
-                          ],
-                          quantity: qty,
-                          totalPrice,
-                        },
-                        confirmRef.current?.getBoundingClientRect() || undefined
-                      )
-                    }
-                    className={`w-full max-w-sm h-16 rounded-2xl flex items-center justify-center gap-2 transition-all ${canConfirm ? "bg-[var(--primary)] text-white shadow-sm" : "bg-gray-200 text-gray-500"} font-semibold`}
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M7 4h-2l-1 2v2h2l2-4h9l1 4h-2l-1-2h-8"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M5 8h12l-1 7H7L5 8z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                      <circle cx="8" cy="20" r="2" fill="currentColor" />
-                      <circle cx="17" cy="20" r="2" fill="currentColor" />
-                    </svg>
-                    <span>Thêm vào giỏ - {formatVnd(totalPrice)}</span>
-                  </motion.button>
-                </div>
               </div>
+            </div>
+
+            {/* Fixed Footer */}
+            <div className="fixed md:absolute bottom-0 left-0 right-0 p-4 md:p-8 bg-white border-t border-gray-100 z-[90] md:z-10 md:w-[60%] md:left-auto flex justify-center">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={!canConfirm}
+                ref={confirmRef}
+                onClick={() =>
+                  onConfirm(
+                    {
+                      variant,
+                      addons,
+                      groups: [
+                        ...(
+                          variantGroup && variant
+                            ? [
+                              {
+                                id: String(variantGroup.id),
+                                title: String(variantGroup.title || ""),
+                                options: [
+                                  { id: String(variant.id), name: String(variant.name), price: Number(variant.price) },
+                                ],
+                              },
+                            ]
+                            : []
+                        ),
+                        ...nonVariantGroups
+                          .map((g) => {
+                            const set = selectedAddonIds[g.id] ?? new Set<string>();
+                            const opts = (g.options ?? []).filter((o) => set.has(o.id));
+                            return {
+                              id: String(g.id),
+                              title: String(g.title || ""),
+                              options: opts.map((o) => ({ id: String(o.id), name: String(o.name || ""), price: Number(o.price || 0) })),
+                            };
+                          })
+                          .filter((g) => g.options.length > 0),
+                      ],
+                      quantity: qty,
+                      totalPrice,
+                    },
+                    confirmRef.current?.getBoundingClientRect() || undefined
+                  )
+                }
+                className={`w-full max-w-sm h-16 rounded-2xl flex items-center justify-center gap-2 transition-all ${canConfirm ? "bg-[var(--primary)] text-white shadow-sm" : "bg-gray-200 text-gray-500"} font-semibold`}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M7 4h-2l-1 2v2h2l2-4h9l1 4h-2l-1-2h-8"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M5 8h12l-1 7H7L5 8z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <circle cx="8" cy="20" r="2" fill="currentColor" />
+                  <circle cx="17" cy="20" r="2" fill="currentColor" />
+                </svg>
+                <span>Thêm vào giỏ - {formatVnd(totalPrice)}</span>
+              </motion.button>
             </div>
           </motion.div>
         </>

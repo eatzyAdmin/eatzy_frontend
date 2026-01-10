@@ -22,15 +22,6 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
     setMounted(true);
   }, []);
 
-  const categories = [
-    { label: "Mức độ ngon", score: 4.9, icon: ChefHat },
-    { label: "Độ chính xác", score: 4.9, icon: CheckCircle2 },
-    { label: "Phục vụ", score: 5.0, icon: Sparkles },
-    { label: "Giao tiếp", score: 5.0, icon: MessageSquare },
-    { label: "Vị trí", score: 4.8, icon: Map },
-    { label: "Giá trị", score: 5.0, icon: Tag },
-  ];
-
   const reviews = useMemo(() => restaurant.reviews || [], [restaurant.reviews]);
   // Use restaurant.rating if available, else calculate average
   const rating = restaurant.rating || (reviews.reduce((acc, r) => acc + r.rating, 0) / (reviews.length || 1));
@@ -100,19 +91,19 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
           />
 
           {/* Modal Container - Centered with max-width */}
-          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 md:p-6 lg:p-8">
+          <div className="fixed inset-0 z-[101] flex items-end md:items-center justify-center p-0 md:p-6 lg:p-8">
             <motion.div
-              initial={{ opacity: 0, y: 100 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 150 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-[1050px] h-[90vh] bg-white rounded-[36px] shadow-2xl flex flex-col overflow-hidden"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 100, damping: 18 }}
+              className="w-full max-w-[1050px] h-[100dvh] md:h-[90vh] bg-white md:rounded-[36px] shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Fixed Header with Close Button */}
               <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white">
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+                  className="p-4 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                 >
                   <X className="w-5 h-5 text-gray-900" />
                 </button>
@@ -120,35 +111,41 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
               </div>
 
               {/* Two Column Layout with Independent Scrolling */}
-              <div className="flex-1 flex overflow-hidden">
+              <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
 
                 {/* Left Column - Scrollable Stats */}
-                <div className="w-[400px] flex-shrink-0 overflow-y-auto border-r border-gray-100 pr-8 px-16 py-8">
-                  <div className="space-y-8">
-                    {/* Hero Rating */}
-                    <div className="text-center space-y-3">
-                      <div className="flex items-center justify-center gap-4 mb-3">
-                        <span className="text-4xl">🏆</span>
-                        <div className="text-[80px] leading-none font-bold text-[#1A1A1A]">
-                          {rating.toFixed(1).replace('.', ',')}
-                        </div>
-                        <span className="text-4xl">🏆</span>
-                      </div>
+                <div className="w-full md:w-[400px] flex-shrink-0 border-b md:border-b-0 md:border-r border-gray-100 flex flex-col md:block">
+                  {/* Mobile Compact Header: Rating + Dist together */}
+                  <div className="flex items-center gap-6 px-5 py-4 md:px-16 md:py-8 md:block md:space-y-8 no-scrollbar overflow-x-auto">
 
-                      <h3 className="text-[18px] font-bold text-[#1A1A1A]">Được khách yêu thích</h3>
-                      <p className="text-gray-600 text-[13px] leading-relaxed">
-                        Trong số các quán ăn đủ điều kiện dựa trên điểm xếp hạng, lượt đánh giá và độ tin cậy, quán này nằm trong <span className="font-bold text-gray-900">nhóm 10% quán ăn hàng đầu</span>
+                    {/* Hero Rating - Compact on Mobile */}
+                    <div className="text-center md:space-y-3 flex-shrink-0">
+                      <div className="flex items-center justify-center gap-2 md:gap-4 md:mb-3">
+                        <span className="text-2xl md:text-4xl hidden md:inline">🏆</span>
+                        <div className="flex items-center gap-1">
+                          <div className="text-[42px] md:text-[80px] leading-none font-bold text-[#1A1A1A]">
+                            {rating.toFixed(1).replace('.', ',')}
+                          </div>
+                          <Star className="w-6 h-6 md:w-12 md:h-12 text-yellow-500 fill-yellow-500 mt-1 md:mt-2" />
+                        </div>
+                        <span className="text-2xl md:text-4xl hidden md:inline">🏆</span>
+                      </div>
+                      <h3 className="hidden md:block text-[18px] font-bold text-[#1A1A1A]">Được khách yêu thích</h3>
+                      <p className="hidden md:block text-gray-600 text-[13px] leading-relaxed">
+                        Top 10% quán ăn hàng đầu
                       </p>
+                      {/* Mobile Only Label */}
+                      <div className="md:hidden text-xs font-bold mt-1">Khách yêu thích</div>
                     </div>
 
-                    {/* Rating Distribution */}
-                    <div className="space-y-2.5">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold text-gray-900 text-sm">Xếp hạng tổng thể</h4>
+                    {/* Rating Distribution - Compact on Mobile */}
+                    <div className="flex-1 min-w-[180px] md:space-y-2.5 border-l md:border-l-0 pl-6 md:pl-0 border-gray-100">
+                      <div className="flex items-center justify-between mb-2 md:mb-3">
+                        <h4 className="font-semibold text-gray-900 text-xs md:text-sm">Xếp hạng</h4>
                         {selectedRating !== null && (
                           <button
                             onClick={() => setSelectedRating(null)}
-                            className="text-xs text-[var(--primary)] font-bold hover:underline"
+                            className="text-[10px] md:text-xs text-[var(--primary)] font-bold hover:underline"
                           >
                             Xóa lọc
                           </button>
@@ -176,27 +173,11 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                         </div>
                       ))}
                     </div>
-
-                    {/* Categories */}
-                    <div className="space-y-3 pt-4 border-t border-gray-100">
-                      {categories.map((cat) => {
-                        const Icon = cat.icon;
-                        return (
-                          <div key={cat.label} className="flex items-center justify-between py-1">
-                            <div className="flex items-center gap-2.5">
-                              <Icon className="w-4 h-4 text-gray-700" strokeWidth={1.5} />
-                              <span className="text-sm text-gray-900">{cat.label}</span>
-                            </div>
-                            <span className="font-semibold text-gray-900 text-sm">{cat.score.toFixed(1).replace('.', ',')}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
                   </div>
                 </div>
 
                 {/* Right Column - Scrollable Reviews */}
-                <div className="flex-1 overflow-y-auto pr-12 px-8 py-6">
+                <div className="flex-1 overflow-y-auto px-5 md:pr-12 md:pl-8 py-6">
                   <div className="space-y-6">
                     {/* Header */}
                     <div className="flex items-center justify-between pb-4">
@@ -320,7 +301,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
           </div>
         </>
       )}
-    </AnimatePresence>,
+    </AnimatePresence >,
     document.body
   );
 };

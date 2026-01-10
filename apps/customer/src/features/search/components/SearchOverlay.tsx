@@ -181,7 +181,7 @@ export default function SearchOverlay({
                 stiffness: 150,
               }
             }}
-            className="fixed z-[50] left-4 right-4 md:left-48 md:right-48 top-4 flex items-center justify-center gap-2 md:gap-3"
+            className="fixed z-[50] left-12 right-12 md:left-48 md:right-48 top-4 flex items-center justify-center gap-2 md:gap-3"
           >
             <div className="relative flex items-center gap-2 md:gap-3 px-3 md:px-5 h-14 md:h-20 text-base md:text-xl rounded-full bg-white shadow-2xl border border-gray-200 overflow-hidden flex-1 max-w-3xl">
               {isSearching && (

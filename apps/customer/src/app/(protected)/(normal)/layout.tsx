@@ -68,7 +68,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       <AnimatePresence>
-        {((effectiveSearchMode || isRestaurantDetail || isOrderHistory || isFavorites) && isHeaderVisible) && (
+        {((effectiveSearchMode || isOrderHistory || isFavorites) && isHeaderVisible) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -88,6 +88,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             }}
             exit={{ y: -100, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
+            className={isRestaurantDetail ? "hidden md:block" : ""}
           >
             <HomeHeader
               onMenuClick={() => setMenuOpen(true)}
@@ -116,7 +117,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         isSearchBarCompact={isSearchBarCompact}
         isSearching={isSearching}
       />
-      <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />
+      {!isRestaurantDetail && <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />}
       {children}
     </div>
   );

@@ -14,11 +14,11 @@ export default function CurrentOrdersDrawerShimmer() {
   };
 
   return (
-    <div className="grid grid-cols-[20%_40%_40%] h-[calc(88vh-72px)]">
+    <div className="flex flex-col md:grid md:grid-cols-[20%_40%_40%] h-full md:h-[calc(88vh-72px)] overflow-hidden">
       {/* Column 1: List */}
-      <div className="overflow-y-auto no-scrollbar bg-white border-r border-gray-100 p-4 space-y-4">
+      <div className="order-1 md:order-none w-full md:w-auto h-auto md:h-full overflow-x-auto md:overflow-y-auto flex md:flex-col border-b md:border-b-0 md:border-r border-gray-100 p-4 space-x-4 md:space-x-0 md:space-y-4 no-scrollbar flex-shrink-0 bg-white">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="flex flex-col gap-2 p-4 border rounded-xl border-gray-100">
+          <div key={i} className="min-w-[300px] md:min-w-0 w-full md:w-auto flex-shrink-0 flex flex-col gap-2 p-4 border rounded-xl border-gray-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <motion.div
@@ -78,7 +78,7 @@ export default function CurrentOrdersDrawerShimmer() {
       </div>
 
       {/* Column 2: Map Shimmer */}
-      <div className="relative bg-[#f2f4f6] border-r border-gray-100 flex items-center justify-center overflow-hidden">
+      <div className="order-2 md:order-none relative h-[30vh] md:h-full w-full flex-shrink-0 bg-[#f2f4f6] border-r border-gray-100 flex items-center justify-center overflow-hidden">
         {/* Abstract Map Background Elements */}
         <div className="absolute inset-0">
           {/* Parks */}
@@ -155,7 +155,7 @@ export default function CurrentOrdersDrawerShimmer() {
       </div>
 
       {/* Column 3: Details */}
-      <div className="relative overflow-y-auto px-12 py-4 bg-white">
+      <div className="order-3 md:order-none relative flex-1 overflow-y-auto px-4 py-6 md:px-12 md:py-4 bg-white border-l border-gray-100 pb-20 md:pb-4">
         {/* Steps */}
         <div className="flex justify-between mb-8 overflow-hidden pt-2">
           {[1, 2, 3, 4, 5].map(step => (

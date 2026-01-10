@@ -70,29 +70,30 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
         {open && (
           <motion.div
             key="orders-panel"
-            initial={{ y: 520, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 520, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 240, damping: 24 }}
-            className="fixed z-[70] left-0 right-0 bottom-0 max-h-[88vh] rounded-t-[40px] bg-[#F7F7F7] border-t border-gray-200 overflow-hidden shadow-2xl"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 100, damping: 18 }}
+            className="fixed z-[70] inset-0 md:inset-x-0 md:bottom-0 md:top-auto md:max-h-[88vh] md:rounded-t-[40px] bg-[#F7F7F7] border-t border-gray-200 overflow-hidden shadow-2xl flex flex-col"
           >
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
-              <div className="text-2xl font-anton font-bold text-[#1A1A1A]">CURRENT ORDERS</div>
+            <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200 bg-white flex-shrink-0">
+              <div className="text-xl md:text-2xl font-anton font-bold text-[#1A1A1A]">CURRENT ORDERS</div>
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onClose}
-                className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center"
+                className="p-4 rounded-full bg-gray-100 flex items-center justify-center"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </motion.button>
             </div>
             {isLoading ? (
               <CurrentOrdersDrawerShimmer />
             ) : (
-              <div className="grid grid-cols-[20%_40%_40%] h-[calc(88vh-72px)]">
-                <div className="overflow-y-auto no-scrollbar bg-white border-r border-gray-100">
-                  <ul className="divide-y divide-gray-200">
+              <div className="flex flex-col md:grid md:grid-cols-[20%_40%_40%] flex-1 overflow-hidden">
+                {/* Order List: Horizontal on mobile, vertical on desktop */}
+                <div className="order-1 md:order-none w-full md:w-auto overflow-x-auto md:overflow-y-auto flex md:block border-b md:border-b-0 md:border-r border-gray-100 flex-shrink-0 bg-white md:h-full no-scrollbar">
+                  <ul className="flex md:block divide-x md:divide-x-0 md:divide-y divide-gray-200">
                     {orders.map((o) => {
                       const restaurant = getRestaurantById(o.restaurantId);
                       const active = o.id === activeOrderId;
@@ -109,10 +110,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                       return (
                         <motion.li
                           key={o.id}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className={`p-4 cursor-pointer border-l-4 ${active ? "border-[var(--primary)] bg-[var(--primary)]/8" : "border-transparent bg-white hover:bg-gray-50"}`}
+                          className={`p-4 cursor-pointer min-w-[300px] md:min-w-0 md:border-l-4 ${active ? "md:border-[var(--primary)] bg-[var(--primary)]/5 md:bg-[var(--primary)]/8" : "md:border-transparent bg-white hover:bg-gray-50"} ${active ? "border-b-2 border-b-[var(--primary)] md:border-b-0" : ""}`}
                           onClick={() => setActiveOrderId(o.id)}
                         >
                           <div className="flex items-start justify-between">
@@ -138,27 +136,29 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                   </ul>
                 </div>
 
-                <div className="relative">
+                {/* Map View */}
+                <div className="order-2 md:order-none relative h-[30vh] md:h-full w-full flex-shrink-0">
                   {activeOrder && <OrderMapView order={activeOrder} />}
                 </div>
 
-                <div className="relative overflow-y-auto px-12 py-4 bg-white border-l border-gray-100">
+                {/* Details */}
+                <div className="order-3 md:order-none relative flex-1 overflow-y-auto px-4 py-6 md:px-12 md:py-4 bg-white border-l border-gray-100 pb-20 md:pb-4">
                   {activeOrder && (
                     <>
                       <OrderStatusSteps status={activeOrder.status} />
-                      <div className="mt-2 border-2 border-gray-200 p-6 rounded-[24px]">
+                      <div className="mt-4 md:mt-2 border-2 border-gray-200 p-4 md:p-6 rounded-[24px]">
                         <div className="text-[14px] font-semibold text-[#1A1A1A] mb-3">Thông tin đơn hàng</div>
                         <ul className="divide-y divide-gray-200">
                           {activeOrder.items.map((it) => (
                             <li key={it.id} className="py-3">
                               <div className="flex items-start gap-3">
-                                <div className="w-8 h-8 rounded-full font-anton bg-[var(--primary)]/15 text-[var(--primary)] flex items-center justify-center font-bold text-2xl">
+                                <div className="w-8 h-8 rounded-full font-anton bg-[var(--primary)]/15 text-[var(--primary)] flex items-center justify-center font-bold text-lg md:text-2xl">
                                   {it.quantity}x
                                 </div>
                                 <div className="flex-1">
-                                  <div className="flex items-start justify-between">
-                                    <div className="text-[#1A1A1A] font-medium line-clamp-1">{it.name}</div>
-                                    <div className="text-[#1A1A1A] font-anton text-xl font-semibold">{formatVnd(it.price)}</div>
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="text-[#1A1A1A] font-medium line-clamp-2 md:line-clamp-1">{it.name}</div>
+                                    <div className="text-[#1A1A1A] font-anton text-lg md:text-xl font-semibold whitespace-nowrap">{formatVnd(it.price)}</div>
                                   </div>
                                 </div>
                               </div>
@@ -184,7 +184,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                           <div className="my-2 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
                           <div className="flex items-center justify-between">
                             <div className="text-[#555]">Tổng số tiền</div>
-                            <div className="text-2xl font-bold text-[var(--primary)]">{formatVnd(activeOrder.total)}</div>
+                            <div className="text-xl md:text-2xl font-bold text-[var(--primary)]">{formatVnd(activeOrder.total)}</div>
                           </div>
                         </div>
 

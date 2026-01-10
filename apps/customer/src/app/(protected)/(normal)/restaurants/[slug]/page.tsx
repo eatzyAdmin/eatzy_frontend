@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ImageWithFallback, RestaurantDetailShimmer, FloatingRestaurantCartShimmer } from "@repo/ui";
-import { ChevronLeft, ChevronRight, Tag, Star, MapPin, ArrowLeft, Plus, Minus } from "@repo/ui/icons";
+import { ChevronLeft, ChevronRight, Tag, Star, MapPin, ArrowLeft, Plus, Minus, CheckCircle2 } from "@repo/ui/icons";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useLoading, useHoverHighlight, HoverHighlightOverlay, useFlyToCart, FlyToCartLayer } from "@repo/ui";
 import type { Restaurant, Dish, MenuCategory, Voucher } from "@repo/types";
@@ -69,6 +69,9 @@ export default function RestaurantDetailPage() {
     const rightCol = rightColumnRef.current;
     if (!rightCol) return;
 
+    const isMobile = window.innerWidth < 768;
+    const root = isMobile ? document.getElementById("mobile-scroll-container") : rightCol;
+
     const obs = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -77,9 +80,9 @@ export default function RestaurantDetailPage() {
         if (visible[0]) setActiveCategoryId(visible[0].target.getAttribute("data-id"));
       },
       {
-        root: rightCol,
+        root: root,
         rootMargin: "-120px 0px -60% 0px",
-        threshold: 0.2
+        threshold: 0.1
       }
     );
     categories.forEach((c) => {
@@ -114,22 +117,27 @@ export default function RestaurantDetailPage() {
   const scrollToCategory = (id: string) => {
     const node = sectionRefs.current[id];
     const rightCol = rightColumnRef.current;
-    if (!node || !rightCol) return;
+    const mobileContainer = document.getElementById("mobile-scroll-container");
+    const isMobile = window.innerWidth < 768;
+    const container = isMobile ? mobileContainer : rightCol;
 
-    const containerRect = rightCol.getBoundingClientRect();
+    if (!node || !container) return;
+
+    const containerRect = container.getBoundingClientRect();
     const nodeRect = node.getBoundingClientRect();
-    const offsetTop = nodeRect.top - containerRect.top + rightCol.scrollTop - 140;
+    // 180 = Header offset + Tabs height approx
+    const offsetTop = nodeRect.top - containerRect.top + container.scrollTop - (isMobile ? 180 : 140);
 
-    rightCol.scrollTo({ top: offsetTop, behavior: "smooth" });
+    container.scrollTo({ top: offsetTop, behavior: "smooth" });
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#F7F7F7]">
+    <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
       <FlyToCartLayer ghosts={ghosts} />
       {/* Back button - Fixed position */}
       <button
         onClick={() => router.back()}
-        className="fixed top-24 left-6 z-50 w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white hover:scale-110 transition-all flex items-center justify-center group"
+        className="fixed top-4 left-4 md:top-24 md:left-6 z-50 w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white hover:scale-110 transition-all flex items-center justify-center group"
       >
         <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
       </button>
@@ -142,47 +150,97 @@ export default function RestaurantDetailPage() {
         </>
       ) : (
         <div className="flex-1 overflow-hidden">
-          <div className="max-w-[1400px] mx-auto pr-16 px-8 pt-20 h-full">
-            <div className="grid grid-cols-[30%_70%] gap-8 h-full">
-              <div ref={leftColumnRef} className="relative overflow-y-auto no-scrollbar pr-2 space-y-6 mb-12">
-                {/* Restaurant Title */}
-                <div>
-                  <h1
-                    className="text-[62px] font-bold leading-tight text-[#1A1A1A] mb-3"
-                    style={{
-                      fontStretch: "condensed",
-                      letterSpacing: "-0.01em",
-                      fontFamily: "var(--font-anton), var(--font-sans)",
-                    }}
-                  >
-                    {restaurant.name.toUpperCase()}
-                  </h1>
-                  {restaurant.description && (
-                    <p className="text-[14px] text-[#555555] leading-relaxed mb-4">{restaurant.description}</p>
-                  )}
+          <div className="max-w-[1400px] mx-auto md:pr-16 md:px-8 px-0 pt-0 pb-0 md:pt-20 md:pb-0 h-full">
+            <div className="flex flex-col md:grid md:grid-cols-[30%_70%] md:gap-8 h-full overflow-y-auto md:overflow-visible no-scrollbar md:pb-0" id="mobile-scroll-container">
+              <div ref={leftColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pr-2 space-y-6 mb-0 md:mb-12 shrink-0 px-4 pt-[60px] md:px-0 md:pt-0">
 
-                  {restaurant.categories && restaurant.categories.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {restaurant.categories.map((cat) => (
-                        <span
-                          key={typeof cat === "string" ? cat : cat.id}
-                          className="text-[12px] bg-white border border-gray-200 text-gray-700 px-3 py-1 rounded-full shadow-sm"
-                        >
-                          {typeof cat === "string" ? cat : cat.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                {/* Mobile Hero Image - Artistic Blend */}
+                {restaurant.imageUrl && (
+                  <div className="absolute top-0 left-0 w-full h-[160px] z-0 md:hidden border-none outline-none ring-0 -mb-1">
+                    <div className="relative w-full h-full overflow-hidden">
+                      <ImageWithFallback src={restaurant.imageUrl} alt={restaurant.name} fill className="object-cover" />
+                      {/* Gradient for text blend */}
+                      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F7F7F7] via-[#F7F7F7]/80 to-transparent" />
+                      {/* Top gradient for header visibility */}
+                      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent" />
 
-                  {restaurant.address && (
-                    <div className="flex items-start gap-2 text-[13px] text-[#555555] mb-2">
-                      <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span>{restaurant.address}</span>
+                      <button className="absolute top-4 right-4 bg-white/20 backdrop-blur-md border border-white/30 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-all">
+                        <Star className="w-3.5 h-3.5 fill-white" />
+                        <span className="text-[12px] font-bold uppercase tracking-wide">Save</span>
+                      </button>
                     </div>
-                  )}
+                  </div>
+                )}
+
+                {/* Restaurant Title & Info */}
+                <div className="relative z-10">
+                  <div className="flex gap-4 items-start md:block">
+                    {/* Small Image - Mobile Only */}
+                    {restaurant.imageUrl && (
+                      <div className="shrink-0 w-[120px] h-[120px] rounded-[20px] overflow-hidden shadow-lg border-2 border-gray-200 md:hidden relative bg-gray-100">
+                        <ImageWithFallback src={restaurant.imageUrl} alt={restaurant.name} fill className="object-cover" />
+                      </div>
+                    )}
+
+                    {/* Text Content */}
+                    <div className="flex-1 min-w-0 flex flex-col gap-2 md:gap-0">
+                      <h1
+                        className="text-[24px] md:text-[62px] font-bold leading-[1.1] text-[#1A1A1A] md:mb-3 md:drop-shadow-none"
+                        style={{
+                          fontStretch: "condensed",
+                          letterSpacing: "-0.01em",
+                          fontFamily: "var(--font-anton), var(--font-sans)",
+                        }}
+                      >
+                        {restaurant.name.toUpperCase()}
+                      </h1>
+
+                      {restaurant.description && (
+                        <p className="hidden md:block text-[14px] text-[#555555] leading-relaxed mb-4">{restaurant.description}</p>
+                      )}
+
+                      {restaurant.description && (
+                        <p className="md:hidden text-[13px] text-[#555555] leading-snug line-clamp-2 mb-2">{restaurant.description}</p>
+                      )}
+
+                      {/* Rating Component - Moved Inside for Mobile */}
+                      <div className="flex items-center gap-2 mt-1 md:hidden">
+                        {restaurant.rating && (
+                          <button
+                            onClick={() => setIsReviewsOpen(true)}
+                            className="flex items-center gap-0.5 bg-yellow-50 pl-2 pr-1.5 py-1 rounded-lg border border-yellow-100 active:scale-95 transition-transform"
+                          >
+                            <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500 mr-1" />
+                            <span className="text-[13px] font-bold text-[#1A1A1A]">{restaurant.rating}</span>
+                            <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+                          </button>
+                        )}
+                        {restaurant.address && (
+                          <div className="flex items-center gap-1 text-[12px] text-[#555555] line-clamp-1">
+                            <MapPin className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">{restaurant.address}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Desktop only Address/Rating placement fallback if needed, but we can share structure if careful. 
+                          For Desktop, we usually want these elements separate.
+                          Let's hide the mobile specific rating/address block above on desktop, and keep the original desktop structure below.
+                       */}
+                      <div className="hidden md:block">
+                        {restaurant.address && (
+                          <div className="flex items-start gap-2 text-[13px] text-[#555555] mb-2">
+                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                            <span>{restaurant.address}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-10">
+                {/* Rating - Desktop Position (Hidden on Mobile now) */}
+                <div className="hidden md:flex items-center gap-10 relative z-10 mt-4 md:mt-0">
                   {restaurant.rating && (
                     <button
                       onClick={() => setIsReviewsOpen(true)}
@@ -199,9 +257,10 @@ export default function RestaurantDetailPage() {
                   )}
                 </div>
 
-                {/* Small illustration image */}
+
+                {/* Small illustration image - Desktop only */}
                 {restaurant.imageUrl && (
-                  <div className="rounded-[24px] overflow-hidden">
+                  <div className="hidden md:block rounded-[24px] overflow-hidden">
                     <div className="relative aspect-[16/11]">
                       <ImageWithFallback
                         src={restaurant.imageUrl}
@@ -212,53 +271,13 @@ export default function RestaurantDetailPage() {
                     </div>
                   </div>
                 )}
-
-                {vouchers.length > 0 && (
-                  <div>
-                    <div className="text-[13px] font-semibold text-[#1A1A1A] mb-3 uppercase tracking-wide">
-                      Available Offers
-                    </div>
-                    <div className="space-y-3">
-                      {vouchers.map((v) => (
-                        <div
-                          key={v.id}
-                          className="relative bg-white rounded-[14px] p-4 border-2 border-dashed border-[var(--primary)]/50 shadow-sm"
-                        >
-                          <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-[#F7F7F7] rounded-full border border-[var(--primary)]/50"></div>
-                          <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 bg-[#F7F7F7] rounded-full border border-[var(--primary)]/50"></div>
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-[var(--primary)] text-white flex items-center justify-center flex-shrink-0">
-                              <Tag className="w-5 h-5" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-[#1A1A1A] text-[13px]">
-                                {v.title ?? (v.discountType === 'PERCENT' && typeof v.discountValue === 'number'
-                                  ? `Giảm ${v.discountValue}%`
-                                  : v.discountType === 'AMOUNT' && typeof v.discountValue === 'number'
-                                    ? `Giảm ${new Intl.NumberFormat('vi-VN').format(v.discountValue)}đ`
-                                    : v.description ?? ''
-                                )}
-                              </div>
-                              {v.description && (
-                                <div className="text-[12px] text-[#555] mt-0.5 line-clamp-2">
-                                  {v.description}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="absolute inset-0 bg-gradient-to-r from-[var(--secondary)]/10 via-transparent to-[var(--primary)]/10 pointer-events-none rounded-[14px]"></div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
 
-              {/* Right Column - Main Image & Menu (Scrollable independently) */}
-              <div ref={rightColumnRef} className="relative overflow-y-auto no-scrollbar pl-2 mb-12">
-                {/* Main Hero Image with Save Button */}
+              {/* Right Column - Main Image & Menu (Scrollable independently on desktop) */}
+              <div ref={rightColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pl-2 mb-12 shrink-0 px-4 md:px-0">
+                {/* Main Hero Image with Save Button - Desktop Only */}
                 {restaurant.imageUrl && (
-                  <div className="relative mb-6">
+                  <div className="hidden md:block relative mb-6">
                     <div className="relative aspect-[16/8] rounded-[24px] overflow-hidden shadow-md bg-white">
                       <ImageWithFallback
                         src={restaurant.imageUrl}
@@ -276,9 +295,10 @@ export default function RestaurantDetailPage() {
                   </div>
                 )}
 
-                {/* Category tabs - positioned here, becomes sticky on scroll */}
+                {/* Category tabs - positioned here, sticky on scroll */}
                 <div
-                  className={`${isTabsSticky ? "sticky top-0 z-40 bg-[#F7F7F7] pt-4 -mt-4" : ""} mb-6`}
+                  className={`sticky top-0 z-40 bg-[#F7F7F7] mb-6 transition-all pt-6 md:pt-0 ${isTabsSticky ? "md:pt-4 md:-mt-4" : ""
+                    }`}
                 >
                   <div ref={catContainerRef} className="relative bg-[#F7F7F7] border-b-2 border-gray-300">
                     <HoverHighlightOverlay rect={catRect} style={catStyle} />
@@ -288,7 +308,7 @@ export default function RestaurantDetailPage() {
                           <button
                             key={c.id}
                             onClick={() => scrollToCategory(c.id)}
-                            className={`text-[28px] font-bold uppercase tracking-wide transition-all relative pb-1 whitespace-nowrap ${activeCategoryId === c.id
+                            className={`text-[20px] md:text-[28px] font-bold uppercase tracking-wide transition-all relative pb-1 whitespace-nowrap ${activeCategoryId === c.id
                               ? "text-[#1A1A1A]"
                               : "text-gray-400"
                               }`}
@@ -338,7 +358,7 @@ export default function RestaurantDetailPage() {
                               behavior: "smooth",
                             })
                           }
-                          className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center"
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hidden md:flex"
                         >
                           <ChevronLeft className="w-4 h-4 text-gray-700" />
                         </motion.button>
@@ -358,7 +378,7 @@ export default function RestaurantDetailPage() {
                               behavior: "smooth",
                             })
                           }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hidden md:flex"
                         >
                           <ChevronRight className="w-4 h-4 text-gray-700" />
                         </motion.button>
@@ -367,7 +387,7 @@ export default function RestaurantDetailPage() {
                   </div>
                 </div>
 
-                <div ref={menuContainerRef} className="relative space-y-8 px-4">
+                <div ref={menuContainerRef} className="relative space-y-8 px-0 md:px-4">
                   {categories.map((c) => {
                     const dishes: Dish[] = getDishesByMenuCategory(c.id);
                     return (
@@ -377,7 +397,7 @@ export default function RestaurantDetailPage() {
                         data-id={c.id}
                       >
                         <div className="flex items-center justify-between mb-4">
-                          <h2 className="text-[24px] font-bold text-[#1A1A1A] uppercase tracking-wide">
+                          <h2 className="text-[20px] md:text-[24px] font-bold text-[#1A1A1A] uppercase tracking-wide">
                             {c.name}
                           </h2>
                           <div className="text-[12px] text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200 font-medium">
@@ -385,7 +405,7 @@ export default function RestaurantDetailPage() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-5">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
                           {dishes.map((d) => {
                             const count = items
                               .filter(
@@ -400,7 +420,7 @@ export default function RestaurantDetailPage() {
                             return (
                               <div
                                 key={d.id}
-                                className="group relative bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
+                                className="group relative bg-white rounded-[16px] md:rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
                                 onMouseEnter={(e) =>
                                   menuMove(e, {
                                     borderRadius: 24,
@@ -433,11 +453,11 @@ export default function RestaurantDetailPage() {
                                       Hết hàng
                                     </div>
                                   )}
-                                  <div className="absolute top-3 right-3 z-10">
+                                  <div className="absolute top-2 right-2 md:top-3 md:right-3 z-10">
                                     {count > 0 ? (
                                       <motion.div
                                         layoutId={`item-${d.id}-btn`}
-                                        className="rounded-full bg-white/90 backdrop-blur text-[#1A1A1A] shadow-lg flex items-center gap-2 px-1 py-1 h-10 border border-gray-100"
+                                        className="rounded-full bg-white/90 backdrop-blur text-[#1A1A1A] shadow-lg flex items-center gap-1 md:gap-2 px-1 py-1 h-8 md:h-10 border border-gray-100"
                                       >
                                         <button
                                           onClick={(e) => {
@@ -449,11 +469,11 @@ export default function RestaurantDetailPage() {
                                             );
                                             if (target) removeItem(target.id);
                                           }}
-                                          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                                          className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                                         >
-                                          <Minus className="w-4 h-4" />
+                                          <Minus className="w-3 h-3 md:w-4 md:h-4" />
                                         </button>
-                                        <span className="text-sm font-bold min-w-[20px] text-center">
+                                        <span className="text-xs md:text-sm font-bold min-w-[16px] md:min-w-[20px] text-center">
                                           {count}
                                         </span>
                                         <button
@@ -463,9 +483,9 @@ export default function RestaurantDetailPage() {
                                             setDrawerDish(d);
                                             setDrawerOpen(true);
                                           }}
-                                          className="w-8 h-8 rounded-full bg-[var(--primary)] text-white hover:brightness-110 flex items-center justify-center shadow-md shadow-[var(--primary)]/30 transition-all"
+                                          className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[var(--primary)] text-white hover:brightness-110 flex items-center justify-center shadow-md shadow-[var(--primary)]/30 transition-all"
                                         >
-                                          <Plus className="w-4 h-4" />
+                                          <Plus className="w-3 h-3 md:w-4 md:h-4" />
                                         </button>
                                       </motion.div>
                                     ) : (
@@ -477,29 +497,29 @@ export default function RestaurantDetailPage() {
                                           setDrawerDish(d);
                                           setDrawerOpen(true);
                                         }}
-                                        className="w-10 h-10 rounded-full bg-white text-[#1A1A1A] shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group/btn"
+                                        className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white text-[#1A1A1A] shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group/btn"
                                       >
-                                        <Plus className="w-5 h-5 group-hover/btn:text-[var(--primary)] transition-colors" />
+                                        <Plus className="w-4 h-4 md:w-5 md:h-5 group-hover/btn:text-[var(--primary)] transition-colors" />
                                       </motion.button>
                                     )}
                                   </div>
                                 </div>
-                                <div className="p-5">
-                                  <div className="flex justify-between items-start gap-2 mb-2">
-                                    <h3 className="font-bold text-[17px] text-[#1A1A1A] leading-snug line-clamp-2">
+                                <div className="p-3 md:p-5">
+                                  <div className="flex justify-between items-start gap-2 mb-1 md:mb-2">
+                                    <h3 className="font-bold text-[15px] md:text-[17px] text-[#1A1A1A] leading-snug line-clamp-2">
                                       {d.name}
                                     </h3>
                                   </div>
-                                  <p className="text-[13px] text-gray-500 line-clamp-2 mb-4 min-h-[2.5em] leading-relaxed">
+                                  <p className="text-[12px] md:text-[13px] text-gray-500 line-clamp-2 mb-2 md:mb-4 min-h-[2.5em] leading-relaxed">
                                     {d.description}
                                   </p>
-                                  <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                                  <div className="flex items-center justify-between pt-2 md:pt-3 border-t border-gray-50">
                                     <div className="flex items-baseline gap-1">
-                                      <span className="text-[18px] font-bold text-[var(--primary)]">
+                                      <span className="text-[16px] md:text-[18px] font-bold text-[var(--primary)]">
                                         {formatVnd(minPrice)}
                                       </span>
                                     </div>
-                                    <div className="text-[12px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
+                                    <div className="hidden md:block text-[12px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
                                       Còn {d.availableQuantity}
                                     </div>
                                   </div>
@@ -513,11 +533,23 @@ export default function RestaurantDetailPage() {
                   })}
                   <HoverHighlightOverlay rect={menuRect} style={menuStyle} />
                 </div>
+                {/* End of list indicator */}
+                <div className="py-12 flex items-center justify-center gap-4 opacity-60">
+                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
+                    </div>
+                    <span className="text-[14px] font-bold text-gray-400 uppercase font-anton">End of list</span>
+                  </div>
+                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        </div >
+      )
+      }
       <DishCustomizeDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
@@ -560,6 +592,6 @@ export default function RestaurantDetailPage() {
       />
       <ReviewsModal restaurant={restaurant} isOpen={isReviewsOpen} onClose={() => setIsReviewsOpen(false)} />
       {!isLoading && <FloatingRestaurantCart restaurantId={restaurant.id} restaurantName={restaurant.name} />}
-    </div>
+    </div >
   );
 }

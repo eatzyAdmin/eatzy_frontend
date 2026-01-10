@@ -22,7 +22,7 @@ export default function BottomNav({ onCurrentOrdersClick, isOrdersOpen }: Bottom
   ];
 
   return (
-    <div className="md:hidden fixed bottom-2 left-2 right-2 z-[100]">
+    <div className="md:hidden fixed bottom-2 left-2 right-2 z-[40]">
       <motion.div
         className="backdrop-blur-xl text-black rounded-[32px] border border-white/40 px-2 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/20 flex items-center justify-between"
         initial={{ y: 100, opacity: 0 }}

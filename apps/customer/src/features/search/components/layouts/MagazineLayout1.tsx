@@ -21,14 +21,14 @@ export default function MagazineLayout1({ restaurant, dishes }: Props) {
   const { show } = useLoading();
   const router = useRouter();
   const setRefs = useCallback((el: HTMLDivElement | null) => { containerRef.current = el; tapRef.current = el; }, [containerRef, tapRef]);
-  
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6 }}
-      className="mb-16 px-4"
+      className="mb-8 md:mb-16 px-4"
     >
       <div className="max-w-[1200px] mx-auto">
         {/* Magazine page indicator */}
@@ -40,7 +40,7 @@ export default function MagazineLayout1({ restaurant, dishes }: Props) {
 
         {/* Restaurant title - editorial style */}
         <div className="mb-12">
-          <h2 className="text-7xl font-bold leading-none mb-4" style={{ fontFamily: 'serif' }}>
+          <h2 className="text-4xl md:text-7xl font-bold leading-none mb-4" style={{ fontFamily: 'serif' }}>
             {restaurant.name}
           </h2>
           <div className="flex items-center gap-6 text-sm text-gray-600">
@@ -57,14 +57,14 @@ export default function MagazineLayout1({ restaurant, dishes }: Props) {
           ref={setRefs}
           onMouseLeave={clearHover}
           onClick={(e) => { triggerTap(e); setTimeout(() => { show('Đang mở chi tiết quán'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
-          className="relative grid grid-cols-12 gap-8 cursor-pointer"
+          className="relative grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 cursor-pointer"
         >
           <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
           <TapRippleOverlay ripple={ripple} />
           {/* Large featured dish */}
-          <div onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#f5efe6', opacity: 1, scaleEnabled: true, scale: 1.12 })} className="col-span-8 relative z-10 cursor-pointer">
-            <div className="relative aspect-[4/3] overflow-hidden mb-4">
-              <ImageWithFallback 
+          <div onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#f5efe6', opacity: 1, scaleEnabled: true, scale: 1.12 })} className="col-span-1 md:col-span-8 relative z-10 cursor-pointer">
+            <div className="relative aspect-[4/3] overflow-hidden mb-4 rounded-2xl">
+              <ImageWithFallback
                 src={featured.imageUrl}
                 alt={featured.name}
                 fill
@@ -73,15 +73,15 @@ export default function MagazineLayout1({ restaurant, dishes }: Props) {
             </div>
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h3 className="text-4xl font-bold mb-2" style={{ fontFamily: 'serif' }}>
+                <h3 className="text-2xl md:text-4xl font-bold mb-2" style={{ fontFamily: 'serif' }}>
                   {featured.name}
                 </h3>
-                <p className="text-gray-600 text-lg leading-relaxed max-w-xl">
+                <p className="text-gray-600 text-base md:text-lg leading-relaxed max-w-xl">
                   {featured.description}
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-amber-600">
+                <div className="text-xl md:text-3xl font-bold text-amber-600">
                   {(featured.price / 1000).toFixed(0)}K
                 </div>
                 {featured.rating && (
@@ -91,7 +91,7 @@ export default function MagazineLayout1({ restaurant, dishes }: Props) {
             </div>
           </div>
 
-          <div className="col-span-4 space-y-6">
+          <div className="col-span-1 md:col-span-4 space-y-6">
             <div className="text-xs uppercase tracking-widest text-gray-400 font-semibold border-b border-gray-200 pb-2">
               More Dishes
             </div>
@@ -106,8 +106,8 @@ export default function MagazineLayout1({ restaurant, dishes }: Props) {
                 className="group cursor-pointer relative z-10"
               >
                 <div className="flex gap-4">
-                  <div className="relative w-24 h-24 flex-shrink-0 overflow-hidden">
-                    <ImageWithFallback 
+                  <div className="relative w-24 h-24 flex-shrink-0 overflow-hidden rounded-2xl">
+                    <ImageWithFallback
                       src={dish.imageUrl}
                       alt={dish.name}
                       fill

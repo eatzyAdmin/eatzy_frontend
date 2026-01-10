@@ -14,54 +14,69 @@ export default function MagazineLayout9({ restaurant, dishes, menuCategories }: 
   const { show } = useLoading();
   const router = useRouter();
   const setRefs = useCallback((el: HTMLDivElement | null) => { containerRef.current = el; tapRef.current = el; }, [containerRef, tapRef]);
-  
+
   return (
-    <motion.section 
-      className="relative mb-16 overflow-hidden"
+    <motion.section
+      className="relative mb-16 overflow-hidden flex flex-col md:block h-auto md:h-[700px]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      style={{ height: '700px' }}
     >
       <div
         ref={setRefs}
         onMouseLeave={clearHover}
         onClick={(e) => { triggerTap(e); setTimeout(() => { show('Đang mở chi tiết quán'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
-        className="absolute inset-0 cursor-pointer"
+        className="absolute inset-0 cursor-pointer z-20"
       >
         <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
         <TapRippleOverlay ripple={ripple} />
       </div>
-      <div className="absolute inset-0" style={{ clipPath: 'polygon(22% 0, 100% 0, 100% 100%, 0 100%)' }}>
-        <ImageWithFallback
-          src={lead?.imageUrl || ''}
-          alt={lead?.name || ''}
-          fill
-          className="object-cover"
-        />
+
+      {/* Image Section */}
+      <div className="relative md:absolute inset-0 w-full h-[250px] md:h-full rounded-2xl md:rounded-none overflow-hidden" style={{ clipPath: 'none' }}>
+        <div className="absolute inset-0 md:clip-path-[polygon(22%_0,100%_0,100%_100%,0_100%)] w-full h-full">
+          <ImageWithFallback
+            src={lead?.imageUrl || ''}
+            alt={lead?.name || ''}
+            fill
+            className="object-cover"
+          />
+        </div>
       </div>
 
-      <div 
-        className="absolute left-0 top-0 bottom-0"
+      {/* Green decorative strip - Desktop only */}
+      <div
+        className="hidden md:block absolute left-0 top-0 bottom-0"
         style={{ width: '140px', backgroundColor: '#B4BE3F', clipPath: 'polygon(0 0, 100% 0, 70% 100%, 0 100%)' }}
       />
 
-      <div 
+      {/* Content Section */}
+      <div
         onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#ffffff', opacity: 1, scaleEnabled: true, scale: 1.12 })}
-        className="absolute top-8 bottom-8 left-[140px] bg-white shadow-xl p-8 cursor-pointer"
-        style={{ width: '42%', clipPath: 'polygon(0 0, 100% 0, 86% 100%, 0 100%)', borderRadius: '12px' }}
+        className="relative md:absolute md:top-8 md:bottom-8 md:left-[140px] bg-white shadow-none md:shadow-xl p-6 md:p-8 cursor-pointer z-10 w-full md:w-[42%]"
+        style={{
+          clipPath: 'none'
+        }}
       >
-        <h2 className="text-[22px] font-bold text-[#222] leading-tight">{restaurant.name}</h2>
-        <div className="mt-2 flex items-center gap-3 text-[12px] text-[#555]">
+        {/* Desktop clip-path applied via inner div or conditional style to avoid messing up mobile layout? 
+            Actually, we can just apply the style conditionally using a class or just inline style with media query? 
+            Inline styles don't support media queries. 
+            We can use a separate div for desktop styling or just accept that on mobile it's a block.
+            Let's keep simpler structure.
+        */}
+        <div className="hidden md:block absolute inset-0 bg-white" style={{ clipPath: 'polygon(0 0, 100% 0, 86% 100%, 0 100%)', borderRadius: '12px', zIndex: -1 }}></div>
+
+        <h2 className="text-[22px] font-bold text-[#222] leading-tight relative">{restaurant.name}</h2>
+        <div className="mt-2 flex items-center gap-3 text-[12px] text-[#555] relative">
           {restaurant.address && <span>{restaurant.address}</span>}
           {typeof restaurant.rating === 'number' && (
             <span className="text-amber-600 font-semibold">{restaurant.rating.toFixed(1)}★</span>
           )}
         </div>
         {restaurant.description && (
-          <p className="mt-3 text-[13px] text-[#4A4A4A] leading-relaxed">{restaurant.description}</p>
+          <p className="mt-3 text-[13px] text-[#4A4A4A] leading-relaxed relative">{restaurant.description}</p>
         )}
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-4 relative">
           {others.map((d) => (
             <div key={d.id} onMouseEnter={(e) => moveHighlight(e, { borderRadius: 8, backgroundColor: '#f7f7f7', opacity: 1, scaleEnabled: true, scale: 1.12 })} className="flex items-start justify-between relative z-10 cursor-pointer">
               <div>

@@ -49,19 +49,19 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ type: "spring", stiffness: 120, damping: 18 }}
-            className="fixed bottom-8 right-8 z-50 bg-[var(--primary)] text-[#1A1A1A] rounded-full shadow-2xl p-4 pr-6 flex items-center gap-3 cursor-pointer hover:brightness-110 active:scale-95"
+            className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50 bg-[var(--primary)] text-[#1A1A1A] rounded-full shadow-2xl p-2 pr-4 md:p-4 md:pr-6 flex items-center gap-2 md:gap-3 cursor-pointer hover:brightness-110 active:scale-95"
           >
             <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-black/10 flex items-center justify-center">
-                <ShoppingBag className="w-6 h-6" />
+              <div className="w-9 h-9 md:w-12 md:h-12 rounded-full bg-black/10 flex items-center justify-center">
+                <ShoppingBag className="w-4 h-4 md:w-6 md:h-6" />
               </div>
-              <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-white text-[#1A1A1A] font-bold text-xs flex items-center justify-center border-2 border-[var(--primary)] shadow-sm">
+              <span className="absolute -top-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full bg-white text-[#1A1A1A] font-bold text-[10px] md:text-xs flex items-center justify-center border-2 border-[var(--primary)] shadow-sm">
                 {itemCount}
               </span>
             </div>
-            <div className="flex flex-col items-start mr-2">
-              <span className="text-xs font-semibold opacity-80 uppercase tracking-wide">Giỏ hàng</span>
-              <span className="font-bold text-lg leading-none">{formatVnd(cartTotal)}</span>
+            <div className="flex flex-col items-start mr-1 md:mr-2">
+              <span className="hidden md:block text-xs font-semibold opacity-80 uppercase tracking-wide">Giỏ hàng</span>
+              <span className="font-bold text-sm md:text-lg leading-none">{formatVnd(cartTotal)}</span>
             </div>
           </motion.button>
         )}
@@ -100,7 +100,7 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
-                      className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                      className="p-4 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                     >
                       <X className="w-5 h-5" />
                     </button>

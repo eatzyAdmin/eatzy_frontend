@@ -23,7 +23,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
   const { show } = useLoading();
   const router = useRouter();
   const setRefs = useCallback((el: HTMLDivElement | null) => { containerRef.current = el; tapRef.current = el; }, [containerRef, tapRef]);
-  
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 30 }}
@@ -36,7 +36,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
         {/* Header */}
         <div className="text-center mb-12 pb-8 border-b-2 border-gray-900">
           <div className="text-xs text-gray-400 uppercase tracking-widest mb-4">Menu Selection</div>
-          <h2 className="text-6xl font-black mb-4" style={{ fontFamily: 'serif' }}>
+          <h2 className="text-4xl md:text-6xl font-black mb-4" style={{ fontFamily: 'serif' }}>
             {restaurant.name}
           </h2>
           <div className="flex items-center justify-center gap-4">
@@ -55,7 +55,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
           ref={setRefs}
           onMouseLeave={clearHover}
           onClick={(e) => { triggerTap(e); setTimeout(() => { show('Đang mở chi tiết quán'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
-          className="relative grid grid-cols-2 gap-16 cursor-pointer"
+          className="relative grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 cursor-pointer"
         >
           <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
           <TapRippleOverlay ripple={ripple} />
@@ -63,12 +63,12 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
           {firstCategory && (
             <div>
               <div className="mb-8">
-                <h3 className="text-4xl font-bold mb-2" style={{ fontFamily: 'serif' }}>
+                <h3 className="text-2xl md:text-4xl font-bold mb-2" style={{ fontFamily: 'serif' }}>
                   {firstCategory.name}
                 </h3>
                 <div className="w-16 h-1 bg-amber-500" />
               </div>
-              
+
               <div className="space-y-6">
                 {cat1Dishes.map((dish, idx) => (
                   <motion.div
@@ -80,8 +80,8 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                     onMouseEnter={(e) => moveHighlight(e, { borderRadius: 10, backgroundColor: '#f0eadf', opacity: 1, scaleEnabled: true, scale: 1.12 })}
                     className="flex gap-4 group cursor-pointer relative z-10"
                   >
-                    <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
-                      <ImageWithFallback 
+                    <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded-2xl">
+                      <ImageWithFallback
                         src={dish.imageUrl}
                         alt={dish.name}
                         fill
@@ -115,12 +115,12 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
           {secondCategory && (
             <div>
               <div className="mb-8">
-                <h3 className="text-4xl font-bold mb-2" style={{ fontFamily: 'serif' }}>
+                <h3 className="text-2xl md:text-4xl font-bold mb-2" style={{ fontFamily: 'serif' }}>
                   {secondCategory.name}
                 </h3>
                 <div className="w-16 h-1 bg-amber-500" />
               </div>
-              
+
               <div className="space-y-6">
                 {cat2Dishes.map((dish, idx) => (
                   <motion.div
@@ -132,8 +132,8 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                     onMouseEnter={(e) => moveHighlight(e, { borderRadius: 10, backgroundColor: '#f6f1e7', opacity: 1, scaleEnabled: true, scale: 1.12 })}
                     className="flex gap-4 group cursor-pointer relative z-10"
                   >
-                    <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
-                      <ImageWithFallback 
+                    <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded-2xl">
+                      <ImageWithFallback
                         src={dish.imageUrl}
                         alt={dish.name}
                         fill

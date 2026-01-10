@@ -12,10 +12,10 @@ export default function MagazineLayout7({ restaurant, dishes }: { restaurant: Re
   const { show } = useLoading();
   const router = useRouter();
   const setRefs = useCallback((el: HTMLDivElement | null) => { containerRef.current = el; tapRef.current = el; }, [containerRef, tapRef]);
-  
+
   return (
-    <motion.section 
-      className="bg-[#F5F5F5] overflow-hidden shadow-sm mb-16 p-12"
+    <motion.section
+      className="bg-[#F5F5F5] overflow-hidden shadow-sm mb-16 p-4 md:p-12"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
@@ -25,9 +25,9 @@ export default function MagazineLayout7({ restaurant, dishes }: { restaurant: Re
         <span>menuboard</span>
         <span>Specialties</span>
       </div>
-      
+
       {/* Main Title */}
-      <h2 className="text-[40px] font-bold text-[#2C2C2C] text-center mb-2 tracking-tight" style={{ fontFamily: 'Georgia, serif' }}>
+      <h2 className="text-[30px] md:text-[40px] font-bold text-[#2C2C2C] text-center mb-2 tracking-tight" style={{ fontFamily: 'Georgia, serif' }}>
         {restaurant.name}
       </h2>
       <p className="text-[13px] text-[#666] text-center mb-10">
@@ -53,7 +53,7 @@ export default function MagazineLayout7({ restaurant, dishes }: { restaurant: Re
           >
             {/* Image Container - Vertical Rectangle */}
             <div className="w-full px-4 mb-4">
-              <div className="relative overflow-hidden rounded-lg shadow-md" style={{ height: '380px' }}>
+              <div className="relative overflow-hidden rounded-2xl shadow-md h-[300px] md:h-[380px]">
                 <ImageWithFallback
                   src={dish.imageUrl}
                   alt={dish.name}
@@ -64,7 +64,7 @@ export default function MagazineLayout7({ restaurant, dishes }: { restaurant: Re
             </div>
 
             {/* Text Content on Beige Background */}
-            <div 
+            <div
               className="w-full px-6 py-8 text-center"
               style={{ backgroundColor: '#EAE0CC' }}
             >

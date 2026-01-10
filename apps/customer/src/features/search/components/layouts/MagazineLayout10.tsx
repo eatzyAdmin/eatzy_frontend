@@ -14,10 +14,12 @@ export default function MagazineLayout10({ restaurant, dishes }: { restaurant: R
   const setRefs = useCallback((el: HTMLDivElement | null) => { containerRef.current = el; tapRef.current = el; }, [containerRef, tapRef]);
   return (
     <motion.section className="mb-16">
-      <div className="relative h-[420px] overflow-hidden">
-        <ImageWithFallback src={restaurant.imageUrl ?? 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800'} alt={restaurant.name} fill className="object-cover" />
-        <div className="absolute inset-y-0 left-0 w-2/5 bg-white/90 clip-path-[polygon(0_0,100%_0,85%_100%,0_100%)] p-8">
-          <h2 className="text-3xl font-bold text-[#1d1d1d]">{restaurant.name}</h2>
+      <div className="relative flex flex-col md:block h-auto md:h-[420px] overflow-hidden">
+        <div className="relative w-full h-[250px] md:absolute md:inset-0 md:h-full rounded-2xl md:rounded-none overflow-hidden">
+          <ImageWithFallback src={restaurant.imageUrl ?? 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800'} alt={restaurant.name} fill className="object-cover" />
+        </div>
+        <div className="relative w-full bg-white p-6 md:absolute md:inset-y-0 md:left-0 md:w-2/5 md:bg-white/90 md:p-8 md:clip-path-[polygon(0_0,100%_0,85%_100%,0_100%)]">
+          <h2 className="text-2xl md:text-3xl font-bold text-[#1d1d1d]">{restaurant.name}</h2>
           <p className="mt-3 text-[#555]">{restaurant.description}</p>
         </div>
       </div>
@@ -31,7 +33,7 @@ export default function MagazineLayout10({ restaurant, dishes }: { restaurant: R
         <TapRippleOverlay ripple={ripple} />
         {top.map((d) => (
           <div key={d.id} onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#f5efe6', opacity: 1, scaleEnabled: true, scale: 1.12 })} className="group bg-white hover:shadow-lg transition-shadow relative z-10 cursor-pointer">
-            <div className="relative aspect-[4/3] overflow-hidden">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
               <ImageWithFallback src={d.imageUrl} alt={d.name} fill className="object-cover" />
             </div>
             <div className="mt-2">

@@ -103,7 +103,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 480, opacity: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 26 }}
-            className="fixed z-[70] right-0 top-0 bottom-0 w-[460px] max-w-[96vw] bg-[#F7F7F7] border-l border-gray-200 overflow-hidden rounded-l-[40px] shadow-2xl flex flex-col"
+            className="fixed z-[70] inset-0 md:inset-auto md:right-0 md:top-0 md:bottom-0 w-full md:w-[460px] md:max-w-[96vw] bg-[#F7F7F7] border-l-0 md:border-l border-gray-200 overflow-hidden rounded-none md:rounded-l-[40px] shadow-2xl flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-8 border-b border-gray-200 text-[#1A1A1A] bg-white/60 flex-shrink-0">
@@ -120,7 +120,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                       setIsEditMode(!isEditMode);
                       setSelectedRestIds(new Set());
                     }}
-                    className="px-4 py-2 rounded-xl text-sm font-semibold bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+                    className="px-6 py-3 rounded-2xl bg-gray-100 text-sm font-semibold border border-gray-200 hover:bg-gray-50 transition-colors"
                   >
                     {isEditMode ? "Xong" : "Sửa"}
                   </button>
@@ -129,7 +129,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                   whileHover={{ scale: 1.06 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={onClose}
-                  className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors ml-1"
+                  className="p-4 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-50 transition-colors ml-1"
                 >
                   <X className="w-5 h-5 text-gray-600" />
                 </motion.button>
@@ -173,7 +173,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                           {isEditMode && (
                             <motion.div
                               initial={{ width: 0, opacity: 0, marginRight: 0 }}
-                              animate={{ width: 32, opacity: 1, marginRight: 8 }}
+                              animate={{ width: 32, opacity: 1, marginRight: 0 }}
                               exit={{ width: 0, opacity: 0, marginRight: 0 }}
                               className="overflow-hidden flex items-center"
                             >
@@ -228,10 +228,10 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                             {items.map(i => i.name).join(", ")}
                           </div>
                           <div className="flex items-end justify-between">
-                            <div className="text-sm text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg font-medium">
+                            <div className="text-sm text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg font-medium whitespace-nowrap">
                               {count} món
                             </div>
-                            <div className="text-lg font-bold text-[var(--primary)]">
+                            <div className="text-lg font-bold text-[var(--primary)] whitespace-nowrap">
                               {formatVnd(subtotal)}
                             </div>
                           </div>
