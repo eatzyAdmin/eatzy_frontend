@@ -9,6 +9,7 @@ const CurrentOrdersDrawer = dynamic(() => import("@/features/orders/components/C
 import SearchOverlay from "@/features/search/components/SearchOverlay";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useSearch } from "@/features/search/hooks/useSearch";
+import BottomNav from "@/features/navigation/components/BottomNav";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [cartOpen, setCartOpen] = useState(false);
@@ -115,6 +116,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         isSearchBarCompact={isSearchBarCompact}
         isSearching={isSearching}
       />
+      <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />
       {children}
     </div>
   );

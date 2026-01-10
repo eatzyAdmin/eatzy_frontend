@@ -148,9 +148,6 @@ export default function OrderHistoryPage() {
                 </motion.button>
               ))}
             </div>
-            <div className="ml-auto text-sm text-gray-600">
-              {filteredOrders.length} đơn hàng
-            </div>
           </div>
         </div>
       </div>

@@ -100,9 +100,9 @@ export default function SearchOverlay({
                   stiffness: 150,
                 },
               }}
-              className="fixed z-[70] inset-x-60 top-[16vh] -translate-x-1/2 max-w-[92vw]"
+              className="fixed z-[70] inset-x-4 md:inset-x-60 top-[16vh] md:-translate-x-1/2 max-w-full md:max-w-[92vw]"
             >
-              <div className="relative flex items-center gap-3 px-5 h-20 text-xl rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl overflow-hidden">
+              <div className="relative flex items-center gap-3 px-5 h-16 md:h-20 text-lg md:text-xl rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl overflow-hidden">
                 {isSearching && (
                   <motion.div
                     initial={{ x: "-100%" }}
@@ -111,20 +111,20 @@ export default function SearchOverlay({
                     className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent"
                   />
                 )}
-                <Search className="w-8 h-8" />
+                <Search className="w-6 h-6 md:w-8 md:h-8" />
                 <input
                   autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Tìm món, nhà hàng, khu vực..."
-                  className="flex-1 bg-transparent text-white font-medium placeholder:text-white/60 focus:outline-none"
+                  placeholder="Tìm món, nhà hàng..."
+                  className="flex-1 bg-transparent text-white font-medium placeholder:text-white/60 focus:outline-none min-w-0"
                 />
                 <button
                   onClick={onClose}
-                  className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors flex-shrink-0"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
               </div>
             </motion.div>
@@ -135,7 +135,7 @@ export default function SearchOverlay({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, delay: 0.1 }}
-              className="fixed inset-x-60 top-[32vh] -translate-x-1/2 flex flex-wrap gap-3 justify-center z-[70] max-w-2xl px-4"
+              className="fixed inset-x-0 top-[28vh] md:top-[32vh] flex flex-wrap gap-2 md:gap-3 justify-center z-[70] max-w-full md:max-w-2xl px-4 mx-auto"
             >
               {quickSearchTags.map((tag, index) => (
                 <motion.button
@@ -153,7 +153,7 @@ export default function SearchOverlay({
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleQuickSearch(tag)}
-                  className="px-6 py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium hover:bg-white/20 hover:border-white/30 transition-colors shadow-lg"
+                  className="px-4 py-2 md:px-6 md:py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium hover:bg-white/20 hover:border-white/30 transition-colors shadow-lg"
                 >
                   {tag}
                 </motion.button>
@@ -181,9 +181,9 @@ export default function SearchOverlay({
                 stiffness: 150,
               }
             }}
-            className="fixed z-[50] left-48 right-48 top-4 -translate-x-1/2 flex items-center justify-center gap-3"
+            className="fixed z-[50] left-4 right-4 md:left-48 md:right-48 top-4 flex items-center justify-center gap-2 md:gap-3"
           >
-            <div className="relative flex items-center gap-3 px-5 h-20 text-xl rounded-full bg-white shadow-2xl border border-gray-200 overflow-hidden flex-1 max-w-3xl">
+            <div className="relative flex items-center gap-2 md:gap-3 px-3 md:px-5 h-14 md:h-20 text-base md:text-xl rounded-full bg-white shadow-2xl border border-gray-200 overflow-hidden flex-1 max-w-3xl">
               {isSearching && (
                 <motion.div
                   initial={{ x: "-100%" }}
@@ -192,19 +192,19 @@ export default function SearchOverlay({
                   className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-gray-300 to-transparent"
                 />
               )}
-              <Search className="w-8 h-8 text-gray-500" />
+              <Search className="w-5 h-5 md:w-8 md:h-8 text-gray-500" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Tìm món, nhà hàng, khu vực..."
-                className="flex-1 bg-transparent text-gray-900 font-medium placeholder:text-gray-400 focus:outline-none"
+                placeholder="Tìm món, nhà hàng..."
+                className="flex-1 bg-transparent text-gray-900 font-medium placeholder:text-gray-400 focus:outline-none min-w-0"
               />
               <button
                 onClick={() => handleSearch()}
-                className="w-12 h-12 rounded-full bg-[var(--primary)] text-white flex items-center justify-center hover:bg-[var(--primary)]/90 transition-colors"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--primary)] text-white flex items-center justify-center hover:bg-[var(--primary)]/90 transition-colors flex-shrink-0"
               >
-                <Search className="w-6 h-6" />
+                <Search className="w-5 h-5 md:w-6 md:h-6" />
               </button>
             </div>
 
@@ -221,10 +221,10 @@ export default function SearchOverlay({
                     stiffness: 100,
                   }}
                   onClick={() => setFilterOpen(true)}
-                  className="h-20 px-8 bg-white rounded-[30px] shadow-2xl border border-gray-100 text-[var(--primary)] font-bold text-xl hover:bg-gray-50 transition-colors whitespace-nowrap flex items-center gap-2"
+                  className="h-14 md:h-20 px-4 md:px-8 bg-white rounded-[30px] shadow-2xl border border-gray-100 text-[var(--primary)] font-bold text-base md:text-xl hover:bg-gray-50 transition-colors whitespace-nowrap flex items-center gap-2"
                 >
-                  <SlidersHorizontal className="w-6 h-6" />
-                  Filter
+                  <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6" />
+                  <span className="hidden md:inline">Filter</span>
                 </motion.button>
               )}
             </AnimatePresence>

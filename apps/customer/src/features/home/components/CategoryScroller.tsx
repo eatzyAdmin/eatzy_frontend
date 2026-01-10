@@ -23,42 +23,50 @@ export default function CategoryScroller({
   const [rulerFixedY, setRulerFixedY] = useState<number | null>(null);
   const aligningRef = useRef(false);
   const rafIdRef = useRef<number | null>(null);
-  
-  
+  const [isMobile, setIsMobile] = useState(false);
 
-  const itemSpacing = 60;
-  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const itemSpacing = isMobile ? 40 : 60;
+
   // Create infinite loop by triplicating categories
   const infiniteCategories = [...categories, ...categories, ...categories];
   const centerOffset = categories.length; // Start from middle set
-  
+
   // Calculate scale based on distance from screen center
   const calculateScales = () => {
     const screenCenter = typeof window !== 'undefined' ? window.innerWidth / 2 : 0;
     const newScales: number[] = [];
-    
+
     itemRefs.current.forEach((element) => {
       if (!element) {
         newScales.push(1.0);
         return;
       }
-      
+
       const elementRect = element.getBoundingClientRect();
       const elementCenter = elementRect.left + elementRect.width / 2;
       const distanceFromCenter = Math.abs(elementCenter - screenCenter);
-      
-      // Scale items within 200px of center
-      if (distanceFromCenter < 200) {
-        const scaleFactor = 1 - (distanceFromCenter / 200);
+
+      const range = isMobile ? 120 : 200; // Smaller scale range on mobile
+
+      // Scale items within range of center
+      if (distanceFromCenter < range) {
+        const scaleFactor = 1 - (distanceFromCenter / range);
         newScales.push(1.0 + (scaleFactor * 0.5)); // From 1.0 to 1.5
       } else {
         newScales.push(1.0);
       }
     });
-    
+
     setScales(newScales);
   };
-  
+
   // Update scales during drag
   useEffect(() => {
     if (!isDragging) return;
@@ -66,8 +74,8 @@ export default function CategoryScroller({
       calculateScales();
     });
     return unsubscribe;
-  }, [x, isDragging]);
-  
+  }, [x, isDragging, isMobile]);
+
   // Auto snap to center when activeIndex changes
   const alignActiveToViewportCenter = useCallback(() => {
     const activeDisplayIndex = centerOffset + activeIndex;
@@ -90,17 +98,22 @@ export default function CategoryScroller({
       rafIdRef.current = requestAnimationFrame(step);
     };
     rafIdRef.current = requestAnimationFrame(step);
-  }, [activeIndex, centerOffset, x]);
+  }, [activeIndex, centerOffset, x]); // Removed dependency on isMobile causing loops?
 
   useEffect(() => {
     alignActiveToViewportCenter();
   }, [alignActiveToViewportCenter]);
 
+  // Re-calculate scales on resize/mobile change
+  useEffect(() => {
+    calculateScales();
+  }, [isMobile]);
+
   useEffect(() => {
     const updateRulerFixedY = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const y = rect.bottom - 22;
+      const y = rect.bottom - (isMobile ? 16 : 22);
       setRulerFixedY(y);
     };
 
@@ -111,7 +124,7 @@ export default function CategoryScroller({
       window.removeEventListener('resize', updateRulerFixedY);
       window.removeEventListener('scroll', updateRulerFixedY);
     };
-  }, []);
+  }, [isMobile]);
 
   const handleDragStart = () => {
     setIsDragging(true);
@@ -119,32 +132,32 @@ export default function CategoryScroller({
 
   const handleDragEnd = () => {
     setIsDragging(false);
-    
+
     if (!containerRef.current) return;
-    
+
     const screenCenter = typeof window !== 'undefined' ? window.innerWidth / 2 : 0;
-    
+
     // Find which category is closest to screen center
     let closestIndex = activeIndex;
     let minDistance = Infinity;
-    
+
     itemRefs.current.forEach((element, displayIndex) => {
       if (!element) return;
-      
+
       const actualIndex = displayIndex % categories.length;
       // Only consider the middle set to avoid duplicates
       if (displayIndex < centerOffset || displayIndex >= centerOffset + categories.length) return;
-      
+
       const elementRect = element.getBoundingClientRect();
       const elementCenter = elementRect.left + elementRect.width / 2;
       const distance = Math.abs(elementCenter - screenCenter);
-      
+
       if (distance < minDistance) {
         minDistance = distance;
         closestIndex = actualIndex;
       }
     });
-    
+
     if (closestIndex !== activeIndex) {
       onCategoryChange(closestIndex);
     } else {
@@ -154,7 +167,7 @@ export default function CategoryScroller({
 
   const handleCategoryClick = (displayIndex: number) => {
     if (isDragging) return;
-    
+
     // Map display index to actual category index
     const actualIndex = displayIndex % categories.length;
     if (actualIndex !== activeIndex) {
@@ -166,35 +179,11 @@ export default function CategoryScroller({
   const rulerX = useTransform(x, (latest) => latest * 1.5);
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="relative w-full overflow-hidden"
-      style={{ height: '240px' }}
+      style={{ height: isMobile ? '160px' : '240px' }}
     >
-
-      {/* Navigation buttons */}
-      {/* <div className="absolute left-6 top-1/2 -translate-y-1/2 z-40">
-        <motion.button
-          whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.15)' }}
-          whileTap={{ scale: 0.96 }}
-          onClick={() => onCategoryChange((activeIndex - 1 + categories.length) % categories.length)}
-          className="w-14 h-14 rounded-full bg-white/8 backdrop-blur-sm border border-white/20 flex items-center justify-center"
-        >
-          <ChevronLeft className="w-7 h-7 text-white/90" />
-        </motion.button>
-      </div> */}
-      
-      {/* <div className="absolute right-6 top-1/2 -translate-y-1/2 z-40">
-        <motion.button
-          whileHover={{ scale: 1.08, backgroundColor: 'rgba(255,255,255,0.15)' }}
-          whileTap={{ scale: 0.96 }}
-          onClick={() => onCategoryChange((activeIndex + 1) % categories.length)}
-          className="w-14 h-14 rounded-full bg-white/8 backdrop-blur-sm border border-white/20 flex items-center justify-center"
-        >
-          <ChevronRight className="w-7 h-7 text-white/90" />
-        </motion.button>
-      </div> */}
-
       {/* Center marker - marks the exact center of screen */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50">
         <motion.div
@@ -207,16 +196,16 @@ export default function CategoryScroller({
             ease: 'easeInOut',
           }}
         >
-          <div className="w-[2px] h-32 bg-purple-500/0 shadow-lg shadow-purple-500/0" />
+          <div className={`w-[2px] ${isMobile ? 'h-24' : 'h-32'} bg-purple-500/0 shadow-lg shadow-purple-500/0`} />
         </motion.div>
       </div>
 
       {/* Category Text Layer */}
-      <div className="absolute pb-12 left-0 right-0 bottom-10 flex items-end justify-center z-20">
+      <div className={`absolute pb-12 left-0 right-0 ${isMobile ? 'bottom-2' : 'bottom-10'} flex items-end justify-center z-20`}>
         <motion.div
           drag="x"
           dragElastic={0.05}
-          dragTransition={{ 
+          dragTransition={{
             power: 0.12,
             timeConstant: 200,
           }}
@@ -229,13 +218,21 @@ export default function CategoryScroller({
             {infiniteCategories.map((category, displayIndex) => {
               // Calculate which is the "active" one in the infinite loop
               const actualIndex = displayIndex % categories.length;
-              const isActive = actualIndex === activeIndex && 
-                               displayIndex >= centerOffset && 
-                               displayIndex < centerOffset + categories.length;
-              
+              const isActive = actualIndex === activeIndex &&
+                displayIndex >= centerOffset &&
+                displayIndex < centerOffset + categories.length;
+
               // Get scale from calculated scales
               const scale = scales[displayIndex] || 1.0;
               const opacity = 0.7 + ((scale - 1.0) / 0.5) * 0.6; // Opacity from 0.4 to 1.0
+
+              const activeFontSize = isMobile ? 'clamp(40px, 10vw, 60px)' : 'clamp(82px, 6.8vw, 136px)';
+              const inactiveFontSize = isMobile ? 'clamp(28px, 6vw, 40px)' : 'clamp(55px, 4.55vw, 91px)';
+
+              // Calculated dragging font size
+              // Mobile base: 30px -> scale 1.5 -> 45px
+              // Desktop base: 54px -> scale 1.5 -> 81px
+              const baseDragSize = isMobile ? 30 : 54;
 
               return (
                 <motion.div
@@ -252,7 +249,7 @@ export default function CategoryScroller({
                     duration: 0.1,
                     ease: [0.33, 1, 0.68, 1],
                   }}
-                  style={{ 
+                  style={{
                     cursor: isActive ? 'default' : 'pointer',
                     width: 'fit-content',
                     flexShrink: 0,
@@ -264,8 +261,8 @@ export default function CategoryScroller({
                     className="font-anton font-bold uppercase whitespace-nowrap leading-none"
                     animate={{
                       fontSize: isDragging
-                        ? `clamp(${54 * scale}px, ${4.55 * scale}vw, ${91 * scale}px)`
-                        : (isActive ? 'clamp(82px, 6.8vw, 136px)' : 'clamp(55px, 4.55vw, 91px)'),
+                        ? `clamp(${baseDragSize * scale}px, ${4.55 * scale}vw, ${91 * scale}px)`
+                        : (isActive ? activeFontSize : inactiveFontSize),
                     }}
                     transition={{
                       duration: isDragging ? 0.05 : 0.3,
@@ -305,10 +302,11 @@ export default function CategoryScroller({
 
       <div className="absolute inset-0 flex items-end justify-center pointer-events-none z-10 transform translate-y-8">
         <div className="absolute inset-x-0 bottom-0 h-12 rounded-t-md z-0" />
-        <motion.div 
+        <motion.div
           style={{ x: rulerX }}
           className="relative h-12 z-10"
         >
+          {/* Ruler content is visual only, keep it generic */}
           <div className="flex" style={{ width: '20000px', marginLeft: '-10000px' }}>
             {Array.from({ length: 40 }).map((_, segmentIndex) => (
               <div key={segmentIndex} className="relative" style={{ width: '500px' }}>
@@ -344,7 +342,7 @@ export default function CategoryScroller({
             ))}
           </div>
         </motion.div>
-        <div className="absolute top-36 left-1/2 -translate-x-1/2">
+        <div className={`absolute ${isMobile ? 'top-24' : 'top-36'} left-1/2 -translate-x-1/2`}>
           <motion.div
             animate={{
               opacity: [0.85, 1, 0.85],
