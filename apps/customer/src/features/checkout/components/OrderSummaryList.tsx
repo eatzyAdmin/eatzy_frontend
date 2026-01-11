@@ -7,7 +7,7 @@ export default function OrderSummaryList() {
   const activeRestaurantId = useCartStore((s) => s.activeRestaurantId);
   const items = useCartStore((s) => s.items.filter(i => !activeRestaurantId || i.restaurantId === activeRestaurantId));
   return (
-    <div className="p-4">
+    <div className="p-0 md:p-4">
       <div className="text-[14px] font-semibold text-[#1A1A1A] mb-3">Thông tin đơn hàng</div>
       {items.length === 0 ? (
         <div className="p-2 text-[#555]">Chưa có món nào</div>

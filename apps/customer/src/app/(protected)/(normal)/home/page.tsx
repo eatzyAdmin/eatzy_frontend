@@ -160,10 +160,10 @@ export default function HomePage() {
               },
             }}
             onClick={() => setShowAllCategories(true)}
-            className="fixed z-50 right-6 top-[15vh] md:top-[18vh] flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
+            className="fixed z-50 right-3 md:right-6 top-[15vh] md:top-[18vh] flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
           >
-            <List className="w-5 h-5" />
-            <span className="text-sm font-medium">All categories</span>
+            <List className="w-4 h-4 md:w-5 md:h-5" />
+            <span className="text-xs md:text-sm font-medium">All categories</span>
           </motion.button>
         )}
       </AnimatePresence>

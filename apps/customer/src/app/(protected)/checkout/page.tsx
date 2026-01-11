@@ -181,7 +181,7 @@ export default function CheckoutPage() {
                 </section>
                 <div className="grid grid-cols-1 md:grid-cols-10 p-4 gap-4 items-stretch">
                   <section className="col-span-1 md:col-span-6 h-full" ref={(el) => { sectionRefs.current["promo"] = el; }} data-id="promo">
-                    <div className="p-4">
+                    <div className="md:p-4">
                       <div className="text-[14px] font-semibold text-[#1A1A1A] mb-3">Ưu đãi</div>
                       <div className="space-y-3">
                         {mounted && vouchers.map((v) => (
@@ -195,7 +195,7 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                   </section>
-                  <section ref={(el) => { sectionRefs.current["payment"] = el; }} data-id="payment" className="p-4 col-span-1 md:col-span-4 h-full">
+                  <section ref={(el) => { sectionRefs.current["payment"] = el; }} data-id="payment" className="md:p-4 col-span-1 md:col-span-4 h-full">
                     <div className="h-full">
                       <CheckoutSummary subtotal={subtotal} fee={fee} discount={discount} />
                     </div>

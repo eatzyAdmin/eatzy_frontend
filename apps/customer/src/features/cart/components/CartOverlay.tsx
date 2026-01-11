@@ -106,7 +106,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
             className="fixed z-[70] inset-0 md:inset-auto md:right-0 md:top-0 md:bottom-0 w-full md:w-[460px] md:max-w-[96vw] bg-[#F7F7F7] border-l-0 md:border-l border-gray-200 overflow-hidden rounded-none md:rounded-l-[40px] shadow-2xl flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-8 border-b border-gray-200 text-[#1A1A1A] bg-white/60 flex-shrink-0">
+            <div className="flex items-center justify-between p-4 md:p-8 border-b border-gray-200 text-[#1A1A1A] bg-white/60 flex-shrink-0">
               <div className="flex flex-col">
                 <div className="text-3xl font-anton font-semibold uppercase">Giỏ hàng</div>
                 <div className="text-sm text-gray-500 font-medium">
@@ -137,7 +137,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
               {isLoading ? (
                 <>
                   <CartOverlayShimmer />

@@ -11,7 +11,7 @@ const METHODS: { key: PaymentMethod; label: string; icon: React.ReactNode }[] = 
 
 export default function PaymentMethodSelector({ value, onChange }: { value: PaymentMethod; onChange: (m: PaymentMethod) => void }) {
   return (
-    <div className="p-4">
+    <div className="p-0 md:p-4">
       <div className="text-[14px] font-semibold text-[#1A1A1A] mb-2">Hình thức thanh toán</div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {METHODS.map((m, index) => (
@@ -24,8 +24,8 @@ export default function PaymentMethodSelector({ value, onChange }: { value: Paym
             whileTap={{ scale: 0.98 }}
             onClick={() => onChange(m.key)}
             className={`relative cursor-pointer p-4 rounded-2xl border-2 transition-all duration-300 flex items-center justify-between ${value === m.key
-                ? 'border-[var(--primary)] bg-gradient-to-br from-[var(--secondary)]/10 to-[var(--primary)]/10 shadow-sm'
-                : 'border-gray-200 bg-white hover:border-[var(--primary)]/40 hover:bg-[var(--primary)]/5'
+              ? 'border-[var(--primary)] bg-gradient-to-br from-[var(--secondary)]/10 to-[var(--primary)]/10 shadow-sm'
+              : 'border-gray-200 bg-white hover:border-[var(--primary)]/40 hover:bg-[var(--primary)]/5'
               }`}
           >
             <div className="flex items-center gap-3">

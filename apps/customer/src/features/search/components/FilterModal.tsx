@@ -128,8 +128,8 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-100">
-            <h2 className="text-2xl font-bold flex items-center gap-2 uppercase tracking-wide">
+          <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-100">
+            <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2 uppercase tracking-wide">
               <SlidersHorizontal className="w-5 h-5" />
               Bộ lọc
             </h2>
@@ -142,7 +142,7 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-8 space-y-10 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 space-y-6 md:space-y-10 custom-scrollbar">
 
             {/* Price Range */}
             <section>
@@ -279,7 +279,7 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
           </div>
 
           {/* Footer */}
-          <div className="p-6 border-t border-gray-100 bg-white flex items-center justify-between">
+          <div className="p-4 md:p-6 border-t border-gray-100 bg-white flex items-center justify-between">
             <button
               onClick={() => { setPriceRange([0, MAX_PRICE]); setSort('recommended'); setCategory(null); }}
               className="text-gray-600 hover:text-gray-900 font-medium px-4 py-2 hover:bg-gray-100 rounded-xl transition-colors"
