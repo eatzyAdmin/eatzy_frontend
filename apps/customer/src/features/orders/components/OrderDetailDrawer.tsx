@@ -76,10 +76,10 @@ export default function OrderDetailDrawer({
         {open && (
           <motion.div
             key="detail-panel"
-            initial={{ y: 520, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 520, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 240, damping: 24 }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 100, damping: 18 }}
             className="fixed z-[70] left-0 right-0 bottom-0 h-[92vh] rounded-t-[40px] bg-[#F7F7F7] border-t border-gray-200 overflow-hidden shadow-2xl flex flex-col"
           >
             {/* Header */}
@@ -214,7 +214,7 @@ export default function OrderDetailDrawer({
                           </div>
 
                           {/* Right Side: Order Items */}
-                          <div className="w-full md:w-auto flex-1 rounded-[24px] p-4 md:p-8 border-2 border-gray-200">
+                          <div className="w-full md:w-auto flex-1 rounded-[24px] p-8 border-2 border-gray-200">
                             <div className="flex items-center gap-2 mb-4">
                               <Package className="w-5 h-5 text-[var(--primary)]" />
                               <h3 className="text-lg font-bold text-[#1A1A1A]">Món ăn</h3>
@@ -365,7 +365,7 @@ export default function OrderDetailDrawer({
                         </div>
 
                         {/* Delivery Route */}
-                        <div className="rounded-[24px] p-4 md:p-8 border-2 border-gray-200">
+                        <div className="rounded-[24px] p-8 border-2 border-gray-200">
                           <div className="space-y-3">
                             {/* Pickup - Restaurant */}
                             <div className="flex items-start gap-4">
@@ -413,7 +413,7 @@ export default function OrderDetailDrawer({
                         </div>
 
                         {/* Order Info */}
-                        <div className="rounded-[24px] p-4 md:p-8 border-2 border-gray-200">
+                        <div className="rounded-[24px] p-8 border-2 border-gray-200">
                           <div className="flex items-center gap-2 mb-4">
                             <Calendar className="w-5 h-5 text-[var(--primary)]" />
                             <h3 className="text-lg font-bold text-[#1A1A1A]">Thông tin đơn hàng</h3>

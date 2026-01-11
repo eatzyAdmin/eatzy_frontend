@@ -10,6 +10,7 @@ import SearchOverlay from "@/features/search/components/SearchOverlay";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useSearch } from "@/features/search/hooks/useSearch";
 import BottomNav from "@/features/navigation/components/BottomNav";
+import { BottomNavProvider } from "@/features/navigation/context/BottomNavContext";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [cartOpen, setCartOpen] = useState(false);
@@ -26,6 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isRestaurantDetail = pathname?.startsWith("/restaurants/") ?? false;
   const isOrderHistory = pathname?.startsWith("/order-history") ?? false;
   const isFavorites = pathname?.startsWith("/favorites") ?? false;
+  const isProfile = pathname?.startsWith("/profile") ?? false;
   const [isRecommendedMode, setIsRecommendedMode] = useState(false);
 
   // Combine search mode and recommended mode for layout purposes
@@ -66,59 +68,61 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [isSearchMode]);
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden">
-      <AnimatePresence>
-        {((effectiveSearchMode || isOrderHistory || isFavorites) && isHeaderVisible) && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="pointer-events-none fixed inset-x-0 top-0 h-20 z-[20] backdrop-blur-xl"
-          />
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {((!effectiveSearchMode) || isHeaderVisible) && (
-          <motion.div
-            initial={{ y: 0, opacity: 1 }}
-            animate={{
-              y: effectiveSearchMode && !isHeaderVisible ? -100 : 0,
-              opacity: effectiveSearchMode && !isHeaderVisible ? 0 : 1,
-            }}
-            exit={{ y: -100, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
-            className={isRestaurantDetail ? "hidden md:block" : ""}
-          >
-            <HomeHeader
-              onMenuClick={() => setMenuOpen(true)}
-              onFavoritesClick={() => setOrdersOpen(true)}
-              onSearchClick={() => setSearchOpen(true)}
-              onCartClick={() => setCartOpen(true)}
-              hideSearchIcon={effectiveSearchMode || isRestaurantDetail || isOrderHistory || isFavorites}
-              hideCart={isRestaurantDetail}
-              onLogoClick={() => {
-                const next = new URLSearchParams(searchParams.toString());
-                next.delete('q');
-                router.replace(`/home`, { scroll: false });
-              }}
+    <BottomNavProvider>
+      <div className="relative min-h-screen w-full overflow-x-hidden">
+        <AnimatePresence>
+          {((effectiveSearchMode || isOrderHistory || isFavorites || isProfile) && isHeaderVisible) && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="pointer-events-none fixed inset-x-0 top-0 h-20 z-[20] backdrop-blur-xl"
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <CartOverlay open={cartOpen} onClose={() => setCartOpen(false)} />
-      <ProtectedMenuOverlay open={menuOpen} onClose={() => setMenuOpen(false)} />
-      <CurrentOrdersDrawer open={ordersOpen} onClose={() => setOrdersOpen(false)} />
-      <SearchOverlay
-        open={searchOpen}
-        onClose={() => setSearchOpen(false)}
-        onSearch={handleSearch}
-        isSearchMode={effectiveSearchMode}
-        isSearchBarCompact={isSearchBarCompact}
-        isSearching={isSearching}
-      />
-      {!isRestaurantDetail && <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />}
-      {children}
-    </div>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {((!effectiveSearchMode) || isHeaderVisible) && (
+            <motion.div
+              initial={{ y: 0, opacity: 1 }}
+              animate={{
+                y: effectiveSearchMode && !isHeaderVisible ? -100 : 0,
+                opacity: effectiveSearchMode && !isHeaderVisible ? 0 : 1,
+              }}
+              exit={{ y: -100, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
+              className={isRestaurantDetail ? "hidden md:block" : ""}
+            >
+              <HomeHeader
+                onMenuClick={() => setMenuOpen(true)}
+                onFavoritesClick={() => setOrdersOpen(true)}
+                onSearchClick={() => setSearchOpen(true)}
+                onCartClick={() => setCartOpen(true)}
+                hideSearchIcon={effectiveSearchMode || isRestaurantDetail || isOrderHistory || isFavorites || isProfile}
+                hideCart={isRestaurantDetail}
+                onLogoClick={() => {
+                  const next = new URLSearchParams(searchParams.toString());
+                  next.delete('q');
+                  router.replace(`/home`, { scroll: false });
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <CartOverlay open={cartOpen} onClose={() => setCartOpen(false)} />
+        <ProtectedMenuOverlay open={menuOpen} onClose={() => setMenuOpen(false)} />
+        <CurrentOrdersDrawer open={ordersOpen} onClose={() => setOrdersOpen(false)} />
+        <SearchOverlay
+          open={searchOpen}
+          onClose={() => setSearchOpen(false)}
+          onSearch={handleSearch}
+          isSearchMode={effectiveSearchMode}
+          isSearchBarCompact={isSearchBarCompact}
+          isSearching={isSearching}
+        />
+        {!isRestaurantDetail && <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />}
+        {children}
+      </div>
+    </BottomNavProvider>
   );
 }

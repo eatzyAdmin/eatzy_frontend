@@ -14,12 +14,12 @@ export default function OrderDetailDrawerShimmer() {
   };
 
   return (
-    <div className="flex h-full items-start overflow-hidden pt-8">
+    <div className="flex flex-col md:flex-row h-full items-start overflow-y-auto md:overflow-hidden pt-4 md:pt-8 px-4">
       {/* Left Column */}
-      <div className="w-[65%] flex-shrink-0 space-y-6 h-full overflow-y-auto p-2 px-4 pl-16">
-        <div className="flex gap-6 items-start">
+      <div className="w-full md:w-[65%] flex-shrink-0 space-y-6 h-auto md:h-full md:overflow-y-auto px-0 py-4 md:px-4 md:pl-16">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
           {/* Restaurant Info Shimmer */}
-          <div className="flex flex-col gap-4 w-[240px] flex-shrink-0">
+          <div className="flex flex-col gap-4 w-full md:w-[240px] flex-shrink-0">
             <div className="bg-white rounded-[32px] p-5 border border-gray-100 h-[300px] flex flex-col items-center">
               <motion.div
                 className="w-20 h-20 rounded-full bg-gray-100 mb-4"
@@ -77,7 +77,7 @@ export default function OrderDetailDrawerShimmer() {
           </div>
 
           {/* Items List Shimmer */}
-          <div className="flex-1 rounded-[24px] p-8 border-2 border-gray-100 bg-white h-[500px]">
+          <div className="w-full md:w-auto flex-1 rounded-[24px] p-4 md:p-8 border-2 border-gray-100 bg-white h-[500px]">
             <motion.div
               className="h-6 w-32 bg-gray-200 rounded mb-6"
               variants={shimmerVariants}
@@ -138,7 +138,7 @@ export default function OrderDetailDrawerShimmer() {
       </div>
 
       {/* Right Column */}
-      <div className="flex-1 space-y-6 h-full p-2 pl-4 pr-20">
+      <div className="w-full md:flex-1 space-y-6 h-auto md:h-full p-4 md:pl-4 md:pr-20">
         {/* Driver Shimmer */}
         <div className="bg-white rounded-[32px] p-6 border border-gray-100 h-[120px] flex items-center gap-4">
           <motion.div className="w-16 h-16 rounded-full bg-gray-200" variants={shimmerVariants} initial="initial" animate="animate" style={{ background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)', backgroundSize: '200% 100%' }} />

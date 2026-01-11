@@ -4,11 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { ArrowLeft, Receipt, Filter, Search, X } from "@repo/ui/icons";
-import { useLoading, RestaurantCardShimmer } from "@repo/ui";
+import { useLoading, OrderHistoryCardShimmer } from "@repo/ui";
 import type { Order, OrderStatus } from "@repo/types";
 import { getOrders } from "@/features/orders/data/mockOrders";
 import OrderHistoryCard from "@/features/orders/components/OrderHistoryCard";
 import OrderDetailDrawer from "@/features/orders/components/OrderDetailDrawer";
+import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
+import { useRef } from "react";
 
 const statusFilters: { value: OrderStatus | "ALL"; label: string }[] = [
   { value: "ALL", label: "Tất cả" },
@@ -26,6 +28,30 @@ export default function OrderHistoryPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const { setIsVisible } = useBottomNav();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const currentScrollY = container.scrollTop;
+      const direction = currentScrollY > lastScrollY.current ? 'down' : 'up';
+
+      if (direction === 'down' && currentScrollY > 20) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [setIsVisible]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -153,11 +179,11 @@ export default function OrderHistoryPage() {
       </div>
 
       {/* Orders Grid */}
-      <div className="flex-1 overflow-y-auto">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         <div className="max-w-[1400px] mx-auto px-4 py-4 md:px-8 md:py-8">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <RestaurantCardShimmer cardCount={6} />
+              <OrderHistoryCardShimmer cardCount={6} />
             </div>
           ) : filteredOrders.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

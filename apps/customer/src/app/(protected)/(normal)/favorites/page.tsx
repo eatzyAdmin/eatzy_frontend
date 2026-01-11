@@ -9,6 +9,8 @@ import type { Restaurant } from "@repo/types";
 import { getFavoriteIds } from "@/features/favorites/data/mockFavorites";
 import { mockSearchRestaurants } from "@/features/search/data/mockSearchData";
 import FavoriteRestaurantCard from "@/features/favorites/components/FavoriteRestaurantCard";
+import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
+import { useRef } from "react";
 
 export default function FavoritesPage() {
   const router = useRouter();
@@ -18,6 +20,30 @@ export default function FavoritesPage() {
   const [actualSearchQuery, setActualSearchQuery] = useState("");
   const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const { setIsVisible } = useBottomNav();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const currentScrollY = container.scrollTop;
+      const direction = currentScrollY > lastScrollY.current ? 'down' : 'up';
+
+      if (direction === 'down' && currentScrollY > 20) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [setIsVisible]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -127,14 +153,14 @@ export default function FavoritesPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         <div className="max-w-[1400px] mx-auto px-4 py-4 md:px-8 md:py-8">
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               <RestaurantCardShimmer cardCount={6} />
             </div>
           ) : filteredRestaurants.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               <AnimatePresence mode="popLayout">
                 {filteredRestaurants.map((restaurant, index) => (
                   <motion.div

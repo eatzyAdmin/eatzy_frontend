@@ -21,7 +21,7 @@ const RestaurantCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
     animate: { opacity: 1, y: 0, scale: 1 },
   };
 
-  // Shimmer card component
+  // Shimmer card component - FOR FAVORITES
   const ShimmerCard = ({ index }: { index: number }) => {
     return (
       <motion.div
@@ -48,10 +48,10 @@ const RestaurantCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
             backgroundSize: '200% 100%',
           }}
         >
-          {/* Code badge */}
-          <div className="absolute top-3 left-3">
+          {/* Heart Badge (Top Right) */}
+          <div className="absolute top-2 right-2 md:top-3 md:right-3">
             <motion.div
-              className="h-6 w-20 bg-white/80 rounded-full"
+              className="w-8 h-8 md:w-10 md:h-10 bg-white/80 rounded-full"
               variants={shimmerVariants}
               initial="initial"
               animate="animate"
@@ -61,10 +61,11 @@ const RestaurantCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
               }}
             />
           </div>
-          {/* Status badge */}
-          <div className="absolute top-3 right-3">
+
+          {/* Rating Badge (Bottom Left) */}
+          <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3">
             <motion.div
-              className="h-6 w-24 bg-white/80 rounded-full"
+              className="h-5 w-10 md:h-6 md:w-12 bg-white/80 rounded-full"
               variants={shimmerVariants}
               initial="initial"
               animate="animate"
@@ -74,26 +75,29 @@ const RestaurantCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
               }}
             />
           </div>
+
         </motion.div>
 
         {/* Content */}
-        <div className="p-5 space-y-4">
-          {/* Restaurant Info */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gray-200" />
-            <div className="flex-1 space-y-2">
+        <div className="p-3 md:p-5 space-y-2 md:space-y-3">
+          {/* Name */}
+          <motion.div
+            className="h-3 md:h-5 w-32 md:w-48 bg-gray-200 rounded"
+            variants={shimmerVariants}
+            initial="initial"
+            animate="animate"
+            style={{
+              background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
+              backgroundSize: '200% 100%',
+            }}
+          />
+
+          {/* Categories */}
+          <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
+            {[1, 2, 3].map((i) => (
               <motion.div
-                className="h-4 w-40 bg-gray-200 rounded"
-                variants={shimmerVariants}
-                initial="initial"
-                animate="animate"
-                style={{
-                  background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
-                  backgroundSize: '200% 100%',
-                }}
-              />
-              <motion.div
-                className="h-3 w-32 bg-gray-100 rounded"
+                key={i}
+                className="h-5 w-16 md:h-6 md:w-20 bg-gray-100 rounded-full"
                 variants={shimmerVariants}
                 initial="initial"
                 animate="animate"
@@ -102,54 +106,13 @@ const RestaurantCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
                   backgroundSize: '200% 100%',
                 }}
               />
-            </div>
-          </div>
-
-          {/* Order Items */}
-          <div className="space-y-2">
-            <motion.div
-              className="h-3 w-16 bg-gray-100 rounded"
-              variants={shimmerVariants}
-              initial="initial"
-              animate="animate"
-              style={{
-                background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
-                backgroundSize: '200% 100%',
-              }}
-            />
-            {[1, 2].map((i) => (
-              <div key={i} className="flex items-center justify-between">
-                <motion.div
-                  className="h-3.5 flex-1 bg-gray-100 rounded"
-                  variants={shimmerVariants}
-                  initial="initial"
-                  animate="animate"
-                  style={{
-                    background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
-                    backgroundSize: '200% 100%',
-                  }}
-                />
-                <motion.div
-                  className="h-3.5 w-16 bg-gray-200 rounded ml-2"
-                  variants={shimmerVariants}
-                  initial="initial"
-                  animate="animate"
-                  style={{
-                    background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
-                    backgroundSize: '200% 100%',
-                  }}
-                />
-              </div>
             ))}
           </div>
 
-          {/* Divider */}
-          <div className="h-px bg-gray-100" />
-
-          {/* Total & Date */}
-          <div className="flex items-center justify-between">
+          {/* Description */}
+          <div className="space-y-1 md:space-y-2">
             <motion.div
-              className="h-3.5 w-24 bg-gray-100 rounded"
+              className="h-2.5 md:h-3 w-full bg-gray-100 rounded"
               variants={shimmerVariants}
               initial="initial"
               animate="animate"
@@ -158,28 +121,31 @@ const RestaurantCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
                 backgroundSize: '200% 100%',
               }}
             />
-            <div className="text-right space-y-1">
-              <motion.div
-                className="h-3 w-12 bg-gray-100 rounded ml-auto"
-                variants={shimmerVariants}
-                initial="initial"
-                animate="animate"
-                style={{
-                  background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
-                  backgroundSize: '200% 100%',
-                }}
-              />
-              <motion.div
-                className="h-5 w-24 bg-gray-200 rounded"
-                variants={shimmerVariants}
-                initial="initial"
-                animate="animate"
-                style={{
-                  background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
-                  backgroundSize: '200% 100%',
-                }}
-              />
-            </div>
+            <motion.div
+              className="hidden md:block h-3 w-3/4 bg-gray-100 rounded"
+              variants={shimmerVariants}
+              initial="initial"
+              animate="animate"
+              style={{
+                background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
+                backgroundSize: '200% 100%',
+              }}
+            />
+          </div>
+
+          {/* Address */}
+          <div className="flex items-center gap-1 md:gap-2">
+            <div className="w-3 h-3 md:w-4 md:h-4 rounded bg-gray-200" />
+            <motion.div
+              className="h-2.5 md:h-3 flex-1 bg-gray-100 rounded"
+              variants={shimmerVariants}
+              initial="initial"
+              animate="animate"
+              style={{
+                background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
+                backgroundSize: '200% 100%',
+              }}
+            />
           </div>
         </div>
       </motion.div>

@@ -1,6 +1,7 @@
 import { motion } from '@repo/ui/motion';
 import { useEffect, useState, useRef } from 'react';
 import { MagazineLayout8Shimmer } from '@repo/ui';
+import { useBottomNav } from '@/features/navigation/context/BottomNavContext';
 import type { RestaurantWithMenu } from '@/features/search/hooks/useSearch';
 import MagazineLayout1 from '@/features/search/components/layouts/MagazineLayout1';
 import MagazineLayout2 from '@/features/search/components/layouts/MagazineLayout2';
@@ -21,6 +22,7 @@ interface Props {
 export default function RecommendedSection({ results, onBackToHome }: Props) {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const { setIsVisible } = useBottomNav();
   const containerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -79,8 +81,10 @@ export default function RecommendedSection({ results, onBackToHome }: Props) {
 
           if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
             setIsHeaderVisible(false);
+            setIsVisible(false);
           } else if (currentScrollY < lastScrollY.current) {
             setIsHeaderVisible(true);
+            setIsVisible(true);
           }
 
           lastScrollY.current = currentScrollY;
@@ -142,7 +146,7 @@ export default function RecommendedSection({ results, onBackToHome }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1] }}
-      className="min-h-screen bg-white pt-32 pb-20 px-6 magazine-scroll"
+      className="min-h-screen bg-white pt-24 pb-20 px-4 md:pt-32 md:px-6 magazine-scroll"
     >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -150,12 +154,12 @@ export default function RecommendedSection({ results, onBackToHome }: Props) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-12"
+          className="mb-8 md:mb-12"
         >
-          <h1 className="text-5xl font-bold text-gray-900 mb-3">
+          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-2 md:mb-3">
             Dining Recommendations
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-lg md:text-xl text-gray-600">
             Curated selections <span className="font-bold text-amber-600">near you</span>
           </p>
         </motion.div>

@@ -1,6 +1,7 @@
 import { motion } from '@repo/ui/motion';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import type { RestaurantWithMenu } from '../hooks/useSearch';
+import { useBottomNav } from '@/features/navigation/context/BottomNavContext';
 import MagazineLayout1 from './layouts/MagazineLayout1';
 import MagazineLayout2 from './layouts/MagazineLayout2';
 import MagazineLayout3 from './layouts/MagazineLayout3';
@@ -26,6 +27,7 @@ interface Props {
 
 export default function SearchResults({ results, searchQuery, isLoading = false, filters }: Props) {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const { setIsVisible } = useBottomNav();
   const lastScrollY = useRef(0);
 
   // Client-side filtering logic
@@ -79,8 +81,10 @@ export default function SearchResults({ results, searchQuery, isLoading = false,
 
           if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
             setIsHeaderVisible(false);
+            setIsVisible(false);
           } else if (currentScrollY < lastScrollY.current) {
             setIsHeaderVisible(true);
+            setIsVisible(true);
           }
 
           lastScrollY.current = currentScrollY;
