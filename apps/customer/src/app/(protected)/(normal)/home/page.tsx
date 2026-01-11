@@ -267,7 +267,7 @@ export default function HomePage() {
                 stiffness: 150,
                 damping: 18,
               }}
-              className="fixed z-50 right-6 top-[18vh] w-[280px] max-w-[92vw] rounded-2xl bg-white/8 backdrop-blur-xl border border-white/20 overflow-hidden"
+              className="fixed z-50 right-6 top-[18vh] w-[280px] md:w-[340px] max-w-[92vw] rounded-2xl bg-white/8 backdrop-blur-xl border border-white/20 overflow-hidden"
             >
               <div className="p-4 border-b border-white/10 flex items-center gap-2 text-white/90">
                 <List className="w-5 h-5" />

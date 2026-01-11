@@ -14,7 +14,7 @@ export default function CurrentOrdersDrawerShimmer() {
   };
 
   return (
-    <div className="flex flex-col md:grid md:grid-cols-[20%_40%_40%] h-full md:h-[calc(88vh-72px)] overflow-hidden">
+    <div className="flex flex-col md:grid md:grid-cols-[20%_40%_40%] flex-1 overflow-hidden">
       {/* Column 1: List */}
       <div className="order-1 md:order-none w-full md:w-auto h-auto md:h-full overflow-x-auto md:overflow-y-auto flex md:flex-col border-b md:border-b-0 md:border-r border-gray-100 p-4 space-x-4 md:space-x-0 md:space-y-4 no-scrollbar flex-shrink-0 bg-white">
         {[1, 2, 3].map((i) => (
