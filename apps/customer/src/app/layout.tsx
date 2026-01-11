@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "Eatzy",
   },
   formatDetection: {
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#78C841",
+  themeColor: "#F7F7F7",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
