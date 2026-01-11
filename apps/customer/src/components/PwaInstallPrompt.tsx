@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { X, Download, Share } from "@repo/ui/icons";
 import { motion, AnimatePresence } from "@repo/ui/motion";
@@ -23,6 +24,7 @@ export default function PwaInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     // Check if iOS
@@ -36,19 +38,31 @@ export default function PwaInstallPrompt() {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setTimeout(() => setShowPrompt(true), 3000);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-
-    if (isIosDevice && !isStandalone) {
-      setTimeout(() => setShowPrompt(true), 3000);
-    }
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     };
   }, []);
+
+  useEffect(() => {
+    // Only show on login page
+    if (pathname !== "/login") {
+      setShowPrompt(false);
+      return;
+    }
+
+    const isDismissed = sessionStorage.getItem("pwa_install_dismissed");
+    if (isDismissed) return;
+
+    // If we have a prompt (Android/Desktop) or if it's iOS (manual instructions)
+    if (deferredPrompt || (isIOS && !window.matchMedia("(display-mode: standalone)").matches && !navigator.standalone)) {
+      const timer = setTimeout(() => setShowPrompt(true), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname, deferredPrompt, isIOS]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
