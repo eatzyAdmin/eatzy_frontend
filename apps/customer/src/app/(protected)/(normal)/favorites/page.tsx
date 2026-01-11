@@ -99,7 +99,7 @@ export default function FavoritesPage() {
     <div className="h-screen flex flex-col bg-[#F7F7F7] pt-0 md:pt-20">
       {/* Header */}
       <div className="sticky top-0 md:top-20 z-40 bg-[#F7F7F7] border-b border-gray-200 shadow-sm">
-        <div className="max-w-[1400px] mx-auto px-4 pt-16 py-4 md:pt-2 md:py-6 md:px-8">
+        <div className="max-w-[1400px] mx-auto px-4 pt-4 py-4 md:pt-2 md:py-6 md:px-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <button

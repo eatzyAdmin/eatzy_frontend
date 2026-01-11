@@ -91,7 +91,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               }}
               exit={{ y: -100, opacity: 0 }}
               transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
-              className={isRestaurantDetail ? "hidden md:block" : ""}
+              className={(isRestaurantDetail || isOrderHistory || isFavorites) ? "hidden md:block" : ""}
             >
               <HomeHeader
                 onMenuClick={() => setMenuOpen(true)}
