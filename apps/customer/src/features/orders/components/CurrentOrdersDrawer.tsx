@@ -82,7 +82,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onClose}
-                className="p-4 rounded-full bg-gray-100 flex items-center justify-center"
+                className="p-3 md:p-4 rounded-full bg-gray-100 flex items-center justify-center"
               >
                 <X className="w-5 h-5" />
               </motion.button>

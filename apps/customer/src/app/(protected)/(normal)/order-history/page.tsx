@@ -77,21 +77,21 @@ export default function OrderHistoryPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#F7F7F7] pt-20">
+    <div className="h-screen flex flex-col bg-[#F7F7F7] pt-0 md:pt-20">
       {/* Header */}
-      <div className="sticky top-20 z-40 bg-[#F7F7F7] border-b border-gray-200 shadow-sm">
-        <div className="max-w-[1400px] mx-auto px-8 pt-2 py-6">
-          <div className="flex items-center justify-between">
+      <div className="sticky top-0 md:top-20 z-40 bg-[#F7F7F7] border-b border-gray-200 shadow-sm">
+        <div className="max-w-[1400px] mx-auto px-4 pt-16 md:pt-2 py-4 md:px-8 md:py-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.back()}
-                className="w-11 h-11 rounded-full bg-white/60 shadow-md border border-white hover:bg-gray-200 transition-all flex items-center justify-center group"
+                className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-white/60 shadow-md border border-white hover:bg-gray-200 transition-all flex items-center justify-center group flex-shrink-0"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
               </button>
               <div>
                 <h1
-                  className="text-[48px] font-bold leading-tight text-[#1A1A1A]"
+                  className="text-[28px] md:text-[48px] font-bold leading-tight text-[#1A1A1A]"
                   style={{
                     fontStretch: "condensed",
                     letterSpacing: "-0.01em",
@@ -106,8 +106,8 @@ export default function OrderHistoryPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="relative">
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="relative w-full md:w-auto">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
@@ -115,7 +115,7 @@ export default function OrderHistoryPage() {
                   value={searchInputValue}
                   onChange={(e) => setSearchInputValue(e.target.value)}
                   onKeyDown={handleSearch}
-                  className="pl-10 pr-10 py-3 w-72 rounded-2xl border border-gray-200 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all"
+                  className="pl-10 pr-10 py-3 w-full md:w-72 rounded-2xl border border-gray-200 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all"
                 />
                 {searchInputValue && (
                   <button
@@ -130,9 +130,9 @@ export default function OrderHistoryPage() {
           </div>
 
           {/* Status Filters */}
-          <div className="flex items-center gap-3 mt-6">
-            <Filter className="w-5 h-5 text-gray-600" />
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 mt-4 md:mt-6 overflow-x-auto no-scrollbar pb-1">
+            <Filter className="w-5 h-5 text-gray-600 flex-shrink-0" />
+            <div className="flex items-center gap-2 min-w-max">
               {statusFilters.map((filter) => (
                 <motion.button
                   key={filter.value}
@@ -154,7 +154,7 @@ export default function OrderHistoryPage() {
 
       {/* Orders Grid */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[1400px] mx-auto px-8 py-8">
+        <div className="max-w-[1400px] mx-auto px-4 py-4 md:px-8 md:py-8">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <RestaurantCardShimmer cardCount={6} />

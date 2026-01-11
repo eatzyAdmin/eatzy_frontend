@@ -108,7 +108,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
             {/* Header */}
             <div className="flex items-center justify-between p-4 md:p-8 border-b border-gray-200 text-[#1A1A1A] bg-white/60 flex-shrink-0">
               <div className="flex flex-col">
-                <div className="text-3xl font-anton font-semibold uppercase">Giỏ hàng</div>
+                <div className="text-3xl font-anton font-bold uppercase">My Cart</div>
                 <div className="text-sm text-gray-500 font-medium">
                   {carts.length} quán ăn đang chờ
                 </div>

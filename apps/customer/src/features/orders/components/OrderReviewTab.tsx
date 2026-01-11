@@ -290,10 +290,10 @@ export default function OrderReviewTab({
   );
 
   return (
-    <div className="flex h-full items-start overflow-hidden pt-4">
+    <div className="flex flex-col md:flex-row h-full items-start overflow-y-auto md:overflow-hidden pt-4 custom-scrollbar gap-6 md:gap-0 px-4 md:px-0 bg-[#F7F7F7]">
       {/* Left Column - Restaurant Review */}
       <div
-        className="flex-1 h-full overflow-y-auto p-4 pl-12 pr-6"
+        className="w-full md:flex-1 h-auto md:h-full md:overflow-y-auto p-0 md:p-4 md:pl-12 md:pr-6"
         style={{ scrollbarWidth: "none" }}
       >
         <AnimatePresence mode="wait">
@@ -310,11 +310,11 @@ export default function OrderReviewTab({
       </div>
 
       {/* Divider */}
-      <div className="w-[1px] h-[90%] my-auto bg-gradient-to-b from-transparent via-gray-300 to-transparent opacity-60 flex-shrink-0" />
+      <div className="hidden md:block w-[1px] h-[90%] my-auto bg-gradient-to-b from-transparent via-gray-300 to-transparent opacity-60 flex-shrink-0" />
 
       {/* Right Column - Driver Review */}
       <div
-        className="flex-1 h-full overflow-y-auto p-4 pl-6 pr-12"
+        className="w-full md:flex-1 h-auto md:h-full md:overflow-y-auto p-0 md:p-4 md:pl-6 md:pr-12"
         style={{ scrollbarWidth: "none" }}
       >
         <AnimatePresence mode="wait">

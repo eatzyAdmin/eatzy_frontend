@@ -120,7 +120,7 @@ export default function OrderDetailDrawer({
                     whileHover={{ scale: 1.06 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={onClose}
-                    className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all"
+                    className="hidden md:block p-4 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all"
                   >
                     <X className="w-5 h-5" />
                   </motion.button>
@@ -141,17 +141,17 @@ export default function OrderDetailDrawer({
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ duration: 0.2 }}
-                      className="flex h-full items-start overflow-hidden pt-8"
+                      className="flex flex-col md:flex-row h-full items-start overflow-y-auto md:overflow-hidden pt-4 md:pt-8 custom-scrollbar"
                     >
                       {/* Left Column - Restaurant & Order Items */}
                       <div
-                        className="w-[65%] flex-shrink-0 space-y-6 h-full overflow-y-auto p-2 px-4 pl-16"
+                        className="w-full md:w-[65%] flex-shrink-0 space-y-6 h-auto md:h-full md:overflow-y-auto p-4 md:px-4 md:pl-16"
                         style={{ scrollbarWidth: 'none' }}
                       >
                         {/* Restaurant & Order Items Combined Section */}
-                        <div className="flex gap-6 items-start">
+                        <div className="flex flex-col md:flex-row gap-6 items-start">
                           {/* Left Side: Restaurant Card + Safety */}
-                          <div className="flex flex-col gap-4 w-[240px] flex-shrink-0">
+                          <div className="flex flex-col gap-4 w-full md:w-[240px] flex-shrink-0">
                             {/* Restaurant Card */}
                             <div className="bg-white rounded-[32px] p-5 shadow-[0_6px_20px_rgba(0,0,0,0.06)] border border-gray-100 flex flex-col items-center text-center relative overflow-hidden">
                               {/* Avatar */}
@@ -214,7 +214,7 @@ export default function OrderDetailDrawer({
                           </div>
 
                           {/* Right Side: Order Items */}
-                          <div className="flex-1 rounded-[24px] p-8 border-2 border-gray-200">
+                          <div className="w-full md:w-auto flex-1 rounded-[24px] p-4 md:p-8 border-2 border-gray-200">
                             <div className="flex items-center gap-2 mb-4">
                               <Package className="w-5 h-5 text-[var(--primary)]" />
                               <h3 className="text-lg font-bold text-[#1A1A1A]">Món ăn</h3>
@@ -298,11 +298,11 @@ export default function OrderDetailDrawer({
                       </div>
 
                       {/* Sophisticated Vertical Divider */}
-                      <div className="w-[1px] h-[90%] my-auto bg-gradient-to-b from-transparent via-gray-300 to-transparent mx-2 opacity-60" />
+                      <div className="hidden md:block w-[1px] h-[90%] my-auto bg-gradient-to-b from-transparent via-gray-300 to-transparent mx-2 opacity-60" />
 
                       {/* Right Column - Status & Info */}
                       <div
-                        className="flex-1 space-y-6 h-full overflow-y-auto p-2 pl-4 pr-20"
+                        className="w-full md:flex-1 space-y-6 h-auto md:h-full md:overflow-y-auto p-4 md:pl-4 md:pr-20"
                         style={{ scrollbarWidth: 'none' }}
                       >
                         {/* Driver Info - Compact */}
@@ -365,7 +365,7 @@ export default function OrderDetailDrawer({
                         </div>
 
                         {/* Delivery Route */}
-                        <div className="rounded-[24px] p-8 border-2 border-gray-200">
+                        <div className="rounded-[24px] p-4 md:p-8 border-2 border-gray-200">
                           <div className="space-y-3">
                             {/* Pickup - Restaurant */}
                             <div className="flex items-start gap-4">
@@ -413,7 +413,7 @@ export default function OrderDetailDrawer({
                         </div>
 
                         {/* Order Info */}
-                        <div className="rounded-[24px] p-8 border-2 border-gray-200">
+                        <div className="rounded-[24px] p-4 md:p-8 border-2 border-gray-200">
                           <div className="flex items-center gap-2 mb-4">
                             <Calendar className="w-5 h-5 text-[var(--primary)]" />
                             <h3 className="text-lg font-bold text-[#1A1A1A]">Thông tin đơn hàng</h3>

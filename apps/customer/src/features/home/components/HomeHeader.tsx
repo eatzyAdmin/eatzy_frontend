@@ -46,12 +46,12 @@ export default function HomeHeader({
                 },
               }}
               onClick={onMenuClick}
-              className={`w-9 h-9 md:w-10 md:h-10 rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
+              className={`w-10 h-10 rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
                 ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
                 : 'bg-white/10 border-white/20 hover:bg-white/20'
                 }`}
             >
-              <Menu className={`w-4 h-4 md:w-5 md:h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
+              <Menu strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
             </motion.button>
 
             <motion.div
@@ -117,9 +117,9 @@ export default function HomeHeader({
                 },
               }}
               onClick={onSearchClick}
-              className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
+              className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
             >
-              <Search className="w-4 h-4 md:w-5 md:h-5 text-white" />
+              <Search strokeWidth={2.3} className="w-5 h-5 text-white" />
             </motion.button>
           )}
 
@@ -139,7 +139,7 @@ export default function HomeHeader({
               className={`relative rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
                 ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
                 : 'bg-white/10 border-white/20 hover:bg-white/20'
-                } ${cartItemsLength > 0 ? 'px-3 w-auto h-9 md:h-10 gap-2' : 'w-9 h-9 md:w-10 md:h-10'}`}
+                } ${cartItemsLength > 0 ? 'px-3 w-auto h-10 md:h-10 gap-2' : 'w-10 h-10 md:w-10 md:h-10'}`}
             >
               <CartButtonContent hideSearchIcon={hideSearchIcon} />
             </motion.button>
@@ -163,7 +163,7 @@ function CartButtonContent({ hideSearchIcon }: { hideSearchIcon: boolean }) {
   return (
     <>
       <motion.div animate={pulse ? { scale: [1, 1.15, 1] } : {}} transition={{ duration: 0.3 }} className="relative flex items-center">
-        <ShoppingCart className={`w-4 h-4 md:w-5 md:h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
+        <ShoppingCart strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
         {count > 0 && (
           <motion.span key={count} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 300 }} className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--primary)] text-[10px] leading-[18px] text-black font-bold border border-white/60 flex items-center justify-center">
             {count}
