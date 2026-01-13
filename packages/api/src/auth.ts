@@ -8,14 +8,14 @@ export const authApi = {
   },
 
   logout: () => {
-    return http.post<IBackendRes<void>>('/api/v1/auth/logout');
+    return http.post<IBackendRes<void>>('/api/v1/auth/logout') as unknown as Promise<IBackendRes<void>>;
   },
 
   getAccount: () => {
-    return http.get<IBackendRes<IUserGetAccount>>('/api/v1/auth/account');
+    return http.get<IBackendRes<IUserGetAccount>>('/api/v1/auth/account') as unknown as Promise<IBackendRes<IUserGetAccount>>;
   },
 
   refreshToken: () => {
-    return http.get<IBackendRes<IResLoginDTO>>('/api/v1/auth/refresh');
+    return http.get<IBackendRes<IResLoginDTO>>('/api/v1/auth/refresh') as unknown as Promise<IBackendRes<IResLoginDTO>>;
   }
 };
