@@ -45,6 +45,7 @@ export const useAuth = () => {
     isAuthenticated: !!data?.data?.user,
     isLoading,
     error,
+    isError,
     refetch,
   };
 };
