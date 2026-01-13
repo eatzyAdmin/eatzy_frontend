@@ -11,12 +11,17 @@ import {
 import { mockCustomerProfile } from "@/features/profile/data/mockProfileData";
 import CustomerProfileCard from "@/features/profile/components/CustomerProfileCard";
 import ProfileMenuItem from "@/features/profile/components/ProfileMenuItem";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { logout } from "@/features/auth/api";
+import { useAuthStore } from "@repo/store";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { confirm } = useSwipeConfirmation();
   const { show, hide } = useLoading();
   const { showNotification } = useNotification();
+  const { user } = useAuth();
+  const { clearAuth } = useAuthStore();
 
   // Simulate loading finish on mount (standard practice in this app)
   useEffect(() => {
@@ -32,15 +37,28 @@ export default function ProfilePage() {
       description: "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng?",
       confirmText: "Trượt để đăng xuất",
       type: "danger",
-      onConfirm: () => {
+      onConfirm: async () => {
         show();
-        setTimeout(() => {
-          hide();
-          showNotification({ message: "Đăng xuất thành công", type: "success" });
-          router.push("/login");
-        }, 1000);
+        try {
+          await logout();
+        } catch (error) {
+          console.error("Logout error", error);
+        }
+
+        // Always clear local state and redirect
+        clearAuth();
+        hide();
+        showNotification({ message: "Đăng xuất thành công", type: "success" });
+        router.push("/login");
       }
     });
+  };
+
+  // Merge real user data with mock profile structure for display
+  const displayProfile = {
+    ...mockCustomerProfile,
+    name: user?.name || mockCustomerProfile.name,
+    // email: user?.email // Profile card might not show email, but name counts
   };
 
   return (
@@ -53,7 +71,7 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <CustomerProfileCard profile={mockCustomerProfile} />
+          <CustomerProfileCard profile={displayProfile} />
         </motion.div>
 
         {/* Account Settings */}

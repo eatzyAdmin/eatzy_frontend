@@ -13,6 +13,9 @@ import DriverProfileCard from "@/features/profile/components/DriverProfileCard";
 import ProfileMenuItem from "@/features/profile/components/ProfileMenuItem";
 
 import { useNormalLoading } from "../context/NormalLoadingContext";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { logout } from "@/features/auth/api";
+import { useAuthStore } from "@repo/store";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -20,6 +23,8 @@ export default function ProfilePage() {
   const { show, hide } = useLoading();
   const { showNotification } = useNotification();
   const { stopLoading } = useNormalLoading();
+  const { user } = useAuth();
+  const { clearAuth } = useAuthStore();
 
   useEffect(() => {
     stopLoading();
@@ -31,15 +36,27 @@ export default function ProfilePage() {
       description: "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng?",
       confirmText: "Trượt để đăng xuất",
       type: "danger",
-      onConfirm: () => {
+      onConfirm: async () => {
         show();
-        setTimeout(() => {
-          hide();
-          showNotification({ message: "Đăng xuất thành công", type: "success" });
-          router.push("/login");
-        }, 1000);
+        try {
+          await logout();
+        } catch (error) {
+          console.error("Logout error", error);
+        }
+
+        // Always clear
+        clearAuth();
+        hide();
+        showNotification({ message: "Đăng xuất thành công", type: "success" });
+        router.push("/login");
       }
     });
+  };
+
+  // Merge real user data
+  const displayProfile = {
+    ...mockDriverProfile,
+    name: user?.name || mockDriverProfile.name,
   };
 
   return (
@@ -56,7 +73,7 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <DriverProfileCard profile={mockDriverProfile} />
+          <DriverProfileCard profile={displayProfile} />
         </motion.div>
 
         {/* Account Settings */}

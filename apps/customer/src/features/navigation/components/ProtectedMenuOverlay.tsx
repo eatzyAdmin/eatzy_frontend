@@ -2,17 +2,18 @@
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { History, Home, Heart, LogOut } from "@repo/ui/icons";
 import { NavItem, NavItemShimmer, ProfileShimmer, useLoading, useSwipeConfirmation } from "@repo/ui";
-import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "../../auth/hooks/useAuth";
+import { logout } from "../../auth/api";
+import { useAuthStore } from "@repo/store";
 
 export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading } = useAuth();
+  const { clearAuth } = useAuthStore();
   const router = useRouter();
   const params = useSearchParams();
   const { show } = useLoading();
   const { confirm } = useSwipeConfirmation();
-
-  useEffect(() => { const t = setTimeout(() => setIsLoading(false), 400); return () => clearTimeout(t); }, []);
 
   const handleHomeClick = () => {
     show("Đang tải trang chủ...");
@@ -24,7 +25,7 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
 
   const handleOrderHistoryClick = () => {
     show("Đang tải lịch sử đơn hàng...");
-    router.push(`/order-history`);
+    router.push(`/order-history`); // Keep original path, adjust if /orders is correct
     onClose();
   };
 
@@ -42,14 +43,15 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
       confirmText: "Vuốt để đăng xuất",
       type: "danger",
       onConfirm: async () => {
-        // Simulate 2 second loading
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // Show loading overlay
         show("Đang đăng xuất...");
-
-        // Redirect to login page
-        router.replace('/login');
+        try {
+          await logout();
+        } catch (error) {
+          console.error("Logout failed:", error);
+        } finally {
+          clearAuth();
+          router.replace('/login');
+        }
       }
     });
   };
@@ -87,18 +89,20 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
             ) : (
               <div className="relative flex items-center p-6 border-b border-white/10 text-white/90">
                 <div className="relative h-12 w-12 rounded-2xl flex items-center justify-center shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.2)] bg-white/10 border border-white/20">
-                  <div className="w-5 h-5 rounded-md bg-white/40" />
+                  <span className="text-xl font-bold text-white/90">
+                    {user?.name?.charAt(0).toUpperCase() || "C"}
+                  </span>
                 </div>
-                <div className="ml-4">
-                  <p className="font-semibold text-sm">Người dùng</p>
-                  <p className="text-xs text-white/80">user@example.com</p>
+                <div className="ml-4 overflow-hidden">
+                  <p className="font-semibold text-sm truncate max-w-[140px] text-white/90">{user?.name || "Khách"}</p>
+                  <p className="text-xs text-white/70 truncate max-w-[140px]">{user?.email || "Chưa đăng nhập"}</p>
                 </div>
               </div>
             )}
 
             <div className="relative flex-1 py-4 px-3 flex flex-col overflow-hidden">
               <div className="mb-3 px-4">
-                <p className="text-xs text-white/70 uppercase font-medium">Dành cho khách hàng</p>
+                <p className="text-xs text-white/50 uppercase font-medium tracking-wider">Menu</p>
               </div>
               {isLoading ? (
                 customerItems.map((_, idx) => <NavItemShimmer key={idx} expanded={true} index={idx} />)
@@ -106,12 +110,13 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
                 customerItems.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <div key={item.id} onClick={item.onClick} className="cursor-pointer">
+                    <div key={item.id} onClick={item.onClick} className="cursor-pointer mb-1 last:mb-0">
                       <NavItem
-                        icon={<Icon size={20} className={item.isLogout ? "text-red-400" : "text-white"} />}
+                        icon={<Icon size={20} className={item.isLogout ? "text-red-400" : "text-white/80"} />}
                         text={item.text}
                         expanded={true}
                         active={false}
+                        className={item.isLogout ? "hover:bg-red-500/10" : "hover:bg-white/10"}
                       />
                     </div>
                   );

@@ -12,14 +12,14 @@ export interface DriverProfile {
 }
 
 export const mockDriverProfile: DriverProfile = {
-  name: "Nguyễn Văn A",
-  phone: "0901234567",
-  email: "nguyenvana@driver.eatzy.com",
-  vehicleType: "Honda Wave Alpha",
-  licensePlate: "59A-12345",
-  rating: 4.8,
-  totalTrips: 1234,
-  yearsActive: 2,
+  name: "Chưa đăng nhập",
+  phone: "No data",
+  email: "No data",
+  vehicleType: "No data",
+  licensePlate: "No data",
+  rating: 0,
+  totalTrips: 0,
+  yearsActive: 0,
   profilePhoto: "https://i.pravatar.cc/150?img=11",
-  joinDate: "2023-05-15"
+  joinDate: "No data"
 };

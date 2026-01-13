@@ -10,7 +10,10 @@ import OrderCard from '@/components/OrderCard';
 import OrderDrawer from '@/components/OrderDrawer';
 import '@repo/ui/styles/scrollbar.css';
 
+import { useAuth } from '@/features/auth/hooks/useAuth';
+
 export default function OrdersPage() {
+  const { user } = useAuth();
   const { confirm } = useSwipeConfirmation();
   const { showNotification } = useNotification();
   const { hide } = useLoading();
@@ -29,6 +32,7 @@ export default function OrdersPage() {
   }, [hide]);
 
   const handleToggleApp = () => {
+    // ... same content
     const newStatus = !isAppActive;
     confirm({
       title: newStatus ? 'Bật ứng dụng' : 'Tắt ứng dụng',
@@ -113,7 +117,7 @@ export default function OrdersPage() {
         <div className="border-b border-gray-200 px-8 py-4 shrink-0">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-anton font-bold text-[#1A1A1A]">
-              NHÀ HÀNG ABC
+              {user?.name?.toUpperCase() || "NHÀ HÀNG ABC"}
             </h1>
             <motion.button
               whileHover={{ scale: 1.05 }}

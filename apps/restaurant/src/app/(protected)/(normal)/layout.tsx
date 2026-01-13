@@ -14,10 +14,12 @@ import {
   Wallet,
   User,
   LogOut,
-
 } from '@repo/ui/icons';
 import RestaurantNavItem from '../../../components/RestaurantNavItem';
 import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation } from '@repo/ui';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
+import { logout } from '../../../features/auth/api';
+import { useAuthStore } from '@repo/store';
 
 const restaurantMenuItems = [
   { id: 'orders', icon: ShoppingCart, text: 'Đơn hàng' },
@@ -37,16 +39,9 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
   const { confirm } = useSwipeConfirmation();
   const { startLoading, stopLoading } = useNormalLoading();
   const [activeSection, setActiveSection] = useState('orders');
-  const [profileData] = useState({ fullName: 'Nhà hàng ABC', email: 'restaurant@eatzy.com' });
   const [navHovered, setNavHovered] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitialLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const { clearAuth } = useAuthStore();
 
   // Stop loading on navigation complete
   useEffect(() => {
@@ -67,11 +62,16 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
         title: 'Đăng xuất',
         description: 'Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?',
         confirmText: 'Đăng xuất',
-        onConfirm: () => {
+        onConfirm: async () => {
           startLoading();
-          setTimeout(() => {
+          try {
+            await logout();
+          } catch (error) {
+            console.error("Logout error", error);
+          } finally {
+            clearAuth();
             router.push('/login');
-          }, 1500);
+          }
         }
       });
     } else {
@@ -90,8 +90,6 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
       router.push('/profile');
     }
   };
-
-
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -125,7 +123,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
         />
 
         {/* Profile section */}
-        {isInitialLoading ? (
+        {isAuthLoading ? (
           <ProfileShimmer expanded={navHovered} />
         ) : (
           <motion.div
@@ -160,18 +158,18 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
                 >
                   <User size={22} className="text-gray-700 drop-shadow-sm" />
                 </motion.div>
-                <div className="relative ml-4">
+                <div className="relative ml-4 overflow-hidden">
                   <motion.p
                     layoutId="profile-name"
                     className="font-semibold text-sm text-gray-800 tracking-wide drop-shadow-sm whitespace-nowrap overflow-hidden text-ellipsis"
                   >
-                    {profileData.fullName}
+                    {user?.name || "Nhà hàng"}
                   </motion.p>
                   <motion.p
                     layoutId="profile-email"
                     className="text-xs text-gray-600 drop-shadow-sm tracking-wide whitespace-nowrap overflow-hidden text-ellipsis"
                   >
-                    {profileData.email}
+                    {user?.email || "Chưa đăng nhập"}
                   </motion.p>
                 </div>
               </>
@@ -199,7 +197,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
             </p>
           </div>
 
-          {isInitialLoading ? (
+          {isAuthLoading ? (
             Array.from({ length: restaurantMenuItems.length }, (_, index) => (
               <NavItemShimmer
                 key={`shimmer-${index}`}
@@ -239,7 +237,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
               "linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)",
           }}
         >
-          {isInitialLoading ? (
+          {isAuthLoading ? (
             <NavItemShimmer
               expanded={navHovered}
               index={restaurantMenuItems.length}
@@ -260,10 +258,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
       </div >
 
       <div className="flex-1 ml-28 flex flex-col overflow-x-hidden max-w-full">
-        {/* Header */}
         {/* Header Removed */}
-
-        {/* Page Content */}
         <div className="flex-1 overflow-x-hidden max-w-full">{children}</div>
       </div>
     </div >
