@@ -60,6 +60,11 @@ export default function HomePage() {
     clearSearch,
     searchQuery,
     filters,
+    // Pagination
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    totalResults,
   } = useSearch();
 
   // Expose clearSearch to window for menu navigation
@@ -240,6 +245,10 @@ export default function HomePage() {
             searchQuery={searchQuery}
             isLoading={isSearching}
             filters={filters}
+            isLoadingMore={isLoadingMore}
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+            totalResults={totalResults}
           />
         )}
       </AnimatePresence>

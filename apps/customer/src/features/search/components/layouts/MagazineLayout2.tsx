@@ -10,6 +10,7 @@ interface Props {
   restaurant: Restaurant;
   dishes: Dish[];
   menuCategories: MenuCategory[];
+  distance?: number;
 }
 
 // Layout 2: Multi-column editorial with asymmetric grid

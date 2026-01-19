@@ -1,5 +1,5 @@
 import { http } from "./http";
-import type { IBackendRes, ResultPaginationDTO, Restaurant, Dish } from "../../types/src";
+import type { IBackendRes, ResultPaginationDTO, Restaurant, Dish, RestaurantMagazine, NearbyRestaurantsParams } from "../../types/src";
 
 
 // Pagination params matching Spring Boot
@@ -47,6 +47,35 @@ export const restaurantApi = {
     };
     return restaurantApi.getRestaurants(searchParams);
   },
+
+  /**
+   * Get nearby restaurants with personalized ranking
+   * This API searches restaurants within configured distance and sorts by:
+   * - Personalized score (if user is logged in): typeScore, loyaltyScore, distanceScore, qualityScore
+   * - Distance (if user is not logged in)
+   * 
+   * @param params NearbyRestaurantsParams with latitude, longitude, optional search keyword
+   * @returns Paginated list of RestaurantMagazine with ranking scores
+   */
+  getNearbyRestaurants: (params: NearbyRestaurantsParams) => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('latitude', params.latitude.toString());
+    queryParams.append('longitude', params.longitude.toString());
+
+    if (params.search?.trim()) {
+      queryParams.append('search', params.search.trim());
+    }
+    if (params.page !== undefined) {
+      queryParams.append('page', params.page.toString());
+    }
+    if (params.size !== undefined) {
+      queryParams.append('size', params.size.toString());
+    }
+
+    return http.get<IBackendRes<ResultPaginationDTO<RestaurantMagazine[]>>>(
+      `/api/v1/restaurants/nearby?${queryParams.toString()}`
+    ) as unknown as Promise<IBackendRes<ResultPaginationDTO<RestaurantMagazine[]>>>;
+  },
 };
 
 // Dish API
@@ -56,4 +85,3 @@ export const dishApi = {
     return http.get<IBackendRes<Dish[]>>(`/api/v1/dishes/restaurant/${restaurantId}`) as unknown as Promise<IBackendRes<Dish[]>>;
   },
 };
-

@@ -10,10 +10,11 @@ interface Props {
   restaurant: Restaurant;
   dishes: Dish[];
   menuCategories: MenuCategory[];
+  distance?: number; // Distance in km from user
 }
 
 // Layout 1: Editorial Hero - Large featured dish with editorial typography
-export default function MagazineLayout1({ restaurant, dishes }: Props) {
+export default function MagazineLayout1({ restaurant, dishes, distance }: Props) {
   const featured = dishes[0];
   const sideDishes = dishes.slice(1, 5);
   const { containerRef, rect, style, moveHighlight, clearHover } = useHoverHighlight<HTMLDivElement>();
@@ -48,6 +49,14 @@ export default function MagazineLayout1({ restaurant, dishes }: Props) {
               <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
               <span className="font-semibold">{restaurant.rating}</span>
             </div>
+            {distance !== undefined && (
+              <>
+                <span className="text-gray-300">|</span>
+                <div className="flex items-center gap-1 text-gray-500">
+                  <span>{distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`}</span>
+                </div>
+              </>
+            )}
             <span className="text-gray-300">|</span>
             <p className="max-w-2xl leading-relaxed">{restaurant.description}</p>
           </div>

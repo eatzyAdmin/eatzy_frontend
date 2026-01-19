@@ -10,6 +10,7 @@ interface Props {
   restaurant: Restaurant;
   dishes: Dish[];
   menuCategories: MenuCategory[];
+  distance?: number;
 }
 
 // Layout 4: Table of Contents style with dish listings

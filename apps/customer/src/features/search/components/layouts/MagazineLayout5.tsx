@@ -10,6 +10,7 @@ interface Props {
   restaurant: Restaurant;
   dishes: Dish[];
   menuCategories: MenuCategory[];
+  distance?: number;
 }
 
 // Layout 5: Full-bleed spread with overlapping elements

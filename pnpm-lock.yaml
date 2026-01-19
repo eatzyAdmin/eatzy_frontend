@@ -75,6 +75,9 @@ importers:
       '@repo/fonts':
         specifier: workspace:*
         version: link:../../packages/fonts
+      '@repo/hooks':
+        specifier: workspace:*
+        version: link:../../packages/hooks
       '@repo/lib':
         specifier: workspace:*
         version: link:../../packages/lib
@@ -422,7 +425,18 @@ importers:
         specifier: 5.9.2
         version: 5.9.2
 
-  packages/hooks: {}
+  packages/hooks:
+    dependencies:
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+    devDependencies:
+      '@types/react':
+        specifier: ^18.2.0
+        version: 18.3.26
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.2
 
   packages/lib:
     dependencies:

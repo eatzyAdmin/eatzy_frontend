@@ -10,6 +10,7 @@ interface Props {
   restaurant: Restaurant;
   dishes: Dish[];
   menuCategories: MenuCategory[];
+  distance?: number;
 }
 
 // Layout 3: "Look At This Plate" feature style

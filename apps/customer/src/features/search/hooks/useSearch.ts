@@ -1,147 +1,248 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import type { Restaurant, Dish, MenuCategory } from '@repo/types';
+import type { Restaurant, Dish, MenuCategory, RestaurantMagazine } from '@repo/types';
 import {
-  searchRestaurants,
+  searchRestaurants as mockSearchRestaurants,
   getDishesForRestaurant,
   getMenuCategoriesForRestaurant,
 } from '../data/mockSearchData';
+import { useSearchRestaurants } from './useSearchRestaurants';
+import { useUserLocation, DEFAULT_LOCATION_HCMC } from '@repo/hooks';
+
+// ======== Types ========
 
 export interface RestaurantWithMenu {
   restaurant: Restaurant;
   dishes: Dish[];
   menuCategories: MenuCategory[];
-  layoutType: number; // 1-5 for different magazine layouts
+  layoutType: number; // 1-10 for different magazine layouts
+  distance?: number;
+  finalScore?: number;
 }
+
+export interface SearchFilters {
+  minPrice: number;
+  maxPrice: number;
+  sort: string;
+  category: string | null;
+}
+
+// ======== Constants ========
+
+const USE_MOCK_DATA = false; // Set to true to use mock data instead of API
+
+// ======== Mapper Function ========
+
+function mapMagazineToRestaurantWithMenu(
+  magazine: RestaurantMagazine,
+  layoutIndex: number
+): RestaurantWithMenu {
+  const menuCategories: MenuCategory[] = (magazine.category || []).map((cat, idx) => ({
+    id: String(cat.id),
+    name: cat.name,
+    restaurantId: String(magazine.id),
+    displayOrder: idx + 1,
+  }));
+
+  const dishes: Dish[] = (magazine.category || []).flatMap(cat =>
+    (cat.dishes || []).map(dish => ({
+      id: String(dish.id),
+      name: dish.name,
+      description: dish.description || '',
+      price: dish.price,
+      imageUrl: dish.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
+      restaurantId: String(magazine.id),
+      menuCategoryId: String(cat.id),
+      availableQuantity: 100,
+      isAvailable: true,
+      rating: magazine.averageRating || 4.5,
+    }))
+  );
+
+  const restaurant: Restaurant = {
+    id: String(magazine.id),
+    name: magazine.name,
+    slug: magazine.slug,
+    categories: [],
+    status: 'OPEN',
+    rating: magazine.averageRating || 0,
+    address: magazine.address,
+    description: magazine.description,
+    imageUrl: dishes[0]?.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
+    reviewCount: (magazine.oneStarCount || 0) + (magazine.twoStarCount || 0) +
+      (magazine.threeStarCount || 0) + (magazine.fourStarCount || 0) +
+      (magazine.fiveStarCount || 0),
+  };
+
+  return {
+    restaurant,
+    dishes,
+    menuCategories,
+    layoutType: (layoutIndex % 10) + 1,
+    distance: magazine.distance,
+    finalScore: magazine.finalScore,
+  };
+}
+
+// ======== Main Hook ========
 
 export function useSearch() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-  const [searchResults, setSearchResults] = useState<RestaurantWithMenu[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
 
-  // Check if we're in search mode (has search query param)
+  // Local state
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchParams.get('q') || '');
+  const [mockResults, setMockResults] = useState<RestaurantWithMenu[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [isMockSearching, setIsMockSearching] = useState(false);
+
+  // Get user location
+  const { location: userLocation, isLoading: isLocationLoading } = useUserLocation();
+  const locationCoords = userLocation || DEFAULT_LOCATION_HCMC;
+
   // Parse filters from URL
-  // Check if we're in search mode (has search query param)
-  // Parse filters from URL
-  const filters = useMemo(() => ({
+  const filters = useMemo<SearchFilters>(() => ({
     minPrice: Number(searchParams.get('minPrice')) || 0,
     maxPrice: Number(searchParams.get('maxPrice')) || 500000,
     sort: searchParams.get('sort') || 'recommended',
     category: searchParams.get('category') || null,
   }), [searchParams]);
 
-  // Check if we're in search mode (has search query param)
+  // Check if in search mode
   const isSearchMode = searchParams.has('q');
+  const currentQuery = searchParams.get('q') || '';
 
-  // Perform search
-  const performSearch = useCallback(async (query: string, newFilters?: Partial<typeof filters>) => {
-    if (!query.trim()) {
-      return;
+  // ===== useInfiniteQuery via useSearchRestaurants =====
+  const {
+    restaurants: apiRestaurants,
+    totalCount,
+    isLoading: isApiLoading,
+    isFetchingNextPage,
+    isError: isApiError,
+    hasNextPage,
+    fetchNextPage,
+    refetch: refetchApi,
+  } = useSearchRestaurants(
+    !USE_MOCK_DATA && isSearchMode && locationCoords ? {
+      latitude: locationCoords.latitude,
+      longitude: locationCoords.longitude,
+      search: currentQuery,
+    } : null,
+    {
+      enabled: !USE_MOCK_DATA && isSearchMode && !isLocationLoading,
+      showErrorNotification: true,
     }
+  );
+
+  // Convert API results to RestaurantWithMenu format
+  const apiSearchResults = useMemo<RestaurantWithMenu[]>(() => {
+    if (USE_MOCK_DATA || !apiRestaurants.length) return [];
+    return apiRestaurants.map((magazine, index) =>
+      mapMagazineToRestaurantWithMenu(magazine, index)
+    );
+  }, [apiRestaurants]);
+
+  // Combined search results
+  const searchResults = USE_MOCK_DATA ? mockResults : apiSearchResults;
+  const isSearching = USE_MOCK_DATA ? isMockSearching : isApiLoading;
+
+  // ===== Actions =====
+
+  const performSearch = useCallback(async (query: string, newFilters?: Partial<SearchFilters>) => {
+    if (!query.trim()) return;
 
     const alreadyInSearchMode = searchParams.has('q');
-    setIsSearching(true);
-
-    // Construct URL Params
     const params = new URLSearchParams(searchParams.toString());
     params.set('q', query);
 
-    // Apply new filters or keep existing if not provided (but if specifically passed as object? assume passed = override)
-    // Actually, usually performSearch is called with NEW values.
-    const filtersToUse = newFilters || filters;
-
+    const filtersToUse = newFilters ? { ...filters, ...newFilters } : filters;
     if (filtersToUse.minPrice !== undefined) params.set('minPrice', filtersToUse.minPrice.toString());
     if (filtersToUse.maxPrice !== undefined) params.set('maxPrice', filtersToUse.maxPrice.toString());
     if (filtersToUse.sort) params.set('sort', filtersToUse.sort);
     if (filtersToUse.category) params.set('category', filtersToUse.category);
     else params.delete('category');
 
-
-    // If we're already in search mode (compact search bar), push URL first so other instances react immediately
     if (alreadyInSearchMode) {
       router.push(`?${params.toString()}`, { scroll: false });
     }
 
-    // Simulate loading for 2 seconds
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Mock data simulation
+    if (USE_MOCK_DATA) {
+      setIsMockSearching(true);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const restaurants = mockSearchRestaurants(query);
+      const resultsWithMenu: RestaurantWithMenu[] = restaurants.map((restaurant, index) => ({
+        restaurant,
+        dishes: getDishesForRestaurant(restaurant.id),
+        menuCategories: getMenuCategoriesForRestaurant(restaurant.id),
+        layoutType: (index % 10) + 1,
+      }));
+      setMockResults(resultsWithMenu);
+      setIsMockSearching(false);
+    }
 
-    // Get search results
-    const restaurants = searchRestaurants(query);
-
-    // Prepare results with dishes and random layout types
-    const resultsWithMenu: RestaurantWithMenu[] = restaurants.map(restaurant => ({
-      restaurant,
-      dishes: getDishesForRestaurant(restaurant.id),
-      menuCategories: getMenuCategoriesForRestaurant(restaurant.id),
-      layoutType: Math.floor(Math.random() * 10) + 1,
-    }));
-
-    setSearchResults(resultsWithMenu);
-    setIsSearching(false);
     setHasSearched(true);
-    setSearchQuery(query);
+    setLocalSearchQuery(query);
 
-    // If we were NOT in search mode (overlay search on home), only update URL after loading finishes
     if (!alreadyInSearchMode) {
       router.push(`?${params.toString()}`, { scroll: false });
     }
-  }, [searchParams, router, filters]); // Added filters to dep
+  }, [searchParams, router, filters]);
 
-  // Clear search and return to home
   const clearSearch = useCallback(() => {
-    setSearchQuery('');
-    setSearchResults([]);
+    setLocalSearchQuery('');
+    setMockResults([]);
     setHasSearched(false);
-    setIsSearching(false);
+    setIsMockSearching(false);
 
     const next = new URLSearchParams(searchParams.toString());
-    next.delete('q');
-    next.delete('minPrice');
-    next.delete('maxPrice');
-    next.delete('sort');
-    next.delete('category');
+    ['q', 'minPrice', 'maxPrice', 'sort', 'category'].forEach(key => next.delete(key));
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   }, [router, searchParams, pathname]);
 
-  // Load search results on mount if query param exists
+  // Sync URL query changes
   useEffect(() => {
     const query = searchParams.get('q') || '';
-    if (!query) return;
-    if (isSearching) return;
-    // Trigger when URL param changes OR on reload when we haven't searched yet
-    // Also trigger if filters changed?
-    // We can check if params changed roughly.
-    // For simplicity, strict check or just react to searchParams
-    const currentParams = new URLSearchParams(searchParams.toString());
-    const queryChanged = query !== searchQuery;
-    const filtersChanged =
-      Number(currentParams.get('minPrice') || 0) !== filters.minPrice ||
-      Number(currentParams.get('maxPrice') || 500000) !== filters.maxPrice ||
-      (currentParams.get('sort') || 'recommended') !== filters.sort ||
-      (currentParams.get('category') || null) !== filters.category;
+    if (!query || isSearching) return;
 
-    if (queryChanged || filtersChanged || !hasSearched) {
-      // Pass null to newFilters to let performSearch use current URL/state filters
-      // But performSearch uses 'filters' from closure which might be stale?
-      // Actually 'filters' is derived from 'searchParams' at top level.
-      // So calling performSearch(query, filters) works.
-      performSearch(query, filters);
+    if (query !== localSearchQuery) {
+      setLocalSearchQuery(query);
+      setHasSearched(true);
+      if (USE_MOCK_DATA) {
+        performSearch(query, filters);
+      }
     }
-  }, [searchParams, searchQuery, performSearch, isSearching, hasSearched, filters]); // Removed filters from dep loop to avoid strict object eq issues, relying on searchParams
+  }, [searchParams, localSearchQuery, performSearch, isSearching, filters]);
+
+  // ===== Return =====
 
   return {
-    searchQuery,
-    setSearchQuery,
+    // State
+    searchQuery: localSearchQuery,
+    setSearchQuery: setLocalSearchQuery,
     searchResults,
     isSearching,
     hasSearched,
     isSearchMode,
+    filters,
+
+    // Pagination (from useInfiniteQuery)
+    isLoadingMore: isFetchingNextPage,
+    hasMore: hasNextPage ?? false,
+    totalResults: totalCount || searchResults.length,
+
+    // API specific
+    isApiError,
+
+    // Actions
     performSearch,
     clearSearch,
-    filters,
+    loadMore: fetchNextPage,
+    refetch: USE_MOCK_DATA ? () => performSearch(localSearchQuery) : refetchApi,
+
+    // Location
+    userLocation: locationCoords,
+    isLocationLoading,
   };
 }
