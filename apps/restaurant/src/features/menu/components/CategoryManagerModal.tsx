@@ -116,7 +116,7 @@ export default function CategoryManagerModal({ categories, onUpdate, onClose }: 
     <div className="bg-white w-[500px] max-w-[90vw] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
-        <h2 className="text-xl font-anton font-bold text-[#1A1A1A]">QUẢN LÝ DANH MỤC</h2>
+        <h2 className="text-xl font-anton font-bold text-[#1A1A1A]">CATEGORIES MANAGER</h2>
         <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
           <X className="w-5 h-5 text-gray-500" />
         </button>

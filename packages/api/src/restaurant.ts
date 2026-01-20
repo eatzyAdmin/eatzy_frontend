@@ -78,10 +78,98 @@ export const restaurantApi = {
   },
 };
 
-// Dish API
+// ======== Dish API ========
+
 export const dishApi = {
-  // Get dishes by restaurant ID
+  // Get dishes by restaurant ID (returns all dishes, no pagination)
   getDishesByRestaurantId: (restaurantId: number) => {
-    return http.get<IBackendRes<Dish[]>>(`/api/v1/dishes/restaurant/${restaurantId}`) as unknown as Promise<IBackendRes<Dish[]>>;
+    return http.get<IBackendRes<Dish[]>>(
+      `/api/v1/dishes/restaurant/${restaurantId}`
+    ) as unknown as Promise<IBackendRes<Dish[]>>;
+  },
+
+  // Get dishes by category ID
+  getDishesByCategoryId: (categoryId: number) => {
+    return http.get<IBackendRes<Dish[]>>(
+      `/api/v1/dishes/category/${categoryId}`
+    ) as unknown as Promise<IBackendRes<Dish[]>>;
+  },
+
+  // Get single dish by ID
+  getDishById: (id: number) => {
+    return http.get<IBackendRes<Dish>>(
+      `/api/v1/dishes/${id}`
+    ) as unknown as Promise<IBackendRes<Dish>>;
+  },
+
+  // Create new dish
+  createDish: (dish: Omit<Dish, 'id'>) => {
+    return http.post<IBackendRes<Dish>>(
+      `/api/v1/dishes`,
+      dish
+    ) as unknown as Promise<IBackendRes<Dish>>;
+  },
+
+  // Update dish
+  updateDish: (dish: Dish) => {
+    return http.put<IBackendRes<Dish>>(
+      `/api/v1/dishes`,
+      dish
+    ) as unknown as Promise<IBackendRes<Dish>>;
+  },
+
+  // Delete dish
+  deleteDish: (id: number) => {
+    return http.delete<IBackendRes<void>>(
+      `/api/v1/dishes/${id}`
+    ) as unknown as Promise<IBackendRes<void>>;
+  },
+};
+
+// ======== Menu Category API (DishCategory in backend) ========
+
+export type MenuCategoryDTO = {
+  id: number;
+  name: string;
+  restaurant?: { id: number };
+  displayOrder?: number;
+};
+
+export const menuCategoryApi = {
+  // Get all categories for a restaurant (no pagination, returns full list)
+  getCategoriesByRestaurantId: (restaurantId: number) => {
+    return http.get<IBackendRes<MenuCategoryDTO[]>>(
+      `/api/v1/dish-categories/restaurant/${restaurantId}`
+    ) as unknown as Promise<IBackendRes<MenuCategoryDTO[]>>;
+  },
+
+  // Get single category by ID
+  getCategoryById: (id: number) => {
+    return http.get<IBackendRes<MenuCategoryDTO>>(
+      `/api/v1/dish-categories/${id}`
+    ) as unknown as Promise<IBackendRes<MenuCategoryDTO>>;
+  },
+
+  // Create new category
+  createCategory: (category: Omit<MenuCategoryDTO, 'id'>) => {
+    return http.post<IBackendRes<MenuCategoryDTO>>(
+      `/api/v1/dish-categories`,
+      category
+    ) as unknown as Promise<IBackendRes<MenuCategoryDTO>>;
+  },
+
+  // Update category
+  updateCategory: (category: MenuCategoryDTO) => {
+    return http.put<IBackendRes<MenuCategoryDTO>>(
+      `/api/v1/dish-categories`,
+      category
+    ) as unknown as Promise<IBackendRes<MenuCategoryDTO>>;
+  },
+
+  // Delete category
+  deleteCategory: (id: number) => {
+    return http.delete<IBackendRes<void>>(
+      `/api/v1/dish-categories/${id}`
+    ) as unknown as Promise<IBackendRes<void>>;
   },
 };

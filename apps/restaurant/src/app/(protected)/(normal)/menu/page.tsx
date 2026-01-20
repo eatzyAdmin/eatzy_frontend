@@ -5,28 +5,66 @@ import { motion, AnimatePresence } from '@repo/ui/motion';
 import { ImageWithFallback, useLoading, useHoverHighlight, HoverHighlightOverlay, useSwipeConfirmation, useNotification, RestaurantMenuShimmer } from '@repo/ui';
 import { Dish, MenuCategory } from '@repo/types';
 import { Edit2, Search, Plus, Settings, Trash2 } from '@repo/ui/icons';
-import { mockCategories, mockDishes as initialMockDishes } from '@/features/menu/data/mockMenuData';
 import DishInfoCard from '@/features/menu/components/DishInfoCard';
 import DishEditModal from '@/features/menu/components/DishEditModal';
 import CategoryManagerModal from '@/features/menu/components/CategoryManagerModal';
 import { formatVnd } from '@repo/lib';
+import { useRestaurantMenu } from '@/features/menu/hooks/useMenu';
+
+// ======== Constants ========
+
+// TODO: Get from user profile/auth when owner logs in
+// For now, use a fixed restaurant ID for development
+const USE_MOCK_DATA = false;
+const MOCK_RESTAURANT_ID = 1; // Change this to your test restaurant ID
+
+// Mock data fallback (only used when USE_MOCK_DATA is true)
+import { mockCategories, mockDishes as initialMockDishes } from '@/features/menu/data/mockMenuData';
 
 export default function MenuPage() {
   const { hide } = useLoading();
   const { confirm } = useSwipeConfirmation();
   const { showNotification } = useNotification();
 
-  const [categories, setCategories] = useState<MenuCategory[]>(mockCategories);
-  const [dishes, setDishes] = useState<Dish[]>(initialMockDishes);
-  const [activeCategoryId, setActiveCategoryId] = useState<string>(categories[0]?.id || '');
+  // ======== API Data Hook ========
+  const {
+    dishes: apiDishes,
+    categories: apiCategories,
+    isLoading: isApiLoading,
+    isError,
+    createDish: apiCreateDish,
+    updateDish: apiUpdateDish,
+    deleteDish: apiDeleteDish,
+    createCategory: apiCreateCategory,
+    updateCategory: apiUpdateCategory,
+    deleteCategory: apiDeleteCategory,
+  } = useRestaurantMenu(USE_MOCK_DATA ? null : MOCK_RESTAURANT_ID);
+
+  // ======== Local State (for mock data fallback) ========
+  const [mockCategories_state, setMockCategories] = useState<MenuCategory[]>(mockCategories);
+  const [mockDishes, setMockDishes] = useState<Dish[]>(initialMockDishes);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  // Decide which data to use
+  const categories = USE_MOCK_DATA ? mockCategories_state : apiCategories;
+  const dishes = USE_MOCK_DATA ? mockDishes : apiDishes;
+  const isLoading = USE_MOCK_DATA ? isInitialLoading : isApiLoading;
+
+  const [activeCategoryId, setActiveCategoryId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
 
   // Modal States
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
-  const [editingDish, setEditingDish] = useState<Dish | null>(null); // Draft state
+  const [editingDish, setEditingDish] = useState<Dish | null>(null);
   const [dishMode, setDishMode] = useState<'edit' | 'create'>('edit');
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+
+  // Set active category when categories load
+  useEffect(() => {
+    if (categories.length > 0 && !activeCategoryId) {
+      setActiveCategoryId(categories[0].id);
+    }
+  }, [categories, activeCategoryId]);
 
   // Sync editingDish when selectedDish changes (deep copy)
   useEffect(() => {
@@ -54,24 +92,30 @@ export default function MenuPage() {
     clearHover: tabClear
   } = useHoverHighlight<HTMLDivElement>();
 
+  // Initial loading simulation for mock data
   useEffect(() => {
-    // Match OrdersPage loading pattern
-    const timer = setTimeout(() => {
-      hide();
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [hide]);
+    if (USE_MOCK_DATA) {
+      const timer = setTimeout(() => {
+        hide();
+        setIsInitialLoading(false);
+      }, 1500);
+      return () => clearTimeout(timer);
+    } else {
+      // For API, hide loading screen when data is loaded
+      if (!isApiLoading) {
+        hide();
+      }
+    }
+  }, [hide, isApiLoading]);
 
   // Observer for active category
   useEffect(() => {
     const mainEl = mainScrollRef.current;
-    if (!mainEl) return;
+    if (!mainEl || categories.length === 0) return;
 
     const observer = new IntersectionObserver((entries) => {
       const visible = entries.filter(e => e.isIntersecting);
       if (visible.length > 0) {
-        // Find the one closest to top
         const topMost = visible.reduce((prev, curr) =>
           Math.abs(curr.boundingClientRect.top) < Math.abs(prev.boundingClientRect.top) ? curr : prev
         );
@@ -92,7 +136,6 @@ export default function MenuPage() {
     setActiveCategoryId(id);
     const el = sectionRefs.current[id];
     if (el && mainScrollRef.current) {
-      // Scroll to align element top to container top
       const containerTop = mainScrollRef.current.getBoundingClientRect().top;
       const elTop = el.getBoundingClientRect().top;
       const offset = elTop - containerTop + mainScrollRef.current.scrollTop;
@@ -109,15 +152,37 @@ export default function MenuPage() {
     );
   }, [dishes, searchQuery]);
 
-  // Dish Handlers
-  const handleDishUpdate = (updatedDish: Dish) => {
-    if (dishMode === 'create') {
-      setDishes(prev => [...prev, updatedDish]);
-      setDishMode('edit'); // Switch to edit after creation
-      setSelectedDish(updatedDish); // This will trigger useEffect to update editingDish, keeping UI in sync
+  // ======== Dish Handlers ========
+
+  const handleDishUpdate = async (updatedDish: Dish) => {
+    if (USE_MOCK_DATA) {
+      if (dishMode === 'create') {
+        setMockDishes(prev => [...prev, updatedDish]);
+        setDishMode('edit');
+        setSelectedDish(updatedDish);
+      } else {
+        setMockDishes(prev => prev.map(d => d.id === updatedDish.id ? updatedDish : d));
+        setSelectedDish(updatedDish);
+      }
+      showNotification({
+        message: dishMode === 'create' ? 'Đã thêm món mới thành công!' : 'Đã cập nhật món ăn thành công!',
+        type: 'success'
+      });
     } else {
-      setDishes(prev => prev.map(d => d.id === updatedDish.id ? updatedDish : d));
-      setSelectedDish(updatedDish); // Update source of truth
+      // API call
+      if (dishMode === 'create') {
+        const { id, ...dishWithoutId } = updatedDish;
+        const created = await apiCreateDish(dishWithoutId);
+        if (created) {
+          setDishMode('edit');
+          setSelectedDish(created);
+        }
+      } else {
+        const updated = await apiUpdateDish(updatedDish);
+        if (updated) {
+          setSelectedDish(updated);
+        }
+      }
     }
   };
 
@@ -128,9 +193,13 @@ export default function MenuPage() {
       description: 'Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa?',
       confirmText: 'Xóa món',
       type: 'danger',
-      onConfirm: () => {
-        setDishes(prev => prev.filter(d => d.id !== dishId));
-        showNotification({ message: 'Đã xóa món ăn', type: 'success' });
+      onConfirm: async () => {
+        if (USE_MOCK_DATA) {
+          setMockDishes(prev => prev.filter(d => d.id !== dishId));
+          showNotification({ message: 'Đã xóa món ăn', type: 'success' });
+        } else {
+          await apiDeleteDish(dishId);
+        }
       }
     });
   };
@@ -142,7 +211,7 @@ export default function MenuPage() {
       description: '',
       price: 0,
       imageUrl: '',
-      restaurantId: 'rest-1',
+      restaurantId: String(MOCK_RESTAURANT_ID),
       menuCategoryId: categories[0]?.id || '',
       availableQuantity: 0,
       isAvailable: true,
@@ -163,13 +232,33 @@ export default function MenuPage() {
     setDishMode('edit');
   };
 
-  // Category Handlers
-  const handleUpdateCategories = (newCategories: MenuCategory[]) => {
-    setCategories(newCategories);
+  // ======== Category Handlers ========
+
+  const handleUpdateCategories = async (newCategories: MenuCategory[]) => {
+    if (USE_MOCK_DATA) {
+      setMockCategories(newCategories);
+    } else {
+      // For API, the CategoryManagerModal should call individual create/update/delete
+      // This is a simplified approach - in production, compare old vs new and call appropriate APIs
+      // For now, just close the modal and refetch will happen automatically
+    }
   };
+
+  // ======== Render ========
 
   if (isLoading) {
     return <RestaurantMenuShimmer />;
+  }
+
+  if (isError) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#F7F7F7]">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Không thể tải thực đơn</h2>
+          <p className="text-gray-500">Vui lòng thử lại sau</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -237,88 +326,95 @@ export default function MenuPage() {
 
       {/* Main Scrollable Content */}
       <div ref={mainScrollRef} className="flex-1 overflow-y-auto p-8 space-y-12 scroll-smooth bg-[#F7F7F7] scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-        {categories.map(cat => {
-          const catDishes = filteredDishes.filter(d => d.menuCategoryId === cat.id);
-          if (searchQuery && catDishes.length === 0) return null;
+        {categories.length === 0 ? (
+          <div className="text-center py-20">
+            <h2 className="text-2xl font-bold text-gray-400 mb-2">Chưa có danh mục nào</h2>
+            <p className="text-gray-400">Tạo danh mục đầu tiên để bắt đầu thêm món</p>
+          </div>
+        ) : (
+          categories.map(cat => {
+            const catDishes = filteredDishes.filter(d => d.menuCategoryId === cat.id);
+            if (searchQuery && catDishes.length === 0) return null;
 
-          return (
-            <section
-              key={cat.id}
-              ref={el => { sectionRefs.current[cat.id] = el; }}
-              data-id={cat.id}
-              className="space-y-6"
-            >
-              <div className="flex items-center gap-4">
-                <h2 className="text-2xl font-anton font-bold text-[#1A1A1A] tracking-tight">{cat.name.toUpperCase()}</h2>
-                <div className="h-px flex-1 bg-gray-200"></div>
-                <span className="text-xs font-bold text-gray-400 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">{catDishes.length} items</span>
-              </div>
+            return (
+              <section
+                key={cat.id}
+                ref={el => { sectionRefs.current[cat.id] = el; }}
+                data-id={cat.id}
+                className="space-y-6"
+              >
+                <div className="flex items-center gap-4">
+                  <h2 className="text-2xl font-anton font-bold text-[#1A1A1A] tracking-tight">{cat.name.toUpperCase()}</h2>
+                  <div className="h-px flex-1 bg-gray-200"></div>
+                  <span className="text-xs font-bold text-gray-400 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">{catDishes.length} items</span>
+                </div>
 
-              <div className="grid grid-cols-3 xl:grid-cols-4 gap-8">
-                <AnimatePresence mode="popLayout">
-                  {catDishes.map(dish => {
-                    const isSelected = selectedDish?.id === dish.id;
-                    return (
-                      <motion.div
-                        layout
-                        layoutId={`dish-card-${dish.id}`}
-                        key={dish.id}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ type: 'spring', damping: 16, stiffness: 100 }}
-                        onClick={() => handleEditDish(dish)}
-                        whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                        className={`group bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 cursor-pointer ${isSelected ? 'opacity-0 pointer-events-none' : ''}`}
-                      >
-                        <div className="relative aspect-[4/3] overflow-hidden">
-                          <ImageWithFallback
-                            src={dish.imageUrl}
-                            alt={dish.name}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                          {/* Edit & Trash Overlay with Larger Buttons */}
-                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                            <span className="bg-white/95 text-[#1A1A1A] px-5 py-3 rounded-full text-sm font-bold shadow-lg flex items-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-transform hover:bg-[#1A1A1A] hover:text-white">
-                              <Edit2 className="w-4 h-4" />
-                              <span className="hidden sm:inline">Chỉnh sửa</span>
-                            </span>
-                            <button
-                              onClick={(e) => handleDeleteDish(e, dish.id)}
-                              className="bg-white/95 text-red-500 px-4 py-3 rounded-full shadow-lg flex items-center justify-center transform translate-y-3 group-hover:translate-y-0 transition-transform delay-75 hover:bg-red-500 hover:text-white"
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
-                          </div>
-
-                          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold shadow-sm text-gray-700">
-                            Qty: {dish.availableQuantity}
-                          </div>
-                        </div>
-                        <div className="p-5">
-                          <div className="mb-2">
-                            <h3 className="font-bold text-[#1A1A1A] text-lg leading-tight line-clamp-1">{dish.name || 'Món mới'}</h3>
-                          </div>
-                          <p className="text-xs text-gray-500 line-clamp-2 mb-4 h-8 leading-relaxed font-medium">{dish.description || 'Chưa có mô tả'}</p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-[var(--primary)] font-bold text-lg">{formatVnd(Number(dish.price))}</span>
-
-                            {(dish.optionGroups?.length ?? 0) > 0 && (
-                              <span className="text-[10px] text-gray-500 bg-gray-50 border border-gray-100 px-2 py-1 rounded-md font-medium">
-                                {dish.optionGroups?.length} options
+                <div className="grid grid-cols-3 xl:grid-cols-4 gap-8">
+                  <AnimatePresence mode="popLayout">
+                    {catDishes.map(dish => {
+                      const isSelected = selectedDish?.id === dish.id;
+                      return (
+                        <motion.div
+                          layout
+                          layoutId={`dish-card-${dish.id}`}
+                          key={dish.id}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          transition={{ type: 'spring', damping: 16, stiffness: 100 }}
+                          onClick={() => handleEditDish(dish)}
+                          whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                          className={`group bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 cursor-pointer ${isSelected ? 'opacity-0 pointer-events-none' : ''}`}
+                        >
+                          <div className="relative aspect-[4/3] overflow-hidden">
+                            <ImageWithFallback
+                              src={dish.imageUrl}
+                              alt={dish.name}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            {/* Edit & Trash Overlay */}
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                              <span className="bg-white/95 text-[#1A1A1A] px-5 py-3 rounded-full text-sm font-bold shadow-lg flex items-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-transform hover:bg-[#1A1A1A] hover:text-white">
+                                <Edit2 className="w-4 h-4" />
+                                <span className="hidden sm:inline">Chỉnh sửa</span>
                               </span>
-                            )}
+                              <button
+                                onClick={(e) => handleDeleteDish(e, dish.id)}
+                                className="bg-white/95 text-red-500 px-4 py-3 rounded-full shadow-lg flex items-center justify-center transform translate-y-3 group-hover:translate-y-0 transition-transform delay-75 hover:bg-red-500 hover:text-white"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+                            </div>
+
+                            <div className="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold shadow-sm text-gray-700">
+                              Qty: {dish.availableQuantity}
+                            </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-              </div>
-            </section>
-          );
-        })}
+                          <div className="p-5">
+                            <div className="mb-2">
+                              <h3 className="font-bold text-[#1A1A1A] text-lg leading-tight line-clamp-1">{dish.name || 'Món mới'}</h3>
+                            </div>
+                            <p className="text-xs text-gray-500 line-clamp-2 mb-4 h-8 leading-relaxed font-medium">{dish.description || 'Chưa có mô tả'}</p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[var(--primary)] font-bold text-lg">{formatVnd(Number(dish.price))}</span>
+
+                              {(dish.optionGroups?.length ?? 0) > 0 && (
+                                <span className="text-[10px] text-gray-500 bg-gray-50 border border-gray-100 px-2 py-1 rounded-md font-medium">
+                                  {dish.optionGroups?.length} options
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              </section>
+            );
+          })
+        )}
         <div className="h-40"></div>
       </div>
 
@@ -333,16 +429,13 @@ export default function MenuPage() {
               onClick={handleCloseEdit}
               className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-md flex items-center justify-center p-8"
             >
-              {/* Modal Container: Centered, Max Height 92% */}
+              {/* Modal Container */}
               <div
                 onClick={(e) => e.stopPropagation()}
                 className="w-full max-w-[1400px] h-full max-h-[92vh] grid grid-cols-[35%_65%] gap-6"
               >
                 {/* Left: Info Card */}
-                <motion.div
-                  // Removed init/exit animations for shared element transition
-                  className="h-full overflow-hidden"
-                >
+                <motion.div className="h-full overflow-hidden">
                   <DishInfoCard
                     dish={editingDish}
                     originalDish={selectedDish}
