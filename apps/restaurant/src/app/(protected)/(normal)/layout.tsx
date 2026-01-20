@@ -14,6 +14,7 @@ import {
   Wallet,
   User,
   LogOut,
+  BarChart3,
 } from '@repo/ui/icons';
 import RestaurantNavItem from '../../../components/RestaurantNavItem';
 import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation } from '@repo/ui';
@@ -27,7 +28,7 @@ const restaurantMenuItems = [
   { id: 'history', icon: History, text: 'Lịch sử đơn hàng' },
   { id: 'reviews', icon: Star, text: 'Đánh giá' },
   { id: 'store', icon: Store, text: 'Cửa hàng' },
-  { id: 'finances', icon: TrendingUp, text: 'Tài chính' },
+  { id: 'reports', icon: BarChart3, text: 'Báo cáo' },
   { id: 'wallet', icon: Wallet, text: 'Ví cửa hàng' }
 ];
 

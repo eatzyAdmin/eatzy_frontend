@@ -140,7 +140,7 @@ export default function OrdersPage() {
           <div className="flex flex-col h-full min-h-0">
             <div className="mb-4 flex items-center justify-center gap-3 flex-shrink-0">
               <h3 className="text-lg font-anton font-bold text-[#1A1A1A]">
-                CHỜ XÁC NHẬN
+                PENDING
               </h3>
               <div className="w-7 h-7 rounded-full bg-yellow-500 flex items-center justify-center">
                 <span className="text-xs font-bold text-white">{pendingOrders.length}</span>
@@ -177,7 +177,7 @@ export default function OrdersPage() {
           <div className="flex flex-col h-full min-h-0">
             <div className="mb-4 flex items-center justify-center gap-3 flex-shrink-0">
               <h3 className="text-lg font-anton font-bold text-[#1A1A1A]">
-                ĐANG CHUẨN BỊ
+                IN PROGRESS
               </h3>
               <div className="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center">
                 <span className="text-xs font-bold text-white">{isLoading ? '-' : inProgressOrders.length}</span>
@@ -214,7 +214,7 @@ export default function OrdersPage() {
           <div className="flex flex-col h-full min-h-0">
             <div className="mb-4 flex items-center justify-center gap-3 flex-shrink-0">
               <h3 className="text-lg font-anton font-bold text-[#1A1A1A]">
-                CHỜ TÀI XẾ
+                WAITING FOR DRIVER
               </h3>
               <div className="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center">
                 <span className="text-xs font-bold text-white">{isLoading ? '-' : waitingForDriverOrders.length}</span>
