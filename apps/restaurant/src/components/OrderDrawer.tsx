@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
-import { X, CheckCircle, XCircle, Clock, MapPin, User } from '@repo/ui/icons';
+import { X, CheckCircle, XCircle, Clock, MapPin, User, ChevronRight } from '@repo/ui/icons';
 import { formatVnd } from '@repo/lib';
 import type { Order, OrderItem } from '@repo/types';
 import { useSwipeConfirmation } from '@repo/ui';
@@ -78,240 +78,257 @@ export default function OrderDrawer({ open, order, onClose, onConfirm, onReject,
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-md"
             onClick={onClose}
           />
           <motion.div
-            initial={{ y: 520, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 520, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 240, damping: 24 }}
-            className="fixed z-[70] left-0 right-0 bottom-0 max-h-[90vh] rounded-t-[40px] bg-[#F7F7F7] overflow-hidden shadow-2xl"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 18, stiffness: 100 }}
+            className="fixed z-[70] left-4 right-4 bottom-4 top-20 rounded-[40px] bg-[#F8F9FA] overflow-hidden shadow-2xl flex flex-col border border-white/20"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 bg-white">
-              <div className="text-2xl font-anton font-bold text-[#1A1A1A]">
-                CHI TIẾT ĐƠN HÀNG
+            <div className="flex items-center justify-between px-8 py-6 bg-white border-b border-gray-100 shrink-0">
+              <div>
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">ORDER DETAILS</div>
+                <div className="text-3xl font-anton font-bold text-[#1A1A1A]">
+                  #{order.code}
+                </div>
               </div>
               <motion.button
-                whileHover={{ scale: 1.06 }}
+                whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onClose}
-                className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </motion.button>
             </div>
 
-            {/* 2 Column Layout: 70% - 30% */}
-            <div className="grid grid-cols-[70%_30%] h-[calc(90vh-88px)]">
-              {/* Left Column: Order Details */}
-              <div className="overflow-y-auto px-6 py-4 custom-scrollbar">
-                <div className="m-4 rounded-3xl border-2 border-gray-300">
-                  {/* Order Code & Time */}
-                  <div className="p-8 border-b-2 border-gray-300">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-sm text-gray-500 mb-1">Mã đơn hàng</div>
-                        <div className="text-xl font-anton font-bold text-primary">
-                          {order.code}
+            {/* Content Layout */}
+            <div className="flex-1 overflow-hidden grid grid-cols-12 gap-0 relative">
+              {/* Left Column: Order Information (Scrollable) */}
+              <div className="col-span-8 overflow-y-auto custom-scrollbar bg-white">
+                <div className="p-8 space-y-8">
+
+                  {/* Customer & Time Section */}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="bg-gray-50 rounded-[24px] p-5 border border-gray-100">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 text-gray-400">
+                          <User className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">CUSTOMER</div>
+                          <div className="font-bold text-[#1A1A1A] text-lg">
+                            {order.customer?.name || 'Guest User'}
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm text-gray-500 mb-1">Thời gian</div>
-                        <div className="flex items-center gap-1 text-sm font-semibold" suppressHydrationWarning>
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          {datetime || '--/--/---- --:--'}
+                    </div>
+                    <div className="bg-gray-50 rounded-[24px] p-5 border border-gray-100">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 text-gray-400">
+                          <Clock className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">ORDER TIME</div>
+                          <div className="font-bold text-[#1A1A1A] text-lg pb-1" suppressHydrationWarning>
+                            {datetime || '--:--'}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Delivery Info */}
-                  <div className="p-8 border-b-2 border-gray-300">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <MapPin className="w-5 h-5 text-primary" />
+                  {/* Delivery Location */}
+                  <div className="bg-gray-50 rounded-[24px] p-5 border border-gray-100">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 text-[#1A1A1A]">
+                        <MapPin className="w-6 h-6" />
                       </div>
-                      <div className="flex-1">
-                        <div className="text-sm text-gray-500 mb-1">Địa chỉ giao hàng</div>
-                        <div className="text-sm font-semibold text-[#1A1A1A]">
-                          {order.deliveryLocation.address || 'Địa chỉ không xác định'}
+                      <div className="flex-1 mt-1">
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">DELIVERY ADDRESS</div>
+                        <div className="font-bold text-[#1A1A1A] text-lg leading-snug">
+                          {order.deliveryLocation.address || 'Address not provided'}
                         </div>
                       </div>
                     </div>
                   </div>
+
 
                   {/* Order Items */}
-                  <div className="p-8 border-b-2 border-gray-300">
-                    <div className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      Món ăn ({order.items.length})
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="w-8 h-[2px] bg-gray-200 rounded-full"></span>
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">ORDER ITEMS ({order.items.length})</span>
+                      <span className="flex-1 h-[2px] bg-gray-200 rounded-full"></span>
                     </div>
-                    <div className="space-y-3">
+
+                    <div className="grid grid-cols-1 gap-4">
                       {order.items.map((item: OrderItem) => (
-                        <div key={item.id} className="flex items-start gap-3 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
-                          <div className="w-10 h-10 rounded-full bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
-                            <span className="font-anton text-lg font-bold">{item.quantity}x</span>
+                        <div key={item.id} className="bg-white rounded-[24px] p-4 border-2 border-gray-50 hover:border-lime-100 hover:shadow-lg hover:shadow-lime-500/5 transition-all duration-300 flex items-start gap-4 group">
+                          <div className="w-14 h-14 rounded-2xl bg-gray-50 text-[#1A1A1A] font-anton text-xl flex items-center justify-center flex-shrink-0 group-hover:bg-lime-400 group-hover:text-white transition-colors duration-300 shadow-inner">
+                            {item.quantity}x
                           </div>
-                          <div className="flex-1">
-                            <div className="font-semibold text-[#1A1A1A] mb-1">{item.name}</div>
+                          <div className="flex-1 py-1">
+                            <div className="font-bold text-[#1A1A1A] text-lg">{item.name}</div>
 
-                            {/* Variant */}
-                            {item.options?.variant && (
-                              <div className="text-xs text-gray-600 mb-1">
-                                <span className="font-semibold">Phân loại:</span> {item.options.variant.name}
-                                {item.options.variant.price > 0 && ` (+${formatVnd(item.options.variant.price)})`}
+                            {/* Variants & Addons */}
+                            {(item.options?.variant || (item.options?.addons && item.options.addons.length > 0)) && (
+                              <div className="mt-2 text-sm text-gray-500 space-y-1">
+                                {item.options?.variant && (
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+                                    <span className='font-semibold text-gray-400'>{item.options.variant.name} {item.options.variant.price > 0 && `(+${formatVnd(item.options.variant.price)})`}</span>
+                                  </div>
+                                )}
+                                {item.options?.addons?.map((a) => (
+                                  <div key={a.id} className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+                                    <span className='font-semibold text-gray-400'>{a.name} (+{formatVnd(a.price)})</span>
+                                  </div>
+                                ))}
                               </div>
                             )}
-
-                            {/* Addons */}
-                            {item.options?.addons && item.options.addons.length > 0 && (
-                              <div className="text-xs text-gray-600">
-                                <span className="font-semibold">Topping:</span> {item.options.addons.map((a: { id: string; name: string; price: number }) =>
-                                  `${a.name} (+${formatVnd(a.price)})`
-                                ).join(', ')}
-                              </div>
-                            )}
                           </div>
-                          <div className="text-right">
-                            <div className="font-anton text-lg font-bold text-primary">
+                          <div className="py-1 text-right">
+                            <div className="font-anton text-xl text-primary font-bold">
                               {formatVnd(item.price * item.quantity)}
+                            </div>
+                            <div className="text-xs font-medium text-gray-400 mt-1">
+                              {formatVnd(item.price)} / item
                             </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-
-                  {/* Price Breakdown */}
-                  <div className="p-8">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Tạm tính</span>
-                        <span className="font-semibold">{formatVnd(order.subtotal)}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Phí vận chuyển</span>
-                        <span className="font-semibold">{formatVnd(order.fee)}</span>
-                      </div>
-                      {order.discount > 0 && (
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Giảm giá</span>
-                          <span className="font-semibold text-green-600">-{formatVnd(order.discount)}</span>
-                        </div>
-                      )}
-                      <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-2" />
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-700 font-semibold">Tổng cộng</span>
-                        <span className="text-2xl font-anton font-bold text-primary">
-                          {formatVnd(order.total)}
-                        </span>
-                      </div>
-
-                      {/* Restaurant earnings */}
-                      <div className="mt-3 pt-3 border-t border-gray-200">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Nhà hàng nhận</span>
-                          <span className="text-lg font-anton font-bold text-green-600">
-                            {formatVnd(order.subtotal - order.discount)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              {/* Right Column: Action Buttons */}
-              <div className="bg-white p-12 flex flex-col justify-center gap-4 relative overflow-hidden">
-                <AnimatePresence mode="wait">
-                  {!showRejectReasons ? (
-                    <motion.div
-                      key="action-buttons"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.25 }}
-                      className="space-y-4 w-full"
-                    >
-                      {isPending && (
-                        <>
-                          <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={handleConfirmOrder}
-                            className="w-full flex flex-col items-center justify-center gap-2 px-6 py-6 rounded-3xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
-                          >
-                            <CheckCircle className="w-8 h-8" />
-                            <span>Xác nhận</span>
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={handleRejectOrder}
-                            className="w-full flex flex-col items-center justify-center gap-2 px-6 py-6 rounded-3xl bg-red-50 text-red-600 font-semibold hover:bg-red-100 transition-colors"
-                          >
-                            <XCircle className="w-8 h-8" />
-                            <span>Từ chối</span>
-                          </motion.button>
-                        </>
+              {/* Right Column: Payment & Actions (Sticky/Fixed) */}
+              <div className="col-span-4 bg-[#FAFAFA] border-l border-gray-100 flex flex-col h-full">
+                <div className="flex-1 p-8 overflow-y-auto custom-scrollbar">
+
+                  {/* Payment Summary Box */}
+                  <div className="bg-white rounded-[32px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 mb-6">
+                    <h3 className="text-center font-anton text-xl font-semibold text-[#1A1A1A] mb-6 uppercase">Payment Summary</h3>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between text-base">
+                        <span className="text-gray-500 font-medium">Subtotal</span>
+                        <span className="font-bold text-[#1A1A1A]">{formatVnd(order.subtotal)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-base">
+                        <span className="text-gray-500 font-medium">Delivery Fee</span>
+                        <span className="font-bold text-[#1A1A1A]">{formatVnd(order.fee)}</span>
+                      </div>
+                      {order.discount > 0 && (
+                        <div className="flex items-center justify-between text-base">
+                          <span className="text-gray-500 font-medium">Discount</span>
+                          <span className="font-bold text-red-500">-{formatVnd(order.discount)}</span>
+                        </div>
                       )}
-                      {isPrepared && (
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleCompleteOrder}
-                          className="w-full flex flex-col items-center justify-center gap-2 px-6 py-6 rounded-3xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/30"
-                        >
-                          <CheckCircle className="w-8 h-8" />
-                          <span>Hoàn thành</span>
-                        </motion.button>
-                      )}
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="reject-reasons"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.25 }}
-                      className="space-y-3 w-full"
-                    >
-                      <div className="text-sm font-semibold text-gray-700 text-center mb-4">Chọn lý do từ chối:</div>
-                      {REJECTION_REASONS.map((reason, index) => (
-                        <motion.button
-                          key={reason}
+
+                      <div className="border-t-2 border-dashed border-gray-100 my-4"></div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-gray-800 text-lg">Total</span>
+                        <span className="font-anton text-3xl text-primary">{formatVnd(order.total)}</span>
+                      </div>
+                    </div>
+
+                    {/* Compact Earnings Info */}
+                    <div className="mt-6 bg-lime-50 rounded-xl p-3 flex items-center justify-between">
+                      <span className="text-xs font-bold text-lime-700 uppercase">Restaurant Net Earning</span>
+                      <span className="text-sm font-anton font-bold text-lime-700">{formatVnd(order.subtotal - order.discount)}</span>
+                    </div>
+                  </div>
+
+                  {/* Actions Section */}
+                  <div className="relative">
+                    <AnimatePresence mode="wait">
+                      {!showRejectReasons ? (
+                        <motion.div
+                          key="action-buttons"
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05, duration: 0.2 }}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => handleSelectReason(reason)}
-                          className="w-full px-4 py-3 rounded-xl bg-gray-100 hover:bg-red-50 hover:text-red-600 text-sm font-medium transition-colors text-center"
+                          exit={{ opacity: 0, y: -10 }}
+                          className="space-y-3"
                         >
-                          {reason}
-                        </motion.button>
-                      ))}
-                      <motion.button
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: REJECTION_REASONS.length * 0.05, duration: 0.2 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleCancelReject}
-                        className="w-full px-4 py-3 rounded-xl bg-gray-200 text-gray-700 font-semibold mt-4"
-                      >
-                        Hủy
-                      </motion.button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                          {isPending && (
+                            <>
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={handleConfirmOrder}
+                                className="w-full py-4 rounded-2xl bg-[#1A1A1A] text-white font-bold text-lg shadow-xl shadow-black/10 hover:shadow-2xl hover:bg-black transition-all flex items-center justify-center gap-3 group"
+                              >
+                                <span>Confirm Order</span>
+                                <div className="w-8 h-8 rounded-full bg-lime-400 text-black flex items-center justify-center group-hover:scale-110 transition-transform">
+                                  <CheckCircle className="w-5 h-5" strokeWidth={3} />
+                                </div>
+                              </motion.button>
+
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={handleRejectOrder}
+                                className="w-full py-4 rounded-2xl bg-white border-2 border-gray-200 text-gray-500 font-bold hover:bg-red-50 hover:border-red-100 hover:text-red-500 transition-all flex items-center justify-center gap-2"
+                              >
+                                <XCircle className="w-5 h-5" />
+                                <span>Reject Order</span>
+                              </motion.button>
+                            </>
+                          )}
+
+                          {isPrepared && (
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={handleCompleteOrder}
+                              className="w-full py-4 rounded-2xl bg-lime-500 text-white font-bold text-lg shadow-xl shadow-lime-500/30 hover:bg-lime-600 transition-all flex items-center justify-center gap-3"
+                            >
+                              <span>Mark as Ready</span>
+                              <CheckCircle className="w-6 h-6" />
+                            </motion.button>
+                          )}
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="reasons-list"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          className="bg-white rounded-[24px] p-5 shadow-lg border border-gray-100"
+                        >
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="font-bold text-gray-800">Select Reason</span>
+                            <button onClick={handleCancelReject} className="p-1 hover:bg-gray-100 rounded-full"><X className="w-4 h-4" /></button>
+                          </div>
+                          <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                            {REJECTION_REASONS.map((reason) => (
+                              <button
+                                key={reason}
+                                onClick={() => handleSelectReason(reason)}
+                                className="w-full text-left px-4 py-3 rounded-xl hover:bg-red-50 hover:text-red-600 text-sm font-medium transition-colors flex items-center justify-between group"
+                              >
+                                {reason}
+                                <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                </div>
               </div>
             </div>
           </motion.div>
-
-
         </>
       )}
     </AnimatePresence>

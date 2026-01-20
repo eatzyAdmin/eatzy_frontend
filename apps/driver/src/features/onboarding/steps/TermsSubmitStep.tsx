@@ -2,7 +2,7 @@
 import { useOnboardingStore } from "../store/useOnboardingStore";
 import { useLoading } from "@repo/ui";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, CheckCircle2 } from "@repo/ui/icons";
+import { AlertTriangle, CheckCircle2, ShieldCheck, FileText } from "@repo/ui/icons";
 import { useState, useEffect } from "react";
 import type { OnboardingStepId } from "../types";
 
@@ -50,27 +50,93 @@ export default function TermsSubmitStep() {
     setField('applicationStatus', 'PENDING_REVIEW');
     setTimeout(() => { router.push('/pending-review'); }, 300);
   };
+
   return (
-    <div className="p-6 space-y-4">
-      <div className="text-lg font-semibold text-gray-900">Đồng ý điều khoản & gửi hồ sơ</div>
-      {errorMsg && (
-        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">{errorMsg}</div>
-      )}
-      <div className="rounded-2xl border p-4 text-sm text-gray-700">
-        <div className="font-semibold mb-2">Tóm tắt</div>
-        <div>Vui lòng kiểm tra lại thông tin trước khi gửi.</div>
+    <div className="space-y-5">
+      {/* Header Card */}
+      <div className="bg-white rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
+          <div className="w-10 h-10 rounded-2xl bg-lime-100 flex items-center justify-center border border-lime-200">
+            <FileText className="w-5 h-5 text-lime-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-[#1A1A1A]">Điều khoản & Gửi hồ sơ</h3>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Terms & Submit</p>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* Error Message */}
+          {errorMsg && (
+            <div className="p-4 bg-amber-50 border border-amber-100 rounded-[20px] flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <span className="font-bold text-xs uppercase tracking-wider text-amber-400">Cảnh báo</span>
+                <p className="text-amber-700 font-medium text-sm mt-0.5">{errorMsg}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Summary Card */}
+          <div className="bg-gray-50 rounded-[20px] p-5 border border-gray-100">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Tóm tắt</p>
+            <p className="text-sm text-gray-600 font-medium">Vui lòng kiểm tra lại thông tin trước khi gửi.</p>
+          </div>
+
+          {/* Checkboxes */}
+          <div className="space-y-4">
+            <label className="flex items-start gap-4 cursor-pointer group p-4 rounded-[20px] border border-gray-100 hover:border-lime-200 hover:bg-lime-50/30 transition-all">
+              <input
+                type="checkbox"
+                checked={!!data.hasConfirmedAccuracy}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAccuracy(e.target.checked)}
+                className="w-5 h-5 rounded-lg border-2 border-gray-200 text-lime-500 focus:ring-lime-500 focus:ring-2 cursor-pointer mt-0.5"
+              />
+              <div>
+                <span className="text-sm font-bold text-[#1A1A1A] group-hover:text-lime-700 transition-colors">Tôi cam kết thông tin là chính xác</span>
+                <p className="text-xs text-gray-400 mt-1">Mọi thông tin tôi cung cấp là trung thực.</p>
+              </div>
+            </label>
+
+            <label className="flex items-start gap-4 cursor-pointer group p-4 rounded-[20px] border border-gray-100 hover:border-lime-200 hover:bg-lime-50/30 transition-all">
+              <input
+                type="checkbox"
+                checked={!!data.hasAcceptedTerms}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAccepted(e.target.checked)}
+                className="w-5 h-5 rounded-lg border-2 border-gray-200 text-lime-500 focus:ring-lime-500 focus:ring-2 cursor-pointer mt-0.5"
+              />
+              <div>
+                <span className="text-sm font-bold text-[#1A1A1A] group-hover:text-lime-700 transition-colors">Tôi đồng ý với Điều khoản & Chính sách của Eatzy Driver</span>
+                <p className="text-xs text-gray-400 mt-1">Bao gồm Chính sách Bảo mật và Điều khoản Sử dụng.</p>
+              </div>
+            </label>
+          </div>
+        </div>
       </div>
-      <label className="flex items-center gap-3 text-sm text-gray-700">
-        <input type="checkbox" checked={!!data.hasConfirmedAccuracy} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAccuracy(e.target.checked)} className="w-4 h-4" />
-        <span>Tôi cam kết thông tin là chính xác</span>
-      </label>
-      <label className="flex items-center gap-3 text-sm text-gray-700">
-        <input type="checkbox" checked={!!data.hasAcceptedTerms} onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAccepted(e.target.checked)} className="w-4 h-4" />
-        <span>Tôi đồng ý với Điều khoản & Chính sách của Eatzy Driver</span>
-      </label>
-      <button disabled={!allChecked} onClick={validateAndSubmit} className={`w-full h-12 rounded-xl text-white flex items-center justify-center gap-2 ${allChecked ? 'bg-[var(--primary)]' : 'bg-gray-300'}`}>
+
+      {/* Safety Banner */}
+      <div className="bg-gradient-to-r from-lime-50 to-white border border-lime-100/50 p-4 rounded-[24px] flex items-center gap-3">
+        <div className="w-8 h-8 rounded-full bg-lime-100 flex items-center justify-center flex-shrink-0">
+          <ShieldCheck className="w-4 h-4 text-lime-600" />
+        </div>
+        <p className="text-xs text-lime-600 leading-relaxed font-medium">
+          Thông tin của bạn được bảo mật và chỉ dùng cho mục đích xác minh.
+        </p>
+      </div>
+
+      {/* Submit Button */}
+      <button
+        disabled={!allChecked}
+        onClick={validateAndSubmit}
+        className={`w-full h-14 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all duration-300 ${allChecked
+            ? 'bg-lime-500 text-[#1A1A1A] hover:bg-lime-400 shadow-lg shadow-lime-500/20 active:scale-[0.98]'
+            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          }`}
+      >
         {allChecked ? <CheckCircle2 className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
-        Gửi hồ sơ
+        <span className="font-anton text-base uppercase tracking-wider">GỬI HỒ SƠ</span>
       </button>
     </div>
   );

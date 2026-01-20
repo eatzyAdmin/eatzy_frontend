@@ -39,10 +39,10 @@ const FloatingLabelInput = forwardRef<HTMLInputElement, FloatingLabelInputProps>
             type={inputType}
             value={value}
             className={`w-full pt-6 pb-2 px-0 bg-transparent border-0 border-b-2 text-gray-900 ${error
-                ? 'border-[var(--danger)]'
-                : isActive
-                  ? 'border-[var(--primary)]'
-                  : 'border-gray-300'
+              ? 'border-[var(--danger)]'
+              : isActive
+                ? 'border-[var(--primary)]'
+                : 'border-gray-300'
               } focus:outline-none focus:ring-0 transition-all duration-300 ${className}`}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
@@ -51,13 +51,13 @@ const FloatingLabelInput = forwardRef<HTMLInputElement, FloatingLabelInputProps>
           />
           <label
             className={`absolute left-0 transition-all duration-300 ease-out pointer-events-none ${isActive
-                ? 'top-0 text-xs font-medium'
-                : 'top-1/2 -translate-y-1/2 text-base'
+              ? 'top-0 text-[10px] font-bold uppercase tracking-wider'
+              : 'top-1/2 -translate-y-1/2 text-sm font-medium'
               } ${error
                 ? 'text-[var(--danger)]'
                 : isActive
                   ? 'text-[var(--primary)]'
-                  : 'text-gray-500'
+                  : 'text-gray-400'
               }`}
           >
             {label}

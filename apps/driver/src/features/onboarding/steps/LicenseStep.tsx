@@ -25,16 +25,54 @@ export default function LicenseStep() {
   useEffect(() => {
     setStepValid("license", !!form.formState.isValid);
   }, [form.formState.isValid, setStepValid]);
+
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-        <BadgeCheck className="w-5 h-5 text-[var(--primary)]" />
-        <div>Bằng lái xe</div>
+    <div className="bg-white rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 overflow-hidden">
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
+        <div className="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center border border-purple-200">
+          <BadgeCheck className="w-5 h-5 text-purple-600" />
+        </div>
+        <div>
+          <h3 className="font-bold text-[#1A1A1A]">Bằng lái xe</h3>
+          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Driver License</p>
+        </div>
       </div>
-      <FloatingLabelInput label="Số GPLX" value={w.driverLicenseNumber} error={form.formState.errors.driverLicenseNumber?.message} {...form.register("driverLicenseNumber", { onChange: (e: React.ChangeEvent<HTMLInputElement>) => setField("driverLicenseNumber", e.target.value) })} />
-      <CustomSelect label="Hạng" options={["A1","A2"]} value={(w.driverLicenseClass as string) ?? undefined} onChange={(v: string) => { form.setValue("driverLicenseClass", v as "A1" | "A2", { shouldValidate: true }); setField("driverLicenseClass", v as DriverOnboardingData["driverLicenseClass"]); }} />
-      <CalendarDatePicker label="Ngày cấp" value={w.driverLicenseIssueDate || null} onChange={(v) => { const val = typeof v === 'string' ? v : (v ? (v as Date).toISOString().slice(0,10) : ''); form.setValue("driverLicenseIssueDate", val, { shouldValidate: true }); setField("driverLicenseIssueDate", val); }} error={form.formState.errors.driverLicenseIssueDate?.message} />
-      <UploadCard label="Ảnh bằng lái" value={w.driverLicenseImageUrl} onChange={(u) => { form.setValue("driverLicenseImageUrl", String(u), { shouldValidate: true }); setField("driverLicenseImageUrl", u); }} />
+
+      {/* Form Content */}
+      <div className="p-6 space-y-5">
+        <FloatingLabelInput
+          label="Số GPLX"
+          value={w.driverLicenseNumber}
+          error={form.formState.errors.driverLicenseNumber?.message}
+          {...form.register("driverLicenseNumber", { onChange: (e: React.ChangeEvent<HTMLInputElement>) => setField("driverLicenseNumber", e.target.value) })}
+        />
+        <CustomSelect
+          label="Hạng"
+          options={["A1", "A2"]}
+          value={(w.driverLicenseClass as string) ?? undefined}
+          onChange={(v: string) => {
+            form.setValue("driverLicenseClass", v as "A1" | "A2", { shouldValidate: true });
+            setField("driverLicenseClass", v as DriverOnboardingData["driverLicenseClass"]);
+          }}
+        />
+        <CalendarDatePicker
+          label="Ngày cấp"
+          value={w.driverLicenseIssueDate || null}
+          onChange={(v) => {
+            const val = typeof v === 'string' ? v : (v ? (v as Date).toISOString().slice(0, 10) : '');
+            form.setValue("driverLicenseIssueDate", val, { shouldValidate: true });
+            setField("driverLicenseIssueDate", val);
+          }}
+          error={form.formState.errors.driverLicenseIssueDate?.message}
+        />
+
+        {/* Upload Section */}
+        <div className="pt-2">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Upload Document</p>
+          <UploadCard label="Ảnh bằng lái" value={w.driverLicenseImageUrl} onChange={(u) => { form.setValue("driverLicenseImageUrl", String(u), { shouldValidate: true }); setField("driverLicenseImageUrl", u); }} />
+        </div>
+      </div>
     </div>
   );
 }

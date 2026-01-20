@@ -6,7 +6,7 @@ import WalletTransactionTable from '@/features/wallet/components/WalletTransacti
 import WalletBankInfo from '@/features/wallet/components/WalletBankInfo';
 import WithdrawModal from '@/features/wallet/components/WithdrawModal';
 import { useLoading, useNotification } from '@repo/ui';
-import { ChevronLeft, ChevronRight } from '@repo/ui/icons';
+import { ChevronLeft, ChevronRight, Wallet } from '@repo/ui/icons';
 
 export default function WalletPage() {
   const { hide } = useLoading();
@@ -78,8 +78,16 @@ export default function WalletPage() {
     <div className="min-h-screen pb-20 px-6 pt-8 w-full max-w-full overflow-x-hidden">
       {/* Header Section */}
       <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-        <h1 className="text-4xl font-anton font-bold text-[#1A1A1A] mb-2">My Wallet</h1>
-        <p className="text-gray-500 font-medium text-lg">Manage earnings, payouts, and bank details overview.</p>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <Wallet size={12} />
+            Financial Hub
+          </span>
+        </div>
+        <h1 className="text-4xl font-anton text-gray-900 uppercase tracking-tight">
+          My Wallet
+        </h1>
+        <p className="text-gray-500 font-medium mt-1">Manage earnings, payouts, and bank details overview.</p>
       </div>
 
       {/* Hero Stats Horizontal Scroll Container */}

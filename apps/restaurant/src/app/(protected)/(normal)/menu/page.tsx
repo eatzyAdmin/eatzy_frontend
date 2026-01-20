@@ -267,8 +267,16 @@ export default function MenuPage() {
       <div className="px-8 pt-8 pb-4 bg-white/50 backdrop-blur-md sticky top-0 z-20 border-b border-gray-200 shadow-sm shrink-0">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-4xl mb-2 font-anton font-bold text-[#1A1A1A]">MENU MANAGEMENT</h1>
-            <p className="text-gray-500 text-sm font-medium">Quản lý món ăn, phân loại và tùy chọn</p>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <Settings size={12} />
+                Menu Editor
+              </span>
+            </div>
+            <h1 className="text-4xl font-anton text-gray-900 uppercase tracking-tight">
+              Menu Management
+            </h1>
+            <p className="text-gray-500 font-medium mt-1">Quản lý món ăn, phân loại và tùy chọn</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative">

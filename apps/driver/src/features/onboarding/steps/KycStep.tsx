@@ -26,18 +26,47 @@ export default function KycStep() {
   useEffect(() => {
     setStepValid("kyc", !!form.formState.isValid);
   }, [form.formState.isValid, setStepValid]);
+
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-        <IdCard className="w-5 h-5 text-[var(--primary)]" />
-        <div>Giấy tờ tùy thân & Selfie</div>
+    <div className="bg-white rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 overflow-hidden">
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
+        <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center border border-blue-200">
+          <IdCard className="w-5 h-5 text-blue-600" />
+        </div>
+        <div>
+          <h3 className="font-bold text-[#1A1A1A]">Giấy tờ tùy thân & Selfie</h3>
+          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Identity Verification</p>
+        </div>
       </div>
-      <CustomSelect label="Loại giấy tờ" options={["CCCD","CMND","PASSPORT"]} value={(w.idType as string) ?? undefined} onChange={(v: string) => { form.setValue("idType", v as IdType, { shouldValidate: true }); setField("idType", v as IdType); }} />
-      <FloatingLabelInput label="Số giấy tờ" value={w.idNumber} error={form.formState.errors.idNumber?.message} {...form.register("idNumber", { onChange: (e: React.ChangeEvent<HTMLInputElement>) => setField("idNumber", e.target.value) })} />
-      <div className="grid grid-cols-1 gap-4">
-        <UploadCard label="Mặt trước" value={w.idFrontImageUrl} onChange={(u) => { form.setValue("idFrontImageUrl", String(u), { shouldValidate: true }); setField("idFrontImageUrl", u); }} />
-        <UploadCard label="Mặt sau" value={w.idBackImageUrl} onChange={(u) => { form.setValue("idBackImageUrl", String(u), { shouldValidate: true }); setField("idBackImageUrl", u); }} />
-        <UploadCard label="Selfie" value={w.selfieImageUrl} onChange={(u) => { form.setValue("selfieImageUrl", String(u), { shouldValidate: true }); setField("selfieImageUrl", u); }} />
+
+      {/* Form Content */}
+      <div className="p-6 space-y-5">
+        <CustomSelect
+          label="Loại giấy tờ"
+          options={["CCCD", "CMND", "PASSPORT"]}
+          value={(w.idType as string) ?? undefined}
+          onChange={(v: string) => {
+            form.setValue("idType", v as IdType, { shouldValidate: true });
+            setField("idType", v as IdType);
+          }}
+        />
+        <FloatingLabelInput
+          label="Số giấy tờ"
+          value={w.idNumber}
+          error={form.formState.errors.idNumber?.message}
+          {...form.register("idNumber", { onChange: (e: React.ChangeEvent<HTMLInputElement>) => setField("idNumber", e.target.value) })}
+        />
+
+        {/* Upload Section */}
+        <div className="pt-2">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Upload Documents</p>
+          <div className="grid grid-cols-1 gap-4">
+            <UploadCard label="Mặt trước" value={w.idFrontImageUrl} onChange={(u) => { form.setValue("idFrontImageUrl", String(u), { shouldValidate: true }); setField("idFrontImageUrl", u); }} />
+            <UploadCard label="Mặt sau" value={w.idBackImageUrl} onChange={(u) => { form.setValue("idBackImageUrl", String(u), { shouldValidate: true }); setField("idBackImageUrl", u); }} />
+            <UploadCard label="Selfie" value={w.selfieImageUrl} onChange={(u) => { form.setValue("selfieImageUrl", String(u), { shouldValidate: true }); setField("selfieImageUrl", u); }} />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -54,37 +54,68 @@ function OnboardingContent() {
 
   const otpIdx = ONBOARDING_STEPS.findIndex((x) => x.id === "otp");
   const isStep2 = stepIndex > otpIdx;
+
   return (
-    <div className="min-h-screen w-full bg-white">
+    <div className="min-h-screen w-full bg-[#F8F9FA]">
       <div className="max-w-md mx-auto p-4 pt-6">
         {isStep2 ? (
           <>
-            <ProgressStepper currentIndex={stepIndex} onClickId={(id) => setStepById(id)} navHidden={false} visibleIds={["personal","kyc","license","vehicle","criminal","bank_tax","terms_submit"]} />
+            {/* Progress Stepper */}
+            <ProgressStepper
+              currentIndex={stepIndex}
+              onClickId={(id) => setStepById(id)}
+              navHidden={false}
+              visibleIds={["personal", "kyc", "license", "vehicle", "criminal", "bank_tax", "terms_submit"]}
+            />
+
+            {/* Step Content */}
             <AnimatePresence mode="wait">
-              <motion.div key={ONBOARDING_STEPS[stepIndex]?.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className="mt-4">
+              <motion.div
+                key={ONBOARDING_STEPS[stepIndex]?.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="mt-4"
+              >
                 {renderStep()}
               </motion.div>
             </AnimatePresence>
           </>
         ) : (
           <AnimatePresence mode="wait">
-            <motion.div key={ONBOARDING_STEPS[stepIndex]?.id} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.5 }}>
+            <motion.div
+              key={ONBOARDING_STEPS[stepIndex]?.id}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.5 }}
+            >
               {renderStep()}
             </motion.div>
           </AnimatePresence>
         )}
+
+        {/* Bottom Navigation - Matching OrderCard/OrderDetailsModal style */}
         {isStep2 && (
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
             <div className="max-w-md mx-auto flex items-center gap-3">
-              <Button variant="outline" size="lg" className="flex-1" onClick={back}>Quay lại</Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="flex-1 rounded-2xl h-14 font-bold border-4 border-gray-100 hover:border-gray-200 hover:bg-gray-50/30 text-[#1A1A1A] transition-all duration-300"
+                onClick={back}
+              >
+                <span className="text-sm">Quay lại</span>
+              </Button>
               <Button
                 variant="primary"
                 size="lg"
-                className="flex-1"
+                className="flex-1 rounded-2xl h-14 font-bold bg-lime-500 hover:bg-lime-400 text-[#1A1A1A] shadow-lg shadow-lime-500/20 transition-all duration-300 disabled:opacity-50"
                 disabled={!store.validSteps[ONBOARDING_STEPS[stepIndex]?.id]}
                 onClick={next}
               >
-                Kế tiếp
+                <span className="font-anton text-base uppercase tracking-wider">KẾ TIẾP</span>
               </Button>
             </div>
           </div>
