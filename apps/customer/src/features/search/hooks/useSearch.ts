@@ -1,11 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import type { Restaurant, Dish, MenuCategory, RestaurantMagazine } from '@repo/types';
-import {
-  searchRestaurants as mockSearchRestaurants,
-  getDishesForRestaurant,
-  getMenuCategoriesForRestaurant,
-} from '../data/mockSearchData';
 import { useSearchRestaurants } from './useSearchRestaurants';
 import { useUserLocation, DEFAULT_LOCATION_HCMC } from '@repo/hooks';
 
@@ -27,10 +22,6 @@ export interface SearchFilters {
   category: string | null;
 }
 
-// ======== Constants ========
-
-const USE_MOCK_DATA = false; // Set to true to use mock data instead of API
-
 // ======== Mapper Function ========
 
 function mapMagazineToRestaurantWithMenu(
@@ -44,7 +35,7 @@ function mapMagazineToRestaurantWithMenu(
     displayOrder: idx + 1,
   }));
 
-  const dishes: Dish[] = (magazine.category || []).flatMap(cat =>
+  let dishes: Dish[] = (magazine.category || []).flatMap(cat =>
     (cat.dishes || []).map(dish => ({
       id: String(dish.id),
       name: dish.name,
@@ -58,6 +49,22 @@ function mapMagazineToRestaurantWithMenu(
       rating: magazine.averageRating || 4.5,
     }))
   );
+
+  // Fallback: If no dishes, create a placeholder dish to prevent UI errors
+  if (dishes.length === 0) {
+    dishes = [{
+      id: `placeholder-${magazine.id}`,
+      name: magazine.name,
+      description: magazine.description || 'Khám phá các món ăn tại đây',
+      price: 0,
+      imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
+      restaurantId: String(magazine.id),
+      menuCategoryId: 'default',
+      availableQuantity: 0,
+      isAvailable: true,
+      rating: magazine.averageRating || 4.5,
+    }];
+  }
 
   const restaurant: Restaurant = {
     id: String(magazine.id),
@@ -92,10 +99,8 @@ export function useSearch() {
   const pathname = usePathname();
 
   // Local state
-  const [localSearchQuery, setLocalSearchQuery] = useState(searchParams.get('q') || '');
-  const [mockResults, setMockResults] = useState<RestaurantWithMenu[]>([]);
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
-  const [isMockSearching, setIsMockSearching] = useState(false);
 
   // Get user location
   const { location: userLocation, isLoading: isLocationLoading } = useUserLocation();
@@ -124,35 +129,30 @@ export function useSearch() {
     fetchNextPage,
     refetch: refetchApi,
   } = useSearchRestaurants(
-    !USE_MOCK_DATA && isSearchMode && locationCoords ? {
+    isSearchMode && locationCoords ? {
       latitude: locationCoords.latitude,
       longitude: locationCoords.longitude,
       search: currentQuery,
     } : null,
     {
-      enabled: !USE_MOCK_DATA && isSearchMode && !isLocationLoading,
+      enabled: isSearchMode && !isLocationLoading,
       showErrorNotification: true,
     }
   );
 
   // Convert API results to RestaurantWithMenu format
-  const apiSearchResults = useMemo<RestaurantWithMenu[]>(() => {
-    if (USE_MOCK_DATA || !apiRestaurants.length) return [];
+  const searchResults = useMemo<RestaurantWithMenu[]>(() => {
+    if (!apiRestaurants.length) return [];
     return apiRestaurants.map((magazine, index) =>
       mapMagazineToRestaurantWithMenu(magazine, index)
     );
   }, [apiRestaurants]);
-
-  // Combined search results
-  const searchResults = USE_MOCK_DATA ? mockResults : apiSearchResults;
-  const isSearching = USE_MOCK_DATA ? isMockSearching : isApiLoading;
 
   // ===== Actions =====
 
   const performSearch = useCallback(async (query: string, newFilters?: Partial<SearchFilters>) => {
     if (!query.trim()) return;
 
-    const alreadyInSearchMode = searchParams.has('q');
     const params = new URLSearchParams(searchParams.toString());
     params.set('q', query);
 
@@ -163,38 +163,15 @@ export function useSearch() {
     if (filtersToUse.category) params.set('category', filtersToUse.category);
     else params.delete('category');
 
-    if (alreadyInSearchMode) {
-      router.push(`?${params.toString()}`, { scroll: false });
-    }
-
-    // Mock data simulation
-    if (USE_MOCK_DATA) {
-      setIsMockSearching(true);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const restaurants = mockSearchRestaurants(query);
-      const resultsWithMenu: RestaurantWithMenu[] = restaurants.map((restaurant, index) => ({
-        restaurant,
-        dishes: getDishesForRestaurant(restaurant.id),
-        menuCategories: getMenuCategoriesForRestaurant(restaurant.id),
-        layoutType: (index % 10) + 1,
-      }));
-      setMockResults(resultsWithMenu);
-      setIsMockSearching(false);
-    }
-
     setHasSearched(true);
     setLocalSearchQuery(query);
 
-    if (!alreadyInSearchMode) {
-      router.push(`?${params.toString()}`, { scroll: false });
-    }
+    router.push(`?${params.toString()}`, { scroll: false });
   }, [searchParams, router, filters]);
 
   const clearSearch = useCallback(() => {
     setLocalSearchQuery('');
-    setMockResults([]);
     setHasSearched(false);
-    setIsMockSearching(false);
 
     const next = new URLSearchParams(searchParams.toString());
     ['q', 'minPrice', 'maxPrice', 'sort', 'category'].forEach(key => next.delete(key));
@@ -204,16 +181,13 @@ export function useSearch() {
   // Sync URL query changes
   useEffect(() => {
     const query = searchParams.get('q') || '';
-    if (!query || isSearching) return;
+    if (!query || isApiLoading) return;
 
     if (query !== localSearchQuery) {
       setLocalSearchQuery(query);
       setHasSearched(true);
-      if (USE_MOCK_DATA) {
-        performSearch(query, filters);
-      }
     }
-  }, [searchParams, localSearchQuery, performSearch, isSearching, filters]);
+  }, [searchParams, localSearchQuery, isApiLoading]);
 
   // ===== Return =====
 
@@ -222,7 +196,7 @@ export function useSearch() {
     searchQuery: localSearchQuery,
     setSearchQuery: setLocalSearchQuery,
     searchResults,
-    isSearching,
+    isSearching: isApiLoading,
     hasSearched,
     isSearchMode,
     filters,
@@ -239,7 +213,7 @@ export function useSearch() {
     performSearch,
     clearSearch,
     loadMore: fetchNextPage,
-    refetch: USE_MOCK_DATA ? () => performSearch(localSearchQuery) : refetchApi,
+    refetch: refetchApi,
 
     // Location
     userLocation: locationCoords,

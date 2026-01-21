@@ -15,11 +15,7 @@ import { useRestaurantMenu } from '@/features/menu/hooks/useMenu';
 
 // TODO: Get from user profile/auth when owner logs in
 // For now, use a fixed restaurant ID for development
-const USE_MOCK_DATA = false;
-const MOCK_RESTAURANT_ID = 1; // Change this to your test restaurant ID
-
-// Mock data fallback (only used when USE_MOCK_DATA is true)
-import { mockCategories, mockDishes as initialMockDishes } from '@/features/menu/data/mockMenuData';
+const RESTAURANT_ID = 1; // Change this to your test restaurant ID
 
 export default function MenuPage() {
   const { hide } = useLoading();
@@ -28,27 +24,14 @@ export default function MenuPage() {
 
   // ======== API Data Hook ========
   const {
-    dishes: apiDishes,
-    categories: apiCategories,
-    isLoading: isApiLoading,
+    dishes,
+    categories,
+    isLoading,
     isError,
-    createDish: apiCreateDish,
-    updateDish: apiUpdateDish,
-    deleteDish: apiDeleteDish,
-    createCategory: apiCreateCategory,
-    updateCategory: apiUpdateCategory,
-    deleteCategory: apiDeleteCategory,
-  } = useRestaurantMenu(USE_MOCK_DATA ? null : MOCK_RESTAURANT_ID);
-
-  // ======== Local State (for mock data fallback) ========
-  const [mockCategories_state, setMockCategories] = useState<MenuCategory[]>(mockCategories);
-  const [mockDishes, setMockDishes] = useState<Dish[]>(initialMockDishes);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-
-  // Decide which data to use
-  const categories = USE_MOCK_DATA ? mockCategories_state : apiCategories;
-  const dishes = USE_MOCK_DATA ? mockDishes : apiDishes;
-  const isLoading = USE_MOCK_DATA ? isInitialLoading : isApiLoading;
+    createDish,
+    updateDish,
+    deleteDish,
+  } = useRestaurantMenu(RESTAURANT_ID);
 
   const [activeCategoryId, setActiveCategoryId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,21 +75,12 @@ export default function MenuPage() {
     clearHover: tabClear
   } = useHoverHighlight<HTMLDivElement>();
 
-  // Initial loading simulation for mock data
+  // Hide loading screen when data is loaded
   useEffect(() => {
-    if (USE_MOCK_DATA) {
-      const timer = setTimeout(() => {
-        hide();
-        setIsInitialLoading(false);
-      }, 1500);
-      return () => clearTimeout(timer);
-    } else {
-      // For API, hide loading screen when data is loaded
-      if (!isApiLoading) {
-        hide();
-      }
+    if (!isLoading) {
+      hide();
     }
-  }, [hide, isApiLoading]);
+  }, [hide, isLoading]);
 
   // Observer for active category
   useEffect(() => {
@@ -155,33 +129,17 @@ export default function MenuPage() {
   // ======== Dish Handlers ========
 
   const handleDishUpdate = async (updatedDish: Dish) => {
-    if (USE_MOCK_DATA) {
-      if (dishMode === 'create') {
-        setMockDishes(prev => [...prev, updatedDish]);
+    if (dishMode === 'create') {
+      const { id, ...dishWithoutId } = updatedDish;
+      const created = await createDish(dishWithoutId);
+      if (created) {
         setDishMode('edit');
-        setSelectedDish(updatedDish);
-      } else {
-        setMockDishes(prev => prev.map(d => d.id === updatedDish.id ? updatedDish : d));
-        setSelectedDish(updatedDish);
+        setSelectedDish(created);
       }
-      showNotification({
-        message: dishMode === 'create' ? 'Đã thêm món mới thành công!' : 'Đã cập nhật món ăn thành công!',
-        type: 'success'
-      });
     } else {
-      // API call
-      if (dishMode === 'create') {
-        const { id, ...dishWithoutId } = updatedDish;
-        const created = await apiCreateDish(dishWithoutId);
-        if (created) {
-          setDishMode('edit');
-          setSelectedDish(created);
-        }
-      } else {
-        const updated = await apiUpdateDish(updatedDish);
-        if (updated) {
-          setSelectedDish(updated);
-        }
+      const updated = await updateDish(updatedDish);
+      if (updated) {
+        setSelectedDish(updated);
       }
     }
   };
@@ -194,12 +152,7 @@ export default function MenuPage() {
       confirmText: 'Xóa món',
       type: 'danger',
       onConfirm: async () => {
-        if (USE_MOCK_DATA) {
-          setMockDishes(prev => prev.filter(d => d.id !== dishId));
-          showNotification({ message: 'Đã xóa món ăn', type: 'success' });
-        } else {
-          await apiDeleteDish(dishId);
-        }
+        await deleteDish(dishId);
       }
     });
   };
@@ -211,7 +164,7 @@ export default function MenuPage() {
       description: '',
       price: 0,
       imageUrl: '',
-      restaurantId: String(MOCK_RESTAURANT_ID),
+      restaurantId: String(RESTAURANT_ID),
       menuCategoryId: categories[0]?.id || '',
       availableQuantity: 0,
       isAvailable: true,
@@ -234,14 +187,9 @@ export default function MenuPage() {
 
   // ======== Category Handlers ========
 
-  const handleUpdateCategories = async (newCategories: MenuCategory[]) => {
-    if (USE_MOCK_DATA) {
-      setMockCategories(newCategories);
-    } else {
-      // For API, the CategoryManagerModal should call individual create/update/delete
-      // This is a simplified approach - in production, compare old vs new and call appropriate APIs
-      // For now, just close the modal and refetch will happen automatically
-    }
+  const handleUpdateCategories = async (_newCategories: MenuCategory[]) => {
+    // CategoryManagerModal should call individual create/update/delete APIs
+    // This callback is kept for compatibility, refetch happens automatically
   };
 
   // ======== Render ========
