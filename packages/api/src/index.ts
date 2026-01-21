@@ -1,5 +1,15 @@
+// Main API exports
 export { http } from "./http";
 export { authApi } from "./auth";
-export { restaurantApi, dishApi, menuCategoryApi, type MenuCategoryDTO } from "./restaurant";
 
-
+// Restaurant module exports
+export {
+  restaurantApi,
+  dishApi,
+  menuCategoryApi,
+  type ResRestaurantDTO,
+  type BackendDishDTO,
+  type MenuCategoryDTO,
+  type PaginationParams,
+  type RestaurantSearchParams,
+} from "./restaurant";

@@ -15,20 +15,12 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.pravatar.cc',
-      },
-      {
-        protocol: 'https',
-        hostname: 'api.dicebear.com',
-      },
-      {
         protocol: "https",
-        hostname: "upload.wikimedia.org",
+        hostname: "**", // Allow ALL https hostnames
+      },
+      {
+        protocol: "http",
+        hostname: "**", // Allow ALL http hostnames (for dev)
       },
     ],
   },

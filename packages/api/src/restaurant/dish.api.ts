@@ -1,0 +1,142 @@
+import { http } from "../http";
+import type { IBackendRes, Dish } from "../../../types/src";
+
+// ======== Backend DTO ========
+
+export type BackendDishDTO = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  availabilityQuantity: number;
+  restaurant?: { id: number };
+  category?: { id: number; name: string };
+  menuOptionGroups?: Array<{
+    id: number;
+    title: string;
+    required: boolean;
+    minSelect: number;
+    maxSelect: number;
+    options: Array<{ id: number; name: string; price: number }>;
+  }>;
+};
+
+// ======== Mappers ========
+
+export function mapBackendDishToFrontend(dto: BackendDishDTO): Dish {
+  return {
+    id: String(dto.id),
+    name: dto.name,
+    description: dto.description || '',
+    price: dto.price,
+    imageUrl: dto.imageUrl || '',
+    restaurantId: dto.restaurant?.id ? String(dto.restaurant.id) : '',
+    menuCategoryId: dto.category?.id ? String(dto.category.id) : '',
+    availableQuantity: dto.availabilityQuantity || 0,
+    isAvailable: dto.availabilityQuantity > 0,
+    optionGroups: dto.menuOptionGroups?.map(g => ({
+      id: String(g.id),
+      title: g.title,
+      required: g.required,
+      minSelect: g.minSelect,
+      maxSelect: g.maxSelect,
+      options: g.options.map(o => ({
+        id: String(o.id),
+        name: o.name,
+        price: o.price,
+      })),
+    })),
+  };
+}
+
+export function mapFrontendDishToBackend(
+  dish: Omit<Dish, 'id'> & { id?: string },
+  restaurantId?: number
+): Record<string, unknown> {
+  return {
+    id: dish.id ? Number(dish.id) : undefined,
+    name: dish.name,
+    description: dish.description,
+    price: dish.price,
+    imageUrl: dish.imageUrl,
+    availabilityQuantity: dish.availableQuantity,
+    restaurant: { id: restaurantId || Number(dish.restaurantId) },
+    category: dish.menuCategoryId ? { id: Number(dish.menuCategoryId) } : undefined,
+  };
+}
+
+// ======== API ========
+
+export const dishApi = {
+  // Get dishes by restaurant ID
+  getDishesByRestaurantId: async (restaurantId: number): Promise<IBackendRes<Dish[]>> => {
+    const response = await http.get<IBackendRes<BackendDishDTO[]>>(
+      `/api/v1/dishes/restaurant/${restaurantId}`
+    ) as unknown as IBackendRes<BackendDishDTO[]>;
+
+    return {
+      ...response,
+      data: response.data?.map(mapBackendDishToFrontend) || [],
+    };
+  },
+
+  // Get dishes by category ID
+  getDishesByCategoryId: async (categoryId: number): Promise<IBackendRes<Dish[]>> => {
+    const response = await http.get<IBackendRes<BackendDishDTO[]>>(
+      `/api/v1/dishes/category/${categoryId}`
+    ) as unknown as IBackendRes<BackendDishDTO[]>;
+
+    return {
+      ...response,
+      data: response.data?.map(mapBackendDishToFrontend) || [],
+    };
+  },
+
+  // Get single dish by ID
+  getDishById: async (id: number): Promise<IBackendRes<Dish>> => {
+    const response = await http.get<IBackendRes<BackendDishDTO>>(
+      `/api/v1/dishes/${id}`
+    ) as unknown as IBackendRes<BackendDishDTO>;
+
+    return {
+      ...response,
+      data: response.data ? mapBackendDishToFrontend(response.data) : undefined,
+    } as IBackendRes<Dish>;
+  },
+
+  // Create new dish
+  createDish: async (dish: Omit<Dish, 'id'>): Promise<IBackendRes<Dish>> => {
+    const backendDish = mapFrontendDishToBackend(dish);
+    const response = await http.post<IBackendRes<BackendDishDTO>>(
+      `/api/v1/dishes`,
+      backendDish
+    ) as unknown as IBackendRes<BackendDishDTO>;
+
+    return {
+      ...response,
+      data: response.data ? mapBackendDishToFrontend(response.data) : undefined,
+    } as IBackendRes<Dish>;
+  },
+
+  // Update dish
+  updateDish: async (dish: Dish): Promise<IBackendRes<Dish>> => {
+    const backendDish = mapFrontendDishToBackend(dish);
+    const response = await http.put<IBackendRes<BackendDishDTO>>(
+      `/api/v1/dishes`,
+      backendDish
+    ) as unknown as IBackendRes<BackendDishDTO>;
+
+    return {
+      ...response,
+      data: response.data ? mapBackendDishToFrontend(response.data) : undefined,
+    } as IBackendRes<Dish>;
+  },
+
+  // Delete dish
+  deleteDish: (id: number) => {
+    return http.delete<IBackendRes<void>>(
+      `/api/v1/dishes/${id}`
+    ) as unknown as Promise<IBackendRes<void>>;
+  },
+};

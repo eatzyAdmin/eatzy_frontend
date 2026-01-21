@@ -17,15 +17,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "images.unsplash.com",
+        hostname: "**", // Allow ALL https hostnames
       },
       {
-        protocol: "https",
-        hostname: "plus.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "api.dicebear.com",
+        protocol: "http",
+        hostname: "**", // Allow ALL http hostnames (for dev)
       },
     ],
   },

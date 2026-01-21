@@ -16,11 +16,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "i.pravatar.cc",
+        hostname: "**", // Allow ALL https hostnames
       },
       {
-        protocol: "https",
-        hostname: "upload.wikimedia.org", // Existing or likely needed domains
+        protocol: "http",
+        hostname: "**", // Allow ALL http hostnames (for dev)
       },
     ],
   },
