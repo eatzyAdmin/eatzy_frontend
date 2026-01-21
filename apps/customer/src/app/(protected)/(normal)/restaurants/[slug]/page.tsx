@@ -3,18 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ImageWithFallback, RestaurantDetailShimmer, FloatingRestaurantCartShimmer } from "@repo/ui";
-import { ChevronLeft, ChevronRight, Tag, Star, MapPin, ArrowLeft, Plus, Minus, CheckCircle2 } from "@repo/ui/icons";
+import { ChevronLeft, ChevronRight, Star, MapPin, ArrowLeft, Plus, Minus, CheckCircle2 } from "@repo/ui/icons";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useLoading, useHoverHighlight, HoverHighlightOverlay, useFlyToCart, FlyToCartLayer } from "@repo/ui";
-import type { Restaurant, Dish, MenuCategory, Voucher } from "@repo/types";
+import type { Restaurant, Dish, MenuCategory } from "@repo/types";
 import { useCartStore } from "@repo/store";
 import { formatVnd } from "@repo/lib";
-import {
-  getRestaurantBySlug,
-  getDishesByMenuCategory,
-  getMenuCategoriesForRestaurant,
-  getVouchersForRestaurant,
-} from "@/features/search/data/mockSearchData";
+import { useRestaurantWithMenu } from "@/features/restaurant";
 import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer";
 import { ReviewsModal } from "@/features/search/components/ReviewsModal";
 import FloatingRestaurantCart from "@/features/cart/components/FloatingRestaurantCart";
@@ -23,18 +18,33 @@ export default function RestaurantDetailPage() {
   const params = useParams() as { slug: string };
   const router = useRouter();
   const { hide } = useLoading();
-  const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch restaurant detail and menu from API
+  const {
+    restaurant,
+    categories: apiCategories,
+    dishes: apiDishes,
+    isLoading: isApiLoading,
+    isError,
+  } = useRestaurantWithMenu(params.slug);
+
+  // Sort categories by displayOrder
+  const categories: MenuCategory[] = useMemo(() =>
+    [...(apiCategories || [])].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)),
+    [apiCategories]
+  );
+
+  // Get dishes for a specific category
+  const getDishesByCategoryId = (categoryId: string): Dish[] => {
+    return apiDishes.filter(dish => dish.menuCategoryId === categoryId);
+  };
+
+  // Hide global loader when finished
   useEffect(() => {
-    // Hide global loader immediately to show page shimmer
-    hide();
-    const t = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(t);
-  }, [hide]);
-
-  const restaurant: Restaurant | undefined = useMemo(() => getRestaurantBySlug(params.slug), [params.slug]);
-  const categories: MenuCategory[] = useMemo(() => restaurant ? getMenuCategoriesForRestaurant(restaurant.id).sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)) : [], [restaurant]);
-  const vouchers: Voucher[] = useMemo(() => restaurant ? getVouchersForRestaurant(restaurant.id) : [], [restaurant]);
+    if (!isApiLoading) {
+      hide();
+    }
+  }, [hide, isApiLoading]);
 
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(categories[0]?.id ?? null);
   const tabsRef = useRef<HTMLDivElement | null>(null);
@@ -143,7 +153,7 @@ export default function RestaurantDetailPage() {
       </button>
 
       {/* Main Content - Two Column Layout */}
-      {isLoading ? (
+      {isApiLoading ? (
         <>
           <RestaurantDetailShimmer />
           <FloatingRestaurantCartShimmer />
@@ -155,32 +165,28 @@ export default function RestaurantDetailPage() {
               <div ref={leftColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pr-2 space-y-6 mb-0 md:mb-12 shrink-0 px-4 pt-[60px] md:px-0 md:pt-0">
 
                 {/* Mobile Hero Image - Artistic Blend */}
-                {restaurant.imageUrl && (
-                  <div className="absolute top-0 left-0 w-full h-[160px] z-0 md:hidden border-none outline-none ring-0 -mb-1">
-                    <div className="relative w-full h-full overflow-hidden">
-                      <ImageWithFallback src={restaurant.imageUrl} alt={restaurant.name} fill className="object-cover" />
-                      {/* Gradient for text blend */}
-                      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F7F7F7] via-[#F7F7F7]/80 to-transparent" />
-                      {/* Top gradient for header visibility */}
-                      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent" />
+                <div className="absolute top-0 left-0 w-full h-[160px] z-0 md:hidden border-none outline-none ring-0 -mb-1">
+                  <div className="relative w-full h-full overflow-hidden">
+                    <ImageWithFallback src={restaurant.imageUrl || "https://placehold.co/600x400?text=Restaurant"} alt={restaurant.name} fill className="object-cover" />
+                    {/* Gradient for text blend */}
+                    <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F7F7F7] via-[#F7F7F7]/80 to-transparent" />
+                    {/* Top gradient for header visibility */}
+                    <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent" />
 
-                      <button className="absolute top-4 right-4 bg-white/20 backdrop-blur-md border border-white/30 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-all">
-                        <Star className="w-3.5 h-3.5 fill-white" />
-                        <span className="text-[12px] font-bold uppercase tracking-wide">Save</span>
-                      </button>
-                    </div>
+                    <button className="absolute top-4 right-4 bg-white/20 backdrop-blur-md border border-white/30 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-all">
+                      <Star className="w-3.5 h-3.5 fill-white" />
+                      <span className="text-[12px] font-bold uppercase tracking-wide">Save</span>
+                    </button>
                   </div>
-                )}
+                </div>
 
                 {/* Restaurant Title & Info */}
                 <div className="relative z-10">
                   <div className="flex gap-4 items-start md:block">
                     {/* Small Image - Mobile Only */}
-                    {restaurant.imageUrl && (
-                      <div className="shrink-0 w-[120px] h-[120px] rounded-[20px] overflow-hidden shadow-lg border-2 border-gray-200 md:hidden relative bg-gray-100">
-                        <ImageWithFallback src={restaurant.imageUrl} alt={restaurant.name} fill className="object-cover" />
-                      </div>
-                    )}
+                    <div className="shrink-0 w-[120px] h-[120px] rounded-[20px] overflow-hidden shadow-lg border-2 border-gray-200 md:hidden relative bg-gray-100">
+                      <ImageWithFallback src={restaurant.imageUrl || "https://placehold.co/400x400?text=Restaurant"} alt={restaurant.name} fill className="object-cover" />
+                    </div>
 
                     {/* Text Content */}
                     <div className="flex-1 min-w-0 flex flex-col gap-2 md:gap-0">
@@ -259,41 +265,37 @@ export default function RestaurantDetailPage() {
 
 
                 {/* Small illustration image - Desktop only */}
-                {restaurant.imageUrl && (
-                  <div className="hidden md:block rounded-[24px] overflow-hidden">
-                    <div className="relative aspect-[16/11]">
-                      <ImageWithFallback
-                        src={restaurant.imageUrl}
-                        alt={restaurant.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
+                <div className="hidden md:block rounded-[24px] overflow-hidden">
+                  <div className="relative aspect-[16/11]">
+                    <ImageWithFallback
+                      src={restaurant.imageUrl || "https://placehold.co/600x400?text=Restaurant"}
+                      alt={restaurant.name}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Right Column - Main Image & Menu (Scrollable independently on desktop) */}
               <div ref={rightColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pl-2 mb-12 shrink-0 px-4 md:px-0">
                 {/* Main Hero Image with Save Button - Desktop Only */}
-                {restaurant.imageUrl && (
-                  <div className="hidden md:block relative mb-6">
-                    <div className="relative aspect-[16/8] rounded-[24px] overflow-hidden shadow-md bg-white">
-                      <ImageWithFallback
-                        src={restaurant.imageUrl}
-                        alt={restaurant.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <button className="absolute top-4 right-4 bg-[#28A745] hover:bg-[#218838] text-white px-4 py-2 rounded-[12px] shadow-lg flex items-center gap-2 transition-all">
-                      <Star className="w-4 h-4 fill-white" />
-                      <span className="text-[14px] font-medium uppercase tracking-wide">
-                        Save to Favorites
-                      </span>
-                    </button>
+                <div className="hidden md:block relative mb-6">
+                  <div className="relative aspect-[16/8] rounded-[24px] overflow-hidden shadow-md bg-white">
+                    <ImageWithFallback
+                      src={restaurant.imageUrl || "https://placehold.co/600x400?text=Restaurant"}
+                      alt={restaurant.name}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                )}
+                  <button className="absolute top-4 right-4 bg-[#28A745] hover:bg-[#218838] text-white px-4 py-2 rounded-[12px] shadow-lg flex items-center gap-2 transition-all">
+                    <Star className="w-4 h-4 fill-white" />
+                    <span className="text-[14px] font-medium uppercase tracking-wide">
+                      Save to Favorites
+                    </span>
+                  </button>
+                </div>
 
                 {/* Category tabs - positioned here, sticky on scroll */}
                 <div
@@ -389,7 +391,7 @@ export default function RestaurantDetailPage() {
 
                 <div ref={menuContainerRef} className="relative space-y-8 px-0 md:px-4">
                   {categories.map((c) => {
-                    const dishes: Dish[] = getDishesByMenuCategory(c.id);
+                    const dishes: Dish[] = getDishesByCategoryId(c.id);
                     return (
                       <section
                         key={c.id}
@@ -420,7 +422,12 @@ export default function RestaurantDetailPage() {
                             return (
                               <div
                                 key={d.id}
-                                className="group relative bg-white rounded-[16px] md:rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
+                                className="group relative bg-white rounded-[16px] md:rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer"
+                                onClick={() => {
+                                  setActiveRestaurant(restaurant.id);
+                                  setDrawerDish(d);
+                                  setDrawerOpen(true);
+                                }}
                                 onMouseEnter={(e) =>
                                   menuMove(e, {
                                     borderRadius: 24,
@@ -591,7 +598,7 @@ export default function RestaurantDetailPage() {
         }}
       />
       <ReviewsModal restaurant={restaurant} isOpen={isReviewsOpen} onClose={() => setIsReviewsOpen(false)} />
-      {!isLoading && <FloatingRestaurantCart restaurantId={restaurant.id} restaurantName={restaurant.name} />}
+      {!isApiLoading && restaurant && <FloatingRestaurantCart restaurantId={restaurant.id} restaurantName={restaurant.name} />}
     </div >
   );
 }
