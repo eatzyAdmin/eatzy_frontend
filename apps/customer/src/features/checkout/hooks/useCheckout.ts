@@ -1,57 +1,234 @@
 "use client";
 import { useMemo, useState } from "react";
-import { useCartStore } from "@repo/store";
+import { useQuery } from "@tanstack/react-query";
 import type { Voucher, PaymentMethod } from "@repo/types";
-import { getRestaurantById, getVouchersForRestaurant } from "@/features/search/data/mockSearchData";
+import { useRestaurantCart } from "@/features/cart/hooks/useCart";
+import { useSearchParams } from "next/navigation";
+import { voucherApi, restaurantDetailApi } from "@repo/api";
+
+// Voucher types - using backend values: PERCENTAGE, FIXED, FREESHIP
+type DiscountVoucher = Voucher & { discountType: 'PERCENTAGE' | 'FIXED' };
+type ShippingVoucher = Voucher & { discountType: 'FREESHIP' };
 
 export function useCheckout() {
-  const activeRestaurantId = useCartStore((s) => s.activeRestaurantId);
-  const items = useCartStore((s) => s.items.filter(i => !activeRestaurantId || i.restaurantId === activeRestaurantId));
-  const totalFromStore = useCartStore((s) => s.total(activeRestaurantId ?? undefined));
-  const restaurant = useMemo(() => activeRestaurantId ? getRestaurantById(activeRestaurantId) : undefined, [activeRestaurantId]);
-  const vouchers: Voucher[] = useMemo(() => activeRestaurantId ? getVouchersForRestaurant(activeRestaurantId) : [], [activeRestaurantId]);
+  const searchParams = useSearchParams();
+  const restaurantIdFromUrl = searchParams.get('restaurantId');
+  const restaurantId = restaurantIdFromUrl ? Number(restaurantIdFromUrl) : null;
 
-  const [selectedVoucherId, setSelectedVoucherId] = useState<string | null>(null);
+  // Get cart for this restaurant
+  const { totalPrice: subtotalFromCart } = useRestaurantCart(restaurantId);
+
+  // Fetch restaurant info
+  const { data: restaurant } = useQuery({
+    queryKey: ['restaurant-detail', restaurantId],
+    queryFn: async () => {
+      if (!restaurantId) return null;
+      const res = await restaurantDetailApi.getById(restaurantId);
+      if (res.statusCode === 200 && res.data) {
+        return res.data;
+      }
+      return null;
+    },
+    enabled: !!restaurantId,
+  });
+
+  // Fetch vouchers for restaurant
+  const { data: vouchersData, isLoading: isLoadingVouchers } = useQuery({
+    queryKey: ['vouchers', 'restaurant', restaurantId],
+    queryFn: async () => {
+      if (!restaurantId) return [];
+      const res = await voucherApi.getVouchersByRestaurantId(restaurantId);
+      if (res.statusCode === 200 && res.data) {
+        return res.data;
+      }
+      return [];
+    },
+    enabled: !!restaurantId,
+    staleTime: 60 * 1000, // 1 minute
+  });
+
+  const allVouchers = vouchersData || [];
+  const subtotal = subtotalFromCart;
+
+  // Separate vouchers by type
+  // Database uses: FREESHIP for free shipping, FIXED for fixed amount discount
+  const { discountVouchers, shippingVouchers } = useMemo(() => {
+    const discount: DiscountVoucher[] = [];
+    const shipping: ShippingVoucher[] = [];
+
+    allVouchers.forEach(v => {
+      if (v.discountType === 'FREESHIP') {
+        shipping.push(v as ShippingVoucher);
+      } else {
+        // FIXED or PERCENT
+        discount.push(v as DiscountVoucher);
+      }
+    });
+
+    return { discountVouchers: discount, shippingVouchers: shipping };
+  }, [allVouchers]);
+
+  // Sort vouchers: eligible first, then ineligible
+  const sortVouchersByEligibility = (vouchers: Voucher[]): Voucher[] => {
+    const now = new Date();
+    return [...vouchers].sort((a, b) => {
+      const aEligible = isVoucherEligible(a, subtotal, now);
+      const bEligible = isVoucherEligible(b, subtotal, now);
+      if (aEligible && !bEligible) return -1;
+      if (!aEligible && bEligible) return 1;
+      return 0;
+    });
+  };
+
+  const sortedDiscountVouchers = useMemo(
+    () => sortVouchersByEligibility(discountVouchers),
+    [discountVouchers, subtotal]
+  );
+
+  const sortedShippingVouchers = useMemo(
+    () => sortVouchersByEligibility(shippingVouchers),
+    [shippingVouchers, subtotal]
+  );
+
+  // Selection states - can select 1 discount + 1 shipping
+  const [selectedDiscountVoucherId, setSelectedDiscountVoucherId] = useState<number | null>(null);
+  const [selectedShippingVoucherId, setSelectedShippingVoucherId] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("EATZYPAY");
   const [address, setAddress] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
 
-  const selectedVoucher = useMemo(() => vouchers.find(v => v.id === selectedVoucherId) || null, [vouchers, selectedVoucherId]);
+  const selectedDiscountVoucher = useMemo(
+    () => discountVouchers.find(v => v.id === selectedDiscountVoucherId) || null,
+    [discountVouchers, selectedDiscountVoucherId]
+  );
 
-  const fee = 23000;
+  const selectedShippingVoucher = useMemo(
+    () => shippingVouchers.find(v => v.id === selectedShippingVoucherId) || null,
+    [shippingVouchers, selectedShippingVoucherId]
+  );
+
+  // Calculate fees
+  const baseFee = 23000; // Base delivery fee
+
+  // Shipping discount
+  const shippingDiscount = useMemo(() => {
+    if (!selectedShippingVoucher) return 0;
+    if (!isVoucherEligible(selectedShippingVoucher, subtotal, new Date())) return 0;
+    return baseFee; // FREE_SHIPPING = full fee waived
+  }, [selectedShippingVoucher, subtotal, baseFee]);
+
+  const fee = baseFee - shippingDiscount;
+
+  // Discount calculation
   const discount = useMemo(() => {
-    if (!selectedVoucher) return 0;
-    const now = new Date();
-    if (selectedVoucher.startDate && new Date(selectedVoucher.startDate) > now) return 0;
-    if (selectedVoucher.endDate && new Date(selectedVoucher.endDate) < now) return 0;
-    if (typeof selectedVoucher.minOrderValue === "number" && totalFromStore < selectedVoucher.minOrderValue) return 0;
-    if (selectedVoucher.discountType === "PERCENT") {
-      const val = Number(selectedVoucher.discountValue || selectedVoucher.discountPercent || 0);
-      return Math.floor((totalFromStore * val) / 100);
-    }
-    const val = Number(selectedVoucher.discountValue || selectedVoucher.discountAmount || 0);
-    return val;
-  }, [selectedVoucher, totalFromStore]);
+    if (!selectedDiscountVoucher) return 0;
+    if (!isVoucherEligible(selectedDiscountVoucher, subtotal, new Date())) return 0;
 
-  const totalPayable = useMemo(() => Math.max(0, totalFromStore + fee - discount), [totalFromStore, fee, discount]);
+    let discountAmount = 0;
+    if (selectedDiscountVoucher.discountType === "PERCENTAGE") {
+      const val = Number(selectedDiscountVoucher.discountValue || 0);
+      discountAmount = Math.floor((subtotal * val) / 100);
+      // Apply max discount cap if exists
+      if (selectedDiscountVoucher.maxDiscountAmount && discountAmount > selectedDiscountVoucher.maxDiscountAmount) {
+        discountAmount = selectedDiscountVoucher.maxDiscountAmount;
+      }
+    } else {
+      // FIXED
+      discountAmount = Number(selectedDiscountVoucher.discountValue || 0);
+    }
+    return discountAmount;
+  }, [selectedDiscountVoucher, subtotal]);
+
+  const totalPayable = useMemo(
+    () => Math.max(0, subtotal + fee - discount),
+    [subtotal, fee, discount]
+  );
+
+  // Identify best vouchers
+  const bestVoucherIds = useMemo(() => {
+    const ids = {
+      discount: null as number | null,
+      shipping: null as number | null,
+    };
+
+    const now = new Date();
+
+    // 1. Find best shipping voucher (Highest maxDiscountAmount)
+    let maxShippingVal = -1;
+    sortedShippingVouchers.forEach(v => {
+      if (!isVoucherEligible(v, subtotal, now)) return;
+      const val = v.maxDiscountAmount || 0;
+      if (val > maxShippingVal) {
+        maxShippingVal = val;
+        ids.shipping = v.id;
+      }
+    });
+
+    // 2. Find best discount voucher (Highest discountAmount)
+    let maxDiscountVal = -1;
+    sortedDiscountVouchers.forEach(v => {
+      if (!isVoucherEligible(v, subtotal, now)) return;
+
+      let amount = 0;
+      if (v.discountType === "PERCENTAGE") {
+        amount = Math.floor((subtotal * (v.discountValue || 0)) / 100);
+        if (v.maxDiscountAmount && amount > v.maxDiscountAmount) {
+          amount = v.maxDiscountAmount;
+        }
+      } else {
+        amount = v.discountValue || 0;
+      }
+
+      if (amount > maxDiscountVal) {
+        maxDiscountVal = amount;
+        ids.discount = v.id;
+      }
+    });
+
+    return ids;
+  }, [sortedDiscountVouchers, sortedShippingVouchers, subtotal]);
 
   return {
-    items,
     restaurant,
-    vouchers,
-    selectedVoucherId,
-    setSelectedVoucherId,
-    selectedVoucher,
+    restaurantId,
+    // All vouchers for display
+    discountVouchers: sortedDiscountVouchers,
+    shippingVouchers: sortedShippingVouchers,
+    allVouchers,
+    isLoadingVouchers,
+    // Selected vouchers
+    selectedDiscountVoucherId,
+    setSelectedDiscountVoucherId,
+    selectedShippingVoucherId,
+    setSelectedShippingVoucherId,
+    selectedDiscountVoucher,
+    selectedShippingVoucher,
+    // Other form fields
     paymentMethod,
     setPaymentMethod,
     address,
     setAddress,
     notes,
     setNotes,
-    subtotal: totalFromStore,
+    // Pricing
+    subtotal,
+    baseFee,
+    shippingDiscount,
     fee,
     discount,
     totalPayable,
+    bestVoucherIds,
+    // Helper
+    isVoucherEligible: (voucher: Voucher) => isVoucherEligible(voucher, subtotal, new Date()),
   };
 }
 
+// Helper function to check voucher eligibility
+function isVoucherEligible(voucher: Voucher, orderTotal: number, now: Date): boolean {
+  // Check date validity
+  if (voucher.startDate && new Date(voucher.startDate) > now) return false;
+  if (voucher.endDate && new Date(voucher.endDate) < now) return false;
+  // Check minimum order value
+  if (typeof voucher.minOrderValue === 'number' && orderTotal < voucher.minOrderValue) return false;
+  return true;
+}

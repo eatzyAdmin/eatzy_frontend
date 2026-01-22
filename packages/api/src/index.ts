@@ -2,6 +2,7 @@
 export { http } from "./http";
 export { authApi } from "./auth";
 export { cartApi } from "./cart";
+export { voucherApi } from "./voucher";
 
 // Restaurant module exports
 export {

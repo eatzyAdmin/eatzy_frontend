@@ -7,6 +7,7 @@ import AddressForm from "@/features/checkout/components/AddressForm";
 import NotesInput from "@/features/checkout/components/NotesInput";
 import PaymentMethodSelector from "@/features/checkout/components/PaymentMethodSelector";
 import PromoVoucherCard from "@/features/checkout/components/PromoVoucherCard";
+import { Truck, Tag } from "@repo/ui/icons";
 const CheckoutSummary = dynamic(() => import("@/features/checkout/components/CheckoutSummary"), { ssr: false });
 const RightSidebar = dynamic(() => import("@/features/checkout/components/RightSidebar"), { ssr: false });
 const OrderSummaryList = dynamic(() => import("@/features/checkout/components/OrderSummaryList"), { ssr: false });
@@ -27,9 +28,14 @@ export default function CheckoutPage() {
 
   const {
     restaurant,
-    vouchers,
-    selectedVoucherId,
-    setSelectedVoucherId,
+    discountVouchers,
+    shippingVouchers,
+    isLoadingVouchers,
+    selectedDiscountVoucherId,
+    setSelectedDiscountVoucherId,
+    selectedShippingVoucherId,
+    setSelectedShippingVoucherId,
+    isVoucherEligible,
     paymentMethod,
     setPaymentMethod,
     address,
@@ -38,8 +44,10 @@ export default function CheckoutPage() {
     setNotes,
     subtotal,
     fee,
+    shippingDiscount,
     discount,
     totalPayable,
+    bestVoucherIds,
   } = useCheckout();
 
   const leftColumnRef = useRef<HTMLDivElement | null>(null);
@@ -182,22 +190,74 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 md:grid-cols-10 p-4 gap-4 items-stretch">
                   <section className="col-span-1 md:col-span-6 h-full" ref={(el) => { sectionRefs.current["promo"] = el; }} data-id="promo">
                     <div className="md:p-4">
-                      <div className="text-[14px] font-semibold text-[#1A1A1A] mb-3">Ưu đãi</div>
-                      <div className="space-y-3">
-                        {mounted && vouchers.map((v) => (
-                          <PromoVoucherCard
-                            key={v.id}
-                            voucher={v}
-                            selected={selectedVoucherId === v.id}
-                            onSelect={() => setSelectedVoucherId(selectedVoucherId === v.id ? null : v.id)}
-                          />
-                        ))}
+                      {/* Scrollable voucher container - shows ~3.5 cards */}
+                      <div className="max-h-[420px] overflow-y-auto pr-2 space-y-6 custom-scrollbar">
+                        {/* Shipping Vouchers */}
+                        {shippingVouchers.length > 0 && (
+                          <div>
+                            <div className="text-[14px] font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2 sticky top-0 bg-[#F7F7F7] py-2 z-10">
+                              <Truck className="w-4 h-4 text-blue-500" /> Miễn phí vận chuyển
+                              <span className="text-xs text-gray-400 font-normal">({shippingVouchers.length})</span>
+                            </div>
+                            <div className="space-y-3">
+                              {mounted && shippingVouchers.map((v) => {
+                                const eligible = isVoucherEligible(v);
+                                return (
+                                  <PromoVoucherCard
+                                    key={v.id}
+                                    voucher={v}
+                                    selected={selectedShippingVoucherId === v.id}
+                                    onSelect={() => setSelectedShippingVoucherId(selectedShippingVoucherId === v.id ? null : v.id)}
+                                    disabled={!eligible}
+                                    reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
+                                    isBest={bestVoucherIds.shipping === v.id}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Discount Vouchers */}
+                        <div>
+                          <div className="text-[14px] font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2 sticky top-0 bg-[#F7F7F7] py-2 z-10">
+                            <Tag className="w-4 h-4 text-[var(--primary)]" /> Ưu đãi giảm giá
+                            <span className="text-xs text-gray-400 font-normal">({discountVouchers.length})</span>
+                          </div>
+                          <div className="space-y-3">
+                            {isLoadingVouchers ? (
+                              <div className="text-center py-8 text-gray-400">
+                                <div className="w-8 h-8 border-2 border-gray-300 border-t-[var(--primary)] rounded-full animate-spin mx-auto mb-2"></div>
+                                Đang tải ưu đãi...
+                              </div>
+                            ) : discountVouchers.length === 0 ? (
+                              <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                Không có ưu đãi nào
+                              </div>
+                            ) : (
+                              mounted && discountVouchers.map((v) => {
+                                const eligible = isVoucherEligible(v);
+                                return (
+                                  <PromoVoucherCard
+                                    key={v.id}
+                                    voucher={v}
+                                    selected={selectedDiscountVoucherId === v.id}
+                                    onSelect={() => setSelectedDiscountVoucherId(selectedDiscountVoucherId === v.id ? null : v.id)}
+                                    disabled={!eligible}
+                                    reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
+                                    isBest={bestVoucherIds.discount === v.id}
+                                  />
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </section>
                   <section ref={(el) => { sectionRefs.current["payment"] = el; }} data-id="payment" className="md:p-4 col-span-1 md:col-span-4 h-full">
                     <div className="h-full">
-                      <CheckoutSummary subtotal={subtotal} fee={fee} discount={discount} />
+                      <CheckoutSummary subtotal={subtotal} fee={fee} discount={discount} shippingDiscount={shippingDiscount} />
                     </div>
                   </section>
                 </div>

@@ -1,9 +1,9 @@
 "use client";
 import { formatVnd } from "@repo/lib";
 import { motion } from "@repo/ui/motion";
-import { ChefHat } from "@repo/ui/icons";
+import { ChefHat, Truck, Tag } from "@repo/ui/icons";
 
-export default function CheckoutSummary({ subtotal, fee, discount }: { subtotal: number; fee: number; discount: number }) {
+export default function CheckoutSummary({ subtotal, fee, discount, shippingDiscount = 0 }: { subtotal: number; fee: number; discount: number; shippingDiscount?: number }) {
   return (
     <div className="relative overflow-hidden rounded-[22px] border-2 border-dashed border-gray-200 shadow-sm">
       <div
@@ -179,12 +179,29 @@ export default function CheckoutSummary({ subtotal, fee, discount }: { subtotal:
             <div className="font-medium">{formatVnd(subtotal)}</div>
           </div>
           <div className="flex items-center justify-between text-[14px]" style={{ fontFamily: "monospace" }}>
-            <div>Phí áp dụng</div>
-            <div className="font-medium">{formatVnd(fee)}</div>
+            <div>Phí giao hàng</div>
+            <div className="font-medium">
+              {shippingDiscount > 0 ? (
+                <span className="flex items-center gap-2">
+                  <span className="line-through text-gray-400">{formatVnd(fee + shippingDiscount)}</span>
+                  <span className="text-blue-600">{formatVnd(fee)}</span>
+                </span>
+              ) : (
+                formatVnd(fee)
+              )}
+            </div>
           </div>
+          {shippingDiscount > 0 && (
+            <div className="flex items-center justify-between text-[14px]" style={{ fontFamily: "monospace" }}>
+              <div className="text-blue-600 flex items-center gap-1"><Truck className="w-3.5 h-3.5" /> Freeship</div>
+              <div className="font-medium text-blue-600">
+                - {formatVnd(shippingDiscount)}
+              </div>
+            </div>
+          )}
           {discount > 0 && (
             <div className="flex items-center justify-between text-[14px]" style={{ fontFamily: "monospace" }}>
-              <div>Giảm giá</div>
+              <div className="text-green-700 flex items-center gap-1"><Tag className="w-3.5 h-3.5" /> Giảm giá</div>
               <div className="font-medium text-green-700">
                 - {formatVnd(discount)}
               </div>
