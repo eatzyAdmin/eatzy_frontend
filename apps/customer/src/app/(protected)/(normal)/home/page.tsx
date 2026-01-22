@@ -36,6 +36,11 @@ export default function HomePage() {
     handleRestaurantChange,
     isCategoriesLoading,
     isRestaurantsLoading: isHomeRestaurantsLoading,
+    // Infinite scroll
+    goToNextRestaurant,
+    goToPreviousRestaurant,
+    isFetchingNextPage,
+    hasNextPage,
   } = useHomePage();
 
   const [showAllCategories, setShowAllCategories] = useState(false);
@@ -48,9 +53,9 @@ export default function HomePage() {
   const {
     restaurants: apiRestaurants,
     isLoading: isRestaurantsLoading,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
+    hasNextPage: recommendedHasNextPage,
+    fetchNextPage: recommendedFetchNextPage,
+    isFetchingNextPage: recommendedIsFetchingNextPage,
   } = useSearchRestaurants(
     showRecommended ? {
       latitude: locationCoords.latitude,
@@ -253,6 +258,10 @@ export default function HomePage() {
                       restaurants={restaurantsInCategory}
                       activeIndex={activeRestaurantIndex}
                       onRestaurantChange={handleRestaurantChange}
+                      onNext={goToNextRestaurant}
+                      onPrevious={goToPreviousRestaurant}
+                      isFetchingNextPage={isFetchingNextPage}
+                      hasNextPage={hasNextPage}
                     />
                   </motion.div>
                 )}
@@ -280,9 +289,9 @@ export default function HomePage() {
               results={recommendedResults}
               onBackToHome={() => setShowRecommended(false)}
               isLoading={isRestaurantsLoading}
-              hasNextPage={hasNextPage}
-              onLoadMore={fetchNextPage}
-              isLoadingMore={isFetchingNextPage}
+              hasNextPage={recommendedHasNextPage}
+              onLoadMore={recommendedFetchNextPage}
+              isLoadingMore={recommendedIsFetchingNextPage}
             />
           </motion.div>
         )}

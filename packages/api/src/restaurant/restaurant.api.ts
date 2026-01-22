@@ -84,6 +84,10 @@ export const restaurantApi = {
     if (params.search?.trim()) {
       queryParams.append('search', params.search.trim());
     }
+    // Filter by restaurant type/category ID using JPA Specification filter syntax
+    if (params.typeId !== undefined) {
+      queryParams.append('filter', `restaurantTypes.id:${params.typeId}`);
+    }
     if (params.page !== undefined) {
       queryParams.append('page', params.page.toString());
     }

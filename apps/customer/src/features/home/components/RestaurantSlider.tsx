@@ -4,19 +4,27 @@ import { useState, useEffect } from 'react';
 
 import { motion, AnimatePresence, PanInfo } from '@repo/ui/motion';
 import { Restaurant } from '@repo/types';
-import { ChevronLeft, ChevronRight } from '@repo/ui/icons';
+import { ChevronLeft, ChevronRight, Loader2 } from '@repo/ui/icons';
 import { ImageWithFallback } from '@repo/ui';
 
 interface RestaurantSliderProps {
   restaurants: Restaurant[];
   activeIndex: number;
   onRestaurantChange: (index: number) => void;
+  onNext?: () => void;  // Called when user wants to go next (handles load more logic)
+  onPrevious?: () => void;  // Called when user wants to go previous
+  isFetchingNextPage?: boolean;
+  hasNextPage?: boolean;
 }
 
 export default function RestaurantSlider({
   restaurants,
   activeIndex,
   onRestaurantChange,
+  onNext,
+  onPrevious,
+  isFetchingNextPage = false,
+  hasNextPage = false,
 }: RestaurantSliderProps) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -28,13 +36,23 @@ export default function RestaurantSlider({
   }, []);
 
   const handlePrevious = () => {
-    const newIndex = activeIndex === 0 ? restaurants.length - 1 : activeIndex - 1;
-    onRestaurantChange(newIndex);
+    if (onPrevious) {
+      onPrevious();
+    } else {
+      // Fallback: simple loop
+      const newIndex = activeIndex === 0 ? restaurants.length - 1 : activeIndex - 1;
+      onRestaurantChange(newIndex);
+    }
   };
 
   const handleNext = () => {
-    const newIndex = activeIndex === restaurants.length - 1 ? 0 : activeIndex + 1;
-    onRestaurantChange(newIndex);
+    if (onNext) {
+      onNext();
+    } else {
+      // Fallback: simple loop
+      const newIndex = activeIndex === restaurants.length - 1 ? 0 : activeIndex + 1;
+      onRestaurantChange(newIndex);
+    }
   };
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
@@ -56,7 +74,14 @@ export default function RestaurantSlider({
   if (!restaurants || restaurants.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-white/50 py-10">
-        <p className="text-lg font-medium">No restaurants found in this category</p>
+        {isFetchingNextPage ? (
+          <>
+            <Loader2 className="w-8 h-8 animate-spin mb-2" />
+            <p className="text-lg font-medium">Đang tải...</p>
+          </>
+        ) : (
+          <p className="text-lg font-medium">Không tìm thấy quán ăn trong danh mục này</p>
+        )}
       </div>
     );
   }

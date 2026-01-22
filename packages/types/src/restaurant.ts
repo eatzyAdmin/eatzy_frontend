@@ -86,6 +86,7 @@ export type NearbyRestaurantsParams = {
   latitude: number;
   longitude: number;
   search?: string;
+  typeId?: number;  // Filter by restaurant type/category ID
   page?: number;
   size?: number;
 };

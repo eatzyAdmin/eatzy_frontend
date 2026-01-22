@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { restaurantTypeApi, restaurantApi } from '@repo/api';
 import type { RestaurantCategory, RestaurantMagazine, Restaurant } from '@repo/types';
 import { useUserLocation, DEFAULT_LOCATION_HCMC } from '@repo/hooks';
@@ -19,6 +19,8 @@ const getCategoryBackgroundImage = (slug: string) => {
   return backgrounds[slug] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=80';
 };
 
+const PAGE_SIZE = 10;
+
 export function useHomePage() {
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
   const [activeRestaurantIndex, setActiveRestaurantIndex] = useState(0);
@@ -28,7 +30,6 @@ export function useHomePage() {
   const { data: categoriesData, isLoading: isCategoriesLoading } = useQuery({
     queryKey: ['restaurant-types', 'all'],
     queryFn: async () => {
-      // Get all categories at once without specific pagination
       const res = await restaurantTypeApi.getAllRestaurantTypes();
       if (res.statusCode === 200 && res.data) {
         return res.data.result;
@@ -41,67 +42,60 @@ export function useHomePage() {
   const categories = categoriesData || [];
   const activeCategory = categories[activeCategoryIndex];
 
-  // 2. Get Restaurants for Active Category
+  // 2. Get Location
   const { location } = useUserLocation();
   const locationCoords = location || DEFAULT_LOCATION_HCMC;
 
-  const { data: restaurantsData, isLoading: isRestaurantsLoading } = useQuery({
+  // 3. Get Restaurants for Active Category with Infinite Scroll
+  const {
+    data: restaurantsPages,
+    isLoading: isRestaurantsLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
     queryKey: ['restaurants', 'by-category', activeCategory?.id, locationCoords.latitude, locationCoords.longitude],
-    queryFn: async () => {
-      if (!activeCategory) return [];
-      
-      // Since backend doesn't support filtering by category in nearby endpoint yet,
-      // we might need to search or use a different endpoint.
-      // Assuming we use the general search with category filter if supported, 
-      // OR we fetch nearby and filter client side (not ideal for large datasets but ok for MVP).
-      // Let's use getRestaurants with filter for now if location is not critical for this specific view,
-      // OR better: use getNearbyRestaurants and filter by category if the API supports it.
-      
-      // Note: The current API definition for getNearbyRestaurants takes 'search' param. 
-      // If the backend supports "category:slug" in search, we use that.
-      // Otherwise, we might need to fetch general list.
-      
-      // Let's try fetching nearby restaurants and client-side filtering for now as a safe fallback
-      // until backend adds dedicated category filter.
-      
+    queryFn: async ({ pageParam = 1 }) => {
+      if (!activeCategory) return { result: [], meta: { page: 1, pages: 1, total: 0 } };
+
       const res = await restaurantApi.getNearbyRestaurants({
         latitude: locationCoords.latitude,
         longitude: locationCoords.longitude,
-        size: 20, // Fetch enough to filter
+        typeId: Number(activeCategory.id), // Filter by category
+        page: pageParam,
+        size: PAGE_SIZE,
       });
 
       if (res.statusCode === 200 && res.data) {
-        // Filter by category slug if possible, or ID
-        // The mock data shows category object in restaurant.
-        // But the RestaurantMagazine type has 'category' as MagazineCategory[] (list of menu categories)
-        // It seems there is a mix-up in types.
-        // Let's assume we filter by matching the category slug if available.
-        
-        // Wait, looking at RestaurantMagazine type: it has 'category?: MagazineCategory[]'. 
-        // It DOES NOT have the main restaurant category (like 'Vietnamese').
-        // This seems to be a limitation in the DTO or Type definition.
-        
-        // However, the UI needs to show restaurants for the selected "Cuisine Type" (e.g. Sushi, Pho).
-        // Let's check the Mock Data again.
-        // Mock data 'MOCK_RESTAURANTS' has 'category: { id, name, slug }'.
-        
-        // If the real backend RestaurantMagazine doesn't return the cuisine type, we can't filter effectively.
-        // Let's assume for now we just return all nearby restaurants to fill the UI, 
-        // effectively ignoring the category filter for the *content* but keeping the UI structure.
-        // TODO: Update Backend to return Restaurant Type/Cuisine in RestaurantMagazine DTO.
-        
-        return res.data.result;
+        return {
+          result: res.data.result || [],
+          meta: res.data.meta || { page: pageParam, pages: 1, total: 0 },
+        };
       }
-      return [];
+      return { result: [], meta: { page: pageParam, pages: 1, total: 0 } };
     },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.meta.page < lastPage.meta.pages) {
+        return lastPage.meta.page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
     enabled: !!activeCategory,
   });
 
+  // Flatten all pages into single array
+  const allRestaurantMagazines = useMemo(() => {
+    if (!restaurantsPages) return [];
+    return restaurantsPages.pages.flatMap(page => page.result);
+  }, [restaurantsPages]);
+
+  // Map to Restaurant type for slider
   const mappedRestaurants = useMemo(() => {
-    return (restaurantsData || []).map((magazine, index) => 
+    return allRestaurantMagazines.map((magazine, index) =>
       mapMagazineToRestaurantWithMenu(magazine as RestaurantMagazine, index).restaurant
     );
-  }, [restaurantsData]);
+  }, [allRestaurantMagazines]);
 
   const restaurantsInCategory = mappedRestaurants;
   const activeRestaurant = restaurantsInCategory[activeRestaurantIndex];
@@ -119,11 +113,17 @@ export function useHomePage() {
     }
   }, [categories.length]);
 
+  // Load more restaurants when approaching end of list
   const handleRestaurantChange = useCallback((index: number) => {
     if (index >= 0 && index < restaurantsInCategory.length) {
       setActiveRestaurantIndex(index);
+
+      // Trigger load more when reaching near the end (within last 3 items)
+      if (index >= restaurantsInCategory.length - 3 && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
     }
-  }, [restaurantsInCategory.length]);
+  }, [restaurantsInCategory.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleFilterChange = useCallback((newFilter: string) => {
     setFilter(newFilter);
@@ -142,17 +142,27 @@ export function useHomePage() {
     }
   }, [activeCategoryIndex, handleCategoryChange]);
 
+  // Next restaurant with load more and loop back only when NO more data
   const goToNextRestaurant = useCallback(() => {
     if (activeRestaurantIndex < restaurantsInCategory.length - 1) {
       handleRestaurantChange(activeRestaurantIndex + 1);
+    } else if (hasNextPage && !isFetchingNextPage) {
+      // At end but more pages available - load next page
+      fetchNextPage();
+    } else if (!hasNextPage) {
+      // At end and no more pages - loop back to start
+      handleRestaurantChange(0);
     }
-  }, [activeRestaurantIndex, restaurantsInCategory.length, handleRestaurantChange]);
+  }, [activeRestaurantIndex, restaurantsInCategory.length, hasNextPage, isFetchingNextPage, fetchNextPage, handleRestaurantChange]);
 
   const goToPreviousRestaurant = useCallback(() => {
     if (activeRestaurantIndex > 0) {
       handleRestaurantChange(activeRestaurantIndex - 1);
+    } else {
+      // At start - loop to end
+      handleRestaurantChange(restaurantsInCategory.length - 1);
     }
-  }, [activeRestaurantIndex, handleRestaurantChange]);
+  }, [activeRestaurantIndex, handleRestaurantChange, restaurantsInCategory.length]);
 
   return {
     // State
@@ -164,27 +174,26 @@ export function useHomePage() {
     activeRestaurant,
     backgroundImage,
     filter,
-    
+
     // Handlers
     handleCategoryChange,
     handleRestaurantChange,
     handleFilterChange,
-    
+
     // Navigation
     goToNextCategory,
     goToPreviousCategory,
     goToNextRestaurant,
     goToPreviousRestaurant,
-    
+
     // Status
     isCategoriesLoading,
     isRestaurantsLoading,
+    isFetchingNextPage,
+    hasNextPage: hasNextPage || false,
     canGoToNextCategory: activeCategoryIndex < categories.length - 1,
     canGoToPreviousCategory: activeCategoryIndex > 0,
-    canGoToNextRestaurant: activeRestaurantIndex < restaurantsInCategory.length - 1,
+    canGoToNextRestaurant: activeRestaurantIndex < restaurantsInCategory.length - 1 || hasNextPage,
     canGoToPreviousRestaurant: activeRestaurantIndex > 0,
   };
 }
-
-
-
