@@ -15,6 +15,8 @@ export type BackendMenuOptionDTO = {
 export type BackendMenuOptionGroupDTO = {
   id: number;
   name: string;
+  minChoices?: number;
+  maxChoices?: number;
   menuOptions: BackendMenuOptionDTO[];
 };
 
@@ -139,6 +141,9 @@ function mapBackendMenuOptionGroup(dto: BackendMenuOptionGroupDTO): OptionGroup 
   return {
     id: String(dto.id),
     title: dto.name,
+    minSelect: dto.minChoices,
+    maxSelect: dto.maxChoices,
+    required: (dto.minChoices || 0) > 0,
     options: dto.menuOptions.map(opt => ({
       id: String(opt.id),
       name: opt.name,
