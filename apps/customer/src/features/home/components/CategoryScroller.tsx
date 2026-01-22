@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useMotionValue, useTransform } from '@repo/ui/motion';
-import { RestaurantCategory } from '@repo/models';
+import { RestaurantCategory } from '@repo/types';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface CategoryScrollerProps {

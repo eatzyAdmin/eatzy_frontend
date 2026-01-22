@@ -5,6 +5,7 @@ export { authApi } from "./auth";
 // Restaurant module exports
 export {
   restaurantApi,
+  restaurantTypeApi,
   dishApi,
   menuCategoryApi,
   restaurantDetailApi,

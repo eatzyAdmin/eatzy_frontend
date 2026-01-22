@@ -1,6 +1,7 @@
 import { motion } from '@repo/ui/motion';
 import { useEffect, useState, useRef } from 'react';
-import { MagazineLayout8Shimmer } from '@repo/ui';
+import { MagazineLayout8Shimmer, InfiniteScrollContainer } from '@repo/ui';
+import { useInfiniteScroll } from '@repo/hooks';
 import { useBottomNav } from '@/features/navigation/context/BottomNavContext';
 import type { RestaurantWithMenu } from '@/features/search/hooks/useSearch';
 import MagazineLayout1 from '@/features/search/components/layouts/MagazineLayout1';
@@ -17,67 +18,89 @@ import MagazineLayout10 from '@/features/search/components/layouts/MagazineLayou
 interface Props {
   results: RestaurantWithMenu[];
   onBackToHome?: () => void;
+  isLoading?: boolean;
+  hasNextPage?: boolean;
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
 }
 
-export default function RecommendedSection({ results, onBackToHome }: Props) {
+export default function RecommendedSection({
+  results,
+  onBackToHome,
+  isLoading = false,
+  hasNextPage = false,
+  onLoadMore,
+  isLoadingMore = false
+}: Props) {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { setIsVisible } = useBottomNav();
   const containerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Sync internal loading state with prop if needed, or just use prop
+  // Here we keep the initial fake loading effect if prop isLoading is true,
+  // or we can remove the fake loading and rely on real data.
+  // Given we are switching to real API, let's respect the isLoading prop primarily,
+  // but we can keep the "entrance animation" effect.
+
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && isLoading && !timerRef.current) {
-          timerRef.current = setTimeout(() => setIsLoading(false), 1500);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    if (!isLoading) {
+      // Small delay to ensure smooth transition
+      const timer = setTimeout(() => setIsInitialLoading(false), 500);
+      return () => clearTimeout(timer);
+    } else {
+      setIsInitialLoading(true);
     }
-
-    return () => {
-      observer.disconnect();
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
   }, [isLoading]);
 
   // Handle scroll-up to return home
   useEffect(() => {
-    let processing = false;
+    let accumulatedDelta = 0;
+    let lastTime = Date.now();
+
     const handleWheel = (e: WheelEvent) => {
-      // If we are at the top and scrolling UP
-      if (window.scrollY <= 0 && e.deltaY < -30 && onBackToHome) {
-        if (processing) return;
-        processing = true;
-        onBackToHome();
-        setTimeout(() => { processing = false; }, 1000);
+      const container = containerRef.current?.parentElement;
+      if (!container) return;
+
+      // If we are at the top of the SCROLLABLE CONTAINER and scrolling UP
+      if (container.scrollTop <= 0 && e.deltaY < 0 && onBackToHome) {
+        const now = Date.now();
+        if (now - lastTime > 1000) {
+          accumulatedDelta = 0;
+        }
+        
+        accumulatedDelta += Math.abs(e.deltaY);
+        lastTime = now;
+
+        // Require a significant cumulative scroll up to go back (e.g., 200 units for more "deliberate" feel)
+        if (accumulatedDelta > 200) {
+          onBackToHome();
+          accumulatedDelta = 0;
+        }
+      } else {
+        accumulatedDelta = 0;
       }
     };
 
-    window.addEventListener('wheel', handleWheel);
-    return () => window.removeEventListener('wheel', handleWheel);
+    const container = containerRef.current?.parentElement;
+    if (container) {
+      container.addEventListener('wheel', handleWheel);
+      return () => container.removeEventListener('wheel', handleWheel);
+    }
   }, [onBackToHome]);
 
   useEffect(() => {
     let ticking = false;
 
     const handleScroll = () => {
+      const container = containerRef.current?.parentElement;
+      if (!container) return;
+
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-
-          // Only trigger header hide if we have scrolled past a certain point
-          // In this context, the recommended section starts after the folded home page.
-          // However, to match the "Search Result" behavior "exactly", we might want the header to react
-          // to scroll delta regardless of absolute position, OR only after we fully entered this view.
-          // Since the user said "layout state ... updated exactly like search result page",
-          // and Search Result page has sticky header logic, we'll keep it.
+          const currentScrollY = container.scrollTop;
 
           if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
             setIsHeaderVisible(false);
@@ -95,19 +118,29 @@ export default function RecommendedSection({ results, onBackToHome }: Props) {
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const container = containerRef.current?.parentElement;
+    if (container) {
+      container.addEventListener('scroll', handleScroll, { passive: true });
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
   }, []);
 
   // Notify parent about scroll state - reusing the same event as SearchResults
   useEffect(() => {
-    // Dispatch custom event for header visibility
-    // This allows the Layout to react even though we are not technically in ?q= search mode
-    // We might need to ensure Layout listens to this event even if !isSearchMode, OR we handle it via the recommended mode flag.
     window.dispatchEvent(new CustomEvent('searchHeaderVisibility', {
       detail: { visible: isHeaderVisible }
     }));
   }, [isHeaderVisible]);
+
+  // Use reusable infinite scroll hook
+  const { sentinelRef } = useInfiniteScroll({
+    hasMore: hasNextPage,
+    isLoadingMore,
+    isLoading,
+    onLoadMore: onLoadMore || (() => { }),
+    rootMargin: '400px',
+    enabled: !!onLoadMore,
+  });
 
   const renderLayout = (item: RestaurantWithMenu) => {
     const { restaurant, dishes, menuCategories, layoutType } = item;
@@ -164,17 +197,26 @@ export default function RecommendedSection({ results, onBackToHome }: Props) {
           </p>
         </motion.div>
 
-        {/* Results */}
-        <div>
-          {isLoading ? (
-            <>
-              <MagazineLayout8Shimmer />
-              <MagazineLayout8Shimmer />
-            </>
-          ) : (
-            results.map((item) => renderLayout(item))
-          )}
-        </div>
+        {/* Results with Infinite Scroll Container */}
+        <InfiniteScrollContainer
+          sentinelRef={sentinelRef}
+          isLoading={isInitialLoading}
+          isLoadingMore={isLoadingMore}
+          hasMore={hasNextPage}
+          isEmpty={!isLoading && results.length === 0}
+          totalResults={results.length}
+          ShimmerComponent={MagazineLayout8Shimmer}
+          initialShimmerCount={2}
+          loadMoreShimmerCount={1}
+          endMessage="Bạn đã xem hết các gợi ý gần đây"
+          EmptyComponent={
+            <div className="py-12 text-center text-gray-500">
+              Không tìm thấy nhà hàng nào quanh khu vực của bạn.
+            </div>
+          }
+        >
+          {results.map((item) => renderLayout(item))}
+        </InfiniteScrollContainer>
       </div>
       <style jsx>{`
         .magazine-scroll::-webkit-scrollbar { width: 6px; height: 6px; }

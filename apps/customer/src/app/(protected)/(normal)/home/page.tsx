@@ -6,8 +6,8 @@ import dynamic from 'next/dynamic';
 const RestaurantSlider = dynamic(() => import('@/features/home/components/RestaurantSlider'), { ssr: false });
 import BackgroundTransition from '@/features/home/components/BackgroundTransition';
 import { useHomePage } from '@/features/home/hooks/useHomePage';
-import { useState, useEffect } from 'react';
-import { List } from '@repo/ui/icons';
+import { useState, useEffect, useMemo } from 'react';
+import { List, Loader2 } from '@repo/ui/icons';
 import { useLoading } from '@repo/ui';
 import { useSearch } from '@/features/search/hooks/useSearch';
 import SearchResults from '@/features/search/components/SearchResults';
@@ -19,11 +19,9 @@ declare global {
 
 import FloatingScrollTrigger from '@/features/home/components/FloatingScrollTrigger';
 import RecommendedSection from '@/features/home/components/RecommendedSection';
-import {
-  searchRestaurants,
-  getDishesForRestaurant,
-  getMenuCategoriesForRestaurant
-} from '@/features/search/data/mockSearchData';
+import { useSearchRestaurants } from '@/features/search/hooks/useSearchRestaurants';
+import { useUserLocation, DEFAULT_LOCATION_HCMC } from '@repo/hooks';
+import { mapMagazineToRestaurantWithMenu } from '@/features/search/utils/mappers';
 import type { RestaurantWithMenu } from '@/features/search/hooks/useSearch';
 
 export default function HomePage() {
@@ -36,13 +34,38 @@ export default function HomePage() {
     backgroundImage,
     handleCategoryChange,
     handleRestaurantChange,
+    isCategoriesLoading,
+    isRestaurantsLoading: isHomeRestaurantsLoading,
   } = useHomePage();
 
   const [showAllCategories, setShowAllCategories] = useState(false);
 
-  // Recommended Section State
+  // Recommended Section Logic (API based)
   const [showRecommended, setShowRecommended] = useState(false);
-  const [recommendedResults, setRecommendedResults] = useState<RestaurantWithMenu[]>([]);
+  const { location: userLocation, isLoading: isLocationLoading } = useUserLocation();
+  const locationCoords = userLocation || DEFAULT_LOCATION_HCMC;
+
+  const {
+    restaurants: apiRestaurants,
+    isLoading: isRestaurantsLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useSearchRestaurants(
+    showRecommended ? {
+      latitude: locationCoords.latitude,
+      longitude: locationCoords.longitude,
+    } : null,
+    {
+      enabled: showRecommended && !isLocationLoading,
+    }
+  );
+
+  const recommendedResults = useMemo(() => {
+    return apiRestaurants.map((magazine, index) =>
+      mapMagazineToRestaurantWithMenu(magazine, index)
+    );
+  }, [apiRestaurants]);
 
   // Handle global loading state (transition from Login)
   const { hide } = useLoading();
@@ -74,18 +97,6 @@ export default function HomePage() {
       delete window.clearHomeSearch;
     };
   }, [clearSearch]);
-
-  // Load recommended data once
-  useEffect(() => {
-    const restaurants = searchRestaurants('');
-    const resultsWithMenu: RestaurantWithMenu[] = restaurants.map(restaurant => ({
-      restaurant,
-      dishes: getDishesForRestaurant(restaurant.id),
-      menuCategories: getMenuCategoriesForRestaurant(restaurant.id),
-      layoutType: Math.floor(Math.random() * 10) + 1,
-    }));
-    setRecommendedResults(resultsWithMenu);
-  }, []);
 
   // Handle Scroll/Wheel Trigger
   useEffect(() => {
@@ -188,11 +199,19 @@ export default function HomePage() {
               transition={{ delay: 0.15, duration: 0.4 }}
               className="flex items-center justify-center h-[28vh] md:h-[42vh]"
             >
-              <CategoryScroller
-                categories={categories}
-                activeIndex={activeCategoryIndex}
-                onCategoryChange={handleCategoryChange}
-              />
+              {isCategoriesLoading ? (
+                <div className="flex gap-8 overflow-hidden">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="w-32 h-12 bg-white/10 rounded-full animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <CategoryScroller
+                  categories={categories}
+                  activeIndex={activeCategoryIndex}
+                  onCategoryChange={handleCategoryChange}
+                />
+              )}
             </motion.section>
 
             {/* Restaurant Slider Section */}
@@ -200,23 +219,43 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 80 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.4 }}
-              className="flex-1 flex items-start justify-center"
+              className="flex-1 flex items-start justify-center min-h-[400px]"
             >
               <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeCategory?.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.08, ease: [0.33, 1, 0.68, 1] }}
-                  className="w-full"
-                >
-                  <RestaurantSlider
-                    restaurants={restaurantsInCategory}
-                    activeIndex={activeRestaurantIndex}
-                    onRestaurantChange={handleRestaurantChange}
-                  />
-                </motion.div>
+                {isHomeRestaurantsLoading ? (
+                  <motion.div
+                    key="loader"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="w-full flex flex-col items-center justify-center gap-4 py-20"
+                  >
+                    <div className="relative">
+                      <Loader2 className="w-12 h-12 text-white/40 animate-spin" />
+                      <div className="absolute inset-0 blur-sm text-white/20 animate-spin">
+                        <Loader2 className="w-12 h-12" />
+                      </div>
+                    </div>
+                    <p className="text-white/40 text-sm font-medium animate-pulse tracking-widest uppercase">
+                      Finding best tastes...
+                    </p>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key={activeCategory?.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.08, ease: [0.33, 1, 0.68, 1] }}
+                    className="w-full"
+                  >
+                    <RestaurantSlider
+                      restaurants={restaurantsInCategory}
+                      activeIndex={activeRestaurantIndex}
+                      onRestaurantChange={handleRestaurantChange}
+                    />
+                  </motion.div>
+                )}
               </AnimatePresence>
             </motion.section>
 
@@ -230,10 +269,22 @@ export default function HomePage() {
       {/* Recommended Section (appears below/replaces home) */}
       <AnimatePresence>
         {showRecommended && !isSearchMode && (
-          <RecommendedSection
-            results={recommendedResults}
-            onBackToHome={() => setShowRecommended(false)}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: '100vh' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '100vh' }}
+            transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
+            className="fixed inset-0 z-[40] overflow-y-auto bg-white magazine-scroll"
+          >
+            <RecommendedSection
+              results={recommendedResults}
+              onBackToHome={() => setShowRecommended(false)}
+              isLoading={isRestaurantsLoading}
+              hasNextPage={hasNextPage}
+              onLoadMore={fetchNextPage}
+              isLoadingMore={isFetchingNextPage}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
 

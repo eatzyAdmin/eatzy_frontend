@@ -4,6 +4,7 @@
 export { restaurantApi, type ResRestaurantDTO, type PaginationParams, type RestaurantSearchParams } from './restaurant.api';
 export { dishApi, type BackendDishDTO, mapBackendDishToFrontend, mapFrontendDishToBackend } from './dish.api';
 export { menuCategoryApi, type MenuCategoryDTO } from './menu-category.api';
+export { restaurantTypeApi } from './restaurant-type.api';
 export {
   restaurantDetailApi,
   type RestaurantDetail,

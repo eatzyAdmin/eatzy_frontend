@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 
 import { motion, AnimatePresence, PanInfo } from '@repo/ui/motion';
-import { Restaurant } from '@repo/models';
+import { Restaurant } from '@repo/types';
 import { ChevronLeft, ChevronRight } from '@repo/ui/icons';
 import { ImageWithFallback } from '@repo/ui';
 
@@ -53,10 +53,27 @@ export default function RestaurantSlider({
     }
   };
 
+  if (!restaurants || restaurants.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-white/50 py-10">
+        <p className="text-lg font-medium">No restaurants found in this category</p>
+      </div>
+    );
+  }
+
   // Get visible items
   const getVisibleRestaurants = () => {
     const visible = [];
     const total = restaurants.length;
+
+    // If only 1 restaurant, show it in the center
+    if (total === 1) {
+      return [{
+        restaurant: restaurants[0],
+        position: 'center' as const,
+        actualIndex: 0,
+      }];
+    }
 
     // On mobile, we might focus on the center one more, but 3 items ensures continuity
     for (let i = -1; i <= 1; i++) {
@@ -65,11 +82,14 @@ export default function RestaurantSlider({
       if (index < 0) index = total + index;
       if (index >= total) index = index - total;
 
-      visible.push({
-        restaurant: restaurants[index],
-        position: i === -1 ? 'left' : i === 0 ? 'center' : 'right',
-        actualIndex: index,
-      });
+      const restaurant = restaurants[index];
+      if (restaurant) {
+        visible.push({
+          restaurant,
+          position: i === -1 ? 'left' as const : i === 0 ? 'center' as const : 'right' as const,
+          actualIndex: index,
+        });
+      }
     }
 
     return visible;
