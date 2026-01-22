@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { dishApi, menuCategoryApi, type MenuCategoryDTO } from '@repo/api';
+import { useQuery, useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
+import { dishApi, menuCategoryApi, restaurantDetailApi, type MenuCategoryDTO } from '@repo/api';
 import type { Dish, MenuCategory } from '@repo/types';
 import { useNotification } from '@repo/ui';
 import { useMemo, useCallback } from 'react';
@@ -45,8 +45,7 @@ export interface UseRestaurantMenuResult {
 
 export const restaurantMenuKeys = {
   all: (restaurantId: number) => ['restaurant', restaurantId, 'menu'] as const,
-  dishes: (restaurantId: number) => [...restaurantMenuKeys.all(restaurantId), 'dishes'] as const,
-  categories: (restaurantId: number) => [...restaurantMenuKeys.all(restaurantId), 'categories'] as const,
+  myMenu: () => ['my-restaurant', 'menu'] as const,
 };
 
 // ======== Mapper Functions ========
@@ -106,43 +105,56 @@ export function useRestaurantMenu(
 
   const isValidId = restaurantId !== null && restaurantId > 0;
 
+  // Determine query key
+  const queryKey = useMemo(() =>
+    isValidId ? restaurantMenuKeys.all(restaurantId!) : restaurantMenuKeys.myMenu(),
+    [isValidId, restaurantId]
+  );
+
   // ======== Queries ========
 
-  // Fetch dishes
-  const dishesQuery = useQuery({
-    queryKey: restaurantMenuKeys.dishes(restaurantId || 0),
+  // Fetch menu (Single query for both dishes and categories)
+  const menuQuery = useQuery({
+    queryKey,
     queryFn: async () => {
-      if (!restaurantId) throw new Error('Invalid restaurant ID');
-      const response = await dishApi.getDishesByRestaurantId(restaurantId);
-      if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể tải danh sách món ăn');
+      let response;
+      if (isValidId) {
+        response = await restaurantDetailApi.getMenu(restaurantId!);
+      } else {
+        response = await restaurantDetailApi.getMyMenu();
       }
-      return response.data || [];
-    },
-    enabled: enabled && isValidId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
 
-  // Fetch categories
-  const categoriesQuery = useQuery({
-    queryKey: restaurantMenuKeys.categories(restaurantId || 0),
-    queryFn: async () => {
-      if (!restaurantId) throw new Error('Invalid restaurant ID');
-      const response = await menuCategoryApi.getCategoriesByRestaurantId(restaurantId);
       if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể tải danh mục món ăn');
+        throw new Error(response.message || 'Không thể tải thực đơn');
       }
-      return (response.data || []).map(mapCategoryDTOToMenuCategory);
+      return response.data;
     },
-    enabled: enabled && isValidId,
+    enabled: enabled,
     staleTime: 5 * 60 * 1000,
   });
 
+  // ======== Computed Values ========
+
+  const dishes = useMemo(() => menuQuery.data?.dishes || [], [menuQuery.data]);
+  const categories = useMemo(() => menuQuery.data?.categories || [], [menuQuery.data]);
+
+  const isLoading = menuQuery.isLoading;
+  const isError = menuQuery.isError;
+  const error = menuQuery.error;
+
   // ======== Mutations ========
+
+  // Helper to invalidate
+  const invalidateMenu = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKey as QueryKey });
+  }, [queryClient, queryKey]);
 
   // Create dish mutation
   const createDishMutation = useMutation({
     mutationFn: async (dish: Omit<Dish, 'id'>) => {
+      // If we don't have restaurantId passed in prop, try to get from fetched data
+      // But dishApi.createDish usually requires Dish object which has restaurantId string
+      // Let's assume the passed dish object has correct restaurantId from form
       const response = await dishApi.createDish(dish);
       if (response.statusCode !== 201 && response.statusCode !== 200) {
         throw new Error(response.message || 'Không thể tạo món ăn');
@@ -150,7 +162,7 @@ export function useRestaurantMenu(
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: restaurantMenuKeys.dishes(restaurantId || 0) });
+      invalidateMenu();
       if (showNotifications) {
         showNotification({ message: 'Đã thêm món mới thành công!', type: 'success' });
       }
@@ -172,7 +184,7 @@ export function useRestaurantMenu(
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: restaurantMenuKeys.dishes(restaurantId || 0) });
+      invalidateMenu();
       if (showNotifications) {
         showNotification({ message: 'Đã cập nhật món ăn thành công!', type: 'success' });
       }
@@ -193,7 +205,7 @@ export function useRestaurantMenu(
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: restaurantMenuKeys.dishes(restaurantId || 0) });
+      invalidateMenu();
       if (showNotifications) {
         showNotification({ message: 'Đã xóa món ăn!', type: 'success' });
       }
@@ -208,9 +220,12 @@ export function useRestaurantMenu(
   // Create category mutation
   const createCategoryMutation = useMutation({
     mutationFn: async (category: Omit<MenuCategory, 'id'>) => {
+      // Need restaurantId for DTO
+      const targetRestaurantId = restaurantId || Number(menuQuery.data?.restaurantId || 0);
+
       const dto: Omit<MenuCategoryDTO, 'id'> = {
         name: category.name,
-        restaurant: { id: restaurantId || 0 },
+        restaurant: { id: targetRestaurantId },
         displayOrder: category.displayOrder,
       };
       const response = await menuCategoryApi.createCategory(dto);
@@ -220,7 +235,7 @@ export function useRestaurantMenu(
       return mapCategoryDTOToMenuCategory(response.data!);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: restaurantMenuKeys.categories(restaurantId || 0) });
+      invalidateMenu();
       if (showNotifications) {
         showNotification({ message: 'Đã thêm danh mục mới!', type: 'success' });
       }
@@ -235,7 +250,8 @@ export function useRestaurantMenu(
   // Update category mutation
   const updateCategoryMutation = useMutation({
     mutationFn: async (category: MenuCategory) => {
-      const dto = mapMenuCategoryToDTO(category, restaurantId || 0);
+      const targetRestaurantId = restaurantId || Number(menuQuery.data?.restaurantId || 0);
+      const dto = mapMenuCategoryToDTO(category, targetRestaurantId);
       const response = await menuCategoryApi.updateCategory(dto);
       if (response.statusCode !== 200) {
         throw new Error(response.message || 'Không thể cập nhật danh mục');
@@ -243,7 +259,7 @@ export function useRestaurantMenu(
       return mapCategoryDTOToMenuCategory(response.data!);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: restaurantMenuKeys.categories(restaurantId || 0) });
+      invalidateMenu();
       if (showNotifications) {
         showNotification({ message: 'Đã cập nhật danh mục!', type: 'success' });
       }
@@ -264,7 +280,7 @@ export function useRestaurantMenu(
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: restaurantMenuKeys.categories(restaurantId || 0) });
+      invalidateMenu();
       if (showNotifications) {
         showNotification({ message: 'Đã xóa danh mục!', type: 'success' });
       }
@@ -276,21 +292,11 @@ export function useRestaurantMenu(
     },
   });
 
-  // ======== Computed Values ========
-
-  const dishes = useMemo(() => dishesQuery.data || [], [dishesQuery.data]);
-  const categories = useMemo(() => categoriesQuery.data || [], [categoriesQuery.data]);
-
-  const isLoading = dishesQuery.isLoading || categoriesQuery.isLoading;
-  const isError = dishesQuery.isError || categoriesQuery.isError;
-  const error = dishesQuery.error || categoriesQuery.error;
-
   // ======== Actions ========
 
   const refetch = useCallback(() => {
-    dishesQuery.refetch();
-    categoriesQuery.refetch();
-  }, [dishesQuery, categoriesQuery]);
+    menuQuery.refetch();
+  }, [menuQuery]);
 
   const createDish = useCallback(async (dish: Omit<Dish, 'id'>): Promise<Dish | null> => {
     try {
@@ -353,8 +359,8 @@ export function useRestaurantMenu(
 
     // Loading states
     isLoading,
-    isDishesLoading: dishesQuery.isLoading,
-    isCategoriesLoading: categoriesQuery.isLoading,
+    isDishesLoading: menuQuery.isLoading,
+    isCategoriesLoading: menuQuery.isLoading,
 
     // Error states
     isError,
@@ -378,5 +384,5 @@ export function useRestaurantMenu(
     isCreatingCategory: createCategoryMutation.isPending,
     isUpdatingCategory: updateCategoryMutation.isPending,
     isDeletingCategory: deleteCategoryMutation.isPending,
-  };
+  }; // End return
 }

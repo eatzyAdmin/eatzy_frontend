@@ -247,6 +247,21 @@ export const restaurantDetailApi = {
   },
 
   /**
+   * Get current owner's restaurant menu (no ID required)
+   * Endpoint: GET /api/v1/restaurants/my-restaurant/menu
+   */
+  getMyMenu: async (): Promise<IBackendRes<RestaurantMenu>> => {
+    const response = await http.get<IBackendRes<BackendRestaurantMenuDTO>>(
+      `/api/v1/restaurants/my-restaurant/menu`
+    ) as unknown as IBackendRes<BackendRestaurantMenuDTO>;
+
+    return {
+      ...response,
+      data: response.data ? mapBackendRestaurantMenu(response.data) : undefined,
+    } as IBackendRes<RestaurantMenu>;
+  },
+
+  /**
    * Open restaurant (for owner)
    * Endpoint: POST /api/v1/restaurants/{id}/open
    */
