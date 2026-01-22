@@ -18,6 +18,8 @@
     "@repo/store": "workspace:*",
     "@repo/types": "workspace:*",
     "@repo/fonts": "workspace:*",
+    "@tanstack/react-query": "^5.59.20",
+    "@tanstack/react-query-devtools": "^5.91.2",
     "date-fns": "^2.30.0"
   },
   "devDependencies": {

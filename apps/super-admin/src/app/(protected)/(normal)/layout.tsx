@@ -15,6 +15,8 @@ import {
 } from '@repo/ui/icons';
 import RestaurantNavItem from '../../../components/RestaurantNavItem';
 import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation } from '@repo/ui';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useLogout } from '@/features/auth/hooks/useLogout';
 
 const adminMenuItems = [
   { id: 'overview', icon: LayoutDashboard, text: 'Tổng quan' },
@@ -31,10 +33,17 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { confirm } = useSwipeConfirmation();
   const { startLoading, stopLoading } = useNormalLoading();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const { handleLogout } = useLogout();
   const [activeSection, setActiveSection] = useState('overview');
-  const [profileData] = useState({ fullName: 'Super Admin', email: 'admin@eatzy.com' });
   const [navHovered, setNavHovered] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  // Derive profile data from auth user
+  const profileData = {
+    fullName: user?.name || 'Super Admin',
+    email: user?.email || 'admin@eatzy.com'
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -67,9 +76,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
         confirmText: 'Đăng xuất',
         onConfirm: () => {
           startLoading();
-          setTimeout(() => {
-            router.push('/login');
-          }, 1500);
+          handleLogout();
         }
       });
     } else {
