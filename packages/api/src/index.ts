@@ -1,6 +1,7 @@
 // Main API exports
 export { http } from "./http";
 export { authApi } from "./auth";
+export { cartApi } from "./cart";
 
 // Restaurant module exports
 export {

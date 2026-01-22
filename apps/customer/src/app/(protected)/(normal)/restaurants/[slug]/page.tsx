@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, Star, MapPin, ArrowLeft, Plus, Minus, CheckC
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useLoading, useHoverHighlight, HoverHighlightOverlay, useFlyToCart, FlyToCartLayer } from "@repo/ui";
 import type { Restaurant, Dish, MenuCategory } from "@repo/types";
-import { useCartStore } from "@repo/store";
+import { useRestaurantCart } from "@/features/cart/hooks/useCart";
 import { formatVnd } from "@repo/lib";
 import { useRestaurantWithMenu } from "@/features/restaurant";
 import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer";
@@ -54,8 +54,21 @@ export default function RestaurantDetailPage() {
   const rightColumnRef = useRef<HTMLDivElement | null>(null);
   const leftColumnRef = useRef<HTMLDivElement | null>(null);
   const [isTabsSticky, setIsTabsSticky] = useState(false);
-  const items = useCartStore((s) => s.items);
-  const { addItem, setActiveRestaurant, removeItem } = useCartStore();
+  // Cart API hook - will be initialized after restaurant data loads
+  const numericRestaurantId = restaurant ? Number(restaurant.id) : null;
+  const { addToCart, cartItems, updateItemQuantity, removeItem: removeCartItem, isAddingToCart } = useRestaurantCart(numericRestaurantId);
+
+  // Helper to get count of a dish in cart
+  const getDishCount = (dishId: string): number => {
+    return cartItems
+      .filter((item) => String(item.dish.id) === dishId)
+      .reduce((sum: number, item) => sum + item.quantity, 0);
+  };
+
+  // Helper to get cart item for a dish
+  const getCartItemForDish = (dishId: string) => {
+    return cartItems.find((item) => String(item.dish.id) === dishId);
+  };
   const { containerRef: catContainerRef, rect: catRect, style: catStyle, moveHighlight: catMove, clearHover: catClear } = useHoverHighlight<HTMLDivElement>();
   const { containerRef: menuContainerRef, rect: menuRect, style: menuStyle, moveHighlight: menuMove, clearHover: menuClear } = useHoverHighlight<HTMLDivElement>();
   const { ghosts, fly } = useFlyToCart();
@@ -115,6 +128,11 @@ export default function RestaurantDetailPage() {
   }, []);
 
 
+
+  // Show loading shimmer while fetching
+  if (isApiLoading) {
+    return <RestaurantDetailShimmer />;
+  }
 
   if (!restaurant) {
     return (
@@ -409,12 +427,8 @@ export default function RestaurantDetailPage() {
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
                           {dishes.map((d) => {
-                            const count = items
-                              .filter(
-                                (it) =>
-                                  it.id === d.id || it.id.startsWith(`${d.id}::`)
-                              )
-                              .reduce((s, it) => s + it.quantity, 0);
+                            const count = getDishCount(d.id);
+                            const cartItem = getCartItemForDish(d.id);
                             const variantGroup = (d.optionGroups ?? []).find((g) => String(g.title || '').toLowerCase().startsWith('variant')) || null;
                             const minPrice = variantGroup && Array.isArray(variantGroup.options) && variantGroup.options.length > 0
                               ? (Number(d.price || 0) + Math.min(...(variantGroup.options ?? []).map((v) => Number(v.price || 0))))
@@ -424,7 +438,6 @@ export default function RestaurantDetailPage() {
                                 key={d.id}
                                 className="group relative bg-white rounded-[16px] md:rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer"
                                 onClick={() => {
-                                  setActiveRestaurant(restaurant.id);
                                   setDrawerDish(d);
                                   setDrawerOpen(true);
                                 }}
@@ -467,14 +480,15 @@ export default function RestaurantDetailPage() {
                                         className="rounded-full bg-white/90 backdrop-blur text-[#1A1A1A] shadow-lg flex items-center gap-1 md:gap-2 px-1 py-1 h-8 md:h-10 border border-gray-100"
                                       >
                                         <button
-                                          onClick={(e) => {
+                                          onClick={async (e) => {
                                             e.stopPropagation();
-                                            const target = items.find(
-                                              (it) =>
-                                                it.id === d.id ||
-                                                it.id.startsWith(`${d.id}::`)
-                                            );
-                                            if (target) removeItem(target.id);
+                                            if (cartItem) {
+                                              if (cartItem.quantity <= 1) {
+                                                await removeCartItem(cartItem.id);
+                                              } else {
+                                                await updateItemQuantity(cartItem.id, cartItem.quantity - 1);
+                                              }
+                                            }
                                           }}
                                           className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                                         >
@@ -486,7 +500,6 @@ export default function RestaurantDetailPage() {
                                         <button
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            setActiveRestaurant(restaurant.id);
                                             setDrawerDish(d);
                                             setDrawerOpen(true);
                                           }}
@@ -500,7 +513,6 @@ export default function RestaurantDetailPage() {
                                         layoutId={`item-${d.id}-btn`}
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          setActiveRestaurant(restaurant.id);
                                           setDrawerDish(d);
                                           setDrawerOpen(true);
                                         }}
@@ -561,11 +573,10 @@ export default function RestaurantDetailPage() {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         dish={drawerDish}
-        onConfirm={(payload, startRect) => {
-          if (!drawerDish) return;
-          const variantId = payload.variant?.id ?? "base";
-          const addonIds = payload.addons.map((a) => a.id).sort();
-          const uniqueId = `${drawerDish.id}::${variantId}::${addonIds.join(".")}`;
+        onConfirm={async (payload, startRect) => {
+          if (!drawerDish || !restaurant) return;
+
+          // Fly animation
           const endEl = document.getElementById("local-cart-fab") || document.getElementById("header-cart-button");
           if (startRect && endEl) {
             fly({
@@ -574,26 +585,34 @@ export default function RestaurantDetailPage() {
               imageUrl: drawerDish.imageUrl,
             });
           }
-          setActiveRestaurant(restaurant.id);
-          addItem({
-            id: uniqueId,
-            name: drawerDish.name,
-            price: payload.totalPrice / payload.quantity,
-            imageUrl: drawerDish.imageUrl,
-            restaurantId: restaurant.id,
-            quantity: payload.quantity,
-            options: {
-              variant: payload.variant
-                ? {
-                  id: payload.variant.id,
-                  name: payload.variant.name,
-                  price: payload.variant.price,
-                }
-                : undefined,
-              addons: payload.addons,
-              groups: payload.groups,
-            },
+
+          // Collect selected option IDs for API
+          const selectedOptionIds: { id: number }[] = [];
+
+          // Add variant option if selected
+          if (payload.variant?.id) {
+            selectedOptionIds.push({ id: Number(payload.variant.id) });
+          }
+
+          // Add addon options
+          payload.addons.forEach(addon => {
+            selectedOptionIds.push({ id: Number(addon.id) });
           });
+
+          // Add options from groups
+          payload.groups?.forEach(group => {
+            group.options.forEach(opt => {
+              selectedOptionIds.push({ id: Number(opt.id) });
+            });
+          });
+
+          // Call API to add to cart
+          await addToCart(
+            Number(drawerDish.id),
+            payload.quantity,
+            selectedOptionIds.length > 0 ? selectedOptionIds : undefined
+          );
+
           setDrawerOpen(false);
         }}
       />

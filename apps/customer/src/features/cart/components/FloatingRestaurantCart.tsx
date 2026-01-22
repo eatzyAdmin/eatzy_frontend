@@ -1,16 +1,33 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useCartStore } from "@repo/store";
 import { formatVnd } from "@repo/lib";
 import { AnimatePresence, motion } from "@repo/ui/motion";
-import { ShoppingBag, Minus, Plus, Trash, X, ChevronRight } from "@repo/ui/icons";
+import { ShoppingBag, Minus, Plus, Trash, X, ChevronRight, Loader2 } from "@repo/ui/icons";
 import { ImageWithFallback } from "@repo/ui";
 import { useLoading } from "@repo/ui";
 import { useRouter } from "next/navigation";
+import { useRestaurantCart } from "../hooks/useCart";
 
-export default function FloatingRestaurantCart({ restaurantId, restaurantName }: { restaurantId: string, restaurantName?: string }) {
-  const { items, setActiveRestaurant, removeItem, addItem } = useCartStore();
+interface FloatingRestaurantCartProps {
+  restaurantId: string | number;
+  restaurantName?: string;
+}
+
+export default function FloatingRestaurantCart({ restaurantId, restaurantName }: FloatingRestaurantCartProps) {
+  // Convert to number for API
+  const numericRestaurantId = typeof restaurantId === 'string' ? Number(restaurantId) : restaurantId;
+
+  const {
+    cartItems,
+    totalItems,
+    totalPrice,
+    updateItemQuantity,
+    removeItem,
+    isUpdating,
+    isLoading,
+  } = useRestaurantCart(numericRestaurantId);
+
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { show } = useLoading();
@@ -20,22 +37,34 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
     setMounted(true);
   }, []);
 
-  const cartItems = useMemo(() => items.filter(i => i.restaurantId === restaurantId), [items, restaurantId]);
-  const cartTotal = useMemo(() => cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0), [cartItems]);
-  const itemCount = useMemo(() => cartItems.reduce((acc, item) => acc + item.quantity, 0), [cartItems]);
-
   const handleCheckout = () => {
     show("Đang chuyển đến Checkout...");
-    setActiveRestaurant(restaurantId);
     setIsOpen(false);
     setTimeout(() => {
-      router.push("/checkout");
+      router.push(`/checkout?restaurantId=${restaurantId}`);
     }, 500);
+  };
+
+  const handleIncrement = async (itemId: number, currentQty: number) => {
+    await updateItemQuantity(itemId, currentQty + 1);
+  };
+
+  const handleDecrement = async (itemId: number, currentQty: number) => {
+    if (currentQty <= 1) {
+      await removeItem(itemId);
+    } else {
+      await updateItemQuantity(itemId, currentQty - 1);
+    }
   };
 
   if (!mounted) return null;
 
   const layoutId = `cart-container-${restaurantId}`;
+
+  // Show loading indicator while fetching
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <>
@@ -56,12 +85,12 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                 <ShoppingBag className="w-4 h-4 md:w-6 md:h-6" />
               </div>
               <span className="absolute -top-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full bg-white text-[#1A1A1A] font-bold text-[10px] md:text-xs flex items-center justify-center border-2 border-[var(--primary)] shadow-sm">
-                {itemCount}
+                {totalItems}
               </span>
             </div>
             <div className="flex flex-col items-start mr-1 md:mr-2">
               <span className="hidden md:block text-xs font-semibold opacity-80 uppercase tracking-wide">Giỏ hàng</span>
-              <span className="font-bold text-sm md:text-lg leading-none">{formatVnd(cartTotal)}</span>
+              <span className="font-bold text-sm md:text-lg leading-none">{formatVnd(totalPrice)}</span>
             </div>
           </motion.button>
         )}
@@ -76,14 +105,19 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
           {isOpen && (
             <>
               <motion.div
+                key="cart-backdrop"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsOpen(false)}
                 className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
               />
-              <div
-                className="fixed inset-0 z-[101] flex items-center justify-center p-4"
+              <motion.div
+                key="cart-wrapper"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`fixed inset-0 z-[101] flex items-center justify-center p-4 ${!isOpen ? 'pointer-events-none' : ''}`}
                 onClick={() => setIsOpen(false)}
               >
                 <motion.div
@@ -107,44 +141,44 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                   </div>
 
                   {/* Body */}
-                  <div className="overflow-y-auto p-6 flex-1 bg-white divide-y divide-gray-200">
+                  <div className="overflow-y-auto p-6 flex-1 bg-white divide-y divide-gray-200 relative">
                     {cartItems.map(item => (
-                      <motion.div
-                        layout
+                      <div
                         key={item.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
                         className="flex gap-4 py-4 first:pt-0 last:pb-0"
                       >
                         <div className="relative w-20 h-20 rounded-3xl overflow-hidden bg-gray-100 flex-shrink-0 border-4 border-gray-200">
-                          <ImageWithFallback src={item.imageUrl || ""} alt={item.name} fill className="object-cover" />
+                          <ImageWithFallback src={item.dish.image || ""} alt={item.dish.name} fill className="object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-start mb-1">
-                            <h4 className="font-semibold text-[#1A1A1A] line-clamp-1 text-sm">{item.name}</h4>
-                            <span className="font-bold text-[#1A1A1A] ml-2 text-sm">{formatVnd(item.price)}</span>
+                            <h4 className="font-semibold text-[#1A1A1A] line-clamp-1 text-sm">{item.dish.name}</h4>
+                            <span className="font-bold text-[#1A1A1A] ml-2 text-sm">{formatVnd(item.dish.price)}</span>
                           </div>
-                          <div className="text-xs text-gray-500 mb-2 line-clamp-1">
-                            {item.options?.variant?.name && <span className="mr-1">{item.options.variant.name}</span>}
-                            {item.options?.addons?.map(a => a.name).join(', ')}
-                          </div>
+                          {item.cartItemOptions && item.cartItemOptions.length > 0 && (
+                            <div className="text-xs text-gray-500 mb-2 line-clamp-1">
+                              {item.cartItemOptions.map(opt => opt.menuOption.name).join(', ')}
+                            </div>
+                          )}
                           <div className="flex items-center gap-3">
                             <button
-                              onClick={() => removeItem(item.id)}
-                              className="w-7 h-7 rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors"
+                              onClick={() => handleDecrement(item.id, item.quantity)}
+                              disabled={isUpdating}
+                              className="w-7 h-7 rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
                             >
                               {item.quantity === 1 ? <Trash className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
                             </button>
                             <span className="font-bold text-sm min-w-[20px] text-center">{item.quantity}</span>
                             <button
-                              onClick={() => addItem({ ...item, quantity: 1 })}
-                              className="w-7 h-7 rounded-xl bg-[var(--primary)] text-[#1A1A1A] flex items-center justify-center hover:brightness-110 active:scale-95 transition-all shadow-sm"
+                              onClick={() => handleIncrement(item.id, item.quantity)}
+                              disabled={isUpdating}
+                              className="w-7 h-7 rounded-xl bg-[var(--primary)] text-[#1A1A1A] flex items-center justify-center hover:brightness-110 active:scale-95 transition-all shadow-sm disabled:opacity-50"
                             >
                               <Plus className="w-3.5 h-3.5 font-bold" />
                             </button>
                           </div>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
 
@@ -152,20 +186,30 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                   <div className="p-6 border-t border-gray-100 bg-gray-50 flex-shrink-0">
                     <div className="flex justify-between mb-4 items-end">
                       <span className="text-gray-500 font-medium">Tổng tạm tính</span>
-                      <span className="text-2xl font-bold text-[#1A1A1A]">{formatVnd(cartTotal)}</span>
+                      <span className="text-2xl font-bold text-[#1A1A1A]">{formatVnd(totalPrice)}</span>
                     </div>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleCheckout}
-                      className="w-full py-4 bg-[var(--primary)] text-[#1A1A1A] rounded-2xl font-bold shadow-lg shadow-[var(--primary)]/20 flex items-center justify-center gap-2 text-lg"
+                      disabled={cartItems.length === 0 || isUpdating}
+                      className="w-full py-4 bg-[var(--primary)] text-[#1A1A1A] rounded-2xl font-bold shadow-lg shadow-[var(--primary)]/20 flex items-center justify-center gap-2 text-lg disabled:opacity-70"
                     >
-                      <span>Xem đơn hàng</span>
-                      <ChevronRight className="w-5 h-5" />
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>Đang cập nhật...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Xem đơn hàng</span>
+                          <ChevronRight className="w-5 h-5" />
+                        </>
+                      )}
                     </motion.button>
                   </div>
                 </motion.div>
-              </div>
+              </motion.div>
             </>
           )}
         </AnimatePresence>,

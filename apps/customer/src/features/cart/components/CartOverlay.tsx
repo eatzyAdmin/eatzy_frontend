@@ -1,81 +1,73 @@
 "use client";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { X, Trash, CheckCircle2, Store } from "@repo/ui/icons";
-import { useCartStore, CartItem } from "@repo/store";
-import { useEffect, useMemo, useState } from "react";
+import { X, Trash, CheckCircle2, Store, Loader2 } from "@repo/ui/icons";
+import { useState } from "react";
 import { ImageWithFallback } from "@repo/ui";
 import { formatVnd } from "@repo/lib";
-import { getRestaurantById } from "@/features/search/data/mockSearchData";
 import { useRouter } from "next/navigation";
 import { useLoading, CartOverlayShimmer } from "@repo/ui";
+import { useCart, cartKeys } from "../hooks/useCart";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function CartOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { items, addItem, removeItemsByRestaurant, setActiveRestaurant } = useCartStore();
+  const {
+    carts,
+    isLoading: isCartsLoading,
+    totalItems,
+  } = useCart();
+
+  const queryClient = useQueryClient();
   const router = useRouter();
   const { show } = useLoading();
   const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedRestIds, setSelectedRestIds] = useState<Set<string>>(new Set());
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedRestIds, setSelectedRestIds] = useState<Set<number>>(new Set());
+  const [isDeletingCarts, setIsDeletingCarts] = useState(false);
 
-  useEffect(() => {
-    if (open) {
-      setIsLoading(true);
-      const timer = setTimeout(() => setIsLoading(false), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [open]);
-
-  // Dummy data initialization
-  useEffect(() => {
-    if (open && items.length === 0) {
-      // Add items for Rest 2
-      addItem({ id: "dish-001", name: "Traditional Sushi", price: 85000, imageUrl: "https://images.unsplash.com/photo-1540317584754-5079b12b2743?w=400&q=60", restaurantId: "rest-2", quantity: 1 });
-      // Add items for Rest 1 (to demo multiple)
-      addItem({ id: "dish-1-1", name: "Phở Bò Tái", price: 65000, imageUrl: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400", restaurantId: "rest-1", quantity: 2 });
-    }
-  }, [open, items.length, addItem]);
-
-  // Group items by restaurant
-  const carts = useMemo(() => {
-    const groups: Record<string, { count: number; subtotal: number; items: CartItem[] }> = {};
-    items.forEach(item => {
-      if (!groups[item.restaurantId]) {
-        groups[item.restaurantId] = { count: 0, subtotal: 0, items: [] };
-      }
-      groups[item.restaurantId].count += item.quantity;
-      groups[item.restaurantId].subtotal += item.price * item.quantity;
-      groups[item.restaurantId].items.push(item);
-    });
-    return Object.entries(groups).map(([rId, data]) => ({
-      restaurantId: rId,
-      ...data,
-      info: getRestaurantById(rId)
-    }));
-  }, [items]);
-
-  const toggleSelection = (rId: string) => {
+  const toggleSelection = (cartId: number) => {
     const next = new Set(selectedRestIds);
-    if (next.has(rId)) next.delete(rId);
-    else next.add(rId);
+    if (next.has(cartId)) next.delete(cartId);
+    else next.add(cartId);
     setSelectedRestIds(next);
   };
 
-  const handleBulkDelete = () => {
-    selectedRestIds.forEach(id => removeItemsByRestaurant(id));
-    setSelectedRestIds(new Set());
-    setIsEditMode(false);
+  const handleBulkDelete = async () => {
+    setIsDeletingCarts(true);
+    try {
+      const { cartApi } = await import("@repo/api");
+      const cartIds = Array.from(selectedRestIds);
+      for (const cartId of cartIds) {
+        await cartApi.deleteCart(cartId);
+      }
+      // Invalidate queries to refetch
+      await queryClient.invalidateQueries({ queryKey: cartKeys.all });
+      setSelectedRestIds(new Set());
+      setIsEditMode(false);
+    } finally {
+      setIsDeletingCarts(false);
+    }
   };
 
-  const handleCardClick = (rId: string) => {
+  const handleDeleteSingleCart = async (cartId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDeletingCarts(true);
+    try {
+      const { cartApi } = await import("@repo/api");
+      await cartApi.deleteCart(cartId);
+      // Invalidate queries to refetch
+      await queryClient.invalidateQueries({ queryKey: cartKeys.all });
+    } finally {
+      setIsDeletingCarts(false);
+    }
+  };
+
+  const handleCardClick = (restaurantId: number, cartId: number) => {
     if (isEditMode) {
-      toggleSelection(rId);
+      toggleSelection(cartId);
     } else {
       show("Đang chuyển đến Checkout...");
-      setActiveRestaurant(rId);
       onClose();
-      // Use setTimeout to allow overlay to close smoothly and loading to appear
       setTimeout(() => {
-        router.push("/checkout");
+        router.push(`/checkout?restaurantId=${restaurantId}`);
       }, 300);
     }
   };
@@ -110,7 +102,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
               <div className="flex flex-col">
                 <div className="text-3xl font-anton font-bold uppercase">My Cart</div>
                 <div className="text-sm text-gray-500 font-medium">
-                  {carts.length} quán ăn đang chờ
+                  {carts.length} quán ăn • {totalItems} món
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -137,8 +129,8 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
-              {isLoading ? (
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 relative">
+              {isCartsLoading ? (
                 <>
                   <CartOverlayShimmer />
                   <CartOverlayShimmer />
@@ -151,17 +143,23 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                   <p>Giỏ hàng trống</p>
                 </div>
               ) : (
-                carts.map(({ restaurantId, info, count, subtotal, items }) => {
-                  const isSelected = selectedRestIds.has(restaurantId);
+                carts.map(cart => {
+                  const isSelected = selectedRestIds.has(cart.id);
+                  const itemCount = cart.cartItems.reduce((sum, item) => sum + item.quantity, 0);
+                  const subtotal = cart.cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+                  const itemNames = cart.cartItems.map(item => item.dish.name).join(", ");
+                  // Get first item image as restaurant preview
+                  const previewImage = cart.cartItems[0]?.dish?.image || "";
+
                   return (
                     <motion.div
-                      key={restaurantId}
+                      key={cart.id}
                       layout
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       whileHover={{ scale: isEditMode ? 1 : 1.02 }}
-                      onClick={() => handleCardClick(restaurantId)}
+                      onClick={() => handleCardClick(cart.restaurant.id, cart.id)}
                       className={`relative bg-white rounded-3xl p-4 shadow-sm border-4 transition-all cursor-pointer group ${isEditMode && isSelected
                         ? "border-[var(--primary)] ring-2 ring-[var(--primary)]/20"
                         : "border-gray-100 hover:border-gray-300 hover:shadow-md"
@@ -191,8 +189,8 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                         <div className="relative flex-shrink-0">
                           <div className="relative w-20 h-20 rounded-3xl overflow-hidden bg-gray-100 border-4 border-gray-200">
                             <ImageWithFallback
-                              src={info?.imageUrl || ""}
-                              alt={info?.name || "Restaurant"}
+                              src={previewImage}
+                              alt={cart.restaurant.name}
                               fill
                               className="object-cover"
                             />
@@ -206,30 +204,32 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                         <div className="flex-1 min-w-0 py-1">
                           <div className="flex items-start justify-between">
                             <h3 className="font-bold text-[#1A1A1A] text-lg truncate pr-2">
-                              {info?.name || "Unknown Restaurant"}
+                              {cart.restaurant.name}
                             </h3>
                             {/* Trash Icon (Visible in Normal Mode) */}
                             {!isEditMode && (
                               <motion.button
                                 whileHover={{ scale: 1.1, backgroundColor: "#FEE2E2" }}
                                 whileTap={{ scale: 0.9 }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeItemsByRestaurant(restaurantId);
-                                }}
-                                className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+                                onClick={(e) => handleDeleteSingleCart(cart.id, e)}
+                                disabled={isDeletingCarts}
+                                className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50"
                               >
-                                <Trash className="w-4 h-4" />
+                                {isDeletingCarts ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Trash className="w-4 h-4" />
+                                )}
                               </motion.button>
                             )}
                           </div>
 
                           <div className="text-xs text-gray-500 line-clamp-1 mt-0.5 mb-2 pr-8">
-                            {items.map(i => i.name).join(", ")}
+                            {itemNames}
                           </div>
                           <div className="flex items-end justify-between">
                             <div className="text-sm text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg font-medium whitespace-nowrap">
-                              {count} món
+                              {itemCount} món
                             </div>
                             <div className="text-lg font-bold text-[var(--primary)] whitespace-nowrap">
                               {formatVnd(subtotal)}
@@ -243,7 +243,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
               )}
             </div>
 
-            {/* Bottom Actions */}
+            {/* Bottom Actions - Delete Button with Spinner */}
             <AnimatePresence>
               {isEditMode && selectedRestIds.size > 0 && (
                 <motion.div
@@ -254,10 +254,20 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                 >
                   <button
                     onClick={handleBulkDelete}
-                    className="w-full bg-red-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-red-500/30 hover:bg-red-600 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                    disabled={isDeletingCarts}
+                    className="w-full bg-red-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-red-500/30 hover:bg-red-600 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70"
                   >
-                    <Trash className="w-5 h-5" />
-                    <span>Xóa ({selectedRestIds.size}) quán đã chọn</span>
+                    {isDeletingCarts ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Đang xóa...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash className="w-5 h-5" />
+                        <span>Xóa ({selectedRestIds.size}) quán đã chọn</span>
+                      </>
+                    )}
                   </button>
                 </motion.div>
               )}

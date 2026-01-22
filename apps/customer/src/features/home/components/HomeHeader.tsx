@@ -2,8 +2,8 @@
 
 import { motion } from '@repo/ui/motion';
 import { Menu, BookHeart, Search, ShoppingCart } from '@repo/ui/icons';
-import { useCartStore } from '@repo/store';
 import { useState, useEffect } from 'react';
+import { useCart } from '@/features/cart/hooks/useCart';
 
 interface HomeHeaderProps {
   onMenuClick?: () => void;
@@ -24,9 +24,7 @@ export default function HomeHeader({
   hideCart = false,
   onLogoClick,
 }: HomeHeaderProps) {
-  // const [layoutView, setLayoutView] = useState<'grid' | 'list'>('grid');
-
-  const cartItemsLength = useCartStore((s) => s.items.length);
+  const { totalItems } = useCart();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-3 md:p-6">
@@ -139,7 +137,7 @@ export default function HomeHeader({
               className={`relative rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
                 ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
                 : 'bg-white/10 border-white/20 hover:bg-white/20'
-                } ${cartItemsLength > 0 ? 'px-3 w-auto h-10 md:h-10 gap-2' : 'w-10 h-10 md:w-10 md:h-10'}`}
+                } ${totalItems > 0 ? 'px-3 w-auto h-10 md:h-10 gap-2' : 'w-10 h-10 md:w-10 md:h-10'}`}
             >
               <CartButtonContent hideSearchIcon={hideSearchIcon} />
             </motion.button>
@@ -151,32 +149,30 @@ export default function HomeHeader({
 }
 
 function CartButtonContent({ hideSearchIcon }: { hideSearchIcon: boolean }) {
-  const count = useCartStore((s) => s.items.length);
-  const total = useCartStore((s) => s.total());
+  const { totalItems, totalPrice } = useCart();
   const [pulse, setPulse] = useState(false);
+
   useEffect(() => {
     setPulse(true);
     const t = setTimeout(() => setPulse(false), 300);
     return () => clearTimeout(t);
-  }, [count]);
+  }, [totalItems]);
 
   return (
     <>
       <motion.div animate={pulse ? { scale: [1, 1.15, 1] } : {}} transition={{ duration: 0.3 }} className="relative flex items-center">
         <ShoppingCart strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
-        {count > 0 && (
-          <motion.span key={count} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 300 }} className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--primary)] text-[10px] leading-[18px] text-black font-bold border border-white/60 flex items-center justify-center">
-            {count}
+        {totalItems > 0 && (
+          <motion.span key={totalItems} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 300 }} className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--primary)] text-[10px] leading-[18px] text-black font-bold border border-white/60 flex items-center justify-center">
+            {totalItems}
           </motion.span>
         )}
       </motion.div>
-      {count > 0 && (
+      {totalItems > 0 && (
         <div className={`hidden md:flex items-center text-sm font-semibold ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
-          {new Intl.NumberFormat('vi-VN').format(total)} đ
+          {new Intl.NumberFormat('vi-VN').format(totalPrice)} đ
         </div>
       )}
     </>
   );
 }
-
-

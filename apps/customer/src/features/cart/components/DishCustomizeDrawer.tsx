@@ -5,7 +5,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import type { Dish, DishVariant, OptionGroup, OptionChoice } from "@repo/types";
 import { formatVnd } from "@repo/lib";
 import { useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
-import { ChefHat, X } from "@repo/ui/icons";
+import { ChefHat, X, Loader2 } from "@repo/ui/icons";
 
 export default function DishCustomizeDrawer({
   open,
@@ -34,6 +34,7 @@ export default function DishCustomizeDrawer({
     Record<string, Set<string>>
   >({});
   const [qty, setQty] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
   const confirmRef = useRef<HTMLButtonElement | null>(null);
   const rightColRef = useRef<HTMLDivElement | null>(null);
   const groupRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -193,7 +194,7 @@ export default function DishCustomizeDrawer({
               </button>
             </div>
 
-            <div className="flex flex-col md:grid md:grid-cols-[40%_60%] gap-0">
+            <div className="flex flex-col md:grid md:grid-cols-[40%_60%] gap-0 pb-0 md:pb-8">
               <div className="relative shrink-0 h-auto md:h-full md:overflow-y-auto no-scrollbar p-5 pt-0 md:p-8 md:pt-8 md:pb-24">
                 <div className="hidden md:block">
                   <div
@@ -425,72 +426,86 @@ export default function DishCustomizeDrawer({
             </div>
 
             {/* Fixed Footer */}
-            <div className="fixed md:absolute bottom-0 left-0 right-0 p-4 md:p-8 bg-white border-t border-gray-100 z-[90] md:z-10 md:w-[60%] md:left-auto flex justify-center">
+            <div className="fixed md:absolute bottom-0 left-0 right-0 p-4 md:py-4 md:p-8 bg-white border-t border-gray-100 z-[90] md:z-10 md:w-[60%] md:left-auto flex justify-center">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                disabled={!canConfirm}
+                disabled={!canConfirm || isAdding}
                 ref={confirmRef}
-                onClick={() =>
-                  onConfirm(
-                    {
-                      variant,
-                      addons,
-                      groups: [
-                        ...(
-                          variantGroup && variant
-                            ? [
-                              {
-                                id: String(variantGroup.id),
-                                title: String(variantGroup.title || ""),
-                                options: [
-                                  { id: String(variant.id), name: String(variant.name), price: Number(variant.price) },
-                                ],
-                              },
-                            ]
-                            : []
-                        ),
-                        ...nonVariantGroups
-                          .map((g) => {
-                            const set = selectedAddonIds[g.id] ?? new Set<string>();
-                            const opts = (g.options ?? []).filter((o) => set.has(o.id));
-                            return {
-                              id: String(g.id),
-                              title: String(g.title || ""),
-                              options: opts.map((o) => ({ id: String(o.id), name: String(o.name || ""), price: Number(o.price || 0) })),
-                            };
-                          })
-                          .filter((g) => g.options.length > 0),
-                      ],
-                      quantity: qty,
-                      totalPrice,
-                    },
-                    confirmRef.current?.getBoundingClientRect() || undefined
-                  )
-                }
-                className={`w-full max-w-sm h-16 rounded-2xl flex items-center justify-center gap-2 transition-all ${canConfirm ? "bg-[var(--primary)] text-white shadow-sm" : "bg-gray-200 text-gray-500"} font-semibold`}
+                onClick={async () => {
+                  setIsAdding(true);
+                  try {
+                    await onConfirm(
+                      {
+                        variant,
+                        addons,
+                        groups: [
+                          ...(
+                            variantGroup && variant
+                              ? [
+                                {
+                                  id: String(variantGroup.id),
+                                  title: String(variantGroup.title || ""),
+                                  options: [
+                                    { id: String(variant.id), name: String(variant.name), price: Number(variant.price) },
+                                  ],
+                                },
+                              ]
+                              : []
+                          ),
+                          ...nonVariantGroups
+                            .map((g) => {
+                              const set = selectedAddonIds[g.id] ?? new Set<string>();
+                              const opts = (g.options ?? []).filter((o) => set.has(o.id));
+                              return {
+                                id: String(g.id),
+                                title: String(g.title || ""),
+                                options: opts.map((o) => ({ id: String(o.id), name: String(o.name || ""), price: Number(o.price || 0) })),
+                              };
+                            })
+                            .filter((g) => g.options.length > 0),
+                        ],
+                        quantity: qty,
+                        totalPrice,
+                      },
+                      confirmRef.current?.getBoundingClientRect() || undefined
+                    );
+                  } finally {
+                    setIsAdding(false);
+                  }
+                }}
+                className={`w-full max-w-sm h-16 rounded-2xl flex items-center justify-center gap-2 transition-all ${canConfirm && !isAdding ? "bg-[var(--primary)] text-white shadow-sm" : "bg-gray-200 text-gray-500"} font-semibold disabled:opacity-70`}
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7 4h-2l-1 2v2h2l2-4h9l1 4h-2l-1-2h-8"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                  <path
-                    d="M5 8h12l-1 7H7L5 8z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                  <circle cx="8" cy="20" r="2" fill="currentColor" />
-                  <circle cx="17" cy="20" r="2" fill="currentColor" />
-                </svg>
-                <span>Thêm vào giỏ - {formatVnd(totalPrice)}</span>
+                {isAdding ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Đang thêm...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M7 4h-2l-1 2v2h2l2-4h9l1 4h-2l-1-2h-8"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M5 8h12l-1 7H7L5 8z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      />
+                      <circle cx="8" cy="20" r="2" fill="currentColor" />
+                      <circle cx="17" cy="20" r="2" fill="currentColor" />
+                    </svg>
+                    <span>Thêm vào giỏ - {formatVnd(totalPrice)}</span>
+                  </>
+                )}
               </motion.button>
             </div>
           </motion.div>
