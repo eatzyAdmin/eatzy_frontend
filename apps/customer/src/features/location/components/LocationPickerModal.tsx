@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { X, MapPin, Search, LocateFixed, Navigation, Check, Loader2 } from "@repo/ui/icons";
+import { X, MapPin, Search, LocateFixed, Navigation, Check, Loader2, Hand, Store } from "@repo/ui/icons";
 import dynamic from "next/dynamic";
+import { ImageWithFallback } from "@repo/ui";
 
 // Dynamic import MapView to avoid SSR issues
 const MapViewForPicker = dynamic(
@@ -60,9 +61,13 @@ export default function LocationPickerModal({
   const [currentAddress, setCurrentAddress] = useState(initialAddress || "");
   const [isLocating, setIsLocating] = useState(false);
   const [flyVersion, setFlyVersion] = useState(0);
+  const [nearbyPlaces, setNearbyPlaces] = useState<PlaceSuggestion[]>([]);
+  const [selectedNearbyIndex, setSelectedNearbyIndex] = useState<number | null>(0);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Ref to track if a suggestion was just selected
+  const justSelectedSuggestionRef = useRef(false);
 
   // Reset state when modal opens
   useEffect(() => {
@@ -158,15 +163,11 @@ export default function LocationPickerModal({
     setMapPosition({ lng, lat });
     setFlyVersion((v) => v + 1);
 
-    // Mark that we just selected a suggestion - don't let reverseGeocode override the address
     justSelectedSuggestionRef.current = true;
     setTimeout(() => {
       justSelectedSuggestionRef.current = false;
     }, 1000);
   };
-
-  // Ref to track if a suggestion was just selected
-  const justSelectedSuggestionRef = useRef(false);
 
   // Handle map position change (drag marker or click)
   const handleMapPositionChange = async (pos: { lng: number; lat: number }) => {
@@ -182,11 +183,32 @@ export default function LocationPickerModal({
 
   // Handle nearby places from map
   const handleNearbyPlacesChange = (places: PlaceSuggestion[]) => {
+    setNearbyPlaces(places);
     // If no address yet and we got places, use the first one
     if (!currentAddress && places.length > 0) {
       setCurrentAddress(places[0].place_name);
     }
+    // Auto select first nearby place if we aren't explicitly searching
+    if (places.length > 0 && !justSelectedSuggestionRef.current) {
+      // Optional: logic to sync selected index
+      // setSelectedNearbyIndex(0);
+    }
   };
+
+  const handleSelectNearbyPlace = (idx: number, place: PlaceSuggestion) => {
+    setSelectedNearbyIndex(idx);
+    setCurrentAddress(place.place_name);
+    setSelectedPlace(place);
+
+    const [lng, lat] = place.center;
+    setMapPosition({ lng, lat });
+    setFlyVersion((v) => v + 1);
+
+    justSelectedSuggestionRef.current = true;
+    setTimeout(() => {
+      justSelectedSuggestionRef.current = false;
+    }, 1000);
+  }
 
   // Handle locate user button
   const handleLocateUser = () => {
@@ -222,163 +244,217 @@ export default function LocationPickerModal({
       latitude: mapPosition.lat,
       longitude: mapPosition.lng,
       address: currentAddress,
-      placeName: selectedPlace?.text,
+      placeName: selectedPlace?.text || nearbyPlaces[selectedNearbyIndex || 0]?.text,
     });
 
     onClose();
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
+    <div
+      className="fixed inset-0 z-[200]"
+      style={{ pointerEvents: isOpen ? 'auto' : 'none' }}
+    >
+      <AnimatePresence>
+        {isOpen && (
           <motion.div
+            className="fixed inset-0 flex items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={onClose}
-            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
-          />
-
-          {/* Modal Container - full screen flex centering */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
+            transition={{ duration: 0.25 }}
           >
-            <div className="w-full max-w-[800px] h-full max-h-[700px] bg-white rounded-[28px] shadow-2xl overflow-hidden flex flex-col pointer-events-auto">
+            {/* Backdrop */}
+            <div
+              onClick={onClose}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-[#F8F9FA] w-full max-w-full md:max-w-6xl h-[100vh] md:h-[90vh] max-h-full md:max-h-[800px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20"
+            >
               {/* Header */}
-              <div className="relative px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lime-400 to-lime-500 flex items-center justify-center shadow-lg shadow-lime-500/30">
-                      <MapPin className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-gray-900">Chọn địa điểm giao hàng</h2>
-                      <p className="text-xs text-gray-500">Tìm kiếm hoặc kéo ghim trên bản đồ</p>
-                    </div>
+              <div className="bg-white px-4 md:px-8 py-4 md:py-6 border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 shadow-sm/50">
+                <div>
+                  <h3 className="text-2xl font-anton font-bold text-[#1A1A1A]">BAN MUỐN GIAO ĐẾN ĐÂU?</h3>
+                  <div className="text-sm font-medium text-gray-500 mt-1">
+                    Kéo thả ghim hoặc tìm kiếm địa chỉ của bạn
                   </div>
-
-                  <button
-                    onClick={onClose}
-                    className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-                  >
-                    <X className="w-5 h-5 text-gray-600" />
-                  </button>
                 </div>
-              </div>
 
-              {/* Search Bar */}
-              <div className="px-5 py-4 border-b border-gray-100 bg-white">
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                    {isSearching ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Search className="w-5 h-5" />
-                    )}
-                  </div>
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    onKeyDown={handleSearchKeyDown}
-                    placeholder="Tìm kiếm địa điểm, tòa nhà, đường..."
-                    className="w-full h-12 pl-12 pr-4 rounded-xl bg-gray-100 border-2 border-transparent focus:border-lime-400 focus:bg-white outline-none transition-all text-gray-900 placeholder:text-gray-400"
-                  />
-
-                  {/* Suggestions Dropdown */}
-                  <AnimatePresence>
-                    {suggestions.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-10 max-h-[250px] overflow-y-auto"
-                      >
-                        {suggestions.map((place) => (
-                          <button
-                            key={place.id}
-                            onClick={() => handleSelectSuggestion(place)}
-                            className="w-full px-4 py-3 flex items-start gap-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-50 last:border-b-0"
-                          >
-                            <div className="w-8 h-8 rounded-lg bg-lime-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <MapPin className="w-4 h-4 text-lime-600" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold text-gray-900 truncate">{place.text}</div>
-                              <div className="text-sm text-gray-500 line-clamp-2">{place.place_name}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-
-              {/* Map Area */}
-              <div className="flex-1 relative">
-                <MapViewForPicker
-                  pickupPos={mapPosition}
-                  onPickupChange={handleMapPositionChange}
-                  onPlacesChange={handleNearbyPlacesChange}
-                  flyVersion={flyVersion}
-                />
-
-                {/* Locate Button */}
                 <button
-                  onClick={handleLocateUser}
-                  disabled={isLocating}
-                  className="absolute bottom-24 right-4 w-12 h-12 rounded-full bg-white shadow-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  onClick={onClose}
+                  className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-700 hover:bg-gray-200 transition-all duration-300"
                 >
-                  {isLocating ? (
-                    <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
-                  ) : (
-                    <LocateFixed className="w-5 h-5 text-gray-700" />
-                  )}
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Footer - Selected Address & Confirm */}
-              <div className="px-5 py-4 border-t border-gray-100 bg-gradient-to-t from-gray-50 to-white">
-                {/* Current Address Display */}
-                <div className="mb-4 p-3 rounded-xl bg-lime-50 border border-lime-200">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-lime-100 flex items-center justify-center flex-shrink-0">
-                      <Navigation className="w-4 h-4 text-lime-700" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-medium text-lime-700 uppercase tracking-wider mb-0.5">Địa chỉ giao hàng</div>
-                      <div className="text-sm font-semibold text-gray-900 line-clamp-2">
-                        {currentAddress || "Đang xác định vị trí..."}
+              {/* Body Layout */}
+              <div className="flex-1 overflow-y-auto md:overflow-hidden grid grid-cols-1 md:grid-cols-[60%_40%] pl-4 md:pl-8 py-4 md:pb-8 pr-4 md:pr-14 gap-4 md:gap-6">
+
+                {/* Left Column: Search & Map */}
+                <div className="flex flex-col h-full min-h-0 space-y-5">
+                  {/* Search Bar */}
+                  <div className="relative z-20">
+                    <div className="relative">
+                      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
+                        {isSearching ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <Search className="w-5 h-5" />
+                        )}
                       </div>
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        onKeyDown={handleSearchKeyDown}
+                        placeholder="Tìm kiếm địa điểm, tòa nhà, đường..."
+                        className="w-full h-14 pl-14 pr-4 rounded-[24px] bg-white border border-gray-200 focus:border-lime-500 focus:ring-4 focus:ring-lime-500/10 outline-none transition-all text-[#1A1A1A] font-medium placeholder:text-gray-400 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
+                      />
+                      {/* Suggestions Dropdown */}
+                      <AnimatePresence>
+                        {suggestions.length > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                            className="absolute top-full left-0 right-0 mt-2 bg-white rounded-[24px] shadow-2xl border border-gray-100 overflow-hidden z-30 max-h-[300px] overflow-y-auto"
+                          >
+                            <div className="p-2 space-y-1">
+                              {suggestions.map((place) => (
+                                <button
+                                  key={place.id}
+                                  onClick={() => handleSelectSuggestion(place)}
+                                  className="w-full px-4 py-3 flex items-start gap-3 hover:bg-gray-50 rounded-[16px] transition-colors text-left group"
+                                >
+                                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-lime-50 group-hover:text-lime-600 transition-colors">
+                                    <MapPin className="w-4 h-4 text-gray-500 group-hover:text-lime-600" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-bold text-[#1A1A1A] truncate">{place.text}</div>
+                                    <div className="text-xs text-gray-500 line-clamp-1">{place.place_name}</div>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
+                  </div>
+
+                  {/* Map */}
+                  <div className="w-full h-64 md:h-auto md:flex-1 relative rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 bg-gray-50">
+                    <MapViewForPicker
+                      pickupPos={mapPosition}
+                      onPickupChange={handleMapPositionChange}
+                      onPlacesChange={handleNearbyPlacesChange}
+                      flyVersion={flyVersion}
+                    />
+
+                    {/* Locate Button */}
+                    <button
+                      onClick={handleLocateUser}
+                      disabled={isLocating}
+                      className="absolute bottom-6 right-6 w-12 h-12 rounded-full bg-white shadow-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-95 disabled:opacity-50 z-10"
+                    >
+                      {isLocating ? (
+                        <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                      ) : (
+                        <LocateFixed className="w-5 h-5 text-gray-700" />
+                      )}
+                    </button>
                   </div>
                 </div>
 
-                {/* Confirm Button */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleConfirm}
-                  disabled={!mapPosition || !currentAddress}
-                  className="w-full h-14 rounded-[16px] bg-gradient-to-r from-lime-500 to-lime-400 text-white font-bold text-lg flex items-center justify-center gap-2 shadow-lg shadow-lime-500/30 hover:shadow-lime-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Check className="w-5 h-5" />
-                  Xác nhận địa điểm
-                </motion.button>
+                {/* Right Column: Nearby Places & Confirm (Swapped) */}
+                <div className="flex flex-col h-full min-h-0 space-y-5">
+                  {/* Nearby Places List (Now First) */}
+                  <div className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col order-1 md:order-none">
+                    <div className="px-6 py-4 pb-0 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30 shrink-0">
+                      <Store className="w-5 h-5 text-gray-400" />
+                      <h4 className="font-bold text-[#1A1A1A] text-base">Địa điểm gần đây</h4>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar pr-3">
+                      {nearbyPlaces.length > 0 ? (
+                        <div className="space-y-2">
+                          {nearbyPlaces.map((p, idx) => {
+                            const selected = selectedPlace?.id === p.id;
+                            return (
+                              <motion.div
+                                key={p.id}
+                                layout
+                                onClick={() => handleSelectNearbyPlace(idx, p)}
+                                className={`
+                                                    relative p-4 rounded-[20px] cursor-pointer border transition-all duration-200 group
+                                                    ${selected
+                                    ? 'bg-lime-50 border-lime-200 shadow-sm'
+                                    : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                                  }
+                                                `}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${selected ? 'bg-lime-100 text-lime-700' : 'bg-gray-100 text-gray-500'}`}>
+                                    {selected ? <Check className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className={`text-sm font-bold truncate ${selected ? 'text-[#1A1A1A]' : 'text-gray-600'}`}>{p.text}</div>
+                                    <div className="text-xs text-gray-400 font-medium line-clamp-1 mt-0.5">{p.place_name}</div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-center text-gray-400 space-y-2">
+                          <Loader2 className="w-6 h-6 animate-spin opacity-50" />
+                          <div className="text-xs font-medium">Đang tìm địa điểm gần đó...</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Current Selection Card (Now Second) */}
+                  <div className="bg-white rounded-[28px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col gap-4 shrink-0 order-2 md:order-none">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-lime-50 border border-lime-100 flex items-center justify-center flex-shrink-0">
+                        <Navigation className="w-5 h-5 text-lime-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">ĐỊA CHỈ ĐANG CHỌN</h4>
+                        <div className="font-bold text-[#1A1A1A] text-sm leading-snug line-clamp-2 mt-0.5">
+                          {currentAddress || "Đang tải vị trí..."}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="h-px bg-gray-100 w-full" />
+
+                    <button
+                      onClick={handleConfirm}
+                      disabled={!mapPosition || !currentAddress}
+                      className="w-full h-12 rounded-[16px] bg-[#1A1A1A] text-white font-bold text-base flex items-center justify-center gap-2 hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-black/10"
+                    >
+                      <Check className="w-5 h-5" />
+                      Xác nhận địa điểm
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

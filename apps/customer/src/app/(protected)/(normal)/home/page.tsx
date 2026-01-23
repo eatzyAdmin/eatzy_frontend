@@ -198,7 +198,7 @@ export default function HomePage() {
               },
             }}
             onClick={() => setShowAllCategories(true)}
-            className="fixed z-50 right-3 md:right-6 top-[18vh] md:top-[18vh] flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
+            className="fixed z-30 right-3 md:right-6 top-[18vh] md:top-[18vh] flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
           >
             <List className="w-4 h-4 md:w-5 md:h-5" />
             <span className="text-xs md:text-sm font-medium">All categories</span>
@@ -353,8 +353,7 @@ export default function HomePage() {
                 stiffness: 150,
                 damping: 18,
               }}
-              className="fixed z-50 right-6 top-[18vh] w-[280px] md:w-[340px] max-w-[92vw] rounded-2xl bg-white/8 backdrop-blur-xl border border-white/20 overflow-hidden"
-            >
+              className="fixed z-50 right-6 top-[18vh] w-[280px] md:w-[340px] max-w-[92vw] rounded-2xl bg-white/8 backdrop-blur-xl border border-white/20 overflow-hidden"            >
               <div className="p-4 border-b border-white/10 flex items-center gap-2 text-white/90">
                 <List className="w-5 h-5" />
                 <span className="text-sm font-semibold">Categories</span>
