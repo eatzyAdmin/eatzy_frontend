@@ -20,7 +20,7 @@ export function useCheckout() {
   const { selectedLocation, updateAddress } = useDeliveryLocationStore();
 
   // Get cart for this restaurant
-  const { totalPrice: subtotalFromCart } = useRestaurantCart(restaurantId);
+  const { totalPrice: subtotalFromCart, cartItems } = useRestaurantCart(restaurantId);
 
   // Fetch restaurant info
   const { data: restaurant } = useQuery({
@@ -237,6 +237,10 @@ export function useCheckout() {
     discount,
     totalPayable,
     bestVoucherIds,
+    // Cart data for order creation
+    cartItems,
+    // Delivery location for order creation
+    selectedLocation,
     // Helper
     isVoucherEligible: (voucher: Voucher) => isVoucherEligible(voucher, subtotal, new Date()),
   };

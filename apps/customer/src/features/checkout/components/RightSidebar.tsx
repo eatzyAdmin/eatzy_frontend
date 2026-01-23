@@ -1,28 +1,32 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { motion } from "@repo/ui/motion";
-import { useSwipeConfirmation, useNotification, useLoading } from "@repo/ui";
+import { useSwipeConfirmation } from "@repo/ui";
 import CheckoutMapSection from "@/features/checkout/components/CheckoutMapSection";
 import { formatVnd } from "@repo/lib";
-import { ShoppingBag } from "@repo/ui/icons";
+import { ShoppingBag, Loader2 } from "@repo/ui/icons";
+
+interface RightSidebarProps {
+  restaurantName?: string;
+  totalPayable: number;
+  onAddressChange?: (addr: string) => void;
+  onPlaceOrder?: () => Promise<void>;
+  isCreating?: boolean;
+  children?: React.ReactNode;
+}
 
 export default function RightSidebar({
   restaurantName,
   totalPayable,
   onAddressChange,
+  onPlaceOrder,
+  isCreating = false,
   children,
-}: {
-  restaurantName?: string;
-  totalPayable: number;
-  onAddressChange?: (addr: string) => void;
-  children?: React.ReactNode;
-}) {
-  const router = useRouter();
+}: RightSidebarProps) {
   const { confirm } = useSwipeConfirmation();
-  const { showNotification } = useNotification();
-  const { show: showLoading } = useLoading();
 
   const handleCompleteOrder = () => {
+    if (isCreating || !onPlaceOrder) return;
+
     confirm({
       title: "Confirm Order",
       description: `Đặt đơn hàng với tổng tiền ${formatVnd(totalPayable)}?`,
@@ -30,15 +34,7 @@ export default function RightSidebar({
       type: "success",
       processingDuration: 1500,
       onConfirm: async () => {
-        showLoading("Đang xử lý đơn hàng...");
-        router.push('/home');
-        setTimeout(() => {
-          showNotification({
-            type: "success",
-            message: "Order Placed Successfully",
-            format: `We are finding a driver for you...`,
-          });
-        }, 800);
+        await onPlaceOrder();
       }
     });
   };
@@ -71,20 +67,31 @@ export default function RightSidebar({
             <div className="text-xl font-bold text-[var(--primary)]">{formatVnd(totalPayable)}</div>
           </div>
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: isCreating ? 1 : 1.02 }}
+            whileTap={{ scale: isCreating ? 1 : 0.98 }}
             onClick={handleCompleteOrder}
-            className="w-full h-14 md:h-16 rounded-[20px] bg-[var(--primary)] text-white text-xl font-semibold md:text-2xl uppercase font-anton shadow-lg shadow-lime-500/30 hover:shadow-lime-500/50 transition-all flex items-center justify-center gap-2"
+            disabled={isCreating}
+            className={`w-full h-14 md:h-16 rounded-[20px] text-white text-xl font-semibold md:text-2xl uppercase font-anton shadow-lg transition-all flex items-center justify-center gap-2 ${isCreating
+                ? 'bg-gray-400 cursor-not-allowed shadow-gray-300/30'
+                : 'bg-[var(--primary)] shadow-lime-500/30 hover:shadow-lime-500/50'
+              }`}
           >
-            <span>Complete Order</span>
-            <span className="bg-white/20 px-2 py-0.5 rounded-lg text-sm font-sans font-bold ml-2">
-              {formatVnd(totalPayable)}
-            </span>
+            {isCreating ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              <>
+                <span>Complete Order</span>
+                <span className="bg-white/20 px-2 py-0.5 rounded-lg text-sm font-sans font-bold ml-2">
+                  {formatVnd(totalPayable)}
+                </span>
+              </>
+            )}
           </motion.button>
         </div>
       </div>
     </div>
   );
 }
-
-

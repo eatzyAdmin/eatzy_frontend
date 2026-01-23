@@ -3,6 +3,7 @@ export { http } from "./http";
 export { authApi } from "./auth";
 export { cartApi } from "./cart";
 export { voucherApi } from "./voucher";
+export { orderApi } from "./order";
 
 // Restaurant module exports
 export {

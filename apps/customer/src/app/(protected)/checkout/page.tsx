@@ -1,13 +1,17 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { useLoading, useHoverHighlight, HoverHighlightOverlay, CheckoutShimmer } from "@repo/ui";
+import { useLoading, useHoverHighlight, HoverHighlightOverlay, CheckoutShimmer, useNotification } from "@repo/ui";
 import { useCheckout } from "@/features/checkout/hooks/useCheckout";
+import { useCreateOrder } from "@/features/checkout/hooks/useCreateOrder";
+import { useRestaurantCart } from "@/features/cart/hooks/useCart";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import AddressForm from "@/features/checkout/components/AddressForm";
 import NotesInput from "@/features/checkout/components/NotesInput";
 import PaymentMethodSelector from "@/features/checkout/components/PaymentMethodSelector";
 import PromoVoucherCard from "@/features/checkout/components/PromoVoucherCard";
 import { Truck, Tag } from "@repo/ui/icons";
+import type { CreateOrderRequest } from "@repo/types";
 const CheckoutSummary = dynamic(() => import("@/features/checkout/components/CheckoutSummary"), { ssr: false });
 const RightSidebar = dynamic(() => import("@/features/checkout/components/RightSidebar"), { ssr: false });
 const OrderSummaryList = dynamic(() => import("@/features/checkout/components/OrderSummaryList"), { ssr: false });
@@ -28,6 +32,7 @@ export default function CheckoutPage() {
 
   const {
     restaurant,
+    restaurantId,
     discountVouchers,
     shippingVouchers,
     isLoadingVouchers,
@@ -48,7 +53,14 @@ export default function CheckoutPage() {
     discount,
     totalPayable,
     bestVoucherIds,
+    cartItems,
+    selectedLocation,
   } = useCheckout();
+
+  const { user } = useAuth();
+  const { createOrder, isCreating } = useCreateOrder();
+  const { showNotification } = useNotification();
+  const { clearCart } = useRestaurantCart(restaurantId);
 
   const leftColumnRef = useRef<HTMLDivElement | null>(null);
   const mainScrollRef = useRef<HTMLDivElement | null>(null);
@@ -104,7 +116,58 @@ export default function CheckoutPage() {
     }
   };
 
+  // Build and submit order
+  const handlePlaceOrder = useCallback(async () => {
+    // Validation
+    if (!user?.id) {
+      showNotification({ message: "Vui lòng đăng nhập để đặt hàng", type: "error" });
+      return;
+    }
+    if (!restaurantId) {
+      showNotification({ message: "Không tìm thấy thông tin nhà hàng", type: "error" });
+      return;
+    }
+    if (!cartItems || cartItems.length === 0) {
+      showNotification({ message: "Giỏ hàng trống", type: "error" });
+      return;
+    }
+    if (!address || !selectedLocation?.latitude || !selectedLocation?.longitude) {
+      showNotification({ message: "Vui lòng nhập địa chỉ giao hàng", type: "error" });
+      return;
+    }
 
+    // Build order request
+    const orderRequest: CreateOrderRequest = {
+      customer: { id: Number(user.id) },
+      restaurant: { id: restaurantId },
+      deliveryAddress: address,
+      deliveryLatitude: selectedLocation.latitude,
+      deliveryLongitude: selectedLocation.longitude,
+      specialInstructions: notes || undefined,
+      deliveryFee: fee,
+      paymentMethod: paymentMethod === "EATZYPAY" ? "VNPAY" : "COD",
+      orderItems: cartItems.map(item => ({
+        dish: { id: item.dish.id },
+        quantity: item.quantity,
+        orderItemOptions: item.cartItemOptions?.map(opt => ({
+          menuOption: { id: opt.menuOption.id }
+        })),
+      })),
+      vouchers: [
+        ...(selectedDiscountVoucherId ? [{ id: selectedDiscountVoucherId }] : []),
+        ...(selectedShippingVoucherId ? [{ id: selectedShippingVoucherId }] : []),
+      ],
+    };
+
+    const result = await createOrder(orderRequest);
+    // Clear cart for this restaurant after successful order
+    if (result) {
+      await clearCart();
+    }
+  }, [
+    user, restaurantId, cartItems, address, selectedLocation, notes, fee, paymentMethod,
+    selectedDiscountVoucherId, selectedShippingVoucherId, createOrder, showNotification, clearCart
+  ]);
 
   if (isLoading) {
     return <CheckoutShimmer />;
@@ -272,7 +335,13 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <RightSidebar restaurantName={restaurant?.name} totalPayable={totalPayable} onAddressChange={(addr) => setAddress(addr)} />
+            <RightSidebar
+              restaurantName={restaurant?.name}
+              totalPayable={totalPayable}
+              onAddressChange={(addr) => setAddress(addr)}
+              onPlaceOrder={handlePlaceOrder}
+              isCreating={isCreating}
+            />
           </div>
         </div>
       </div>
