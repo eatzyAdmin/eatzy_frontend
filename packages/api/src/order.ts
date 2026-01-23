@@ -206,4 +206,18 @@ export const orderApi = {
       params,
     }) as unknown as Promise<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>>;
   },
+
+  /**
+   * Get all orders (Super Admin)
+   * GET /api/v1/orders
+   */
+  getAllOrders: async (params?: {
+    page?: number;
+    size?: number;
+    filter?: string;
+  }): Promise<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>> => {
+    return http.get<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>>("/api/v1/orders", {
+      params,
+    }) as unknown as Promise<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>>;
+  },
 };
