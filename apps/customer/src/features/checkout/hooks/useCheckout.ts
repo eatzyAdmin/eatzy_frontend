@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Voucher, PaymentMethod } from "@repo/types";
 import { useRestaurantCart } from "@/features/cart/hooks/useCart";
 import { useCartStore } from "@repo/store";
-import { voucherApi, restaurantDetailApi } from "@repo/api";
+import { voucherApi, restaurantDetailApi, orderApi } from "@repo/api";
 import { useDeliveryLocationStore } from "@/store/deliveryLocationStore";
 
 // Voucher types - using backend values: PERCENTAGE, FIXED, FREESHIP
@@ -34,6 +34,24 @@ export function useCheckout() {
       return null;
     },
     enabled: !!restaurantId,
+  });
+
+  // Calculate delivery fee from API
+  const { data: deliveryFeeData, isLoading: isLoadingFee } = useQuery({
+    queryKey: ['delivery-fee', restaurantId, selectedLocation?.latitude, selectedLocation?.longitude],
+    queryFn: async () => {
+      if (!restaurantId || !selectedLocation?.latitude || !selectedLocation?.longitude) return null;
+      const res = await orderApi.calculateDeliveryFee({
+        restaurantId,
+        deliveryLatitude: selectedLocation.latitude,
+        deliveryLongitude: selectedLocation.longitude,
+      });
+      if (res.statusCode === 200 && res.data) {
+        return res.data;
+      }
+      return null;
+    },
+    enabled: !!restaurantId && !!selectedLocation?.latitude && !!selectedLocation?.longitude,
   });
 
   // Fetch vouchers for restaurant
@@ -127,13 +145,19 @@ export function useCheckout() {
   );
 
   // Calculate fees
-  const baseFee = 23000; // Base delivery fee
+  const baseFee = deliveryFeeData?.deliveryFee || 23000; // Base delivery fee from API or fallback
 
   // Shipping discount
   const shippingDiscount = useMemo(() => {
     if (!selectedShippingVoucher) return 0;
     if (!isVoucherEligible(selectedShippingVoucher, subtotal, new Date())) return 0;
-    return baseFee; // FREE_SHIPPING = full fee waived
+
+    // Default to baseFee if no max limit is set, otherwise use the smaller of the two
+    if (selectedShippingVoucher.maxDiscountAmount) {
+      return Math.min(baseFee, selectedShippingVoucher.maxDiscountAmount);
+    }
+
+    return baseFee;
   }, [selectedShippingVoucher, subtotal, baseFee]);
 
   const fee = baseFee - shippingDiscount;
@@ -241,6 +265,10 @@ export function useCheckout() {
     cartItems,
     // Delivery location for order creation
     selectedLocation,
+    // Additional loading states
+    isLoadingFee,
+    // Additional info
+    distance: deliveryFeeData?.distance || 0,
     // Helper
     isVoucherEligible: (voucher: Voucher) => isVoucherEligible(voucher, subtotal, new Date()),
   };

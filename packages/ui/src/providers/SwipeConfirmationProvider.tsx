@@ -5,6 +5,7 @@ import SwipeConfirmationModal from '../modals/SwipeConfirmationModal';
 
 interface SwipeConfirmationContextType {
   confirm: (config: SwipeConfirmationConfig) => void;
+  abort: () => void;
 }
 
 interface SwipeConfirmationConfig {
@@ -33,18 +34,25 @@ export function SwipeConfirmationProvider({ children }: { children: ReactNode })
     setIsProcessing(false);
   }, []);
 
+  const abort = useCallback(() => {
+    setIsProcessing(false);
+    setIsOpen(false);
+  }, []);
+
   const handleConfirm = async () => {
     setIsProcessing(true);
 
-    // Simulate loading
-    await new Promise(resolve => setTimeout(resolve, config.processingDuration ?? 2000));
+    try {
+      // Simulate loading
+      await new Promise(resolve => setTimeout(resolve, config.processingDuration ?? 2000));
 
-    if (config?.onConfirm) {
-      await config.onConfirm();
+      if (config?.onConfirm) {
+        await config.onConfirm();
+      }
+    } finally {
+      setIsProcessing(false);
+      setIsOpen(false);
     }
-
-    setIsProcessing(false);
-    setIsOpen(false);
   };
 
   const handleClose = () => {
@@ -53,7 +61,7 @@ export function SwipeConfirmationProvider({ children }: { children: ReactNode })
   };
 
   return (
-    <SwipeConfirmationContext.Provider value={{ confirm }}>
+    <SwipeConfirmationContext.Provider value={{ confirm, abort }}>
       {children}
       <SwipeConfirmationModal
         isOpen={isOpen}

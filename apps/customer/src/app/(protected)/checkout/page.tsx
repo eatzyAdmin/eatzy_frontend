@@ -48,6 +48,7 @@ export default function CheckoutPage() {
     notes,
     setNotes,
     subtotal,
+    baseFee,
     fee,
     shippingDiscount,
     discount,
@@ -55,6 +56,7 @@ export default function CheckoutPage() {
     bestVoucherIds,
     cartItems,
     selectedLocation,
+    isLoadingFee,
   } = useCheckout();
 
   const { user } = useAuth();
@@ -329,7 +331,7 @@ export default function CheckoutPage() {
                   </section>
 
                   <section ref={(el) => { sectionRefs.current["payment"] = el; }} data-id="payment" className="col-span-1 md:col-span-4 h-full">
-                    <CheckoutSummary subtotal={subtotal} fee={fee} discount={discount} shippingDiscount={shippingDiscount} />
+                    <CheckoutSummary subtotal={subtotal} baseFee={baseFee} discount={discount} shippingDiscount={shippingDiscount} isLoadingFee={isLoadingFee} />
                   </section>
                 </div>
               </div>
@@ -340,7 +342,7 @@ export default function CheckoutPage() {
               totalPayable={totalPayable}
               onAddressChange={(addr) => setAddress(addr)}
               onPlaceOrder={handlePlaceOrder}
-              isCreating={isCreating}
+              isCreating={isCreating || isLoadingFee}
             />
           </div>
         </div>

@@ -121,3 +121,19 @@ export type PaymentMethodType = 'COD' | 'VNPAY';
 
 // ======== Payment Status Enum ========
 export type PaymentStatusType = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
+
+// ======== Delivery Fee Types ========
+export type CalculateDeliveryFeeRequest = {
+  restaurantId: number;
+  deliveryLatitude: number;
+  deliveryLongitude: number;
+};
+
+export type DeliveryFeeResponse = {
+  deliveryFee: number;
+  distance: number;
+  surgeMultiplier: number;
+  baseFee: number;
+  baseDistance: number;
+  perKmFee: number;
+};

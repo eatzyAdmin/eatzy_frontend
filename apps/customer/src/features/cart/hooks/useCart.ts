@@ -242,10 +242,9 @@ export function useRestaurantCart(restaurantId: number | null): UseRestaurantCar
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
-      showNotification({ message: 'Đã xóa giỏ hàng!', type: 'success' });
     },
     onError: (error: Error) => {
-      showNotification({ message: error.message, type: 'error' });
+      showNotification({ message: error.message, type: 'error', format: `${error.message}` });
     },
   });
 

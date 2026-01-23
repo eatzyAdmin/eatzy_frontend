@@ -1,11 +1,25 @@
 import { http } from "./http";
-import type { IBackendRes, CreateOrderRequest, OrderResponse } from "../../types/src";
+import type {
+  IBackendRes,
+  CreateOrderRequest,
+  OrderResponse,
+  CalculateDeliveryFeeRequest,
+  DeliveryFeeResponse
+} from "../../types/src";
 
 /**
  * Order API endpoints
  * Handles order creation, retrieval, and management
  */
 export const orderApi = {
+  /**
+   * Calculate delivery fee
+   * POST /api/v1/orders/delivery-fee
+   */
+  calculateDeliveryFee: async (request: CalculateDeliveryFeeRequest): Promise<IBackendRes<DeliveryFeeResponse>> => {
+    return http.post<IBackendRes<DeliveryFeeResponse>>("/api/v1/orders/delivery-fee", request) as unknown as Promise<IBackendRes<DeliveryFeeResponse>>;
+  },
+
   /**
    * Create a new order
    * POST /api/v1/orders

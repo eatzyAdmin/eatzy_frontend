@@ -13,13 +13,15 @@ export interface FavoriteResponse {
   restaurant: {
     id: number;
     name: string;
+    slug?: string;
     address: string;
     description: string;
     averageRating: number;
-    slug?: string;
-    imageUrl?: string; // Backend returns this from avatarUrl
-    avatarUrl?: string;
-    coverImageUrl?: string;
+    imageUrl?: string;
+    restaurantTypes?: {
+      id: number;
+      name: string;
+    }[];
   };
 }
 
