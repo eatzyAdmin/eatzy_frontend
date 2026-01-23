@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
-import { OrderReportItem, OrderStatus, PaymentMethod } from '../services/reportService';
+import { OrderReportItemDTO } from '@repo/types';
+import { OrderStatus } from '../services/reportService';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import {
   ShoppingBag,
@@ -22,7 +23,7 @@ import {
 } from 'lucide-react';
 
 interface OrdersReportProps {
-  data: OrderReportItem[];
+  data: OrderReportItemDTO[];
 }
 
 const formatCurrency = (value: number) =>
@@ -40,8 +41,8 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; bg: stri
   CANCELLED: { label: 'Đã hủy', color: 'text-red-600', bg: 'bg-red-50', icon: XCircle },
 };
 
-const OrderCard = ({ order }: { order: OrderReportItem }) => {
-  const config = statusConfig[order.status];
+const OrderCard = ({ order }: { order: OrderReportItemDTO }) => {
+  const config = statusConfig[order.status as OrderStatus] || statusConfig['PENDING'];
   const Icon = config.icon;
 
   return (

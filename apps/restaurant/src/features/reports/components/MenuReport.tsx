@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
-import { MenuSummaryDto, MenuAnalyticsItem, CategoryAnalyticsItem } from '../services/reportService';
+import { MenuSummaryDTO, MenuAnalyticsItemDTO } from '@repo/types';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import {
   UtensilsCrossed,
@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 interface MenuReportProps {
-  data: MenuSummaryDto;
+  data: MenuSummaryDTO;
 }
 
 const formatCurrency = (value: number) =>
@@ -56,7 +56,7 @@ const TrendBadge = ({ trend, percent }: { trend: 'up' | 'down' | 'stable'; perce
   );
 };
 
-const DishCard = ({ dish, rank }: { dish: MenuAnalyticsItem; rank?: number }) => {
+const DishCard = ({ dish, rank }: { dish: MenuAnalyticsItemDTO; rank?: number }) => {
   return (
     <motion.div
       layout
@@ -74,7 +74,7 @@ const DishCard = ({ dish, rank }: { dish: MenuAnalyticsItem; rank?: number }) =>
           )}
           <span className="text-lg font-semibold text-gray-900">{dish.dishName}</span>
         </div>
-        <TrendBadge trend={dish.trend} percent={dish.trendPercent} />
+        <TrendBadge trend={dish.trend as 'up' | 'down' | 'stable'} percent={dish.trendPercent} />
       </div>
       <div className="flex flex-col gap-1 mt-1">
         <span className="text-xs font-bold text-gray-500 uppercase truncate" title={dish.categoryName}>{dish.categoryName}</span>

@@ -11,5 +11,6 @@ export * from './system-parameter';
 export * from './cart';
 export * from './favorite';
 export * from './wallet';
+export * from './report';
 
 
