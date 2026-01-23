@@ -25,27 +25,30 @@ export interface UseCurrentOrdersResult {
 
 /**
  * Hook to get current (active/in-progress) orders for the logged-in customer
- * Filters out DELIVERED and CANCELLED orders
+ * Uses new /my-customer API with filter to fetch only active orders
  */
 export function useCurrentOrders(): UseCurrentOrdersResult {
   const { user } = useAuth();
-  const customerId = user?.id ? Number(user.id) : null;
+  const isLoggedIn = !!user?.id;
+
+  // Build filter for active statuses using Spring Filter syntax
+  // Filter format: orderStatus~'PENDING' or orderStatus~'PLACED' etc.
+  const statusFilter = ACTIVE_ORDER_STATUSES.map(s => `orderStatus~'${s}'`).join(' or ');
 
   const query = useQuery({
-    queryKey: ["orders", "current", customerId],
+    queryKey: ["orders", "current", "my"],
     queryFn: async () => {
-      if (!customerId) return [];
+      const response = await orderApi.getMyCustomerOrders({
+        filter: statusFilter,
+        size: 50, // Get up to 50 active orders
+      });
 
-      const response = await orderApi.getOrdersByCustomerId(customerId);
       if (response.statusCode === 200 && response.data) {
-        // Filter to only active orders
-        return response.data.filter((order) =>
-          ACTIVE_ORDER_STATUSES.includes(order.orderStatus)
-        );
+        return response.data.result || [];
       }
       return [];
     },
-    enabled: !!customerId,
+    enabled: isLoggedIn,
     staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 60 * 1000, // Refetch every 60 seconds to get status updates
   });

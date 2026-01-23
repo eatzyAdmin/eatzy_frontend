@@ -42,6 +42,21 @@ export const orderApi = {
   },
 
   /**
+   * Get orders for current logged-in customer (uses auth context)
+   * GET /api/v1/orders/my-customer
+   * Supports filter via query params: filter=orderStatus:'PENDING' or 'PLACED' etc.
+   */
+  getMyCustomerOrders: async (params?: {
+    filter?: string;
+    page?: number;
+    size?: number;
+  }): Promise<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>> => {
+    return http.get<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>>("/api/v1/orders/my-customer", {
+      params,
+    }) as unknown as Promise<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>>;
+  },
+
+  /**
    * Cancel an order
    * PUT /api/v1/orders/:id/cancel
    */

@@ -3,13 +3,25 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "@repo/ui/motion";
 import Map, { Marker, Source, Layer } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-import type { Order } from "@repo/types";
-import { Store, Bike } from "@repo/ui/icons";
+import { Store, Bike, MapPin } from "@repo/ui/icons";
 
+type LatLng = { lat: number; lng: number };
 type MapFly = { fitBounds: (bounds: [[number, number], [number, number]], opts?: { padding?: number; duration?: number }) => void };
 type MapLike = { getMap: () => MapFly };
 
-export default function OrderMapView({ order }: { order: Order }) {
+interface OrderMapViewProps {
+  restaurantLocation?: LatLng;
+  deliveryLocation?: LatLng;
+  driverLocation?: LatLng;
+  orderStatus?: string;
+}
+
+export default function OrderMapView({
+  restaurantLocation,
+  deliveryLocation,
+  driverLocation,
+  orderStatus,
+}: OrderMapViewProps) {
   const token = "pk.eyJ1Ijoibmdob2FuZ2hpZW4iLCJhIjoiY21pZG04cmNxMDg3YzJucTFvdzgyYzV5ZiJ9.adJF69BzLTkmZZysMXgUhw";
   const mapRef = useRef<unknown>(null);
   const [driverRoute, setDriverRoute] = useState<{ geometry?: { coordinates: [number, number][] }; distance?: number; duration?: number } | null>(null);
@@ -17,25 +29,32 @@ export default function OrderMapView({ order }: { order: Order }) {
   const [progressA, setProgressA] = useState(0);
   const [progressB, setProgressB] = useState(0);
 
-  const isPending = order.status === "PENDING";
+  // Check if we have valid locations
+  const hasRestaurant = restaurantLocation && Number.isFinite(restaurantLocation.lat) && Number.isFinite(restaurantLocation.lng);
+  const hasDelivery = deliveryLocation && Number.isFinite(deliveryLocation.lat) && Number.isFinite(deliveryLocation.lng);
+  const hasDriver = driverLocation && Number.isFinite(driverLocation.lat) && Number.isFinite(driverLocation.lng);
+
+  const isPending = orderStatus === "PENDING" || orderStatus === "PLACED";
 
   useEffect(() => {
+    if (!hasRestaurant || !hasDelivery) return;
+
     // Skip route fetching for PENDING orders (no driver yet)
-    if (isPending) {
+    if (isPending || !hasDriver) {
       setDriverRoute(null);
       setDeliveryRoute(null);
       const inst = mapRef.current as MapLike | null;
       inst?.getMap()?.fitBounds(
         [
-          [order.restaurantLocation.lng - 0.01, order.restaurantLocation.lat - 0.01],
-          [order.deliveryLocation.lng + 0.01, order.deliveryLocation.lat + 0.01],
+          [restaurantLocation!.lng - 0.01, restaurantLocation!.lat - 0.01],
+          [deliveryLocation!.lng + 0.01, deliveryLocation!.lat + 0.01],
         ],
         { padding: 60, duration: 900 }
       );
       return;
     }
 
-    const fetchRoute = async (start: { lng: number; lat: number }, end: { lng: number; lat: number }) => {
+    const fetchRoute = async (start: LatLng, end: LatLng) => {
       try {
         const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start.lng},${start.lat};${end.lng},${end.lat}?geometries=geojson&steps=true&overview=full&language=vi&access_token=${token}`;
         const res = await fetch(url);
@@ -46,18 +65,20 @@ export default function OrderMapView({ order }: { order: Order }) {
         return null;
       }
     };
+
     (async () => {
-      const a = await fetchRoute(order.driverLocation, order.restaurantLocation);
-      const b = await fetchRoute(order.restaurantLocation, order.deliveryLocation);
+      const a = await fetchRoute(driverLocation!, restaurantLocation!);
+      const b = await fetchRoute(restaurantLocation!, deliveryLocation!);
       setDriverRoute(a);
       setDeliveryRoute(b);
+
       const inst = mapRef.current as MapLike | null;
       const coords = [
         ...(a?.geometry?.coordinates ?? []),
         ...(b?.geometry?.coordinates ?? []),
-        [order.driverLocation.lng, order.driverLocation.lat],
-        [order.restaurantLocation.lng, order.restaurantLocation.lat],
-        [order.deliveryLocation.lng, order.deliveryLocation.lat],
+        [driverLocation!.lng, driverLocation!.lat],
+        [restaurantLocation!.lng, restaurantLocation!.lat],
+        [deliveryLocation!.lng, deliveryLocation!.lat],
       ];
       const lngs = coords.map((c) => c[0]);
       const lats = coords.map((c) => c[1]);
@@ -72,6 +93,7 @@ export default function OrderMapView({ order }: { order: Order }) {
         ],
         { padding: 60, duration: 900 }
       );
+
       const startTime = performance.now();
       const animate = (time: number) => {
         const t = Math.min((time - startTime) / 900, 1);
@@ -81,7 +103,7 @@ export default function OrderMapView({ order }: { order: Order }) {
       };
       requestAnimationFrame(animate);
     })();
-  }, [order, token, isPending]);
+  }, [restaurantLocation, deliveryLocation, driverLocation, token, isPending, hasRestaurant, hasDelivery, hasDriver]);
 
   const partial = (coords: [number, number][], t: number) => {
     const safe = Array.isArray(coords)
@@ -108,53 +130,56 @@ export default function OrderMapView({ order }: { order: Order }) {
     return sliced;
   };
 
-  const driverFeature = useMemo(() => ({
-    type: "Feature",
-    geometry: {
-      type: "LineString",
-      coordinates:
-        driverRoute?.geometry?.coordinates && driverRoute?.geometry?.coordinates.length > 1
-          ? (() => {
-            const p = partial(driverRoute.geometry.coordinates, progressA);
-            return p.length > 1
-              ? p
-              : [
-                [order.driverLocation.lng, order.driverLocation.lat],
-                [order.restaurantLocation.lng, order.restaurantLocation.lat],
-              ];
-          })()
-          : [
-            [order.driverLocation.lng, order.driverLocation.lat],
-            [order.restaurantLocation.lng, order.restaurantLocation.lat],
-          ],
-    },
-    properties: {},
-  }), [driverRoute, progressA, order.driverLocation.lng, order.driverLocation.lat, order.restaurantLocation.lng, order.restaurantLocation.lat]);
+  const driverFeature = useMemo(() => {
+    if (!hasRestaurant) return null;
+    const restLng = restaurantLocation!.lng;
+    const restLat = restaurantLocation!.lat;
+    const drvLng = hasDriver ? driverLocation!.lng : restLng;
+    const drvLat = hasDriver ? driverLocation!.lat : restLat;
 
-  const deliveryFeature = useMemo(() => ({
-    type: "Feature",
-    geometry: {
-      type: "LineString",
-      coordinates:
-        deliveryRoute?.geometry?.coordinates && deliveryRoute?.geometry?.coordinates.length > 1
-          ? (() => {
-            const p = partial(deliveryRoute.geometry.coordinates, progressB);
-            return p.length > 1
-              ? p
-              : [
-                [order.restaurantLocation.lng, order.restaurantLocation.lat],
-                [order.deliveryLocation.lng, order.deliveryLocation.lat],
-              ];
-          })()
-          : [
-            [order.restaurantLocation.lng, order.restaurantLocation.lat],
-            [order.deliveryLocation.lng, order.deliveryLocation.lat],
-          ],
-    },
-    properties: {},
-  }), [deliveryRoute, progressB, order.restaurantLocation.lng, order.restaurantLocation.lat, order.deliveryLocation.lng, order.deliveryLocation.lat]);
+    return {
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates:
+          driverRoute?.geometry?.coordinates && driverRoute?.geometry?.coordinates.length > 1
+            ? (() => {
+              const p = partial(driverRoute.geometry.coordinates, progressA);
+              return p.length > 1 ? p : [[drvLng, drvLat], [restLng, restLat]];
+            })()
+            : [[drvLng, drvLat], [restLng, restLat]],
+      },
+      properties: {},
+    };
+  }, [driverRoute, progressA, restaurantLocation, driverLocation, hasRestaurant, hasDriver]);
 
-  const lines = useMemo(() => ({ type: "FeatureCollection", features: [driverFeature, deliveryFeature] }), [driverFeature, deliveryFeature]);
+  const deliveryFeature = useMemo(() => {
+    if (!hasRestaurant || !hasDelivery) return null;
+    const restLng = restaurantLocation!.lng;
+    const restLat = restaurantLocation!.lat;
+    const delLng = deliveryLocation!.lng;
+    const delLat = deliveryLocation!.lat;
+
+    return {
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates:
+          deliveryRoute?.geometry?.coordinates && deliveryRoute?.geometry?.coordinates.length > 1
+            ? (() => {
+              const p = partial(deliveryRoute.geometry.coordinates, progressB);
+              return p.length > 1 ? p : [[restLng, restLat], [delLng, delLat]];
+            })()
+            : [[restLng, restLat], [delLng, delLat]],
+      },
+      properties: {},
+    };
+  }, [deliveryRoute, progressB, restaurantLocation, deliveryLocation, hasRestaurant, hasDelivery]);
+
+  const lines = useMemo(() => ({
+    type: "FeatureCollection",
+    features: [driverFeature, deliveryFeature].filter(Boolean),
+  }), [driverFeature, deliveryFeature]);
 
   const etaText = useMemo(() => {
     const d1 = Number(driverRoute?.distance ?? 0);
@@ -169,7 +194,22 @@ export default function OrderMapView({ order }: { order: Order }) {
     return `${minStr} · ${kmStr}`;
   }, [driverRoute, deliveryRoute]);
 
-  const initialView = { longitude: order.restaurantLocation.lng, latitude: order.restaurantLocation.lat, zoom: 13 };
+  // If no valid locations, show placeholder
+  if (!hasRestaurant && !hasDelivery) {
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-gray-100">
+        <div className="text-center text-gray-400">
+          <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">Không có dữ liệu vị trí</p>
+        </div>
+      </div>
+    );
+  }
+
+  const centerLat = hasRestaurant ? restaurantLocation!.lat : (hasDelivery ? deliveryLocation!.lat : 10.7769);
+  const centerLng = hasRestaurant ? restaurantLocation!.lng : (hasDelivery ? deliveryLocation!.lng : 106.7009);
+
+  const initialView = { longitude: centerLng, latitude: centerLat, zoom: 13 };
 
   return (
     <div className="h-full p-4 bg-white">
@@ -184,39 +224,43 @@ export default function OrderMapView({ order }: { order: Order }) {
           style={{ width: "100%", height: "100%" }}
         >
           <Source id="order-lines" type="geojson" data={lines as unknown as never}>
-            <Layer id="driver-to-restaurant" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#22c55e", "line-width": 5, "line-opacity": isPending ? 0 : 0.95 }} />
-            <Layer id="restaurant-to-delivery" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#3b82f6", "line-width": 5, "line-opacity": isPending ? 0 : 0.95 }} />
+            <Layer id="driver-to-restaurant" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#22c55e", "line-width": 5, "line-opacity": (isPending || !hasDriver) ? 0 : 0.95 }} />
+            <Layer id="restaurant-to-delivery" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#3b82f6", "line-width": 5, "line-opacity": 0.95 }} />
           </Source>
 
-          <Marker longitude={order.deliveryLocation.lng} latitude={order.deliveryLocation.lat} anchor="center">
-            <div className="relative">
-              <motion.span
-                className="absolute -inset-2 rounded-full border-2 border-blue-500/40"
-                animate={{ scale: [1, 1.6], opacity: [0.7, 0] }}
-                transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
-              />
-              <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
-            </div>
-          </Marker>
-
-          <Marker longitude={order.restaurantLocation.lng} latitude={order.restaurantLocation.lat} anchor="bottom">
-            <div className="flex flex-col items-center -translate-y-1">
+          {hasDelivery && (
+            <Marker longitude={deliveryLocation!.lng} latitude={deliveryLocation!.lat} anchor="center">
               <div className="relative">
                 <motion.span
-                  className="absolute -inset-1 rounded-full border-2 border-orange-500/40"
-                  animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
-                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                  className="absolute -inset-2 rounded-full border-2 border-blue-500/40"
+                  animate={{ scale: [1, 1.6], opacity: [0.7, 0] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
                 />
-                <div className="w-9 h-9 rounded-full bg-orange-500 border-2 border-white shadow-lg flex items-center justify-center">
-                  <Store className="w-5 h-5 text-white" />
-                </div>
+                <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
               </div>
-              <div className="w-2 h-2 rounded-full bg-orange-500 mt-1" />
-            </div>
-          </Marker>
+            </Marker>
+          )}
 
-          {!isPending && (
-            <Marker longitude={order.driverLocation.lng} latitude={order.driverLocation.lat} anchor="bottom">
+          {hasRestaurant && (
+            <Marker longitude={restaurantLocation!.lng} latitude={restaurantLocation!.lat} anchor="bottom">
+              <div className="flex flex-col items-center -translate-y-1">
+                <div className="relative">
+                  <motion.span
+                    className="absolute -inset-1 rounded-full border-2 border-orange-500/40"
+                    animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                  />
+                  <div className="w-9 h-9 rounded-full bg-orange-500 border-2 border-white shadow-lg flex items-center justify-center">
+                    <Store className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+                <div className="w-2 h-2 rounded-full bg-orange-500 mt-1" />
+              </div>
+            </Marker>
+          )}
+
+          {!isPending && hasDriver && (
+            <Marker longitude={driverLocation!.lng} latitude={driverLocation!.lat} anchor="bottom">
               <div className="flex flex-col items-center -translate-y-1">
                 <div className="relative">
                   <motion.span

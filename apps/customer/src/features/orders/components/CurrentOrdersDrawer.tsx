@@ -209,12 +209,33 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                 {/* 3. Map View Column */}
                 <div className="relative h-[250px] md:h-full w-full bg-gray-200 border-r border-gray-100 z-0">
                   {activeOrder && (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                      <div className="text-center text-gray-400">
-                        <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">Map view</p>
-                      </div>
-                    </div>
+                    <OrderMapView
+                      restaurantLocation={
+                        activeOrder.restaurant?.latitude && activeOrder.restaurant?.longitude
+                          ? {
+                            lat: Number(activeOrder.restaurant.latitude),
+                            lng: Number(activeOrder.restaurant.longitude),
+                          }
+                          : undefined
+                      }
+                      deliveryLocation={
+                        activeOrder.deliveryLatitude && activeOrder.deliveryLongitude
+                          ? {
+                            lat: Number(activeOrder.deliveryLatitude),
+                            lng: Number(activeOrder.deliveryLongitude),
+                          }
+                          : undefined
+                      }
+                      driverLocation={
+                        activeOrder.driver?.latitude && activeOrder.driver?.longitude
+                          ? {
+                            lat: Number(activeOrder.driver.latitude),
+                            lng: Number(activeOrder.driver.longitude),
+                          }
+                          : undefined
+                      }
+                      orderStatus={activeOrder.orderStatus}
+                    />
                   )}
                 </div>
 
