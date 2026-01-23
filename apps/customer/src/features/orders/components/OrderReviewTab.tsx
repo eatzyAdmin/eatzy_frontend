@@ -1,23 +1,14 @@
-"use client";
-
 import { useState } from "react";
-import { Star, Send, Award, ShieldCheck, Quote } from "@repo/ui/icons";
+import { Star, Send, Award, ShieldCheck, Quote, User as UserIcon } from "@repo/ui/icons";
 import { ImageWithFallback } from "@repo/ui";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useSwipeConfirmation, useNotification } from "@repo/ui";
-import type { Order } from "@repo/types";
+import type { OrderResponse } from "@repo/types";
 
 interface OrderReviewTabProps {
-  order: Order;
-  driver: {
-    name: string;
-    profilePhoto: string;
-    licensePlate: string;
-  };
-  restaurant: {
-    name: string;
-    imageUrl?: string;
-  } | null;
+  order: OrderResponse;
+  driver: OrderResponse['driver'];
+  restaurant: OrderResponse['restaurant'];
 }
 
 export default function OrderReviewTab({
@@ -25,7 +16,6 @@ export default function OrderReviewTab({
   restaurant,
 }: OrderReviewTabProps) {
   const { confirm } = useSwipeConfirmation();
-  // const { show, hide } = useLoading();
   const { showNotification } = useNotification();
 
   const [restaurantRating, setRestaurantRating] = useState(0);
@@ -58,6 +48,8 @@ export default function OrderReviewTab({
   };
 
   const handleSubmitDriver = async () => {
+    if (!driver) return;
+
     if (driverRating === 0 || !driverComment.trim()) {
       showNotification({ type: "error", message: "Vui lòng chọn số sao và viết nhận xét!", format: "Điền đầy đủ thông tin trước khi gửi đánh giá nhé!" });
       return;
@@ -84,18 +76,16 @@ export default function OrderReviewTab({
           {/* Restaurant Avatar */}
           <div className="relative w-24 h-24 mb-4">
             <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-gray-50 border border-gray-100 shadow-sm">
-              {restaurant?.imageUrl && (
-                <ImageWithFallback
-                  src={restaurant.imageUrl}
-                  alt={restaurant.name}
-                  fill
-                  className="object-cover"
-                />
-              )}
+              <ImageWithFallback
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(restaurant.name)}&background=random&color=fff&size=512`}
+                alt={restaurant.name}
+                fill
+                className="object-cover"
+              />
             </div>
           </div>
 
-          <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">{restaurant?.name}</h3>
+          <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">{restaurant.name}</h3>
           <p className="text-sm text-gray-500 mb-8">Bạn thấy món ăn thế nào?</p>
 
           {/* Star Rating */}
@@ -151,16 +141,14 @@ export default function OrderReviewTab({
           {/* Submitted Profile Card */}
           <div className="relative w-28 h-28 mb-3">
             <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-gray-50 border-4 border-white shadow-md">
-              {restaurant?.imageUrl && (
-                <ImageWithFallback src={restaurant.imageUrl} alt={restaurant.name} fill className="object-cover" />
-              )}
+              <ImageWithFallback src={`https://ui-avatars.com/api/?name=${encodeURIComponent(restaurant.name)}&background=random&color=fff&size=512`} alt={restaurant.name} fill className="object-cover" />
             </div>
             <div className="absolute bottom-0 right-0 z-20 bg-[var(--primary)] text-white p-1.5 rounded-full shadow-md border-2 border-white">
               <Award className="w-4 h-4" />
             </div>
           </div>
 
-          <h2 className="text-xl font-bold text-[#1A1A1A] mb-1">{restaurant?.name}</h2>
+          <h2 className="text-xl font-bold text-[#1A1A1A] mb-1">{restaurant.name}</h2>
           <div className="text-xs font-medium text-gray-500 mb-6">{restaurantRating}/5 Sao</div>
 
           {/* Review Content */}
@@ -186,7 +174,12 @@ export default function OrderReviewTab({
 
   const renderDriverCard = (isSubmitted: boolean) => (
     <div className="bg-white rounded-[32px] p-8 shadow-[0_6px_20px_rgba(0,0,0,0.06)] border border-gray-100 flex flex-col items-center text-center h-full max-h-[600px] relative overflow-hidden">
-      {!isSubmitted ? (
+      {!driver ? (
+        <div className="flex flex-col items-center justify-center h-full text-gray-500">
+          <UserIcon className="w-16 h-16 mb-4 opacity-20" />
+          <p>Chưa có thông tin tài xế</p>
+        </div>
+      ) : !isSubmitted ? (
         <>
           <h2 className="text-xl font-bold text-[#1A1A1A] mb-6">Đánh giá tài xế</h2>
 
@@ -194,7 +187,7 @@ export default function OrderReviewTab({
           <div className="relative w-24 h-24 mb-4">
             <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-gray-50 border border-gray-100 shadow-sm">
               <ImageWithFallback
-                src={driver.profilePhoto}
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(driver.name)}&background=random&color=fff`}
                 alt={driver.name}
                 fill
                 className="object-cover"
@@ -203,7 +196,7 @@ export default function OrderReviewTab({
           </div>
 
           <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">{driver.name}</h3>
-          <p className="text-sm text-gray-500 mb-8">{driver.licensePlate}</p>
+          <p className="text-sm text-gray-500 mb-8">{driver.vehicleLicensePlate || driver.vehicleType || "Tài xế Eatzy"}</p>
 
           {/* Star Rating */}
           <div className="flex items-center gap-2 mb-8">
@@ -258,7 +251,7 @@ export default function OrderReviewTab({
           {/* Submitted Profile Card */}
           <div className="relative w-28 h-28 mb-3">
             <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-gray-50 border-4 border-white shadow-md">
-              <ImageWithFallback src={driver.profilePhoto} alt={driver.name} fill className="object-cover" />
+              <ImageWithFallback src={`https://ui-avatars.com/api/?name=${encodeURIComponent(driver.name)}&background=random&color=fff`} alt={driver.name} fill className="object-cover" />
             </div>
             <div className="absolute bottom-0 right-0 z-20 bg-[#E31C5F] text-white p-1.5 rounded-full shadow-md border-2 border-white">
               <Star className="w-4 h-4 fill-white" />
@@ -332,3 +325,4 @@ export default function OrderReviewTab({
     </div>
   );
 }
+

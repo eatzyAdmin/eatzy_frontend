@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "@repo/ui/motion";
@@ -14,23 +12,12 @@ import {
   Star,
   Award,
   ShieldCheck,
+  User,
 } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
-import type { Order } from "@repo/types";
-import { getRestaurantById } from "@/features/search/data/mockSearchData";
+import type { OrderResponse } from "@repo/types";
 
 const OrderReviewTab = dynamic(() => import("@/features/orders/components/OrderReviewTab"), { ssr: false });
-
-// Mock driver data - in real app this would come from API
-const mockDriverData = {
-  name: "Nguyễn Văn A",
-  phone: "0901234567",
-  vehicleType: "Xe máy",
-  licensePlate: "59A-12345",
-  rating: 4.8,
-  totalTrips: 1234,
-  profilePhoto: "https://i.pravatar.cc/150?img=33",
-};
 
 export default function OrderDetailDrawer({
   open,
@@ -39,10 +26,9 @@ export default function OrderDetailDrawer({
 }: {
   open: boolean;
   onClose: () => void;
-  order: Order | null;
+  order: OrderResponse | null;
 }) {
   const [activeTab, setActiveTab] = useState<"details" | "reviews">("details");
-  const restaurant = useMemo(() => (order ? getRestaurantById(order.restaurantId) : null), [order]);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,12 +36,15 @@ export default function OrderDetailDrawer({
     if (open) {
       setIsLoading(true);
       setActiveTab("details");
-      const timer = setTimeout(() => setIsLoading(false), 1500);
+      const timer = setTimeout(() => setIsLoading(false), 1000);
       return () => clearTimeout(timer);
     }
   }, [open]);
 
   if (!order) return null;
+
+  const restaurant = order.restaurant;
+  const driver = order.driver;
 
   return (
     <>
@@ -90,31 +79,33 @@ export default function OrderDetailDrawer({
                     ORDER DETAIL
                   </div>
                   <div className="text-sm text-gray-600 mt-1">
-                    Order code: <span className="font-semibold text-[var(--primary)]">{order.code}</span>
+                    Order ID: <span className="font-semibold text-[var(--primary)]">#{order.id}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {/* Tab Switcher */}
-                  <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-2xl">
-                    <button
-                      onClick={() => setActiveTab("details")}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "details"
-                        ? "bg-white text-[#1A1A1A] shadow-sm"
-                        : "text-gray-600 hover:text-[#1A1A1A]"
-                        }`}
-                    >
-                      Chi tiết
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("reviews")}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "reviews"
-                        ? "bg-white text-[#1A1A1A] shadow-sm"
-                        : "text-gray-600 hover:text-[#1A1A1A]"
-                        }`}
-                    >
-                      Đánh giá
-                    </button>
-                  </div>
+                  {/* Tab Switcher - Only show if order is delivered */}
+                  {order.orderStatus === "DELIVERED" && (
+                    <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-2xl">
+                      <button
+                        onClick={() => setActiveTab("details")}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "details"
+                          ? "bg-white text-[#1A1A1A] shadow-sm"
+                          : "text-gray-600 hover:text-[#1A1A1A]"
+                          }`}
+                      >
+                        Chi tiết
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("reviews")}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "reviews"
+                          ? "bg-white text-[#1A1A1A] shadow-sm"
+                          : "text-gray-600 hover:text-[#1A1A1A]"
+                          }`}
+                      >
+                        Đánh giá
+                      </button>
+                    </div>
+                  )}
 
                   <motion.button
                     whileHover={{ scale: 1.06 }}
@@ -157,18 +148,12 @@ export default function OrderDetailDrawer({
                               {/* Avatar */}
                               <div className="relative w-20 h-20 mb-3">
                                 <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-gray-50 border border-gray-100">
-                                  {restaurant?.imageUrl ? (
-                                    <ImageWithFallback
-                                      src={restaurant.imageUrl}
-                                      alt={restaurant.name}
-                                      fill
-                                      className="object-cover"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                      <Store className="w-8 h-8 text-gray-300" />
-                                    </div>
-                                  )}
+                                  <ImageWithFallback
+                                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(restaurant.name)}&background=random&color=fff&size=512`}
+                                    alt={restaurant.name}
+                                    fill
+                                    className="object-cover"
+                                  />
                                 </div>
                                 <div className="absolute bottom-0 right-0 z-20 bg-[#E31C5F] text-white p-1 rounded-full shadow-md border-2 border-white">
                                   <ShieldCheck className="w-3 h-3 fill-white" />
@@ -176,9 +161,9 @@ export default function OrderDetailDrawer({
                               </div>
 
                               <h2 className="text-lg font-bold text-[#1A1A1A] mb-1 line-clamp-2 leading-tight">
-                                {restaurant?.name}
+                                {restaurant.name}
                               </h2>
-                              <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 mb-4">
+                              <div className="flex items-center justify-center gap-1.5 text-[11px] font-medium text-gray-500 mb-4">
                                 <Award className="w-3 h-3" />
                                 <span>Nhà hàng - Quán ăn</span>
                               </div>
@@ -187,18 +172,14 @@ export default function OrderDetailDrawer({
                               <div className="w-full border-t border-gray-100 pt-3">
                                 <div className="grid grid-cols-2 gap-2 text-left">
                                   <div>
-                                    <div className="text-lg font-bold text-[#1A1A1A] leading-none mb-1">1.8k</div>
+                                    <div className="text-lg font-bold text-[#1A1A1A] leading-none mb-1">1.2k</div>
                                     <div className="text-[8px] uppercase font-bold text-gray-500 tracking-wide">Đánh giá</div>
                                   </div>
                                   <div className="pl-2 border-l border-gray-100">
                                     <div className="flex items-center gap-0.5 text-lg font-bold text-[#1A1A1A] leading-none mb-1">
-                                      {restaurant?.rating} <Star className="w-3 h-3 text-[#1A1A1A] fill-[#1A1A1A]" />
+                                      4.8 <Star className="w-3 h-3 text-[#1A1A1A] fill-[#1A1A1A]" />
                                     </div>
                                     <div className="text-[8px] uppercase font-bold text-gray-500 tracking-wide">Xếp hạng</div>
-                                  </div>
-                                  <div className="col-span-2 pt-3 mt-3 border-t border-gray-100">
-                                    <div className="text-lg font-bold text-[#1A1A1A] leading-none mb-1">5</div>
-                                    <div className="text-[8px] uppercase font-bold text-gray-500 tracking-wide">Năm hoạt động</div>
                                   </div>
                                 </div>
                               </div>
@@ -219,49 +200,24 @@ export default function OrderDetailDrawer({
                               <Package className="w-5 h-5 text-[var(--primary)]" />
                               <h3 className="text-lg font-bold text-[#1A1A1A]">Món ăn</h3>
                               <span className="ml-auto text-sm text-gray-600">
-                                {order.items.length} món
+                                {order.orderItems.length} món
                               </span>
                             </div>
 
                             <div className="space-y-4">
-                              {order.items.map((item) => (
+                              {order.orderItems.map((item) => (
                                 <div key={item.id} className="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0 last:pb-0">
                                   <div className="w-8 h-8 rounded-full font-anton bg-[var(--primary)]/15 text-[var(--primary)] flex items-center justify-center font-bold text-lg flex-shrink-0">
                                     {item.quantity}x
                                   </div>
 
-                                  {item.imageUrl && (
-                                    <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-white border border-gray-200 flex-shrink-0 flex items-center justify-center">
-                                      <ImageWithFallback
-                                        src={item.imageUrl}
-                                        alt={item.name}
-                                        fill
-                                        className="object-cover"
-                                      />
-                                    </div>
-                                  )}
-
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-2">
-                                      <div className="text-[#1A1A1A] font-medium line-clamp-1">{item.name}</div>
+                                      <div className="text-[#1A1A1A] font-medium line-clamp-1">{item.dish.name}</div>
                                       <div className="text-[#1A1A1A] font-anton text-lg font-semibold whitespace-nowrap">
-                                        {formatVnd(item.price)}
+                                        {formatVnd(item.priceAtPurchase)}
                                       </div>
                                     </div>
-                                    {item.options && (
-                                      <div className="space-y-0.5 mt-0.5">
-                                        {item.options.variant && (
-                                          <div className="text-[#555] text-xs">
-                                            Phân loại: {item.options.variant.name}
-                                          </div>
-                                        )}
-                                        {item.options.addons && item.options.addons.length > 0 && (
-                                          <div className="text-[#555] text-xs">
-                                            Topping: {item.options.addons.map(a => a.name).join(", ")}
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
                                   </div>
                                 </div>
                               ))}
@@ -275,13 +231,13 @@ export default function OrderDetailDrawer({
                               </div>
                               <div className="flex items-center justify-between">
                                 <span className="text-gray-600">Phí vận chuyển</span>
-                                <span className="font-semibold">{formatVnd(order.fee)}</span>
+                                <span className="font-semibold">{formatVnd(order.deliveryFee)}</span>
                               </div>
-                              {order.discount > 0 && (
+                              {order.discountAmount && order.discountAmount > 0 && (
                                 <div className="flex items-center justify-between">
                                   <span className="text-gray-600">Giảm giá</span>
                                   <span className="font-semibold text-green-600">
-                                    - {formatVnd(order.discount)}
+                                    - {formatVnd(order.discountAmount)}
                                   </span>
                                 </div>
                               )}
@@ -289,7 +245,7 @@ export default function OrderDetailDrawer({
                               <div className="flex items-center justify-between text-lg">
                                 <span className="font-bold text-[#1A1A1A]">Tổng cộng</span>
                                 <span className="font-bold text-[var(--primary)] text-2xl font-anton">
-                                  {formatVnd(order.total)}
+                                  {formatVnd(order.totalAmount)}
                                 </span>
                               </div>
                             </div>
@@ -311,27 +267,30 @@ export default function OrderDetailDrawer({
                           <div className="flex-1 flex flex-col items-center justify-center text-center">
                             {/* Avatar */}
                             <div className="relative w-20 h-20 mb-2">
-                              <div className="w-full h-full rounded-full overflow-hidden relative z-10 border-[3px] border-white shadow-sm">
-                                <ImageWithFallback
-                                  src={mockDriverData.profilePhoto}
-                                  alt={mockDriverData.name}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="absolute bottom-0 right-0 z-20 bg-[var(--primary)] text-white w-6 h-6 flex items-center justify-center rounded-full border-2 border-white shadow-md">
-                                <Star className="w-3 h-3 fill-white" />
-                              </div>
+                              {driver ? (
+                                <div className="w-full h-full rounded-full overflow-hidden relative z-10 border-[3px] border-white shadow-sm bg-gray-100 flex items-center justify-center">
+                                  <ImageWithFallback
+                                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(driver.name)}&background=random&color=fff`}
+                                    alt={driver.name}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="w-full h-full rounded-full overflow-hidden relative z-10 border-[3px] border-white shadow-sm bg-gray-100 flex items-center justify-center">
+                                  <User className="w-8 h-8 text-gray-300" />
+                                </div>
+                              )}
                             </div>
 
                             {/* Name & Role */}
                             <div className="space-y-0.5">
                               <h2 className="text-lg font-bold text-[#1A1A1A] leading-tight tracking-tight">
-                                {mockDriverData.name}
+                                {driver?.name || "Đang chờ tài xế"}
                               </h2>
                               <div className="flex items-center justify-center gap-1 text-xs text-[#5E5E5E] font-medium">
                                 <Award className="w-3 h-3 text-[#5E5E5E]" />
-                                <span>{mockDriverData.licensePlate}</span>
+                                <span>{driver?.vehicleLicensePlate || "N/A"}</span>
                               </div>
                             </div>
                           </div>
@@ -341,24 +300,16 @@ export default function OrderDetailDrawer({
                             {/* Stat 1: Rating */}
                             <div className="text-left">
                               <div className="flex items-center gap-1 text-xl font-bold text-[#1A1A1A] leading-none mb-0.5">
-                                {mockDriverData.rating} <Star className="w-3.5 h-3.5 fill-[#1A1A1A]" />
+                                {driver?.averageRating || "5.0"} <Star className="w-3.5 h-3.5 fill-[#1A1A1A]" />
                               </div>
                               <div className="text-[10px] text-[#222222] font-medium leading-tight">Đánh giá</div>
                             </div>
 
                             <div className="w-full h-[1px] bg-gray-100" />
 
-                            {/* Stat 2: Total Trips */}
+                            {/* Stat 2: Vehicle Type */}
                             <div className="text-left">
-                              <div className="text-xl font-bold text-[#1A1A1A] leading-none mb-0.5">{mockDriverData.totalTrips}</div>
-                              <div className="text-[10px] text-[#222222] font-medium leading-tight">Chuyến đi</div>
-                            </div>
-
-                            <div className="w-full h-[1px] bg-gray-100" />
-
-                            {/* Stat 3: Vehicle Type */}
-                            <div className="text-left">
-                              <div className="text-lg font-bold text-[#1A1A1A] leading-none mb-0.5 truncate">{mockDriverData.vehicleType}</div>
+                              <div className="text-lg font-bold text-[#1A1A1A] leading-none mb-0.5 truncate">{driver?.vehicleType || "Xe máy"}</div>
                               <div className="text-[10px] text-[#222222] font-medium leading-tight">Phương tiện</div>
                             </div>
                           </div>
@@ -379,10 +330,10 @@ export default function OrderDetailDrawer({
                                   Điểm lấy hàng
                                 </div>
                                 <div className="font-bold text-[#1A1A1A] text-lg mb-0.5 font-anton truncate">
-                                  {restaurant?.name}
+                                  {restaurant.name}
                                 </div>
                                 <div className="text-sm text-[#777] line-clamp-2">
-                                  {restaurant?.address}
+                                  {restaurant.address}
                                 </div>
                               </div>
                             </div>
@@ -405,7 +356,7 @@ export default function OrderDetailDrawer({
                                   Địa điểm nhận
                                 </div>
                                 <div className="text-sm text-[#777] leading-tight">
-                                  {order.deliveryLocation.address ?? "Chưa có địa chỉ"}
+                                  {order.deliveryAddress}
                                 </div>
                               </div>
                             </div>
@@ -428,21 +379,19 @@ export default function OrderDetailDrawer({
                                   : "N/A"}
                               </span>
                             </div>
-                            {order.updatedAt && (
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-600">Cập nhật lần cuối</span>
-                                <span className="font-semibold">
-                                  {new Date(order.updatedAt).toLocaleString("vi-VN")}
-                                </span>
-                              </div>
-                            )}
                             <div className="h-px bg-gray-100" />
                             <div className="flex items-center justify-between">
                               <span className="text-gray-600">Phương thức thanh toán</span>
                               <div className="flex items-center gap-1.5">
                                 <CreditCard className="w-4 h-4 text-gray-600" />
-                                <span className="font-semibold">Tiền mặt</span>
+                                <span className="font-semibold">{order.paymentMethod}</span>
                               </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-600">Trạng thái thanh toán</span>
+                              <span className={`font-semibold ${order.paymentStatus === 'PAID' ? 'text-green-600' : 'text-orange-600'}`}>
+                                {order.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -459,8 +408,8 @@ export default function OrderDetailDrawer({
                     >
                       <OrderReviewTab
                         order={order}
-                        driver={mockDriverData}
-                        restaurant={restaurant ?? null}
+                        driver={driver}
+                        restaurant={restaurant}
                       />
                     </motion.div>
                   )}
@@ -473,3 +422,4 @@ export default function OrderDetailDrawer({
     </>
   );
 }
+

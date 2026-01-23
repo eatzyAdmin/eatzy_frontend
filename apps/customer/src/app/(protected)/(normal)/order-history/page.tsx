@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { ArrowLeft, Receipt, Filter, Search, X } from "@repo/ui/icons";
 import { useLoading, OrderHistoryCardShimmer } from "@repo/ui";
-import type { Order, OrderStatus } from "@repo/types";
-import { getOrders } from "@/features/orders/data/mockOrders";
+import type { OrderResponse } from "@repo/types";
+import { useOrderHistory } from "@/features/orders/hooks/useOrderHistory";
 import OrderHistoryCard from "@/features/orders/components/OrderHistoryCard";
 import OrderDetailDrawer from "@/features/orders/components/OrderDetailDrawer";
 import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
 import { useRef } from "react";
 
-const statusFilters: { value: OrderStatus | "ALL"; label: string }[] = [
+const statusFilters: { value: string; label: string }[] = [
   { value: "ALL", label: "Tất cả" },
   { value: "DELIVERED", label: "Hoàn thành" },
   { value: "CANCELLED", label: "Đã hủy" },
@@ -21,13 +21,16 @@ const statusFilters: { value: OrderStatus | "ALL"; label: string }[] = [
 export default function OrderHistoryPage() {
   const router = useRouter();
   const { hide } = useLoading();
-  const [orders, setOrders] = useState<Order[]>([]);
   const [searchInputValue, setSearchInputValue] = useState("");
   const [actualSearchQuery, setActualSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | "ALL">("ALL");
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [selectedOrder, setSelectedOrder] = useState<OrderResponse | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const { orders, isLoading, refetch } = useOrderHistory({
+    status: statusFilter,
+    search: actualSearchQuery,
+  });
 
   const { setIsVisible } = useBottomNav();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -54,51 +57,24 @@ export default function OrderHistoryPage() {
   }, [setIsVisible]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (!isLoading) {
       hide();
-      setIsLoading(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [hide]);
+    }
+  }, [isLoading, hide]);
 
-  useEffect(() => {
-    // Simulate fetching orders from API
-    const fetchedOrders = getOrders();
-    setOrders(fetchedOrders);
-  }, []);
-
-  const filteredOrders = useMemo(() => {
-    return orders.filter((order) => {
-      // Only show completed or cancelled orders in history
-      const isHistoryOrder = order.status === "DELIVERED" || order.status === "CANCELLED";
-      if (!isHistoryOrder) return false;
-
-      const matchesStatus = statusFilter === "ALL" || order.status === statusFilter;
-      const matchesSearch =
-        !actualSearchQuery ||
-        order.code?.toLowerCase().includes(actualSearchQuery.toLowerCase()) ||
-        order.deliveryLocation.address?.toLowerCase().includes(actualSearchQuery.toLowerCase());
-      return matchesStatus && matchesSearch;
-    });
-  }, [orders, statusFilter, actualSearchQuery]);
-
-  const handleOrderClick = (order: Order) => {
+  const handleOrderClick = (order: OrderResponse) => {
     setSelectedOrder(order);
     setDrawerOpen(true);
   };
 
-  const handleFilterChange = (newFilter: OrderStatus | "ALL") => {
+  const handleFilterChange = (newFilter: string) => {
     if (newFilter === statusFilter) return;
     setStatusFilter(newFilter);
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1200);
   };
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       setActualSearchQuery(searchInputValue);
-      setIsLoading(true);
-      setTimeout(() => setIsLoading(false), 1200);
     }
   };
 
@@ -127,7 +103,7 @@ export default function OrderHistoryPage() {
                   ORDERS HISTORY
                 </h1>
                 <p className="text-sm text-gray-600 mt-1">
-                  Manage and track your orders
+                  Manage and track your past orders
                 </p>
               </div>
             </div>
@@ -137,15 +113,18 @@ export default function OrderHistoryPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Tìm mã đơn hoặc địa chỉ... (Nhấn Enter)"
+                  placeholder="Tìm ID đơn, quán hoặc địa chỉ... (Enter)"
                   value={searchInputValue}
                   onChange={(e) => setSearchInputValue(e.target.value)}
                   onKeyDown={handleSearch}
-                  className="pl-10 pr-10 py-3 w-full md:w-72 rounded-2xl border border-gray-200 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all"
+                  className="pl-10 pr-10 py-3 w-full md:w-72 rounded-2xl border border-gray-200 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all shadow-sm"
                 />
                 {searchInputValue && (
                   <button
-                    onClick={() => setSearchInputValue("")}
+                    onClick={() => {
+                      setSearchInputValue("");
+                      setActualSearchQuery("");
+                    }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-all"
                   >
                     <X className="w-3 h-3 text-gray-600" />
@@ -185,10 +164,10 @@ export default function OrderHistoryPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <OrderHistoryCardShimmer cardCount={6} />
             </div>
-          ) : filteredOrders.length > 0 ? (
+          ) : orders && orders.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <AnimatePresence mode="popLayout">
-                {filteredOrders.map((order, index) => (
+                {orders.map((order: OrderResponse, index: number) => (
                   <motion.div
                     key={order.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -238,3 +217,4 @@ export default function OrderHistoryPage() {
     </div>
   );
 }
+
