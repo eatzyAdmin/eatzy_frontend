@@ -5,6 +5,7 @@ export { cartApi } from "./cart";
 export { voucherApi } from "./voucher";
 export { orderApi } from "./order";
 export { favoriteApi } from "./favorite";
+export { driverApi } from "./driver";
 
 // Restaurant module exports
 export {

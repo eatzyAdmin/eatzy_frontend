@@ -11,13 +11,21 @@ import OrderOfferModal from "@/features/orders/components/OrderOfferModal";
 import CurrentOrderPanel from "@/features/orders/components/CurrentOrderPanel";
 import { LocateFixed, Bike } from "@repo/ui/icons";
 import type { DriverActiveOrder } from "@repo/types";
+import { useDriverStatus } from "@/features/online/hooks/useDriverStatus";
 
 import { useNormalLoading } from "../context/NormalLoadingContext";
 
 export default function Page() {
   const { hide } = useLoading();
   const { stopLoading } = useNormalLoading();
-  const [online, setOnline] = useState(false);
+
+  // Driver status management
+  const {
+    isOnline: online,
+    isLoading: isStatusLoading,
+    toggleStatus
+  } = useDriverStatus();
+
   const [locateVersion, setLocateVersion] = useState(0);
   const [activeOrder, setActiveOrder] = useState<DriverActiveOrder | null>(null);
   const { currentOffer, countdown, acceptOffer, rejectOffer } = useOrderOffers(online, !!activeOrder);
@@ -36,7 +44,7 @@ export default function Page() {
       <DriverMapView locateVersion={locateVersion} activeOrder={activeOrder} />
       <div className="absolute left-4 right-4 bottom-[96px] space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <ConnectToggle online={online} onChange={setOnline} className="" />
+          <ConnectToggle online={online} onToggle={toggleStatus} className="" />
           <motion.button whileTap={{ scale: 0.95 }} onClick={() => setLocateVersion((v) => v + 1)} className="bg-white shadow-xl w-12 h-12 rounded-2xl flex items-center justify-center border border-gray-200">
             <LocateFixed className="w-6 h-6 text-[#1A1A1A]" />
           </motion.button>
