@@ -11,7 +11,9 @@ import {
   Users,
   Settings,
   User,
-  LogOut
+  LogOut,
+  Wallet,
+  ShieldCheck
 } from '@repo/ui/icons';
 import RestaurantNavItem from '../../../components/RestaurantNavItem';
 import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation } from '@repo/ui';
@@ -19,11 +21,13 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useLogout } from '@/features/auth/hooks/useLogout';
 
 const adminMenuItems = [
-  { id: 'overview', icon: LayoutDashboard, text: 'Tổng quan' },
-  { id: 'restaurants', icon: Store, text: 'Quản lý quán ăn' },
+  { id: 'dashboard', icon: LayoutDashboard, text: 'Tổng quan' },
+  { id: 'restaurants', icon: Store, text: 'Quản lý cửa hàng' },
   { id: 'drivers', icon: Truck, text: 'Quản lý tài xế' },
   { id: 'customers', icon: Users, text: 'Quản lý khách hàng' },
-  { id: 'system-parameters', icon: Settings, text: 'Tham số hệ thống' }
+  { id: 'finance', icon: Wallet, text: 'Tài chính' },
+  { id: 'system-config', icon: Settings, text: 'Cấu hình hệ thống' },
+  { id: 'permissions', icon: ShieldCheck, text: 'Quản lý phân quyền' }
 ];
 
 import { NormalLoadingProvider, useNormalLoading, NormalLoadingOverlay } from './context/NormalLoadingContext';
@@ -35,7 +39,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
   const { startLoading, stopLoading } = useNormalLoading();
   const { user, isLoading: isAuthLoading } = useAuth();
   const { handleLogout } = useLogout();
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState('dashboard');
   const [navHovered, setNavHovered] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
