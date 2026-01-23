@@ -1,57 +1,71 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import type { DriverActiveOrder } from "@repo/types";
 import { Phone, Compass, DollarSign, MapPin, Utensils, ChevronDown } from "@repo/ui/icons";
 import { DotsLoader } from "@repo/ui";
+import { orderApi } from "@repo/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { orderOffersKeys } from "../hooks/useOrderOffers";
 
-type OrderStage = 'AT_STORE' | 'PICKED_UP' | 'AT_DROPOFF' | 'DELIVERED' | 'COMPLETED';
+type OrderStage = 'AT_STORE' | 'PICKED_UP' | 'DELIVERED';
 
-export default function CurrentOrderPanel({ order, onComplete }: { order: DriverActiveOrder; onComplete?: () => void }) {
+export default function CurrentOrderPanel({ order }: { order: DriverActiveOrder }) {
+  const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(true);
-  const [stage, setStage] = useState<OrderStage>('AT_STORE');
-  const [isVisible, setIsVisible] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const stageConfig = {
-    'AT_STORE': { title: 'Đang lấy đơn hàng', buttonText: 'Đã đến cửa hàng' },
-    'PICKED_UP': { title: 'Đang chờ nhận hàng', buttonText: 'Đã nhận hàng' },
-    'AT_DROPOFF': { title: 'Đang giao hàng', buttonText: 'Đã đến điểm giao' },
-    'DELIVERED': { title: 'Chờ khách lấy hàng', buttonText: 'Giao hàng thành công' },
-    'COMPLETED': { title: '', buttonText: '' }
+    'DRIVER_ASSIGNED': { 
+      title: 'Đang đến cửa hàng', 
+      buttonText: 'Đã nhận hàng',
+      action: async () => {
+        await orderApi.markOrderAsPickedUp(parseInt(order.id));
+      }
+    },
+    'READY': { 
+      title: 'Đơn hàng đã sẵn sàng', 
+      buttonText: 'Đã nhận hàng',
+      action: async () => {
+        await orderApi.markOrderAsPickedUp(parseInt(order.id));
+      }
+    },
+    'PICKED_UP': { 
+      title: 'Đang giao hàng', 
+      buttonText: 'Đã đến điểm giao',
+      action: async () => {
+        await orderApi.markOrderAsArrived(parseInt(order.id));
+      }
+    },
+    'ARRIVED': { 
+      title: 'Đã đến điểm giao', 
+      buttonText: 'Giao hàng thành công',
+      action: async () => {
+        await orderApi.markOrderAsDelivered(parseInt(order.id));
+      }
+    },
   };
+
+  const currentStage = (order.orderStatus as keyof typeof stageConfig) || 'DRIVER_ASSIGNED';
+  const { title, buttonText, action } = stageConfig[currentStage] || stageConfig['DRIVER_ASSIGNED'];
 
   const handleButtonClick = async () => {
     if (isProcessing) return;
-
     setIsProcessing(true);
 
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (stage === 'AT_STORE') {
-      setStage('PICKED_UP');
+    try {
+      await action();
+      queryClient.invalidateQueries({ queryKey: orderOffersKeys.all });
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+    } finally {
       setIsProcessing(false);
-    } else if (stage === 'PICKED_UP') {
-      setStage('AT_DROPOFF');
-      setIsProcessing(false);
-    } else if (stage === 'AT_DROPOFF') {
-      setStage('DELIVERED');
-      setIsProcessing(false);
-    } else if (stage === 'DELIVERED') {
-      // Trigger exit animation
-      setIsVisible(false);
-      setIsProcessing(false);
-      // Call onComplete after animation finishes
-      setTimeout(() => {
-        onComplete?.();
-      }, 600);
     }
   };
 
   const handleNavigation = () => {
     // Determine destination based on stage
-    const destination = (stage === 'AT_STORE' || stage === 'PICKED_UP')
+    const destination = (currentStage === 'DRIVER_ASSIGNED')
       ? order.pickup
       : order.dropoff;
 
@@ -59,57 +73,48 @@ export default function CurrentOrderPanel({ order, onComplete }: { order: Driver
     window.open(url, '_blank');
   };
 
-  const { title, buttonText } = stageConfig[stage];
-
   return (
-    <AnimatePresence>
-      {isVisible && (
+    <div className="relative">
+      {/* Toggle Button - Centered at top */}
+      <motion.button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="absolute -top-8 left-1/2 -translate-x-1/2 z-10 w-12 h-6 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
         <motion.div
-          initial={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-          className="relative"
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="flex items-center justify-center"
         >
-          {/* Toggle Button - Centered at top */}
-          <motion.button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="absolute -top-8 left-1/2 -translate-x-1/2 z-10 w-12 h-6 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <motion.div
-              animate={{ rotate: isExpanded ? 180 : 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="flex items-center justify-center"
-            >
-              <ChevronDown size={16} className="text-gray-600" />
-            </motion.div>
-          </motion.button>
+          <ChevronDown size={16} className="text-gray-600" />
+        </motion.div>
+      </motion.button>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="bg-white rounded-[28px] overflow-hidden border border-gray-200 shadow-sm"
-          >
-            {/* Header */}
-            <div className="bg-white px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="relative flex-1 h-8 overflow-hidden">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={stage}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute inset-0 flex items-center text-xl font-bold text-[#1A1A1A] tracking-tight"
-                      style={{ fontStretch: "condensed" }}
-                    >
-                      {title}
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-white rounded-[28px] overflow-hidden border border-gray-200 shadow-sm"
+      >
+        {/* Header */}
+        <div className="bg-white px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="relative flex-1 h-8 overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentStage}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute inset-0 flex items-center text-xl font-bold text-[#1A1A1A] tracking-tight"
+                  style={{ fontStretch: "condensed" }}
+                >
+                  {title}
+                </motion.div>
+              </AnimatePresence>
+            </div>
                 <div className="px-3 py-1.5 rounded-full bg-gray-100 text-[#555] text-sm font-semibold">
                   {order.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Thẻ/Ví'}
                 </div>
@@ -237,7 +242,7 @@ export default function CurrentOrderPanel({ order, onComplete }: { order: Driver
                       ) : (
                         <AnimatePresence mode="wait">
                           <motion.span
-                            key={stage}
+                            key={currentStage}
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
@@ -254,8 +259,6 @@ export default function CurrentOrderPanel({ order, onComplete }: { order: Driver
               )}
             </AnimatePresence>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
   );
 }

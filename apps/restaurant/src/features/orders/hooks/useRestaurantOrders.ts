@@ -1,15 +1,21 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { orderApi } from "@repo/api";
 import type { OrderResponse } from "@repo/types";
 import type { Order, OrderItem } from "@repo/types";
+
+export const restaurantOrdersKeys = {
+  all: ["orders", "my-restaurant"] as const,
+  active: () => [...restaurantOrdersKeys.all, "active"] as const,
+};
 
 // Active order statuses for restaurant view
 const ACTIVE_ORDER_STATUSES = [
   "PENDING",
   "PLACED",
   "PREPARING",
+  "DRIVER_ASSIGNED",
   "READY",
 ];
 
@@ -64,6 +70,7 @@ function mapApiStatusToOrderStatus(apiStatus: string): Order["status"] {
     case "PLACED":
       return "PLACED";
     case "PREPARING":
+    case "DRIVER_ASSIGNED":
       return "PREPARED";
     case "READY":
       return "PICKED";
@@ -72,6 +79,7 @@ function mapApiStatusToOrderStatus(apiStatus: string): Order["status"] {
     case "DELIVERED":
       return "DELIVERED";
     case "CANCELLED":
+    case "REJECTED":
       return "CANCELLED";
     default:
       return "PENDING";
@@ -87,6 +95,10 @@ export interface UseRestaurantOrdersResult {
   pendingOrders: Order[];
   inProgressOrders: Order[];
   waitingForDriverOrders: Order[];
+  acceptOrder: (orderId: string) => Promise<any>;
+  rejectOrder: (orderId: string, reason: string) => Promise<any>;
+  markAsReady: (orderId: string) => Promise<any>;
+  isActionLoading: boolean;
 }
 
 /**
@@ -94,11 +106,12 @@ export interface UseRestaurantOrdersResult {
  * Uses the /api/v1/orders/my-restaurant endpoint
  */
 export function useRestaurantOrders(): UseRestaurantOrdersResult {
+  const queryClient = useQueryClient();
   // Build filter for active statuses
   const statusFilter = ACTIVE_ORDER_STATUSES.map(s => `orderStatus~'${s}'`).join(' or ');
 
   const query = useQuery({
-    queryKey: ["orders", "my-restaurant", "active"],
+    queryKey: restaurantOrdersKeys.active(),
     queryFn: async () => {
       const response = await orderApi.getMyRestaurantOrders({
         filter: statusFilter,
@@ -110,8 +123,32 @@ export function useRestaurantOrders(): UseRestaurantOrdersResult {
       }
       return [];
     },
-    staleTime: 15 * 1000, // 15 seconds
-    refetchInterval: 30 * 1000, // Refetch every 30 seconds
+    // Real-time simulation: always fetch fresh data
+    staleTime: 0,
+    // Poll every 5 seconds to simulate WebSocket real-time updates
+    refetchInterval: 5 * 1000,
+  });
+
+  const acceptMutation = useMutation({
+    mutationFn: (orderId: string) => orderApi.acceptOrder(Number(orderId)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: restaurantOrdersKeys.all });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: ({ orderId, reason }: { orderId: string; reason: string }) =>
+      orderApi.rejectOrderByRestaurant(Number(orderId), reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: restaurantOrdersKeys.all });
+    },
+  });
+
+  const readyMutation = useMutation({
+    mutationFn: (orderId: string) => orderApi.markOrderAsReady(Number(orderId)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: restaurantOrdersKeys.all });
+    },
   });
 
   const orders = query.data || [];
@@ -130,5 +167,9 @@ export function useRestaurantOrders(): UseRestaurantOrdersResult {
     pendingOrders,
     inProgressOrders,
     waitingForDriverOrders,
+    acceptOrder: async (orderId: string) => acceptMutation.mutateAsync(orderId),
+    rejectOrder: async (orderId: string, reason: string) => rejectMutation.mutateAsync({ orderId, reason }),
+    markAsReady: async (orderId: string) => readyMutation.mutateAsync(orderId),
+    isActionLoading: acceptMutation.isPending || rejectMutation.isPending || readyMutation.isPending,
   };
 }

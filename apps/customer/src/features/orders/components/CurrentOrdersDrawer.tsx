@@ -16,8 +16,9 @@ const OrderMapView = dynamic(() => import("@/features/orders/components/OrderMap
 import OrderStatusSteps from "@/features/orders/components/OrderStatusSteps";
 
 export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  // Fetch orders from API
-  const { orders, isLoading: isLoadingOrders, refetch } = useCurrentOrders();
+  // Fetch orders from API with polling enabled when drawer is open
+  // When drawer is open: polls every 5s to simulate real-time updates
+  const { orders, isLoading: isLoadingOrders, refetch } = useCurrentOrders({ isDrawerOpen: open });
 
   const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
   const activeOrder = orders.find((o) => o.id === activeOrderId) ?? orders[0] ?? null;
@@ -239,35 +240,46 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
 
                 {/* 3. Map View Column */}
                 <div className="relative h-[250px] md:h-full w-full bg-gray-200 border-r border-gray-100 z-0">
-                  {activeOrder && (
-                    <OrderMapView
-                      restaurantLocation={
-                        activeOrder.restaurant?.latitude && activeOrder.restaurant?.longitude
-                          ? {
-                            lat: Number(activeOrder.restaurant.latitude),
-                            lng: Number(activeOrder.restaurant.longitude),
-                          }
-                          : undefined
-                      }
-                      deliveryLocation={
-                        activeOrder.deliveryLatitude && activeOrder.deliveryLongitude
-                          ? {
-                            lat: Number(activeOrder.deliveryLatitude),
-                            lng: Number(activeOrder.deliveryLongitude),
-                          }
-                          : undefined
-                      }
-                      driverLocation={
-                        activeOrder.driver?.latitude && activeOrder.driver?.longitude
-                          ? {
-                            lat: Number(activeOrder.driver.latitude),
-                            lng: Number(activeOrder.driver.longitude),
-                          }
-                          : undefined
-                      }
-                      orderStatus={activeOrder.orderStatus}
-                    />
-                  )}
+                  {activeOrder && (() => {
+                    // Helper function to validate coordinates
+                    const isValidCoordinate = (lat: number | undefined | null, lng: number | undefined | null): boolean => {
+                      if (lat == null || lng == null) return false;
+                      if (typeof lat !== 'number' || typeof lng !== 'number') return false;
+                      if (isNaN(lat) || isNaN(lng)) return false;
+                      // Mapbox valid ranges: lat -90 to 90, lng -180 to 180
+                      // Also check for 0,0 coordinates which are likely invalid
+                      if (lat === 0 && lng === 0) return false;
+                      return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+                    };
+
+                    const restaurantLat = activeOrder.restaurant?.latitude;
+                    const restaurantLng = activeOrder.restaurant?.longitude;
+                    const deliveryLat = activeOrder.deliveryLatitude;
+                    const deliveryLng = activeOrder.deliveryLongitude;
+                    const driverLat = activeOrder.driver?.latitude;
+                    const driverLng = activeOrder.driver?.longitude;
+
+                    return (
+                      <OrderMapView
+                        restaurantLocation={
+                          isValidCoordinate(restaurantLat, restaurantLng)
+                            ? { lat: Number(restaurantLat), lng: Number(restaurantLng) }
+                            : undefined
+                        }
+                        deliveryLocation={
+                          isValidCoordinate(deliveryLat, deliveryLng)
+                            ? { lat: Number(deliveryLat), lng: Number(deliveryLng) }
+                            : undefined
+                        }
+                        driverLocation={
+                          isValidCoordinate(driverLat, driverLng)
+                            ? { lat: Number(driverLat), lng: Number(driverLng) }
+                            : undefined
+                        }
+                        orderStatus={activeOrder.orderStatus}
+                      />
+                    );
+                  })()}
                 </div>
 
                 {/* 4. Details Column */}

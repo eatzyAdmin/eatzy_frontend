@@ -50,6 +50,7 @@ export type OrderResponse = {
   cancellationReason?: string;
   createdAt: string;
   preparingAt?: string;
+  assignedAt?: string;
   deliveredAt?: string;
   totalTripDuration?: number;
   orderItems: OrderItemResponse[];
@@ -66,6 +67,8 @@ export type OrderRestaurant = {
   id: number;
   name: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type OrderDriver = {
@@ -77,6 +80,8 @@ export type OrderDriver = {
   completedTrips?: string;
   vehicleLicensePlate?: string;
   phoneNumber?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type OrderVoucher = {

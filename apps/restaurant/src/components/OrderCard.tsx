@@ -38,6 +38,12 @@ export default function OrderCard({ order, onClick }: OrderCardProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {order.driverLocation.name && (
+            <span className="text-[10px] font-anton font-bold bg-blue-500 text-white px-2 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1">
+              <Package className="w-3 h-3" />
+              Driver Assigned
+            </span>
+          )}
           <span className="text-xs font-bold bg-lime-500 text-white px-2.5 py-1 rounded-lg">
             {totalItems} items
           </span>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
-import { X, CheckCircle, XCircle, Clock, MapPin, User, ChevronRight } from '@repo/ui/icons';
+import { X, CheckCircle, XCircle, Clock, MapPin, User, ChevronRight, Loader2, Bike } from '@repo/ui/icons';
 import { formatVnd } from '@repo/lib';
 import type { Order, OrderItem } from '@repo/types';
 import { useSwipeConfirmation } from '@repo/ui';
@@ -17,6 +17,7 @@ interface OrderDrawerProps {
   onConfirm: (orderId: string) => void;
   onReject: (orderId: string, reason: string) => void;
   onComplete: (orderId: string) => void;
+  loading?: boolean;
 }
 
 const REJECTION_REASONS = [
@@ -28,7 +29,7 @@ const REJECTION_REASONS = [
   'Lý do khác'
 ];
 
-export default function OrderDrawer({ open, order, onClose, onConfirm, onReject, onComplete }: OrderDrawerProps) {
+export default function OrderDrawer({ open, order, onClose, onConfirm, onReject, onComplete, loading = false }: OrderDrawerProps) {
   const { confirm } = useSwipeConfirmation();
   const [showRejectReasons, setShowRejectReasons] = useState(false);
 
@@ -62,7 +63,7 @@ export default function OrderDrawer({ open, order, onClose, onConfirm, onReject,
     setShowRejectReasons(false);
   };
 
-  const isPending = order.status === 'PLACED';
+  const isPending = order.status === 'PLACED' || order.status === 'PENDING';
   const isPrepared = order.status === 'PREPARED';
 
   const datetime = order.createdAt
@@ -124,6 +125,9 @@ export default function OrderDrawer({ open, order, onClose, onConfirm, onReject,
                           <div className="font-bold text-[#1A1A1A] text-lg">
                             {order.customer?.name || 'Guest User'}
                           </div>
+                          {order.customer?.phoneNumber && (
+                            <div className="text-sm text-gray-500 font-medium mt-0.5">{order.customer.phoneNumber}</div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -156,6 +160,24 @@ export default function OrderDrawer({ open, order, onClose, onConfirm, onReject,
                       </div>
                     </div>
                   </div>
+
+                  {/* Driver Info */}
+                  {order.driverLocation?.name && (
+                    <div className="flex items-start gap-4 p-5 bg-blue-50/50 rounded-[24px] border border-blue-100 shadow-sm">
+                      <div className="w-12 h-12 rounded-2xl bg-blue-500 flex items-center justify-center shrink-0 border border-blue-200 shadow-sm">
+                        <Bike className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="flex-1 mt-1">
+                        <div className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mb-1">DRIVER ASSIGNED</div>
+                        <div className="font-bold text-[#1A1A1A] text-lg leading-snug">
+                          {order.driverLocation.name}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-md uppercase tracking-wide">Active</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
 
                   {/* Order Items */}
@@ -261,22 +283,33 @@ export default function OrderDrawer({ open, order, onClose, onConfirm, onReject,
                           {isPending && (
                             <>
                               <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={loading ? {} : { scale: 1.02 }}
+                                whileTap={loading ? {} : { scale: 0.98 }}
                                 onClick={handleConfirmOrder}
-                                className="w-full py-4 rounded-2xl bg-[#1A1A1A] text-white font-bold text-lg shadow-xl shadow-black/10 hover:shadow-2xl hover:bg-black transition-all flex items-center justify-center gap-3 group"
+                                disabled={loading}
+                                className={`w-full py-4 rounded-2xl font-bold text-lg shadow-xl flex items-center justify-center gap-3 transition-all ${loading
+                                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                                  : 'bg-[#1A1A1A] text-white shadow-black/10 hover:shadow-2xl hover:bg-black group'
+                                  }`}
                               >
-                                <span>Confirm Order</span>
-                                <div className="w-8 h-8 rounded-full bg-lime-400 text-black flex items-center justify-center group-hover:scale-110 transition-transform">
-                                  <CheckCircle className="w-5 h-5" strokeWidth={3} />
-                                </div>
+                                {loading ? (
+                                  <Loader2 className="w-6 h-6 animate-spin" />
+                                ) : (
+                                  <>
+                                    <span>Confirm Order</span>
+                                    <div className="w-8 h-8 rounded-full bg-lime-400 text-black flex items-center justify-center group-hover:scale-110 transition-transform">
+                                      <CheckCircle className="w-5 h-5" strokeWidth={3} />
+                                    </div>
+                                  </>
+                                )}
                               </motion.button>
 
                               <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={loading ? {} : { scale: 1.02 }}
+                                whileTap={loading ? {} : { scale: 0.98 }}
                                 onClick={handleRejectOrder}
-                                className="w-full py-4 rounded-2xl bg-white border-2 border-gray-200 text-gray-500 font-bold hover:bg-red-50 hover:border-red-100 hover:text-red-500 transition-all flex items-center justify-center gap-2"
+                                disabled={loading}
+                                className="w-full py-4 rounded-2xl bg-white border-2 border-gray-200 text-gray-500 font-bold hover:bg-red-50 hover:border-red-100 hover:text-red-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <XCircle className="w-5 h-5" />
                                 <span>Reject Order</span>
@@ -286,13 +319,23 @@ export default function OrderDrawer({ open, order, onClose, onConfirm, onReject,
 
                           {isPrepared && (
                             <motion.button
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
+                              whileHover={loading ? {} : { scale: 1.02 }}
+                              whileTap={loading ? {} : { scale: 0.98 }}
                               onClick={handleCompleteOrder}
-                              className="w-full py-4 rounded-2xl bg-lime-500 text-white font-bold text-lg shadow-xl shadow-lime-500/30 hover:bg-lime-600 transition-all flex items-center justify-center gap-3"
+                              disabled={loading}
+                              className={`w-full py-4 rounded-2xl font-bold text-lg shadow-xl transition-all flex items-center justify-center gap-3 ${loading
+                                ? 'bg-gray-400 text-white cursor-not-allowed'
+                                : 'bg-lime-500 text-white shadow-lime-500/30 hover:bg-lime-600'
+                                }`}
                             >
-                              <span>Mark as Ready</span>
-                              <CheckCircle className="w-6 h-6" />
+                              {loading ? (
+                                <Loader2 className="w-6 h-6 animate-spin" />
+                              ) : (
+                                <>
+                                  <span>Mark as Ready</span>
+                                  <CheckCircle className="w-6 h-6" />
+                                </>
+                              )}
                             </motion.button>
                           )}
                         </motion.div>

@@ -27,8 +27,7 @@ export default function Page() {
   } = useDriverStatus();
 
   const [locateVersion, setLocateVersion] = useState(0);
-  const [activeOrder, setActiveOrder] = useState<DriverActiveOrder | null>(null);
-  const { currentOffer, countdown, acceptOffer, rejectOffer } = useOrderOffers(online, !!activeOrder);
+  const { currentOffer, activeOrder, countdown, acceptOffer, rejectOffer } = useOrderOffers(online);
 
   // Hide loading after 1.5s on mount
   useEffect(() => {
@@ -67,9 +66,6 @@ export default function Page() {
         {activeOrder && (
           <CurrentOrderPanel
             order={activeOrder}
-            onComplete={() => {
-              setActiveOrder(null);
-            }}
           />
         )}
       </div>
@@ -80,8 +76,8 @@ export default function Page() {
       <OrderOfferModal
         offer={currentOffer}
         countdown={countdown}
-        onAccept={() => { const order = acceptOffer(); if (order) setActiveOrder(order); }}
-        onReject={() => { rejectOffer(); }}
+        onAccept={acceptOffer}
+        onReject={rejectOffer}
       />
     </div>
   );

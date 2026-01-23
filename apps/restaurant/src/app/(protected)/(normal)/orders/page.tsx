@@ -21,7 +21,6 @@ export default function OrdersPage() {
   const { hide } = useLoading();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isActionLoading, setIsActionLoading] = useState(false);
 
   // Restaurant status management
   const {
@@ -36,9 +35,24 @@ export default function OrdersPage() {
     pendingOrders,
     inProgressOrders,
     waitingForDriverOrders,
+    orders,
     isLoading,
     refetch,
+    acceptOrder,
+    rejectOrder,
+    markAsReady,
+    isActionLoading,
   } = useRestaurantOrders();
+
+  // Sync selectedOrder with fresh data from orders list
+  useEffect(() => {
+    if (selectedOrder) {
+      const freshOrder = orders.find(o => o.id === selectedOrder.id);
+      if (freshOrder && JSON.stringify(freshOrder) !== JSON.stringify(selectedOrder)) {
+        setSelectedOrder(freshOrder);
+      }
+    }
+  }, [orders, selectedOrder]);
 
   useEffect(() => {
     hide();
@@ -73,8 +87,7 @@ export default function OrdersPage() {
 
   const handleConfirmOrder = async (orderId: string) => {
     try {
-      setIsActionLoading(true);
-      const response = await orderApi.acceptOrder(Number(orderId));
+      const response = await acceptOrder(orderId);
 
       if (response.statusCode === 200) {
         showNotification({
@@ -83,7 +96,6 @@ export default function OrdersPage() {
           autoHideDuration: 3000
         });
         handleCloseDrawer();
-        await refetch();
       } else {
         throw new Error(response.message || 'Failed to confirm order');
       }
@@ -93,15 +105,12 @@ export default function OrdersPage() {
         type: 'error',
         autoHideDuration: 3000
       });
-    } finally {
-      setIsActionLoading(false);
     }
   };
 
   const handleRejectOrder = async (orderId: string, reason: string) => {
     try {
-      setIsActionLoading(true);
-      const response = await orderApi.cancelOrder(Number(orderId), reason);
+      const response = await rejectOrder(orderId, reason);
 
       if (response.statusCode === 200) {
         showNotification({
@@ -110,7 +119,6 @@ export default function OrdersPage() {
           autoHideDuration: 3000
         });
         handleCloseDrawer();
-        await refetch();
       } else {
         throw new Error(response.message || 'Failed to reject order');
       }
@@ -120,15 +128,12 @@ export default function OrdersPage() {
         type: 'error',
         autoHideDuration: 3000
       });
-    } finally {
-      setIsActionLoading(false);
     }
   };
 
   const handleCompleteOrder = async (orderId: string) => {
     try {
-      setIsActionLoading(true);
-      const response = await orderApi.markOrderAsReady(Number(orderId));
+      const response = await markAsReady(orderId);
 
       if (response.statusCode === 200) {
         showNotification({
@@ -137,7 +142,6 @@ export default function OrdersPage() {
           autoHideDuration: 3000
         });
         handleCloseDrawer();
-        await refetch();
       } else {
         throw new Error(response.message || 'Failed to complete order');
       }
@@ -147,8 +151,6 @@ export default function OrdersPage() {
         type: 'error',
         autoHideDuration: 3000
       });
-    } finally {
-      setIsActionLoading(false);
     }
   };
 
@@ -324,6 +326,7 @@ export default function OrdersPage() {
         onConfirm={handleConfirmOrder}
         onReject={handleRejectOrder}
         onComplete={handleCompleteOrder}
+        loading={isActionLoading}
       />
     </>
   );

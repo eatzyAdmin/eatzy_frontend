@@ -30,6 +30,7 @@ export type DriverOrderOffer = {
 export type DriverActiveOrder = {
   id: string;
   phase: DriverOrderPhase; // PICKUP or DELIVERY
+  orderStatus?: string;
   pickup: { name: string; address: string; lng: number; lat: number };
   dropoff: { name?: string; address: string; lng: number; lat: number };
   driverLocation: { lng: number; lat: number };

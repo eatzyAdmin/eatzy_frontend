@@ -191,4 +191,19 @@ export const orderApi = {
   assignDriver: async (orderId: number): Promise<IBackendRes<OrderResponse>> => {
     return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/assign-driver`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
+
+  /**
+   * Get orders for current logged-in driver (uses auth context)
+   * GET /api/v1/orders/my-driver
+   * Supports filter via query params: filter=orderStatus != 'DELIVERED' and orderStatus != 'REJECTED'
+   */
+  getMyDriverOrders: async (params?: {
+    filter?: string;
+    page?: number;
+    size?: number;
+  }): Promise<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>> => {
+    return http.get<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>>("/api/v1/orders/my-driver", {
+      params,
+    }) as unknown as Promise<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>>;
+  },
 };
