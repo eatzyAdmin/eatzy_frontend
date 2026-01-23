@@ -12,16 +12,24 @@ import '@repo/ui/styles/scrollbar.css';
 
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useRestaurantOrders } from '@/features/orders/hooks/useRestaurantOrders';
+import { useRestaurantStatus } from '@/features/store/hooks/useRestaurantStatus';
 
 export default function OrdersPage() {
   const { user } = useAuth();
   const { confirm } = useSwipeConfirmation();
   const { showNotification } = useNotification();
   const { hide } = useLoading();
-  const [isAppActive, setIsAppActive] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
+
+  // Restaurant status management
+  const {
+    isOpen: isAppActive,
+    isLoading: isStatusLoading,
+    isUpdating: isStatusUpdating,
+    toggleStatus,
+  } = useRestaurantStatus();
 
   // Fetch orders from API
   const {
@@ -37,7 +45,6 @@ export default function OrdersPage() {
   }, [hide]);
 
   const handleToggleApp = () => {
-    // ... same content
     const newStatus = !isAppActive;
     confirm({
       title: newStatus ? 'Bật ứng dụng' : 'Tắt ứng dụng',
@@ -45,20 +52,10 @@ export default function OrdersPage() {
         ? 'Bật ứng dụng để nhận đơn hàng mới từ khách hàng.'
         : 'Tắt ứng dụng sẽ ngừng nhận đơn hàng mới. Bạn có chắc chắn?',
       confirmText: newStatus ? 'Bật' : 'Tắt',
-      onConfirm: () => {
-        setIsAppActive(newStatus);
-
-        // Show notification after successful toggle
-        showNotification({
-          message: newStatus
-            ? 'Mở nhà hàng thành công!'
-            : 'Nhà hàng đã tạm đóng cửa.',
-          type: 'success', // Both on/off are successful operations
-          format: newStatus
-            ? 'Nhà hàng đang mở và sẵn sàng nhận đơn hàng mới!'
-            : 'Nhà hàng đã tạm đóng cửa. Bạn sẽ không nhận được đơn hàng mới.',
-          autoHideDuration: 3000
-        });
+      onConfirm: async () => {
+        await toggleStatus();
+        // Refetch orders after status change
+        await refetch();
       }
     });
   };

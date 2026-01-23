@@ -116,4 +116,19 @@ export const restaurantApi = {
   deleteRestaurant: (id: number) => {
     return http.delete<IBackendRes<void>>(`/api/v1/restaurants/${id}`);
   },
+
+  // Open my restaurant (for current owner)
+  openMyRestaurant: () => {
+    return http.post<IBackendRes<ResRestaurantDTO>>(`/api/v1/restaurants/open`, {});
+  },
+
+  // Close my restaurant (for current owner)
+  closeMyRestaurant: () => {
+    return http.post<IBackendRes<ResRestaurantDTO>>(`/api/v1/restaurants/close`, {});
+  },
+
+  // Get my restaurant status
+  getMyRestaurantStatus: () => {
+    return http.get<IBackendRes<{ status: string }>>(`/api/v1/restaurants/my-restaurant/status`);
+  },
 };
