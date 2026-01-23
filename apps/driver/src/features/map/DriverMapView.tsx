@@ -39,12 +39,23 @@ export default function DriverMapView({ locateVersion = 0, activeOrder }: { loca
     };
   }, []);
 
-  const initialView = userPos ? { longitude: userPos.lng, latitude: userPos.lat, zoom: 14 } : { longitude: 106.66, latitude: 10.76, zoom: 12 };
+  // Helper to validate coordinates (same as Customer app)
+  const isValidCoordinate = (lat: any, lng: any) => {
+    if (lat === undefined || lat === null || lng === undefined || lng === null) return false;
+    const nLat = Number(lat);
+    const nLng = Number(lng);
+    if (nLat === 0 && nLng === 0) return false;
+    return nLat >= -90 && nLat <= 90 && nLng >= -180 && nLng <= 180;
+  };
+
+  const initialView = isValidCoordinate(userPos?.lat, userPos?.lng)
+    ? { longitude: userPos!.lng, latitude: userPos!.lat, zoom: 14 }
+    : { longitude: 106.66, latitude: 10.76, zoom: 12 };
 
   const flyToUser = useCallback(() => {
-    if (!userPos) return;
+    if (!isValidCoordinate(userPos?.lat, userPos?.lng)) return;
     const inst = mapRef.current as MapLike | null;
-    inst?.getMap()?.flyTo({ center: [userPos.lng, userPos.lat], zoom: 16, duration: 900 });
+    inst?.getMap()?.flyTo({ center: [userPos!.lng, userPos!.lat], zoom: 16, duration: 900 });
   }, [userPos]);
 
   useEffect(() => {

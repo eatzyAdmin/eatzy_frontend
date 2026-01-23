@@ -34,6 +34,7 @@ export type DriverActiveOrder = {
   pickup: { name: string; address: string; lng: number; lat: number };
   dropoff: { name?: string; address: string; lng: number; lat: number };
   driverLocation: { lng: number; lat: number };
+  customer?: { id?: number; name?: string; phoneNumber?: string };
   earnings: DriverEarningsSummary;
   paymentMethod: PaymentMethod;
   distanceKm?: number;

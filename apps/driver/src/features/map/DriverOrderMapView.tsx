@@ -17,7 +17,22 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
   const [progressA, setProgressA] = useState(0);
   const [progressB, setProgressB] = useState(0);
 
+  // Helper to validate coordinates (same as Customer app)
+  const isValidCoordinate = (lat: any, lng: any) => {
+    if (lat === undefined || lat === null || lng === undefined || lng === null) return false;
+    const nLat = Number(lat);
+    const nLng = Number(lng);
+    if (nLat === 0 && nLng === 0) return false;
+    return nLat >= -90 && nLat <= 90 && nLng >= -180 && nLng <= 180;
+  };
+
+  const hasDriver = isValidCoordinate(order.driverLocation.lat, order.driverLocation.lng);
+  const hasPickup = isValidCoordinate(order.pickup.lat, order.pickup.lng);
+  const hasDropoff = isValidCoordinate(order.dropoff.lat, order.dropoff.lng);
+
   useEffect(() => {
+    if (!hasPickup || !hasDropoff) return;
+
     const fetchRoute = async (start: { lng: number; lat: number }, end: { lng: number; lat: number }) => {
       try {
         const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start.lng},${start.lat};${end.lng},${end.lat}?geometries=geojson&steps=true&overview=full&language=vi&access_token=${token}`;
@@ -31,16 +46,17 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
     };
 
     (async () => {
-      const a = await fetchRoute(order.driverLocation, order.pickup);
+      // Only fetch driver route if driver location is valid
+      const a = hasDriver ? await fetchRoute(order.driverLocation, order.pickup) : null;
       const b = await fetchRoute(order.pickup, order.dropoff);
       setDriverRoute(a);
       setDeliveryRoute(b);
 
       const inst = mapRef.current as MapLike | null;
-      const coords = [
+      const coords: [number, number][] = [
         ...(a?.geometry?.coordinates ?? []),
         ...(b?.geometry?.coordinates ?? []),
-        [order.driverLocation.lng, order.driverLocation.lat],
+        ...(hasDriver ? [[order.driverLocation.lng, order.driverLocation.lat] as [number, number]] : []),
         [order.pickup.lng, order.pickup.lat],
         [order.dropoff.lng, order.dropoff.lat],
       ];
@@ -95,51 +111,57 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
     return sliced;
   };
 
-  const driverFeature = useMemo(() => ({
-    type: "Feature",
-    geometry: {
-      type: "LineString",
-      coordinates:
-        driverRoute?.geometry?.coordinates && driverRoute?.geometry?.coordinates.length > 1
-          ? (() => {
-            const p = partial(driverRoute.geometry.coordinates, progressA);
-            return p.length > 1
-              ? p
-              : [
-                [order.driverLocation.lng, order.driverLocation.lat],
-                [order.pickup.lng, order.pickup.lat],
-              ];
-          })()
-          : [
-            [order.driverLocation.lng, order.driverLocation.lat],
-            [order.pickup.lng, order.pickup.lat],
-          ],
-    },
-    properties: {},
-  }), [driverRoute, progressA, order.driverLocation.lng, order.driverLocation.lat, order.pickup.lng, order.pickup.lat]);
+  const driverFeature = useMemo(() => {
+    if (!hasDriver || !hasPickup) return null;
+    return {
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates:
+          driverRoute?.geometry?.coordinates && driverRoute?.geometry?.coordinates.length > 1
+            ? (() => {
+              const p = partial(driverRoute.geometry.coordinates, progressA);
+              return p.length > 1
+                ? p
+                : [
+                  [order.driverLocation.lng, order.driverLocation.lat],
+                  [order.pickup.lng, order.pickup.lat],
+                ];
+            })()
+            : [
+              [order.driverLocation.lng, order.driverLocation.lat],
+              [order.pickup.lng, order.pickup.lat],
+            ],
+      },
+      properties: {},
+    };
+  }, [driverRoute, progressA, order.driverLocation.lng, order.driverLocation.lat, order.pickup.lng, order.pickup.lat, hasDriver, hasPickup]);
 
-  const deliveryFeature = useMemo(() => ({
-    type: "Feature",
-    geometry: {
-      type: "LineString",
-      coordinates:
-        deliveryRoute?.geometry?.coordinates && deliveryRoute?.geometry?.coordinates.length > 1
-          ? (() => {
-            const p = partial(deliveryRoute.geometry.coordinates, progressB);
-            return p.length > 1
-              ? p
-              : [
-                [order.pickup.lng, order.pickup.lat],
-                [order.dropoff.lng, order.dropoff.lat],
-              ];
-          })()
-          : [
-            [order.pickup.lng, order.pickup.lat],
-            [order.dropoff.lng, order.dropoff.lat],
-          ],
-    },
-    properties: {},
-  }), [deliveryRoute, progressB, order.pickup.lng, order.pickup.lat, order.dropoff.lng, order.dropoff.lat]);
+  const deliveryFeature = useMemo(() => {
+    if (!hasPickup || !hasDropoff) return null;
+    return {
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates:
+          deliveryRoute?.geometry?.coordinates && deliveryRoute?.geometry?.coordinates.length > 1
+            ? (() => {
+              const p = partial(deliveryRoute.geometry.coordinates, progressB);
+              return p.length > 1
+                ? p
+                : [
+                  [order.pickup.lng, order.pickup.lat],
+                  [order.dropoff.lng, order.dropoff.lat],
+                ];
+            })()
+            : [
+              [order.pickup.lng, order.pickup.lat],
+              [order.dropoff.lng, order.dropoff.lat],
+            ],
+      },
+      properties: {},
+    };
+  }, [deliveryRoute, progressB, order.pickup.lng, order.pickup.lat, order.dropoff.lng, order.dropoff.lat, hasPickup, hasDropoff]);
 
   const lines = useMemo(() => ({ type: "FeatureCollection", features: [driverFeature, deliveryFeature] }), [driverFeature, deliveryFeature]);
 
@@ -173,51 +195,41 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
         <Layer id="pickup-to-dropoff" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#78C841", "line-width": 5, "line-opacity": 0.95 }} />
       </Source>
 
-      {/* Dropoff Location - Customer (MapPin Icon) */}
-      <Marker longitude={order.dropoff.lng} latitude={order.dropoff.lat} anchor="bottom">
-        <div className="flex flex-col items-center -translate-y-1">
+      {/* 2. Markers */}
+      {hasPickup && (
+        <Marker longitude={order.pickup.lng} latitude={order.pickup.lat} anchor="bottom">
+          <div className="flex flex-col items-center">
+            <div className="bg-white p-1.5 rounded-full shadow-lg border-2 border-emerald-500">
+              <Store className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div className="w-1 h-2 bg-emerald-500" />
+          </div>
+        </Marker>
+      )}
+
+      {hasDropoff && (
+        <Marker longitude={order.dropoff.lng} latitude={order.dropoff.lat} anchor="bottom">
+          <div className="flex flex-col items-center">
+            <div className="bg-white p-1.5 rounded-full shadow-lg border-2 border-red-500">
+              <MapPin className="w-5 h-5 text-red-600" />
+            </div>
+            <div className="w-1 h-2 bg-red-500" />
+          </div>
+        </Marker>
+      )}
+
+      {hasDriver && (
+        <Marker longitude={order.driverLocation.lng} latitude={order.driverLocation.lat} anchor="center">
           <div className="relative">
             <motion.span
-              className="absolute -inset-1 rounded-full border-2 border-red-500/40"
-              animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+              className="absolute -inset-2 rounded-full border-2 border-blue-500/40"
+              animate={{ scale: [1, 1.6], opacity: [0.7, 0] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
             />
-            <div className="w-9 h-9 rounded-full bg-red-500 border-2 border-white shadow-lg flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-white" />
-            </div>
+            <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
           </div>
-          <div className="w-2 h-2 rounded-full bg-red-500 mt-1" />
-        </div>
-      </Marker>
-
-      {/* Pickup Location - Restaurant */}
-      <Marker longitude={order.pickup.lng} latitude={order.pickup.lat} anchor="bottom">
-        <div className="flex flex-col items-center -translate-y-1">
-          <div className="relative">
-            <motion.span
-              className="absolute -inset-1 rounded-full border-2 border-orange-500/40"
-              animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
-            />
-            <div className="w-9 h-9 rounded-full bg-orange-500 border-2 border-white shadow-lg flex items-center justify-center">
-              <Store className="w-5 h-5 text-white" />
-            </div>
-          </div>
-          <div className="w-2 h-2 rounded-full bg-orange-500 mt-1" />
-        </div>
-      </Marker>
-
-      {/* Driver Location - Current Position (Blue Dot) */}
-      <Marker longitude={order.driverLocation.lng} latitude={order.driverLocation.lat} anchor="center">
-        <div className="relative">
-          <motion.span
-            className="absolute -inset-2 rounded-full border-2 border-blue-500/40"
-            animate={{ scale: [1, 1.6], opacity: [0.7, 0] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
-          />
-          <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
-        </div>
-      </Marker>
+        </Marker>
+      )}
 
       {etaText && (
         <div className="absolute left-3 top-3 bg-white/90 backdrop-blur-sm border border-gray-200 text-xs text-[#1A1A1A] px-2 py-1 rounded shadow-sm font-semibold">

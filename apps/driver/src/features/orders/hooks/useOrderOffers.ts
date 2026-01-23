@@ -18,8 +18,12 @@ export default function useOrderOffers(online: boolean) {
   const { data: ordersData, isLoading } = useQuery({
     queryKey: orderOffersKeys.myOffers(),
     queryFn: async () => {
+      // Use explicit status filtering for better compatibility with backend Spring Filter
+      const ACTIVE_STATUSES = ['PREPARING', 'DRIVER_ASSIGNED', 'READY', 'PICKED_UP', 'ARRIVED'];
+      const statusFilter = ACTIVE_STATUSES.map(s => `orderStatus~'${s}'`).join(' or ');
+      
       const response = await orderApi.getMyDriverOrders({
-        filter: "orderStatus != 'DELIVERED' and orderStatus != 'REJECTED'",
+        filter: statusFilter,
       });
       return response.data;
     },
@@ -29,12 +33,20 @@ export default function useOrderOffers(online: boolean) {
 
   const orders = ordersData?.result || [];
 
+  useEffect(() => {
+    if (online) {
+      console.log("DEBUG: Driver is online, orders fetched:", orders);
+    }
+  }, [orders, online]);
+
   const { currentOffer, activeOrder } = useMemo(() => {
+    console.log("DEBUG: Processing orders for panels, total orders:", orders.length);
     // Current Panel statuses: AFTER PREPARING
     const CURRENT_PANEL_STATUSES = ['DRIVER_ASSIGNED', 'READY', 'PICKED_UP', 'ARRIVED'];
     
     // An order is an active order (Current Panel) if its status is in CURRENT_PANEL_STATUSES
     const active = orders.find(o => CURRENT_PANEL_STATUSES.includes(o.orderStatus));
+    console.log("DEBUG: Found active order (Current Panel):", active?.id, "Status:", active?.orderStatus);
 
     // If there's an active order, we show the Current Panel
     if (active) {
@@ -57,6 +69,11 @@ export default function useOrderOffers(online: boolean) {
           lng: active.driver?.longitude || 0,
           lat: active.driver?.latitude || 0,
         },
+        customer: {
+          id: active.customer?.id,
+          name: active.customer?.name,
+          phoneNumber: active.customer?.phoneNumber,
+        },
         paymentMethod: active.paymentMethod as PaymentMethod,
         earnings: {
           orderId: active.id.toString(),
@@ -71,6 +88,7 @@ export default function useOrderOffers(online: boolean) {
 
     // Otherwise, it's an offer (Recommend Panel)
     const offer = orders.find(o => !CURRENT_PANEL_STATUSES.includes(o.orderStatus));
+    console.log("DEBUG: Found offer (Recommend Panel):", offer?.id, "Status:", offer?.orderStatus);
 
     if (offer) {
       const currentOffer: DriverOrderOffer = {
