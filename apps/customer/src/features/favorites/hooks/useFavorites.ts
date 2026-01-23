@@ -1,46 +1,109 @@
 "use client";
 
-import { useState, useCallback } from 'react';
-import { getFavoriteIds } from '@/features/favorites/data/mockFavorites';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { favoriteApi } from "@repo/api";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useNotification } from "@repo/ui";
+import { useCallback } from "react";
 
-// Custom hook to manage favorites state
 export function useFavorites() {
-  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => getFavoriteIds());
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { showNotification } = useNotification();
+  const customerId = user?.id ? Number(user.id) : null;
 
-  const isFavorite = useCallback((restaurantId: string): boolean => {
-    return favoriteIds.includes(restaurantId);
-  }, [favoriteIds]);
+  // Fetch all favorites
+  const { data: favorites = [], isLoading } = useQuery({
+    queryKey: ["favorites", customerId],
+    queryFn: async () => {
+      if (!customerId) return [];
+      const response = await favoriteApi.getFavoritesByCustomerId(customerId);
+      return response.data || [];
+    },
+    enabled: !!customerId,
+  });
 
-  const toggleFavorite = useCallback((restaurantId: string) => {
-    setFavoriteIds((prev) => {
-      if (prev.includes(restaurantId)) {
-        // Remove from favorites
-        return prev.filter((id) => id !== restaurantId);
+  const isFavorite = useCallback(
+    (restaurantId: number) => {
+      return favorites.some((f) => f.restaurant.id === restaurantId);
+    },
+    [favorites]
+  );
+
+  const getFavoriteId = useCallback(
+    (restaurantId: number) => {
+      return favorites.find((f) => f.restaurant.id === restaurantId)?.id;
+    },
+    [favorites]
+  );
+
+  // Mutation to add favorite
+  const addMutation = useMutation({
+    mutationFn: (restaurantId: number) =>
+      favoriteApi.addFavorite({
+        customer: { id: customerId! },
+        restaurant: { id: restaurantId },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorites", customerId] });
+      showNotification({
+        message: "Đã thêm vào yêu thích",
+        type: "success",
+      });
+    },
+    onError: () => {
+      showNotification({
+        message: "Không thể thêm vào yêu thích",
+        type: "error",
+      });
+    },
+  });
+
+  // Mutation to remove favorite
+  const removeMutation = useMutation({
+    mutationFn: (favoriteId: number) => favoriteApi.removeFavorite(favoriteId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorites", customerId] });
+      showNotification({
+        message: "Đã xóa khỏi yêu thích",
+        type: "success",
+      });
+    },
+    onError: () => {
+      showNotification({
+        message: "Không thể xóa khỏi yêu thích",
+        type: "error",
+      });
+    },
+  });
+
+  const toggleFavorite = useCallback(
+    async (restaurantId: number) => {
+      if (!customerId) {
+        showNotification({
+          message: "Vui lòng đăng nhập để thực hiện chức năng này",
+          type: "error",
+        });
+        return;
+      }
+
+      const existingFavoriteId = getFavoriteId(restaurantId);
+
+      if (existingFavoriteId) {
+        await removeMutation.mutateAsync(existingFavoriteId);
       } else {
-        // Add to favorites
-        return [...prev, restaurantId];
+        await addMutation.mutateAsync(restaurantId);
       }
-    });
-  }, []);
-
-  const addFavorite = useCallback((restaurantId: string) => {
-    setFavoriteIds((prev) => {
-      if (!prev.includes(restaurantId)) {
-        return [...prev, restaurantId];
-      }
-      return prev;
-    });
-  }, []);
-
-  const removeFavorite = useCallback((restaurantId: string) => {
-    setFavoriteIds((prev) => prev.filter((id) => id !== restaurantId));
-  }, []);
+    },
+    [customerId, getFavoriteId, removeMutation, addMutation, showNotification]
+  );
 
   return {
-    favoriteIds,
+    favorites,
+    isLoading,
     isFavorite,
     toggleFavorite,
-    addFavorite,
-    removeFavorite,
+    isMutating: addMutation.isPending || removeMutation.isPending,
   };
 }
+

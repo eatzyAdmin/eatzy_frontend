@@ -4,6 +4,7 @@ export { authApi } from "./auth";
 export { cartApi } from "./cart";
 export { voucherApi } from "./voucher";
 export { orderApi } from "./order";
+export { favoriteApi } from "./favorite";
 
 // Restaurant module exports
 export {

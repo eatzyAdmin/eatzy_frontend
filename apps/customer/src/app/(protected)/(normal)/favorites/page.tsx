@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { ArrowLeft, Heart, Search, X, Store } from "@repo/ui/icons";
 import { useLoading, useNotification, RestaurantCardShimmer } from "@repo/ui";
-import type { Restaurant } from "@repo/types";
-import { getFavoriteIds } from "@/features/favorites/data/mockFavorites";
-import { mockSearchRestaurants } from "@/features/search/data/mockSearchData";
+import type { Restaurant, FavoriteResponse } from "@repo/types";
 import FavoriteRestaurantCard from "@/features/favorites/components/FavoriteRestaurantCard";
 import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
-import { useRef } from "react";
+import { useFavorites } from "@/features/favorites/hooks/useFavorites";
 
 export default function FavoritesPage() {
   const router = useRouter();
@@ -18,8 +16,7 @@ export default function FavoritesPage() {
   const { showNotification } = useNotification();
   const [searchInputValue, setSearchInputValue] = useState("");
   const [actualSearchQuery, setActualSearchQuery] = useState("");
-  const [removedIds, setRemovedIds] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { favorites, isLoading: isFavoritesLoading, toggleFavorite } = useFavorites();
 
   const { setIsVisible } = useBottomNav();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -45,21 +42,20 @@ export default function FavoritesPage() {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [setIsVisible]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      hide();
-      setIsLoading(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [hide]);
-
-  // Get favorite restaurants
+  // Map API response to Restaurant type used by UI
   const favoriteRestaurants = useMemo(() => {
-    const favoriteIds = getFavoriteIds();
-    return mockSearchRestaurants.filter((restaurant) =>
-      favoriteIds.includes(restaurant.id) && !removedIds.includes(restaurant.id)
-    );
-  }, [removedIds]);
+    return favorites.map((f: FavoriteResponse): Restaurant => ({
+      id: String(f.restaurant.id),
+      name: f.restaurant.name,
+      address: f.restaurant.address,
+      description: f.restaurant.description,
+      rating: f.restaurant.averageRating,
+      slug: f.restaurant.slug,
+      imageUrl: f.restaurant.avatarUrl,
+      status: 'OPEN',
+      categories: [],
+    }));
+  }, [favorites]);
 
   // Filter by search query
   const filteredRestaurants = useMemo(() => {
@@ -68,30 +64,22 @@ export default function FavoritesPage() {
     const query = actualSearchQuery.toLowerCase();
     return favoriteRestaurants.filter((restaurant) =>
       restaurant.name.toLowerCase().includes(query) ||
-      restaurant.description?.toLowerCase().includes(query) ||
-      restaurant.categories.some((cat) => cat.name.toLowerCase().includes(query))
+      restaurant.description?.toLowerCase().includes(query)
     );
   }, [favoriteRestaurants, actualSearchQuery]);
 
   const handleRestaurantClick = (restaurant: Restaurant) => {
     show("Đang tải thông tin quán ăn...");
-    router.push(`/restaurants/${restaurant.slug}`);
+    router.push(`/restaurants/${restaurant.slug || restaurant.id}`);
   };
 
-  const handleRemoveFavorite = (id: string, name: string) => {
-    setRemovedIds((prev) => [...prev, id]);
-    showNotification({
-      type: "success",
-      message: "Đã xóa khỏi danh sách yêu thích",
-      format: `Đã xóa ${name} khỏi danh sách yêu thích của bạn`,
-    });
+  const handleRemoveFavorite = (restaurantId: string) => {
+    toggleFavorite(Number(restaurantId));
   };
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       setActualSearchQuery(searchInputValue);
-      setIsLoading(true);
-      setTimeout(() => setIsLoading(false), 1400);
     }
   };
 
@@ -155,7 +143,7 @@ export default function FavoritesPage() {
       {/* Content */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         <div className="max-w-[1400px] mx-auto px-4 py-4 md:px-8 md:py-8">
-          {isLoading ? (
+          {isFavoritesLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               <RestaurantCardShimmer cardCount={6} />
             </div>
@@ -174,7 +162,7 @@ export default function FavoritesPage() {
                     <FavoriteRestaurantCard
                       restaurant={restaurant}
                       onClick={() => handleRestaurantClick(restaurant)}
-                      onRemove={() => handleRemoveFavorite(restaurant.id, restaurant.name)}
+                      onRemove={() => handleRemoveFavorite(restaurant.id)}
                     />
                   </motion.div>
                 ))}

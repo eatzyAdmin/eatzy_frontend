@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { motion, AnimatePresence, PanInfo } from '@repo/ui/motion';
 import { Restaurant } from '@repo/types';
@@ -27,6 +28,13 @@ export default function RestaurantSlider({
   hasNextPage = false,
 }: RestaurantSliderProps) {
   const [isMobile, setIsMobile] = useState(false);
+  const router = useRouter();
+
+  const handleRestaurantClick = (restaurant: Restaurant) => {
+    if (restaurant.slug) {
+      router.push(`/restaurants/${restaurant.slug}`);
+    }
+  };
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -171,10 +179,14 @@ export default function RestaurantSlider({
                       }}
                       exit={{ scale: 0.9, opacity: 0 }}
                       transition={{ duration: 0.35, ease: [0.33, 1, 0.68, 1] }}
-                      onClick={() =>
-                        !isCenter && onRestaurantChange(actualIndex)
-                      }
-                      className={`${isCenter ? "" : "cursor-pointer"} flex-shrink-0 origin-top bg-transparent`}
+                      onClick={() => {
+                        if (isCenter) {
+                          handleRestaurantClick(restaurant);
+                        } else {
+                          onRestaurantChange(actualIndex);
+                        }
+                      }}
+                      className="cursor-pointer flex-shrink-0 origin-top bg-transparent"
                       style={{
                         width: `${baseWidth}px`,
                         minWidth: `${baseWidth}px`,
@@ -227,6 +239,10 @@ export default function RestaurantSlider({
                                   backgroundColor: "rgba(255, 255, 255, 0.24)",
                                 }}
                                 whileTap={{ scale: 0.96 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRestaurantClick(restaurant);
+                                }}
                                 className="inline-flex items-center gap-2.5 rounded-full text-[13px] font-bold text-white transition-colors uppercase tracking-[0.12em]"
                               >
                                 KHÁM PHÁ

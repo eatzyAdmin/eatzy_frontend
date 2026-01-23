@@ -13,6 +13,8 @@ import { useRestaurantWithMenu } from "@/features/restaurant";
 import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer";
 import { ReviewsModal } from "@/features/search/components/ReviewsModal";
 import FloatingRestaurantCart from "@/features/cart/components/FloatingRestaurantCart";
+import { useFavorites } from "@/features/favorites/hooks/useFavorites";
+
 
 export default function RestaurantDetailPage() {
   const params = useParams() as { slug: string };
@@ -57,6 +59,9 @@ export default function RestaurantDetailPage() {
   // Cart API hook - will be initialized after restaurant data loads
   const numericRestaurantId = restaurant ? Number(restaurant.id) : null;
   const { addToCart, cartItems, updateItemQuantity, removeItem: removeCartItem, isAddingToCart } = useRestaurantCart(numericRestaurantId);
+  const { isFavorite, toggleFavorite, isMutating } = useFavorites();
+  const favorited = numericRestaurantId ? isFavorite(numericRestaurantId) : false;
+
 
   // Helper to get count of a dish in cart
   const getDishCount = (dishId: string): number => {
@@ -191,9 +196,19 @@ export default function RestaurantDetailPage() {
                     {/* Top gradient for header visibility */}
                     <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent" />
 
-                    <button className="absolute top-4 right-4 bg-white/20 backdrop-blur-md border border-white/30 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-all">
-                      <Star className="w-3.5 h-3.5 fill-white" />
-                      <span className="text-[12px] font-bold uppercase tracking-wide">Save</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (numericRestaurantId) toggleFavorite(numericRestaurantId);
+                      }}
+                      disabled={isMutating}
+                      className={`absolute top-4 right-4 backdrop-blur-md border px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-all active:scale-95 ${favorited ? 'bg-[#FFC107] border-yellow-200 text-white' : 'bg-white/20 border-white/30 text-white'
+                        }`}
+                    >
+                      <Star className={`w-3.5 h-3.5 ${favorited ? 'fill-white' : 'fill-white/80'}`} />
+                      <span className="text-[12px] font-bold uppercase tracking-wide">
+                        {favorited ? 'Saved' : 'Save'}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -307,10 +322,20 @@ export default function RestaurantDetailPage() {
                       className="object-cover"
                     />
                   </div>
-                  <button className="absolute top-4 right-4 bg-[#28A745] hover:bg-[#218838] text-white px-4 py-2 rounded-[12px] shadow-lg flex items-center gap-2 transition-all">
-                    <Star className="w-4 h-4 fill-white" />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (numericRestaurantId) toggleFavorite(numericRestaurantId);
+                    }}
+                    disabled={isMutating}
+                    className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-[12px] shadow-lg border-2 flex items-center gap-2 transition-all active:scale-95 ${favorited
+                      ? 'bg-[#FFC107] hover:bg-[#FFB300] text-white border-yellow-200'
+                      : 'bg-[#28A745] hover:bg-[#218838] text-white border-white/80'
+                      }`}
+                  >
+                    <Star className={`w-4 h-4 ${favorited ? 'fill-white' : 'fill-none'}`} />
                     <span className="text-[14px] font-medium uppercase tracking-wide">
-                      Save to Favorites
+                      {favorited ? 'Saved to Favorites' : 'Save to Favorites'}
                     </span>
                   </button>
                 </div>
