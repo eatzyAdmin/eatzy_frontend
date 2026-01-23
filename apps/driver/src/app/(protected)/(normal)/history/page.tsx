@@ -11,18 +11,23 @@ import DriverHistoryCard from "@/features/history/components/DriverHistoryCard";
 import DriverOrderDetailDrawer from "@/features/history/components/DriverOrderDetailDrawer";
 import { useNormalLoading } from "../context/NormalLoadingContext";
 import { useBottomNav } from "../context/BottomNavContext";
+import { useDriverOrderHistory } from "@/features/history/hooks/useDriverOrderHistory";
 
 export default function HistoryPage() {
   const { hide } = useLoading();
   const { stopLoading } = useNormalLoading();
   const { setIsVisible } = useBottomNav();
-  const [orders, setOrders] = useState<DriverHistoryOrder[]>([]);
   const [filter, setFilter] = useState<"ALL" | "DELIVERED" | "CANCELLED">("ALL");
   const [selectedOrder, setSelectedOrder] = useState<DriverHistoryOrder | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState("");
   const [actualSearchQuery, setActualSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+
+  const { orders, isLoading, isError, error, refetch } = useDriverOrderHistory({
+    status: filter,
+    search: actualSearchQuery,
+    size: 50
+  });
 
   // Scroll animation state
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -114,24 +119,13 @@ export default function HistoryPage() {
 
   // Simulated data fetch & loading
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (!isLoading) {
       hide();
-      setIsLoading(false);
-    }, 1800);
-    setOrders(getDriverHistory());
-    stopLoading();
-    return () => clearTimeout(timer);
-  }, [hide, stopLoading]);
+      stopLoading();
+    }
+  }, [hide, stopLoading, isLoading]);
 
-  const filteredOrders = useMemo(() => {
-    return orders.filter((order) => {
-      const matchesFilter = filter === "ALL" || order.status === filter;
-      const matchesSearch = !actualSearchQuery ||
-        order.code?.toLowerCase().includes(actualSearchQuery.toLowerCase()) ||
-        order.restaurantLocation?.name?.toLowerCase().includes(actualSearchQuery.toLowerCase());
-      return matchesFilter && matchesSearch;
-    });
-  }, [orders, filter, actualSearchQuery]);
+  const filteredOrders = orders; // Filtering is now handled by the hook
 
   const handleOrderClick = (order: DriverHistoryOrder) => {
     setSelectedOrder(order);
@@ -145,17 +139,13 @@ export default function HistoryPage() {
   const handleFilterChange = (newFilter: "ALL" | "DELIVERED" | "CANCELLED") => {
     if (newFilter === filter) return;
     setFilter(newFilter);
-    setIsLoading(true);
     containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    setTimeout(() => setIsLoading(false), 1000);
   };
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       setActualSearchQuery(searchInputValue);
-      setIsLoading(true);
       containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-      setTimeout(() => setIsLoading(false), 1200);
     }
   };
 
