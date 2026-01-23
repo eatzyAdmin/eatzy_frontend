@@ -493,7 +493,8 @@ function getStatusIcon(status: string) {
     case "PENDING": return <Clock className="w-3.5 h-3.5" />;
     case "PLACED": return <ClipboardList className="w-3.5 h-3.5" />;
     case "PREPARING": return <ChefHat className="w-3.5 h-3.5" />;
-    case "READY": return <ChefHat className="w-3.5 h-3.5" />;
+    case "DRIVER_ASSIGNED": return <Bike className="w-3.5 h-3.5" />;
+    case "READY": return <Bike className="w-3.5 h-3.5" />;
     case "PICKED_UP": return <Bike className="w-3.5 h-3.5" />;
     case "ARRIVED": return <Bike className="w-3.5 h-3.5" />;
     case "DELIVERED": return <BadgeCheck className="w-3.5 h-3.5" />;
@@ -507,7 +508,8 @@ function statusLabel(status: string): string {
     case "PENDING": return "Chờ xác nhận";
     case "PLACED": return "Đã đặt";
     case "PREPARING": return "Đang chuẩn bị";
-    case "READY": return "Sẵn sàng";
+    case "DRIVER_ASSIGNED": return "Có tài xế";
+    case "READY": return "Có tài xế";
     case "PICKED_UP": return "Đang giao";
     case "ARRIVED": return "Đã đến";
     case "DELIVERED": return "Thành công";

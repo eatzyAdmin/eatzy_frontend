@@ -9,8 +9,7 @@ type IconType = ComponentType<{ className?: string; strokeWidth?: number }>;
 const steps: ReadonlyArray<{ key: string; label: string; icon: IconType }> = [
   { key: "PENDING", label: "Chờ xác nhận", icon: Clock as IconType },
   { key: "PLACED", label: "Đã đặt", icon: ClipboardList as IconType },
-  { key: "PREPARING", label: "Đang nấu", icon: ChefHat as IconType },
-  { key: "READY", label: "Sẵn sàng", icon: ChefHat as IconType },
+  { key: "DRIVER_ASSIGNED", label: "Có tài xế", icon: Bike as IconType },
   { key: "PICKED_UP", label: "Đang giao", icon: Bike as IconType },
   { key: "DELIVERED", label: "Thành công", icon: BadgeCheck as IconType },
 ];
@@ -18,8 +17,12 @@ const steps: ReadonlyArray<{ key: string; label: string; icon: IconType }> = [
 export default function OrderStatusSteps({ status }: { status: string }) {
   // Find index based on backend status
   let activeIndex = steps.findIndex((s) => s.key === status);
-  // Handle special statuses
-  if (status === "ARRIVED") activeIndex = steps.findIndex((s) => s.key === "PICKED_UP"); // ARRIVED is part of delivery
+  
+  // Handle grouped statuses
+  if (status === "PREPARING") activeIndex = steps.findIndex((s) => s.key === "PLACED");
+  if (status === "READY") activeIndex = steps.findIndex((s) => s.key === "DRIVER_ASSIGNED");
+  if (status === "ARRIVED") activeIndex = steps.findIndex((s) => s.key === "PICKED_UP");
+  
   if (activeIndex === -1 && status === 'CANCELLED') activeIndex = 0;
   if (activeIndex === -1) activeIndex = 0;
 
