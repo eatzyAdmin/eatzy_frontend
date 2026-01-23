@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import { X, CheckCircle, AlertCircle, Clock, Banknote, Landmark, FileText } from '@repo/ui/icons';
-import { Transaction } from '../data/mockWallet';
+import { Transaction } from '../types';
 
 interface WithdrawalDetailsModalProps {
   transaction: Transaction | null;

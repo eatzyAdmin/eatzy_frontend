@@ -1,6 +1,6 @@
 import { DataTable, ColumnDef } from '@repo/ui';
 import { motion } from '@repo/ui/motion';
-import { mockWallet, Transaction } from '../data/mockWallet';
+// import { mockWallet, Transaction } from '../data/mockWallet'; // REMOVED
 import { mockOrderHistory, OrderHistoryItem } from '@/features/history/data/mockHistory';
 import { ArrowDownLeft, ArrowUpRight, Search, Filter, Download, FileText, CheckCircle, AlertCircle, X, Utensils, Landmark } from '@repo/ui/icons';
 import { useState, useMemo } from 'react';
@@ -8,7 +8,14 @@ import WalletSearchPopup from './WalletSearchPopup';
 import WalletFilterModal from './WalletFilterModal';
 import WalletExportModal from './WalletExportModal';
 import OrderDetailsModal from '@/features/history/components/OrderDetailsModal';
+import { useOrderDetail } from '@/features/history/hooks/useOrderDetail';
+import { useLoading } from '@repo/ui';
 import WithdrawalDetailsModal from './WithdrawalDetailsModal';
+import { useWalletTransactions } from '../hooks/useWalletTransactions';
+import { WalletTransactionResponse } from '@repo/types';
+
+// Define local Transaction interface compatible with the table
+import { Transaction } from '../types';
 
 const columns: ColumnDef<Transaction>[] = [
   {
@@ -112,7 +119,37 @@ const columns: ColumnDef<Transaction>[] = [
 ];
 
 export default function WalletTransactionTable() {
-  const [data] = useState(mockWallet.transactions);
+  // Use our new hook
+  const { transactions: backendTransactions, isLoading } = useWalletTransactions({
+    size: 100 // Fetch a reasonable amount for the table
+  });
+  const { getOrderDetail } = useOrderDetail();
+  const { show, hide } = useLoading();
+
+  // Map backend transactions to local Transaction interface
+  const data = useMemo<Transaction[]>(() => {
+    return backendTransactions.map(tx => {
+      let category = 'Unknown';
+      if (tx.transactionType === 'RESTAURANT_EARNING' || tx.transactionType === 'EARNING') category = 'Food Order';
+      else if (tx.transactionType === 'WITHDRAWAL') category = 'Withdrawal';
+      else if (tx.transactionType === 'COMMISSION_PAID') category = 'Commission';
+      else if (tx.transactionType === 'ORDER_PAYMENT') category = 'Payment';
+
+      return {
+        id: `TRX-${tx.id}`,
+        originalId: tx.id,
+        date: tx.createdAt,
+        type: tx.amount > 0 ? 'revenue' : 'withdrawal',
+        description: tx.description,
+        amount: tx.amount,
+        status: tx.status === 'SUCCESS' ? 'success' : 'failed',
+        category: category,
+        orderId: tx.order?.id,
+        balanceAfter: tx.balanceAfter
+      };
+    });
+  }, [backendTransactions]);
+
   const [sortConfig, setSortConfig] = useState<{ key: keyof Transaction; direction: 'asc' | 'desc' } | null>(null);
 
   // Search State
@@ -211,6 +248,7 @@ export default function WalletTransactionTable() {
         if (itemDate > endDate) dateMatch = false;
       }
 
+      // Convert item status to lowercase for comparison if needed, or expected status value
       const statusMatch = filterFields.status === '' || item.status.toLowerCase() === filterFields.status.toLowerCase();
 
       const amountMatch = item.amount >= filterFields.amountRange.min && item.amount <= filterFields.amountRange.max;
@@ -241,11 +279,18 @@ export default function WalletTransactionTable() {
     return result;
   }, [data, sortConfig, searchFields, filterFields]);
 
-  const handleRowClick = (item: Transaction) => {
-    if (item.category === 'Food Order' && item.orderId) {
-      const order = mockOrderHistory.find(o => o.id === item.orderId);
-      if (order) {
-        setSelectedOrder(order);
+  const handleRowClick = async (item: Transaction) => {
+    if ((item.category === 'Food Order' || item.type === 'revenue') && item.orderId) {
+      try {
+        show();
+        const order = await getOrderDetail(item.orderId);
+        if (order) {
+          setSelectedOrder(order);
+        }
+      } catch (error) {
+        console.error("Failed to fetch order details", error);
+      } finally {
+        hide();
       }
     } else if (item.category === 'Withdrawal') {
       setSelectedWithdrawal(item);
@@ -382,27 +427,31 @@ export default function WalletTransactionTable() {
       </div>
 
       <div className="p-4">
-        <DataTable<Transaction>
-          data={filteredAndSortedData}
-          columns={columns}
-          handleSort={handleSort}
-          sortField={sortConfig?.key}
-          sortDirection={sortConfig?.direction}
-          onRowClick={handleRowClick}
-          renderActions={(item) => (
-            <button
-              className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-all duration-300 group"
-              title="View Details"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRowClick(item);
-              }}
-            >
-              <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            </button>
-          )}
-          headerClassName="bg-slate-200 text-gray-700 border-none rounded-xl text-[11px] font-bold uppercase tracking-widest py-4 mb-2"
-        />
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20 text-gray-400">Loading transactions...</div>
+        ) : (
+          <DataTable<Transaction>
+            data={filteredAndSortedData}
+            columns={columns}
+            handleSort={handleSort}
+            sortField={sortConfig?.key as string}
+            sortDirection={sortConfig?.direction}
+            onRowClick={handleRowClick}
+            renderActions={(item) => (
+              <button
+                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-all duration-300 group"
+                title="View Details"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRowClick(item);
+                }}
+              >
+                <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              </button>
+            )}
+            headerClassName="bg-slate-200 text-gray-700 border-none rounded-xl text-[11px] font-bold uppercase tracking-widest py-4 mb-2"
+          />
+        )}
       </div>
 
       <OrderDetailsModal
