@@ -1,23 +1,26 @@
 "use client";
 import { motion } from "@repo/ui/motion";
-import { Clock, ClipboardList, ChefHat, Bike, BadgeCheck, Check } from "@repo/ui/icons";
-import type { OrderStatus } from "@repo/types";
+import { Clock, ClipboardList, ChefHat, Bike, BadgeCheck } from "@repo/ui/icons";
 import type { ComponentType } from "react";
 
 type IconType = ComponentType<{ className?: string; strokeWidth?: number }>;
-const steps: ReadonlyArray<{ key: OrderStatus; label: string; icon: IconType }> = [
-  { key: "PENDING", label: "Tìm tài xế", icon: Clock as IconType },
+
+// Backend order statuses: PENDING, PLACED, PREPARING, READY, PICKED_UP, ARRIVED, DELIVERED, CANCELLED
+const steps: ReadonlyArray<{ key: string; label: string; icon: IconType }> = [
+  { key: "PENDING", label: "Chờ xác nhận", icon: Clock as IconType },
   { key: "PLACED", label: "Đã đặt", icon: ClipboardList as IconType },
-  { key: "PREPARED", label: "Nhà hàng", icon: ChefHat as IconType },
-  { key: "PICKED", label: "Đang giao", icon: Bike as IconType },
+  { key: "PREPARING", label: "Đang nấu", icon: ChefHat as IconType },
+  { key: "READY", label: "Sẵn sàng", icon: ChefHat as IconType },
+  { key: "PICKED_UP", label: "Đang giao", icon: Bike as IconType },
   { key: "DELIVERED", label: "Thành công", icon: BadgeCheck as IconType },
 ];
 
-export default function OrderStatusSteps({ status }: { status: OrderStatus }) {
-  // Find index. If status is CANCELLED, we might default to 0 or show partial? 
-  // For now assuming linear flow.
+export default function OrderStatusSteps({ status }: { status: string }) {
+  // Find index based on backend status
   let activeIndex = steps.findIndex((s) => s.key === status);
-  if (activeIndex === -1 && status === 'CANCELLED') activeIndex = 0; // Or handle differently
+  // Handle special statuses
+  if (status === "ARRIVED") activeIndex = steps.findIndex((s) => s.key === "PICKED_UP"); // ARRIVED is part of delivery
+  if (activeIndex === -1 && status === 'CANCELLED') activeIndex = 0;
   if (activeIndex === -1) activeIndex = 0;
 
   return (
