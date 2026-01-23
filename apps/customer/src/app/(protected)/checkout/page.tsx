@@ -146,7 +146,7 @@ export default function CheckoutPage() {
       deliveryLatitude: selectedLocation.latitude,
       deliveryLongitude: selectedLocation.longitude,
       specialInstructions: notes || undefined,
-      deliveryFee: fee,
+      deliveryFee: baseFee,
       paymentMethod: paymentMethod === "EATZYPAY" ? "VNPAY" : "COD",
       orderItems: cartItems.map(item => ({
         dish: { id: item.dish.id },

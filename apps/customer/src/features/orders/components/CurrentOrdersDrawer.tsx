@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import {
@@ -46,22 +46,53 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
     }
   }, [open, refetch]);
 
+  const [showCancelReasons, setShowCancelReasons] = useState(false);
+  const [selectedReason, setSelectedReason] = useState<string>("");
+
+  const cancellationReasons = [
+    "Đổi ý, không muốn mua nữa",
+    "Đặt nhầm món/số lượng",
+    "Thời gian giao hàng quá lâu",
+    "Giá cao hơn dự kiến",
+    "Lý do khác",
+  ];
+
+  const detailsContainerRef = useRef<HTMLDivElement>(null);
+
   const handleCancelOrder = () => {
     if (!activeOrder) return;
+    setShowCancelReasons(true);
+    // Scroll to bottom after state update to show reasons
+    setTimeout(() => {
+      detailsContainerRef.current?.scrollTo({
+        top: detailsContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }, 100);
+  };
 
+  const handleConfirmCancel = (reason: string) => {
     confirm({
-      title: "Hủy đơn hàng",
-      description: "Bạn có chắc chắn muốn hủy đơn hàng này?",
-      confirmText: "Hủy đơn",
+      title: "Xác nhận hủy đơn",
+      description: `Lý do: ${reason}. Vuốt để xác nhận hủy đơn hàng #${activeOrder?.id}`,
+      confirmText: "Xác nhận hủy",
       type: "danger",
       processingDuration: 1500,
       onConfirm: async () => {
+        if (!activeOrder) return;
         try {
-          await orderApi.cancelOrder(activeOrder.id, "Khách hàng hủy đơn");
+          await orderApi.cancelOrder(activeOrder.id, reason);
           hideLoading();
-          showNotification({ type: "success", message: "Đã hủy đơn hàng", format: `Đơn hàng #${activeOrder.id} đã được hủy thành công` });
+          showNotification({
+            type: "success",
+            message: "Đã hủy đơn hàng",
+            format: `Đơn hàng #${activeOrder.id} đã được hủy thành công`
+          });
+          setShowCancelReasons(false);
           refetch();
-          setTimeout(() => onClose(), 500);
+          if (orders.length <= 1) {
+            setTimeout(() => onClose(), 500);
+          }
         } catch (error) {
           showNotification({ type: "error", message: "Không thể hủy đơn hàng" });
         }
@@ -240,7 +271,9 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                 </div>
 
                 {/* 4. Details Column */}
-                <div className="flex-1 overflow-y-auto p-5 md:p-6 space-y-5 custom-scrollbar bg-[#F8F9FA] h-full pb-24 md:pb-6">
+                <div ref={detailsContainerRef} className="flex-1 overflow-y-auto p-5 md:p-6 space-y-5 custom-scrollbar bg-[#F8F9FA] h-full pb-24 md:pb-6 relative">
+
+
                   {activeOrder && (
                     <>
                       {/* Status Steps Card */}
@@ -249,6 +282,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                       </div>
 
                       {/* Driver Info Card */}
+                      {/* ... (existing driver info) */}
                       <div className="bg-white rounded-[28px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
                         {activeOrder.orderStatus === 'PENDING' || activeOrder.orderStatus === 'PLACED' ? (
                           <div className="flex flex-col items-center text-center py-2">
@@ -339,7 +373,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                                   <div className="font-bold text-[#1A1A1A] text-sm group-hover:text-[var(--primary)] transition-colors line-clamp-1">{item.dish?.name}</div>
                                 </div>
                               </div>
-                              <span className="font-bold text-[#1A1A1A] text-sm tabular-nums">{formatVnd(item.priceAtPurchase * item.quantity)}</span>
+                              <span className="font-bold text-[#1A1A1A] text-sm tabular-nums">{formatVnd(item.priceAtPurchase)}</span>
                             </div>
                           ))}
                         </div>
@@ -378,17 +412,56 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                         </p>
                       </div>
 
-                      {/* Cancel Button */}
-                      {activeOrder.orderStatus === "PENDING" && (
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleCancelOrder}
-                          className="w-full h-12 rounded-[20px] bg-white border border-red-100 text-red-500 font-bold text-sm shadow-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-all"
-                        >
-                          <XCircle className="w-5 h-5" />
-                          Hủy đơn hàng này
-                        </motion.button>
+                      {/* Cancel Flow */}
+                      {(activeOrder.orderStatus === "PENDING" || activeOrder.orderStatus === "PLACED") && (
+                        <div className="mt-4">
+                          {!showCancelReasons ? (
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={handleCancelOrder}
+                              className="w-full h-12 rounded-[20px] bg-white border border-red-100 text-red-500 font-bold text-sm shadow-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-all"
+                            >
+                              <XCircle className="w-5 h-5" />
+                              Hủy đơn hàng này
+                            </motion.button>
+                          ) : (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="bg-white rounded-[28px] p-5 border border-red-100 shadow-md space-y-4"
+                            >
+                              <div className="flex items-center justify-between border-b border-gray-50 pb-3">
+                                <h3 className="text-lg font-semibold text-[#1A1A1A] uppercase">Tại sao bạn muốn hủy?</h3>
+                                <button
+                                  onClick={() => setShowCancelReasons(false)}
+                                  className="text-xs font-bold text-gray-400 hover:text-gray-600 uppercase tracking-wider"
+                                >
+                                  Quay lại
+                                </button>
+                              </div>
+                              <div className="space-y-2">
+                                {cancellationReasons.map((reason) => (
+                                  <button
+                                    key={reason}
+                                    onClick={() => handleConfirmCancel(reason)}
+                                    className="w-full text-left p-4 rounded-xl hover:bg-red-50 text-gray-700 font-bold text-sm transition-colors border border-transparent hover:border-red-100 flex justify-between items-center group"
+                                  >
+                                    {reason}
+                                    <div className="w-4 h-4 rounded-full border border-gray-200 group-hover:border-red-500 transition-colors" />
+                                  </button>
+                                ))}
+                              </div>
+                              <button
+                                onClick={() => setShowCancelReasons(false)}
+                                className="w-full py-3 rounded-xl bg-gray-50 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-all"
+                              >
+                                Giữ lại đơn hàng
+                              </button>
+                            </motion.div>
+                          )}
+                        </div>
                       )}
                     </>
                   )}

@@ -71,11 +71,11 @@ export const orderApi = {
   },
 
   /**
-   * Cancel an order
-   * PUT /api/v1/orders/:id/cancel
+   * Cancel an order (customer)
+   * PATCH /api/v1/orders/:id/customer/cancel
    */
-  cancelOrder: async (orderId: number, reason: string): Promise<IBackendRes<OrderResponse>> => {
-    return http.put<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/cancel`, { reason }) as unknown as Promise<IBackendRes<OrderResponse>>;
+  cancelOrder: async (orderId: number, cancellationReason: string): Promise<IBackendRes<OrderResponse>> => {
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/customer/cancel`, { cancellationReason }) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
 
   /**
@@ -122,57 +122,73 @@ export const orderApi = {
 
   /**
    * Mark order as ready (restaurant)
-   * PUT /api/v1/orders/:id/ready
+   * PATCH /api/v1/orders/:id/restaurant/ready
    */
   markOrderAsReady: async (orderId: number): Promise<IBackendRes<OrderResponse>> => {
-    return http.put<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/ready`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/restaurant/ready`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
 
   /**
    * Accept order (restaurant)
-   * PUT /api/v1/orders/:id/accept
+   * PATCH /api/v1/orders/:id/restaurant/accept
    */
   acceptOrder: async (orderId: number): Promise<IBackendRes<OrderResponse>> => {
-    return http.put<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/accept`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/restaurant/accept`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
 
   /**
-   * Accept order by driver
-   * PUT /api/v1/orders/:id/accept-driver
+   * Reject order (restaurant)
+   * PATCH /api/v1/orders/:id/restaurant/reject
+   */
+  rejectOrderByRestaurant: async (orderId: number, cancellationReason: string): Promise<IBackendRes<OrderResponse>> => {
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/restaurant/reject`, { cancellationReason }) as unknown as Promise<IBackendRes<OrderResponse>>;
+  },
+
+  /**
+   * Driver accepts order
+   * PATCH /api/v1/orders/:id/driver/accept
    */
   acceptOrderByDriver: async (orderId: number): Promise<IBackendRes<OrderResponse>> => {
-    return http.put<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/accept-driver`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/driver/accept`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
+  },
+
+  /**
+   * Driver rejects order
+   * PATCH /api/v1/orders/:id/driver/reject
+   */
+  rejectOrderByDriver: async (orderId: number): Promise<IBackendRes<OrderResponse>> => {
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/driver/reject`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
 
   /**
    * Mark order as picked up (driver)
-   * PUT /api/v1/orders/:id/picked-up
+   * PATCH /api/v1/orders/:id/driver/picked-up
    */
   markOrderAsPickedUp: async (orderId: number): Promise<IBackendRes<OrderResponse>> => {
-    return http.put<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/picked-up`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/driver/picked-up`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
 
   /**
    * Mark order as arrived (driver)
-   * PUT /api/v1/orders/:id/arrived
+   * PATCH /api/v1/orders/:id/driver/arrived
    */
   markOrderAsArrived: async (orderId: number): Promise<IBackendRes<OrderResponse>> => {
-    return http.put<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/arrived`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/driver/arrived`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
 
   /**
    * Mark order as delivered (driver)
-   * PUT /api/v1/orders/:id/delivered
+   * PATCH /api/v1/orders/:id/driver/delivered
    */
   markOrderAsDelivered: async (orderId: number): Promise<IBackendRes<OrderResponse>> => {
-    return http.put<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/delivered`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/driver/delivered`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
 
   /**
    * Assign driver to order
-   * PUT /api/v1/orders/:id/assign-driver
+   * PATCH /api/v1/orders/:id/assign-driver
    */
   assignDriver: async (orderId: number): Promise<IBackendRes<OrderResponse>> => {
-    return http.put<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/assign-driver`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/assign-driver`, {}) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
 };
