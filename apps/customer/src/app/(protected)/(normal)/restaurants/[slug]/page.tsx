@@ -28,6 +28,7 @@ export default function RestaurantDetailPage() {
     dishes: apiDishes,
     isLoading: isApiLoading,
     isError,
+    detail,
   } = useRestaurantWithMenu(params.slug);
 
   // Sort categories by displayOrder
@@ -190,7 +191,8 @@ export default function RestaurantDetailPage() {
                 {/* Mobile Hero Image - Artistic Blend */}
                 <div className="absolute top-0 left-0 w-full h-[160px] z-0 md:hidden border-none outline-none ring-0 -mb-1">
                   <div className="relative w-full h-full overflow-hidden">
-                    <ImageWithFallback src={restaurant.imageUrl || "https://placehold.co/600x400?text=Restaurant"} alt={restaurant.name} fill className="object-cover" />
+                    <ImageWithFallback src={detail?.coverImageUrl || "https://placehold.co/600x400?text=Restaurant"} alt={restaurant.name} fill className="object-cover" />
+
                     {/* Gradient for text blend */}
                     <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F7F7F7] via-[#F7F7F7]/80 to-transparent" />
                     {/* Top gradient for header visibility */}
@@ -218,8 +220,9 @@ export default function RestaurantDetailPage() {
                   <div className="flex gap-4 items-start md:block">
                     {/* Small Image - Mobile Only */}
                     <div className="shrink-0 w-[120px] h-[120px] rounded-[20px] overflow-hidden shadow-lg border-2 border-gray-200 md:hidden relative bg-gray-100">
-                      <ImageWithFallback src={restaurant.imageUrl || "https://placehold.co/400x400?text=Restaurant"} alt={restaurant.name} fill className="object-cover" />
+                      <ImageWithFallback src={detail?.avatarUrl || "https://placehold.co/400x400?text=Restaurant"} alt={restaurant.name} fill className="object-cover" />
                     </div>
+
 
                     {/* Text Content */}
                     <div className="flex-1 min-w-0 flex flex-col gap-2 md:gap-0">
@@ -301,7 +304,7 @@ export default function RestaurantDetailPage() {
                 <div className="hidden md:block rounded-[24px] overflow-hidden">
                   <div className="relative aspect-[16/11]">
                     <ImageWithFallback
-                      src={restaurant.imageUrl || "https://placehold.co/600x400?text=Restaurant"}
+                      src={detail?.avatarUrl || "https://placehold.co/600x400?text=Restaurant"}
                       alt={restaurant.name}
                       fill
                       className="object-cover"
@@ -316,7 +319,7 @@ export default function RestaurantDetailPage() {
                 <div className="hidden md:block relative mb-6">
                   <div className="relative aspect-[16/8] rounded-[24px] overflow-hidden shadow-md bg-white">
                     <ImageWithFallback
-                      src={restaurant.imageUrl || "https://placehold.co/600x400?text=Restaurant"}
+                      src={detail?.coverImageUrl || "https://placehold.co/600x400?text=Restaurant"}
                       alt={restaurant.name}
                       fill
                       className="object-cover"

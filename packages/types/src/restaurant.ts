@@ -26,6 +26,8 @@ export type Restaurant = {
   rating?: number;
   address?: string;
   imageUrl?: string;
+  avatarUrl?: string;
+  coverImageUrl?: string;
   description?: string;
   category?: RestaurantCategory | string;
   reviews?: Review[];
@@ -71,6 +73,8 @@ export type RestaurantMagazine = {
   fiveStarCount?: number;
   averageRating?: number;
   distance?: number; // in km
+  avatarUrl?: string;
+  coverImageUrl?: string;
   category?: MagazineCategory[];
 
   // Personalized ranking scores (only set if user is logged in)
@@ -80,6 +84,7 @@ export type RestaurantMagazine = {
   qualityScore?: number;   // S_Ngon (10%)
   finalScore?: number;     // Total weighted score
 };
+
 
 // Search params for nearby restaurants API
 export type NearbyRestaurantsParams = {

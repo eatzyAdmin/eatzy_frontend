@@ -66,9 +66,12 @@ export type BackendRestaurantDetailDTO = {
   averageRating?: number;
   schedule?: string;
   distance?: number;
+  avatarUrl?: string;
+  coverImageUrl?: string;
   owner?: { id: number; name: string };
   restaurantTypes?: { id: number; name: string };
 };
+
 
 // ======== Frontend Types ========
 
@@ -88,6 +91,8 @@ export type RestaurantDetail = {
   distance?: number;
   ownerName?: string;
   restaurantType?: string;
+  avatarUrl?: string;
+  coverImageUrl?: string;
   // Star counts for rating breakdown
   oneStarCount: number;
   twoStarCount: number;
@@ -129,6 +134,8 @@ function mapBackendRestaurantDetail(dto: BackendRestaurantDetailDTO): Restaurant
     distance: dto.distance,
     ownerName: dto.owner?.name,
     restaurantType: dto.restaurantTypes?.name,
+    avatarUrl: dto.avatarUrl,
+    coverImageUrl: dto.coverImageUrl,
     oneStarCount,
     twoStarCount,
     threeStarCount,

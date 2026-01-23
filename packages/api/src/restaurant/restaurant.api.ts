@@ -26,7 +26,8 @@ export type ResRestaurantDTO = {
   status?: string;
   averageRating?: number;
   schedule?: string;
-  bannerUrl?: string;
+  avatarUrl?: string;
+  coverImageUrl?: string;
   // Rating counts
   oneStarCount?: number;
   twoStarCount?: number;
@@ -34,6 +35,7 @@ export type ResRestaurantDTO = {
   fourStarCount?: number;
   fiveStarCount?: number;
 };
+
 
 // ======== API ========
 

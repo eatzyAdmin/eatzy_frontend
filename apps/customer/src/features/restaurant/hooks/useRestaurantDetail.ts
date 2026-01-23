@@ -27,7 +27,9 @@ function toRestaurantType(detail: RestaurantDetail): Restaurant {
     address: detail.address || '',
     description: detail.description,
     rating: detail.rating || 0,
-    imageUrl: '', // Backend doesn't return imageUrl currently, will need to add later
+    imageUrl: detail.coverImageUrl || '',
+    avatarUrl: detail.avatarUrl,
+    coverImageUrl: detail.coverImageUrl,
     categories: [], // Categories are fetched separately via menu API
     status: (detail.status as 'OPEN' | 'CLOSED' | 'LOCKED') || 'OPEN',
     reviewCount: detail.reviewCount || 0,
