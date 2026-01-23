@@ -1,11 +1,10 @@
 "use client";
-import dynamic from "next/dynamic";
-import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "@repo/ui/motion";
 import { useSwipeConfirmation, useNotification, useLoading } from "@repo/ui";
 import CheckoutMapSection from "@/features/checkout/components/CheckoutMapSection";
 import { formatVnd } from "@repo/lib";
+import { ShoppingBag } from "@repo/ui/icons";
 
 export default function RightSidebar({
   restaurantName,
@@ -18,36 +17,26 @@ export default function RightSidebar({
   onAddressChange?: (addr: string) => void;
   children?: React.ReactNode;
 }) {
-  const rightColRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const { confirm } = useSwipeConfirmation();
   const { showNotification } = useNotification();
   const { show: showLoading } = useLoading();
 
-  useEffect(() => {
-    const el = rightColRef.current;
-    if (!el) return;
-  }, []);
-
   const handleCompleteOrder = () => {
     confirm({
-      title: "Xác nhận đặt hàng",
-      description: `Bạn có chắc chắn muốn đặt đơn hàng với tổng tiền ${formatVnd(totalPayable)}?`,
-      confirmText: "Đặt hàng",
+      title: "Confirm Order",
+      description: `Đặt đơn hàng với tổng tiền ${formatVnd(totalPayable)}?`,
+      confirmText: "Place Order",
       type: "success",
       processingDuration: 1500,
       onConfirm: async () => {
         showLoading("Đang xử lý đơn hàng...");
-
-        // Navigate to home first
         router.push('/home');
-
-        // Show notification after navigation
         setTimeout(() => {
           showNotification({
             type: "success",
-            message: "Đặt hàng thành công",
-            format: `Đơn hàng của bạn đã được đặt thành công. Đang tìm tài xế...`,
+            message: "Order Placed Successfully",
+            format: `We are finding a driver for you...`,
           });
         }, 800);
       }
@@ -55,15 +44,17 @@ export default function RightSidebar({
   };
 
   return (
-    <div ref={rightColRef} className="relative h-auto md:h-full md:overflow-y-auto no-scrollbar md:pl-2 pb-24 md:pb-0">
-      <div className="hidden md:block mb-6">
-        <div className="text-[28px] font-bold uppercase tracking-wide" style={{
-          fontStretch: "condensed",
-          letterSpacing: "-0.01em",
-          fontFamily: "var(--font-anton), var(--font-sans)",
-        }}>Last Step - Checkout</div>
+    <div className="relative h-auto md:h-full md:overflow-y-auto no-scrollbar md:pl-2 pb-24 md:pb-0 flex flex-col">
+      <div className="hidden md:block mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
+            <ShoppingBag size={12} />
+            Checkout Process
+          </span>
+        </div>
+        <div className="text-3xl font-anton font-semibold text-[#1A1A1A] leading-tight">FINAL STEP</div>
         {restaurantName && (
-          <div className="text-[14px] text-[#555] mt-1">{restaurantName}</div>
+          <div className="text-gray-500 font-medium mt-1">{restaurantName}</div>
         )}
       </div>
 
@@ -73,21 +64,22 @@ export default function RightSidebar({
         </CheckoutMapSection>
       </div>
 
-
-
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[60] md:sticky md:bottom-0 md:bg-[#F7F7F7] md:border-none md:z-auto md:pb-4">
-        <div className="p-4 md:pt-2 md:p-6 md:border-t-2 md:border-gray-300">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-semibold text-gray-600">Tổng số tiền</div>
-            <div className="text-xl font-semibold text-[var(--primary)]">{formatVnd(totalPayable)}</div>
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-[60] md:sticky md:bottom-0 md:bg-[#F7F7F7] md:border-none md:shadow-none md:z-auto md:pb-4 md:mt-auto">
+        <div className="p-4 md:pt-4 md:px-0">
+          <div className="flex items-center justify-between mb-3 md:hidden">
+            <div className="text-sm font-semibold text-gray-600">Total Payment</div>
+            <div className="text-xl font-bold text-[var(--primary)]">{formatVnd(totalPayable)}</div>
           </div>
           <motion.button
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleCompleteOrder}
-            className="mt-3 w-full h-16 rounded-2xl bg-[var(--primary)] text-white text-2xl uppercase font-anton font-semibold shadow-sm"
+            className="w-full h-14 md:h-16 rounded-[20px] bg-[var(--primary)] text-white text-xl font-semibold md:text-2xl uppercase font-anton shadow-lg shadow-lime-500/30 hover:shadow-lime-500/50 transition-all flex items-center justify-center gap-2"
           >
-            Complete Order
+            <span>Complete Order</span>
+            <span className="bg-white/20 px-2 py-0.5 rounded-lg text-sm font-sans font-bold ml-2">
+              {formatVnd(totalPayable)}
+            </span>
           </motion.button>
         </div>
       </div>

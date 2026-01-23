@@ -576,16 +576,6 @@ export default function RestaurantDetailPage() {
         onConfirm={async (payload, startRect) => {
           if (!drawerDish || !restaurant) return;
 
-          // Fly animation
-          const endEl = document.getElementById("local-cart-fab") || document.getElementById("header-cart-button");
-          if (startRect && endEl) {
-            fly({
-              start: startRect,
-              end: endEl.getBoundingClientRect(),
-              imageUrl: drawerDish.imageUrl,
-            });
-          }
-
           // Collect selected option IDs for API
           const selectedOptionIds: { id: number }[] = [];
 
@@ -607,13 +597,29 @@ export default function RestaurantDetailPage() {
           });
 
           // Call API to add to cart
-          await addToCart(
+          const success = await addToCart(
             Number(drawerDish.id),
             payload.quantity,
             selectedOptionIds.length > 0 ? selectedOptionIds : undefined
           );
 
-          setDrawerOpen(false);
+          if (success) {
+            // Only after success, we start the drawer closing and then the animation
+            setDrawerOpen(false);
+
+            // Fly animation - trigger immediately as drawer starts closing
+            // We use setTimeout to let the drawer start its exit animation
+            setTimeout(() => {
+              const endEl = document.getElementById("local-cart-fab") || document.getElementById("header-cart-button");
+              if (startRect && endEl) {
+                fly({
+                  start: startRect,
+                  end: endEl.getBoundingClientRect(),
+                  imageUrl: drawerDish.imageUrl,
+                });
+              }
+            }, 100);
+          }
         }}
       />
       <ReviewsModal restaurant={restaurant} isOpen={isReviewsOpen} onClose={() => setIsReviewsOpen(false)} />

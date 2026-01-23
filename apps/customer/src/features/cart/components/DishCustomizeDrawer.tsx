@@ -5,7 +5,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import type { Dish, DishVariant, OptionGroup, OptionChoice } from "@repo/types";
 import { formatVnd } from "@repo/lib";
 import { useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
-import { ChefHat, X, Loader2 } from "@repo/ui/icons";
+import { ChefHat, X, Loader2, Check } from "@repo/ui/icons";
 
 export default function DishCustomizeDrawer({
   open,
@@ -172,10 +172,10 @@ export default function DishCustomizeDrawer({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 100, damping: 18 }}
-            className="fixed z-[70] left-0 right-0 bottom-0 h-auto max-h-[90vh] md:h-auto md:max-h-[88vh] rounded-t-[32px] md:rounded-t-[48px] bg-[#F7F7F7] border-t border-gray-200 overflow-y-auto md:overflow-hidden"
+            className="fixed z-[70] left-0 right-0 bottom-0 h-auto max-h-[90vh] md:h-auto md:max-h-[90vh] rounded-t-[32px] md:rounded-t-[48px] bg-[#F7F7F7] border-t border-gray-200 shadow-2xl overflow-y-auto md:overflow-hidden flex flex-col"
           >
             {/* Mobile Sticky Header */}
-            <div className="md:hidden sticky top-0 left-0 right-0 z-[80] bg-[#F7F7F7] px-6 py-4 border-b border-gray-200 flex items-start gap-4">
+            <div className="md:hidden sticky top-0 left-0 right-0 z-[80] bg-[#F7F7F7] px-6 py-4 border-b border-gray-200 flex items-start gap-4 shrink-0">
               <div className="flex-1 min-w-0 pt-1">
                 <div className="text-[28px] font-anton font-extrabold text-[#1A1A1A] leading-tight line-clamp-1">
                   {dish.name.toUpperCase()}
@@ -194,19 +194,19 @@ export default function DishCustomizeDrawer({
               </button>
             </div>
 
-            <div className="flex flex-col md:grid md:grid-cols-[40%_60%] gap-0 pb-0 md:pb-8">
+            <div className="flex flex-col md:grid md:grid-cols-[40%_60%] gap-0 pb-0 flex-1 min-h-0">
+
+              {/* Left Column - Image & Qty */}
               <div className="relative shrink-0 h-auto md:h-full md:overflow-y-auto no-scrollbar p-5 pt-0 md:p-8 md:pt-8 md:pb-24">
                 <div className="hidden md:block">
-                  <div
-                    className="text-[32px] md:text-[48px] font-anton font-extrabold text-[#1A1A1A] leading-tight"
-                    style={{}}
-                  >
+                  <div className="text-[32px] md:text-[48px] font-anton font-extrabold text-[#1A1A1A] leading-tight">
                     {dish.name.toUpperCase()}
                   </div>
                   <div className="text-sm text-[#555] mt-1">
                     {dish.description}
                   </div>
                 </div>
+
                 <div className="flex items-center justify-center gap-8 md:gap-16 bg-gray-200 rounded-3xl px-4 py-3 md:px-6 md:py-4 mx-8 md:mx-28 mt-5 md:mt-6 mb-5 md:mb-6 shadow-sm">
                   <motion.button
                     whileHover={{ scale: 1.06 }}
@@ -263,6 +263,7 @@ export default function DishCustomizeDrawer({
                     +
                   </motion.button>
                 </div>
+
                 <div className="hidden md:block mt-4 mx-0 md:mx-8 relative rounded-[20px] md:rounded-[30px] overflow-hidden bg-white shadow">
                   <div className="relative aspect-[16/7]">
                     <ImageWithFallback
@@ -273,6 +274,7 @@ export default function DishCustomizeDrawer({
                     />
                   </div>
                 </div>
+
                 {(variantGroup && variantGroup.options?.length > 0) ? (
                   <div className="mt-6">
                     <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3">
@@ -291,22 +293,23 @@ export default function DishCustomizeDrawer({
                   </div>
                 ) : null}
               </div>
+
+              {/* Right Column - Options */}
               <div
-                ref={rightColRef}
-                className="relative flex-1 h-auto md:h-full md:overflow-y-auto px-5 py-6 pb-32 md:px-12 md:p-6 md:pb-24 bg-white border-t md:border-t-0 md:border-l border-gray-100"
+                className="relative flex-1 min-h-0 h-auto md:h-full md:overflow-hidden flex flex-col bg-[#f8f9fa] border-t md:border-t-0 md:border-l border-gray-100"
               >
                 {nonVariantGroups && nonVariantGroups.length > 0 && (
-                  <div className="sticky top-0 z-10 -mt-6 md:pt-6 bg-white">
+                  <div className="shrink-0 z-20 bg-[#f8f9fa] px-5 md:px-12 pt-4 md:pt-6 pb-0">
                     <div
                       ref={addonContainerRef}
-                      className="relative mb-6 md:mb-12 border-b-2 border-gray-300"
+                      className="relative border-b-2 border-gray-200 pb-2"
                     >
                       <HoverHighlightOverlay
                         rect={addonRect}
                         style={addonStyle}
                       />
-                      <div className="overflow-x-auto">
-                        <div className="inline-flex items-center gap-4 md:gap-6 px-1 py-1 md:py-3">
+                      <div className="overflow-x-auto no-scrollbar">
+                        <div className="inline-flex items-center gap-4 md:gap-8 px-2 py-2">
                           {nonVariantGroups.map((g) => {
                             const set =
                               selectedAddonIds[g.id] ?? new Set<string>();
@@ -339,89 +342,116 @@ export default function DishCustomizeDrawer({
                     </div>
                   </div>
                 )}
-                {nonVariantGroups && nonVariantGroups.length > 0 ? (
-                  <div className="space-y-6">
-                    {nonVariantGroups.map((g) => (
-                      <section
-                        key={g.id}
-                        ref={(el) => {
-                          groupRefs.current[g.id] = el;
-                        }}
-                        data-id={g.id}
-                      >
-                        <div className="text-sm font-semibold text-[#1A1A1A] uppercase tracking-wide mb-2">
-                          {String(g.title || "")}
-                          {typeof g.minSelect === "number" && (
-                            <span className="ml-2 text-gray-500 lowercase">
-                              chọn tối thiểu {g.minSelect}
-                              {typeof g.maxSelect === "number"
-                                ? `, tối đa ${g.maxSelect}`
-                                : ""}
-                            </span>
-                          )}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {(g.options ?? []).map((opt) => {
-                            const set =
-                              selectedAddonIds[g.id] ?? new Set<string>();
-                            const active = set.has(opt.id);
-                            const disable =
-                              !active &&
-                              typeof g.maxSelect === "number" &&
-                              set.size >= (g.maxSelect ?? 0);
-                            return (
-                              <button
-                                key={opt.id}
-                                onClick={() => toggleAddon(g.id, opt.id)}
-                                disabled={disable}
-                                className={`text-left px-3 py-3 rounded-2xl border-2 flex items-center gap-3 transition-all ${active ? "bg-[var(--primary)]/20 border-[var(--primary)] ring-1 ring-[var(--primary)]" : "bg-gray-50 border-gray-200 hover:bg-gray-50"} ${disable ? "opacity-50 pointer-events-none" : ""}`}
-                              >
-                                <div className="w-8 h-8 rounded-xl bg-gray-200 text-[var(--primary)] border border-gray-200 flex items-center justify-center">
-                                  <ChefHat className="w-4 h-4" />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="font-semibold text-sm text-[#1A1A1A]">
-                                    {String(opt.name || "")}
+
+                <div
+                  ref={rightColRef}
+                  className="flex-1 md:overflow-y-auto px-5 md:px-12 py-6 pb-32 md:pb-32"
+                >
+                  {nonVariantGroups && nonVariantGroups.length > 0 ? (
+                    <div className="space-y-6">
+                      {nonVariantGroups.map((g) => (
+                        <section
+                          key={g.id}
+                          ref={(el) => {
+                            groupRefs.current[g.id] = el;
+                          }}
+                          data-id={g.id}
+                          className="bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 scroll-mt-36"
+                        >
+                          <div className="px-6 py-5 pb-0 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-lime-50 flex items-center justify-center text-lime-500">
+                                <ChefHat className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-[#1A1A1A] text-lg leading-none">
+                                  {String(g.title || "")}
+                                </h4>
+                                {(typeof g.minSelect === "number" || typeof g.maxSelect === "number") && (
+                                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-1.5">
+                                    {typeof g.minSelect === "number" ? `Min ${g.minSelect}` : "Optional"}
+                                    {typeof g.maxSelect === "number" ? ` • Max ${g.maxSelect}` : ""}
                                   </div>
-                                  <div className="text-xs text-gray-600">
-                                    {formatVnd(Number(opt.price || 0))}
-                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Optional: Checkmark if satisfied */}
+                            {(() => {
+                              const set = selectedAddonIds[g.id] ?? new Set<string>();
+                              const count = set.size;
+                              const isSatisfied = (!g.required || count >= (g.minSelect ?? 1)) && (!g.maxSelect || count <= g.maxSelect);
+                              return isSatisfied && (
+                                <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                                  <Check className="w-3.5 h-3.5" />
                                 </div>
-                                <div
-                                  className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${active ? "bg-[var(--primary)] border-[var(--primary)] text-white" : "bg-white border-gray-300"}`}
+                              );
+                            })()}
+                          </div>
+
+                          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {(g.options ?? []).map((opt) => {
+                              const set = selectedAddonIds[g.id] ?? new Set<string>();
+                              const active = set.has(opt.id);
+                              const disable = !active && typeof g.maxSelect === "number" && set.size >= (g.maxSelect ?? 0);
+
+                              return (
+                                <button
+                                  key={opt.id}
+                                  onClick={() => toggleAddon(g.id, opt.id)}
+                                  disabled={disable}
+                                  className={`
+                                    relative w-full text-left p-3 md:p-4 rounded-[20px] border transition-all duration-200 group
+                                    ${active
+                                      ? "bg-lime-50 border-lime-200 shadow-sm"
+                                      : "bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm hover:bg-gray-50/50"
+                                    }
+                                    ${disable ? "opacity-50 pointer-events-none" : ""}
+                                  `}
                                 >
-                                  <svg
-                                    viewBox="0 0 24 24"
-                                    className={`w-4 h-4 ${active ? "opacity-100" : "opacity-0"}`}
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="3"
-                                  >
-                                    <path d="M20 6 9 17l-5-5" />
-                                  </svg>
-                                </div>
-                              </button>
-                            );
-                          })}
+                                  <div className="flex items-center gap-3 md:gap-4">
+                                    <div className={`
+                                      w-5 h-5 md:w-6 md:h-6 rounded-full border flex items-center justify-center flex-shrink-0 transition-all
+                                      ${active
+                                        ? "bg-lime-500 border-lime-500 text-white"
+                                        : "bg-transparent border-gray-300 group-hover:border-gray-400"
+                                      }
+                                    `}>
+                                      {active && <Check className="w-3 md:w-3.5 h-3 md:h-3.5" />}
+                                    </div>
+
+                                    <div className="flex-1 min-w-0">
+                                      <div className={`text-[14px] md:text-[15px] font-bold truncate ${active ? "text-[#1A1A1A]" : "text-gray-600"}`}>
+                                        {String(opt.name || "")}
+                                      </div>
+                                      <div className="text-xs md:text-sm font-medium text-gray-400">
+                                        {formatVnd(Number(opt.price || 0))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </section>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center min-h-[280px]">
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center text-[var(--primary)] shadow-sm">
+                          <ChefHat className="w-8 h-8" />
                         </div>
-                      </section>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center min-h-[280px]">
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center text-[var(--primary)] shadow-sm">
-                        <ChefHat className="w-8 h-8" />
-                      </div>
-                      <div className="mt-3 text-base font-semibold text-[#1A1A1A]">
-                        Không có tuỳ chọn thêm
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Chọn phân loại hoặc tiếp tục
+                        <div className="mt-3 text-base font-semibold text-[#1A1A1A]">
+                          Không có tuỳ chọn thêm
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Chọn phân loại hoặc tiếp tục
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
 

@@ -116,17 +116,18 @@ export default function CheckoutPage() {
         <div className="max-w-[1400px] mx-auto px-4 pt-4 md:pr-16 md:px-8 md:pt-12 h-full">
           {/* Mobile Header: Last Step + Restaurant Name */}
           <div className="md:hidden">
-            <div className="text-[28px] font-bold uppercase tracking-wide text-[#1A1A1A]" style={{
-              fontStretch: "condensed",
-              letterSpacing: "-0.01em",
-              fontFamily: "var(--font-anton), var(--font-sans)",
-            }}>Last Step - Checkout</div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider">
+                Checkout
+              </span>
+            </div>
+            <div className="text-3xl font-anton text-[#1A1A1A] uppercase leading-none">Last Step</div>
             {restaurant && (
-              <div className="text-[14px] text-[#555] mt-0.5 font-medium">{restaurant.name}</div>
+              <div className="text-[14px] text-[#555] mt-1 font-medium">{restaurant.name}</div>
             )}
           </div>
 
-          <div className="flex flex-col md:grid md:grid-cols-[65%_35%] gap-4 md:gap-8 md:h-full">
+          <div className="flex flex-col md:grid md:grid-cols-[65%_35%] gap-4 md:gap-8 md:h-full mt-4 md:mt-0">
             <div ref={leftColumnRef} className="relative h-auto md:h-full md:overflow-y-auto no-scrollbar md:pr-2 space-y-4 md:space-y-6 mb-6">
               <div className="sticky top-0 z-40 bg-[#F7F7F7] pt-2 md:pt-2">
                 <div ref={navContainerRef} className="relative bg-[#F7F7F7] border-b-2 border-gray-300">
@@ -171,98 +172,106 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               </div>
-              <div className="rounded-[28px] md:mx-2 border-2 border-gray-300">
-                <section className="p-4 border-b-2 border-gray-300" ref={(el) => { sectionRefs.current["address"] = el; }} data-id="address">
+
+              <div className="space-y-6 md:pb-24">
+                <section ref={(el) => { sectionRefs.current["address"] = el; }} data-id="address">
                   <AddressForm value={address} onChange={setAddress} />
                   <div className="md:hidden mt-5">
                     <CheckoutMapSection onAddressChange={setAddress} />
                   </div>
                 </section>
-                <section className="p-4 border-b-2 border-gray-300" ref={(el) => { sectionRefs.current["notes"] = el; }} data-id="notes">
+                <section ref={(el) => { sectionRefs.current["notes"] = el; }} data-id="notes">
                   <NotesInput value={notes} onChange={setNotes} />
                 </section>
-                <section className="p-4 border-b-2 border-gray-300" ref={(el) => { sectionRefs.current["summary"] = el; }} data-id="summary">
+                <section ref={(el) => { sectionRefs.current["summary"] = el; }} data-id="summary">
                   {mounted && <OrderSummaryList />}
                 </section>
-                <section className="p-4 border-b-2 border-gray-300" ref={(el) => { sectionRefs.current["method"] = el; }} data-id="method">
+                <section ref={(el) => { sectionRefs.current["method"] = el; }} data-id="method">
                   <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
                 </section>
-                <div className="grid grid-cols-1 md:grid-cols-10 p-4 gap-4 items-stretch">
-                  <section className="col-span-1 md:col-span-6 h-full" ref={(el) => { sectionRefs.current["promo"] = el; }} data-id="promo">
-                    <div className="md:p-4">
-                      {/* Scrollable voucher container - shows ~3.5 cards */}
-                      <div className="max-h-[420px] overflow-y-auto pr-2 space-y-6 custom-scrollbar">
-                        {/* Shipping Vouchers */}
-                        {shippingVouchers.length > 0 && (
-                          <div>
-                            <div className="text-[14px] font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2 sticky top-0 bg-[#F7F7F7] py-2 z-10">
-                              <Truck className="w-4 h-4 text-blue-500" /> Miễn phí vận chuyển
-                              <span className="text-xs text-gray-400 font-normal">({shippingVouchers.length})</span>
-                            </div>
-                            <div className="space-y-3">
-                              {mounted && shippingVouchers.map((v) => {
-                                const eligible = isVoucherEligible(v);
-                                return (
-                                  <PromoVoucherCard
-                                    key={v.id}
-                                    voucher={v}
-                                    selected={selectedShippingVoucherId === v.id}
-                                    onSelect={() => setSelectedShippingVoucherId(selectedShippingVoucherId === v.id ? null : v.id)}
-                                    disabled={!eligible}
-                                    reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
-                                    isBest={bestVoucherIds.shipping === v.id}
-                                  />
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
 
-                        {/* Discount Vouchers */}
-                        <div>
-                          <div className="text-[14px] font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2 sticky top-0 bg-[#F7F7F7] py-2 z-10">
-                            <Tag className="w-4 h-4 text-[var(--primary)]" /> Ưu đãi giảm giá
-                            <span className="text-xs text-gray-400 font-normal">({discountVouchers.length})</span>
-                          </div>
-                          <div className="space-y-3">
-                            {isLoadingVouchers ? (
-                              <div className="text-center py-8 text-gray-400">
-                                <div className="w-8 h-8 border-2 border-gray-300 border-t-[var(--primary)] rounded-full animate-spin mx-auto mb-2"></div>
-                                Đang tải ưu đãi...
+                <div className="grid grid-cols-1 md:grid-cols-10 gap-6 items-start">
+                  <section className="col-span-1 md:col-span-6" ref={(el) => { sectionRefs.current["promo"] = el; }} data-id="promo">
+                    <div className="bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
+                      <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30">
+                        <Tag className="w-5 h-5 text-gray-400" />
+                        <h4 className="font-bold text-[#1A1A1A]">Promo & Vouchers</h4>
+                      </div>
+
+                      <div className="p-4 md:p-5">
+                        <div className="max-h-[500px] overflow-y-auto pr-2 space-y-6 custom-scrollbar">
+                          {/* Shipping Vouchers */}
+                          {shippingVouchers.length > 0 && (
+                            <div>
+                              <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2 sticky top-0 bg-white py-2 z-10 backdrop-blur-sm">
+                                <Truck className="w-3.5 h-3.5" /> Shipping Vouchers
+                                <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[10px]">({shippingVouchers.length})</span>
                               </div>
-                            ) : discountVouchers.length === 0 ? (
-                              <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                Không có ưu đãi nào
+                              <div className="space-y-3">
+                                {mounted && shippingVouchers.map((v) => {
+                                  const eligible = isVoucherEligible(v);
+                                  return (
+                                    <PromoVoucherCard
+                                      key={v.id}
+                                      voucher={v}
+                                      selected={selectedShippingVoucherId === v.id}
+                                      onSelect={() => setSelectedShippingVoucherId(selectedShippingVoucherId === v.id ? null : v.id)}
+                                      disabled={!eligible}
+                                      reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
+                                      isBest={bestVoucherIds.shipping === v.id}
+                                    />
+                                  );
+                                })}
                               </div>
-                            ) : (
-                              mounted && discountVouchers.map((v) => {
-                                const eligible = isVoucherEligible(v);
-                                return (
-                                  <PromoVoucherCard
-                                    key={v.id}
-                                    voucher={v}
-                                    selected={selectedDiscountVoucherId === v.id}
-                                    onSelect={() => setSelectedDiscountVoucherId(selectedDiscountVoucherId === v.id ? null : v.id)}
-                                    disabled={!eligible}
-                                    reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
-                                    isBest={bestVoucherIds.discount === v.id}
-                                  />
-                                );
-                              })
-                            )}
+                            </div>
+                          )}
+
+                          {/* Discount Vouchers */}
+                          <div>
+                            <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2 sticky top-0 bg-white py-2 z-10 backdrop-blur-sm">
+                              <Tag className="w-3.5 h-3.5" /> Discount Vouchers
+                              <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[10px]">({discountVouchers.length})</span>
+                            </div>
+                            <div className="space-y-3 px-2">
+                              {isLoadingVouchers ? (
+                                <div className="text-center py-8 text-gray-400">
+                                  <div className="w-8 h-8 border-2 border-gray-300 border-t-[var(--primary)] rounded-full animate-spin mx-auto mb-2"></div>
+                                  Checking vouchers...
+                                </div>
+                              ) : discountVouchers.length === 0 ? (
+                                <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                  No vouchers available
+                                </div>
+                              ) : (
+                                mounted && discountVouchers.map((v) => {
+                                  const eligible = isVoucherEligible(v);
+                                  return (
+                                    <PromoVoucherCard
+                                      key={v.id}
+                                      voucher={v}
+                                      selected={selectedDiscountVoucherId === v.id}
+                                      onSelect={() => setSelectedDiscountVoucherId(selectedDiscountVoucherId === v.id ? null : v.id)}
+                                      disabled={!eligible}
+                                      reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
+                                      isBest={bestVoucherIds.discount === v.id}
+                                    />
+                                  );
+                                })
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </section>
-                  <section ref={(el) => { sectionRefs.current["payment"] = el; }} data-id="payment" className="md:p-4 col-span-1 md:col-span-4 h-full">
-                    <div className="h-full">
-                      <CheckoutSummary subtotal={subtotal} fee={fee} discount={discount} shippingDiscount={shippingDiscount} />
-                    </div>
+
+                  <section ref={(el) => { sectionRefs.current["payment"] = el; }} data-id="payment" className="col-span-1 md:col-span-4 h-full">
+                    <CheckoutSummary subtotal={subtotal} fee={fee} discount={discount} shippingDiscount={shippingDiscount} />
                   </section>
                 </div>
               </div>
             </div>
+
             <RightSidebar restaurantName={restaurant?.name} totalPayable={totalPayable} onAddressChange={(addr) => setAddress(addr)} />
           </div>
         </div>

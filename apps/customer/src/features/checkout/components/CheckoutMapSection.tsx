@@ -23,8 +23,8 @@ export default function CheckoutMapSection({ children, onAddressChange }: { chil
 
   return (
     <>
-      <div className="relative mb-3">
-        <div className="relative aspect-[16/9] rounded-[24px] overflow-hidden shadow-md bg-white border border-gray-200">
+      <div className="relative mb-4">
+        <div className="relative aspect-[16/9] rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] bg-white border border-gray-100/50">
           <MapView
             pickupPos={pickupPos}
             onPickupChange={(p) => setPickupPos(p)}
@@ -34,12 +34,15 @@ export default function CheckoutMapSection({ children, onAddressChange }: { chil
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-gray-300">
+      <div className="mb-6 bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
+        <div className="px-6 py-5 pb-0 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30">
+          <MapPin className="w-5 h-5 text-gray-400" />
+          <h4 className="font-bold text-[#1A1A1A]">Select Pickup Point</h4>
+        </div>
         <div className="p-4">
-          <div className="font-semibold mb-2 text-[15px]">Chọn điểm đón</div>
           <motion.div layout>
             {places.length === 0 && (
-              <div className="text-gray-500 text-sm">Đang tìm địa điểm gần bạn...</div>
+              <div className="text-gray-500 text-sm text-center py-4">Searching nearby places...</div>
             )}
             {places.map((p, idx) => {
               const selected = selectedIndex === idx;
@@ -58,16 +61,24 @@ export default function CheckoutMapSection({ children, onAddressChange }: { chil
                     setPickupPos({ lng, lat });
                     setFlyVersion((v) => v + 1);
                   }}
-                  className={`relative p-3 border-b last:border-b-0 rounded-md cursor-pointer ${selected ? 'bg-[var(--secondary)]/15' : ''}`}
+                  className={`
+                    relative p-4 mb-2 last:mb-0 rounded-[16px] cursor-pointer border transition-all duration-200 group
+                    ${selected
+                      ? 'bg-lime-50 border-lime-200 shadow-sm'
+                      : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                    }
+                  `}
                 >
-                  <div className="flex items-center gap-2">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center ${selected ? 'bg-[var(--primary)] text-white' : 'bg-gray-100 text-gray-600'}`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${selected ? 'bg-lime-100 text-lime-700' : 'bg-gray-100 text-gray-500'}`}>
                       {selected ? <Hand className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
                     </div>
-                    <div className="text-[14px] font-medium">{p.text}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className={`text-[14px] font-semibold truncate ${selected ? 'text-[#1A1A1A]' : 'text-gray-600'}`}>{p.text}</div>
+                    </div>
                   </div>
                   {selected && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="ml-9 text-gray-500 text-[12px] mt-1">
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="ml-11 text-gray-500 text-[12px] font-medium line-clamp-2">
                       {p.place_name}
                     </motion.div>
                   )}
