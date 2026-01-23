@@ -38,7 +38,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { confirm } = useSwipeConfirmation();
-  const { startLoading, stopLoading } = useNormalLoading();
+  const { startLoading } = useNormalLoading();
   const { user, isLoading: isAuthLoading } = useAuth();
   const { handleLogout } = useLogout();
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -57,14 +57,6 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
     }, 500);
     return () => clearTimeout(timer);
   }, []);
-
-  // Stop loading on navigation complete with 1s delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      stopLoading();
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [pathname, stopLoading]);
 
   // Update active section based on pathname
   useEffect(() => {
@@ -88,7 +80,6 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
     } else {
       const targetPath = `/${sectionId}`;
       if (!pathname.endsWith(sectionId)) {
-        startLoading();
         setActiveSection(sectionId);
         router.push(targetPath);
       }
@@ -97,7 +88,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
 
   const handleProfileClick = () => {
     if (!pathname.endsWith('/profile')) {
-      startLoading();
+      setActiveSection('profile');
       router.push('/profile');
     }
   };

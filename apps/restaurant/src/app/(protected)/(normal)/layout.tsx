@@ -38,16 +38,11 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { confirm } = useSwipeConfirmation();
-  const { startLoading, stopLoading } = useNormalLoading();
+  const { startLoading } = useNormalLoading();
   const [activeSection, setActiveSection] = useState('orders');
   const [navHovered, setNavHovered] = useState(false);
   const { user, isLoading: isAuthLoading } = useAuth();
   const { clearAuth } = useAuthStore();
-
-  // Stop loading on navigation complete
-  useEffect(() => {
-    stopLoading();
-  }, [pathname, stopLoading]);
 
   // Update active section based on pathname
   useEffect(() => {
@@ -78,7 +73,6 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
     } else {
       const targetPath = `/${sectionId}`;
       if (!pathname.endsWith(sectionId)) {
-        startLoading();
         setActiveSection(sectionId);
         router.push(targetPath);
       }
@@ -87,7 +81,6 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
 
   const handleProfileClick = () => {
     if (!pathname.endsWith('/profile')) {
-      startLoading();
       router.push('/profile');
     }
   };

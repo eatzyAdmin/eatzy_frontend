@@ -8,6 +8,7 @@ export { favoriteApi } from "./favorite";
 export { driverApi } from "./driver";
 export { walletApi } from "./wallet";
 export { reportApi } from "./report";
+export { systemConfigApi } from "./system-config";
 
 // Restaurant module exports
 export {

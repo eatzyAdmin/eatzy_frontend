@@ -17,12 +17,10 @@ import { useOrderDetail } from "@/features/history/hooks/useOrderDetail";
 import { WalletTransaction } from "@/features/wallet/data/mockWalletData";
 import { WalletTransactionResponse } from "@repo/types";
 
-import { useNormalLoading } from "../context/NormalLoadingContext";
 import { useBottomNav } from "../context/BottomNavContext";
 
 export default function WalletPage() {
   const { show, hide } = useLoading();
-  const { stopLoading } = useNormalLoading();
   const { setIsVisible } = useBottomNav();
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
@@ -98,10 +96,6 @@ export default function WalletPage() {
     setSelectedTransaction(tx);
     setIsTransactionDrawerOpen(true);
   };
-
-  useEffect(() => {
-    stopLoading();
-  }, [stopLoading]);
 
   // Scroll animation state
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);

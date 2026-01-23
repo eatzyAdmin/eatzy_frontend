@@ -1,13 +1,18 @@
 export type SystemParameterType = 'percentage' | 'currency' | 'number' | 'text';
 
 export type SystemParameter = {
-  id: string;
-  key: string;
-  name: string;
-  value: number | string;
-  type: SystemParameterType;
-  suffix?: string; // e.g., '%', 'đ', 'km'
+  id: number;
+  configKey: string;
+  configValue: string;
   description: string;
-  updatedAt: string;
-  updatedBy: string;
+  updatedAt?: string;
+  lastUpdatedBy?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  // UI helpers
+  name?: string;
+  type?: SystemParameterType;
+  suffix?: string;
 };

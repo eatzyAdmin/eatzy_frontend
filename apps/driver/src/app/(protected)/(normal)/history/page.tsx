@@ -9,13 +9,12 @@ import HistoryStats from "@/features/history/components/HistoryStats";
 import HistoryFilter from "@/features/history/components/HistoryFilter";
 import DriverHistoryCard from "@/features/history/components/DriverHistoryCard";
 import DriverOrderDetailDrawer from "@/features/history/components/DriverOrderDetailDrawer";
-import { useNormalLoading } from "../context/NormalLoadingContext";
+
 import { useBottomNav } from "../context/BottomNavContext";
 import { useDriverOrderHistory } from "@/features/history/hooks/useDriverOrderHistory";
 
 export default function HistoryPage() {
   const { hide } = useLoading();
-  const { stopLoading } = useNormalLoading();
   const { setIsVisible } = useBottomNav();
   const [filter, setFilter] = useState<"ALL" | "DELIVERED" | "CANCELLED">("ALL");
   const [selectedOrder, setSelectedOrder] = useState<DriverHistoryOrder | null>(null);
@@ -121,9 +120,8 @@ export default function HistoryPage() {
   useEffect(() => {
     if (!isLoading) {
       hide();
-      stopLoading();
     }
-  }, [hide, stopLoading, isLoading]);
+  }, [hide, isLoading]);
 
   const filteredOrders = orders; // Filtering is now handled by the hook
 

@@ -13,11 +13,8 @@ import { LocateFixed, Bike } from "@repo/ui/icons";
 import type { DriverActiveOrder } from "@repo/types";
 import { useDriverStatus } from "@/features/online/hooks/useDriverStatus";
 
-import { useNormalLoading } from "../context/NormalLoadingContext";
-
 export default function Page() {
   const { hide } = useLoading();
-  const { stopLoading } = useNormalLoading();
 
   // Driver status management
   const {
@@ -34,9 +31,8 @@ export default function Page() {
     const timer = setTimeout(() => {
       hide();
     }, 1500);
-    stopLoading();
     return () => clearTimeout(timer);
-  }, [hide, stopLoading]);
+  }, [hide]);
 
   return (
     <div className="w-full h-full">

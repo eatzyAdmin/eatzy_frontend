@@ -12,7 +12,6 @@ import { mockDriverProfile } from "@/features/profile/data/mockProfileData";
 import DriverProfileCard from "@/features/profile/components/DriverProfileCard";
 import ProfileMenuItem from "@/features/profile/components/ProfileMenuItem";
 
-import { useNormalLoading } from "../context/NormalLoadingContext";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { logout } from "@/features/auth/api";
 import { useAuthStore } from "@repo/store";
@@ -22,13 +21,8 @@ export default function ProfilePage() {
   const { confirm } = useSwipeConfirmation();
   const { show, hide } = useLoading();
   const { showNotification } = useNotification();
-  const { stopLoading } = useNormalLoading();
   const { user } = useAuth();
   const { clearAuth } = useAuthStore();
-
-  useEffect(() => {
-    stopLoading();
-  }, [stopLoading]);
 
   const handleLogout = () => {
     confirm({

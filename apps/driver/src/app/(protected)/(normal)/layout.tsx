@@ -9,7 +9,6 @@ import { BottomNavProvider, useBottomNav } from "./context/BottomNavContext";
 
 function Navigation() {
   const pathname = usePathname();
-  const { startLoading } = useNormalLoading();
   const tabs = [
     { id: "home", label: "Home", href: "/home", Icon: Home },
     { id: "history", label: "History", href: "/history", Icon: History },
@@ -25,7 +24,6 @@ function Navigation() {
           <Link
             key={id}
             href={href}
-            onClick={() => pathname !== href && startLoading()}
             className={`group relative flex h-14 items-center justify-center overflow-hidden rounded-full transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${active ? "flex-[2.5]" : "flex-1"
               }`}
           >
