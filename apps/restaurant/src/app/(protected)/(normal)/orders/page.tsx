@@ -5,12 +5,13 @@ import { AnimatePresence, motion } from '@repo/ui/motion';
 import { useLoading, OrderCardShimmer, useSwipeConfirmation, useNotification } from '@repo/ui';
 import { ClipboardList, ChefHat, Bike, Power } from '@repo/ui/icons';
 import type { Order } from '@repo/types';
-import { mockRestaurantOrders } from '@/data/mockOrders';
+import { orderApi } from '@repo/api';
 import OrderCard from '@/components/OrderCard';
 import OrderDrawer from '@/components/OrderDrawer';
 import '@repo/ui/styles/scrollbar.css';
 
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useRestaurantOrders } from '@/features/orders/hooks/useRestaurantOrders';
 
 export default function OrdersPage() {
   const { user } = useAuth();
@@ -18,17 +19,21 @@ export default function OrdersPage() {
   const { showNotification } = useNotification();
   const { hide } = useLoading();
   const [isAppActive, setIsAppActive] = useState(true);
-  const [orders, setOrders] = useState<Order[]>(mockRestaurantOrders);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+
+  // Fetch orders from API
+  const {
+    pendingOrders,
+    inProgressOrders,
+    waitingForDriverOrders,
+    isLoading,
+    refetch,
+  } = useRestaurantOrders();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      hide();
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+    hide();
   }, [hide]);
 
   const handleToggleApp = () => {
@@ -58,10 +63,6 @@ export default function OrdersPage() {
     });
   };
 
-  const pendingOrders = orders.filter(o => o.status === 'PLACED');
-  const inProgressOrders = orders.filter(o => o.status === 'PREPARED');
-  const waitingForDriverOrders = orders.filter(o => o.status === 'PICKED');
-
   const handleOpenOrder = (order: Order) => {
     setSelectedOrder(order);
     setDrawerOpen(true);
@@ -73,41 +74,89 @@ export default function OrdersPage() {
     setTimeout(() => setSelectedOrder(null), 300);
   };
 
-  const handleConfirmOrder = (orderId: string) => {
-    setOrders(prev => prev.map(order =>
-      order.id === orderId
-        ? { ...order, status: 'PREPARED' as const }
-        : order
-    ));
-    handleCloseDrawer();
+  const handleConfirmOrder = async (orderId: string) => {
+    try {
+      setIsActionLoading(true);
+      const response = await orderApi.acceptOrder(Number(orderId));
 
-    // Show loading shimmer for 1s after action
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+      if (response.statusCode === 200) {
+        showNotification({
+          message: 'Đã xác nhận đơn hàng!',
+          type: 'success',
+          autoHideDuration: 3000
+        });
+        handleCloseDrawer();
+        await refetch();
+      } else {
+        throw new Error(response.message || 'Failed to confirm order');
+      }
+    } catch (error) {
+      showNotification({
+        message: 'Không thể xác nhận đơn hàng. Vui lòng thử lại.',
+        type: 'error',
+        autoHideDuration: 3000
+      });
+    } finally {
+      setIsActionLoading(false);
+    }
   };
 
-  const handleRejectOrder = (orderId: string, reason: string) => {
-    console.log(`Rejected order ${orderId} with reason: ${reason}`);
-    setOrders(prev => prev.filter(order => order.id !== orderId));
-    handleCloseDrawer();
+  const handleRejectOrder = async (orderId: string, reason: string) => {
+    try {
+      setIsActionLoading(true);
+      const response = await orderApi.cancelOrder(Number(orderId), reason);
 
-    // Show loading shimmer for 1s after action
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+      if (response.statusCode === 200) {
+        showNotification({
+          message: 'Đã từ chối đơn hàng!',
+          type: 'success',
+          autoHideDuration: 3000
+        });
+        handleCloseDrawer();
+        await refetch();
+      } else {
+        throw new Error(response.message || 'Failed to reject order');
+      }
+    } catch (error) {
+      showNotification({
+        message: 'Không thể từ chối đơn hàng. Vui lòng thử lại.',
+        type: 'error',
+        autoHideDuration: 3000
+      });
+    } finally {
+      setIsActionLoading(false);
+    }
   };
 
-  const handleCompleteOrder = (orderId: string) => {
-    setOrders(prev => prev.map(order =>
-      order.id === orderId
-        ? { ...order, status: 'PICKED' as const }
-        : order
-    ));
-    handleCloseDrawer();
+  const handleCompleteOrder = async (orderId: string) => {
+    try {
+      setIsActionLoading(true);
+      const response = await orderApi.markOrderAsReady(Number(orderId));
 
-    // Show loading shimmer for 1s after action
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+      if (response.statusCode === 200) {
+        showNotification({
+          message: 'Đơn hàng đã sẵn sàng giao!',
+          type: 'success',
+          autoHideDuration: 3000
+        });
+        handleCloseDrawer();
+        await refetch();
+      } else {
+        throw new Error(response.message || 'Failed to complete order');
+      }
+    } catch (error) {
+      showNotification({
+        message: 'Không thể hoàn thành đơn hàng. Vui lòng thử lại.',
+        type: 'error',
+        autoHideDuration: 3000
+      });
+    } finally {
+      setIsActionLoading(false);
+    }
   };
+
+  // Combine loading states for shimmer display
+  const showLoading = isLoading || isActionLoading;
 
   return (
 
@@ -159,7 +208,7 @@ export default function OrdersPage() {
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
               <div className="space-y-4 py-2 px-1">
-                {isLoading ? (
+                {showLoading ? (
                   <OrderCardShimmer cardCount={2} />
                 ) : (
                   <>
@@ -194,13 +243,13 @@ export default function OrdersPage() {
                   IN PROGRESS
                 </h3>
                 <div className="w-7 h-7 rounded-xl bg-blue-500 flex items-center justify-center shadow-md shadow-blue-500/30">
-                  <span className="text-xs font-bold text-white">{isLoading ? '-' : inProgressOrders.length}</span>
+                  <span className="text-xs font-bold text-white">{showLoading ? '-' : inProgressOrders.length}</span>
                 </div>
               </div>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
               <div className="space-y-4 py-2 px-1">
-                {isLoading ? (
+                {showLoading ? (
                   <OrderCardShimmer cardCount={2} />
                 ) : (
                   <>
@@ -235,13 +284,13 @@ export default function OrdersPage() {
                   WAITING FOR DRIVER
                 </h3>
                 <div className="w-7 h-7 rounded-xl bg-lime-500 flex items-center justify-center shadow-md shadow-lime-500/30">
-                  <span className="text-xs font-bold text-white">{isLoading ? '-' : waitingForDriverOrders.length}</span>
+                  <span className="text-xs font-bold text-white">{showLoading ? '-' : waitingForDriverOrders.length}</span>
                 </div>
               </div>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
               <div className="space-y-4 py-2 px-1">
-                {isLoading ? (
+                {showLoading ? (
                   <OrderCardShimmer cardCount={2} />
                 ) : (
                   <>

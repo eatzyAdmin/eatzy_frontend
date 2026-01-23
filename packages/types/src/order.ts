@@ -31,4 +31,9 @@ export type Order = {
   total: number;
   createdAt?: string;
   updatedAt?: string;
+  customer?: {
+    id?: number;
+    name?: string;
+    phoneNumber?: string;
+  };
 };

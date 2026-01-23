@@ -65,6 +65,21 @@ export const orderApi = {
   },
 
   /**
+   * Get orders for current owner's restaurant (uses auth context)
+   * GET /api/v1/orders/my-restaurant
+   * Supports filter via query params: filter=orderStatus~'PENDING' or 'PLACED' etc.
+   */
+  getMyRestaurantOrders: async (params?: {
+    filter?: string;
+    page?: number;
+    size?: number;
+  }): Promise<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>> => {
+    return http.get<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>>("/api/v1/orders/my-restaurant", {
+      params,
+    }) as unknown as Promise<IBackendRes<{ result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } }>>;
+  },
+
+  /**
    * Get orders by restaurant ID
    * GET /api/v1/orders/restaurant/:restaurantId
    */
