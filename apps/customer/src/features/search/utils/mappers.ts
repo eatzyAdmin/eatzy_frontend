@@ -60,7 +60,9 @@ export function mapMagazineToRestaurantWithMenu(
     rating: magazine.averageRating || 0,
     address: magazine.address,
     description: magazine.description,
-    imageUrl: dishes[0]?.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
+    imageUrl: magazine.avatarUrl || magazine.coverImageUrl || dishes[0]?.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
+    avatarUrl: magazine.avatarUrl,
+    coverImageUrl: magazine.coverImageUrl,
     reviewCount: (magazine.oneStarCount || 0) + (magazine.twoStarCount || 0) +
       (magazine.threeStarCount || 0) + (magazine.fourStarCount || 0) +
       (magazine.fiveStarCount || 0),

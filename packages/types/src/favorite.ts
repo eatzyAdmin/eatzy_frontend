@@ -1,6 +1,6 @@
 // Matches backend Favorite and ResFavouriteDTO
 export interface FavoriteRequest {
-  customer: { id: number };
+  customer?: { id: number };  // Optional - backend uses auth context if not provided
   restaurant: { id: number };
 }
 
@@ -18,6 +18,7 @@ export interface FavoriteResponse {
     averageRating: number;
     slug?: string;
     avatarUrl?: string;
+    coverImageUrl?: string;
   };
 }
 

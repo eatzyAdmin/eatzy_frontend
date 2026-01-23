@@ -10,17 +10,16 @@ export function useFavorites() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const customerId = user?.id ? Number(user.id) : null;
+  const isLoggedIn = !!user?.id;
 
-  // Fetch all favorites
+  // Fetch all favorites for current user (uses backend auth context)
   const { data: favorites = [], isLoading } = useQuery({
-    queryKey: ["favorites", customerId],
+    queryKey: ["favorites", "my"],
     queryFn: async () => {
-      if (!customerId) return [];
-      const response = await favoriteApi.getFavoritesByCustomerId(customerId);
+      const response = await favoriteApi.getMyFavorites();
       return response.data || [];
     },
-    enabled: !!customerId,
+    enabled: isLoggedIn,
   });
 
   const isFavorite = useCallback(
@@ -41,20 +40,21 @@ export function useFavorites() {
   const addMutation = useMutation({
     mutationFn: (restaurantId: number) =>
       favoriteApi.addFavorite({
-        customer: { id: customerId! },
         restaurant: { id: restaurantId },
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["favorites", customerId] });
+      queryClient.invalidateQueries({ queryKey: ["favorites", "my"] });
       showNotification({
         message: "Đã thêm vào yêu thích",
         type: "success",
+        format: "Dữ liệu đã cập nhật thành công."
       });
     },
-    onError: () => {
+    onError: (error) => {
       showNotification({
         message: "Không thể thêm vào yêu thích",
         type: "error",
+        format: `${error.message}`
       });
     },
   });
@@ -63,23 +63,25 @@ export function useFavorites() {
   const removeMutation = useMutation({
     mutationFn: (favoriteId: number) => favoriteApi.removeFavorite(favoriteId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["favorites", customerId] });
+      queryClient.invalidateQueries({ queryKey: ["favorites", "my"] });
       showNotification({
         message: "Đã xóa khỏi yêu thích",
         type: "success",
+        format: "Dữ liệu đã cập nhật thành công."
       });
     },
-    onError: () => {
+    onError: (error) => {
       showNotification({
         message: "Không thể xóa khỏi yêu thích",
         type: "error",
+        format: `${error.message}`
       });
     },
   });
 
   const toggleFavorite = useCallback(
     async (restaurantId: number) => {
-      if (!customerId) {
+      if (!isLoggedIn) {
         showNotification({
           message: "Vui lòng đăng nhập để thực hiện chức năng này",
           type: "error",
@@ -95,7 +97,18 @@ export function useFavorites() {
         await addMutation.mutateAsync(restaurantId);
       }
     },
-    [customerId, getFavoriteId, removeMutation, addMutation, showNotification]
+    [isLoggedIn, getFavoriteId, removeMutation, addMutation, showNotification]
+  );
+
+  const isRestaurantMutating = useCallback(
+    (restaurantId: number) => {
+      const favoriteId = getFavoriteId(restaurantId);
+      return (
+        (addMutation.isPending && addMutation.variables === restaurantId) ||
+        (removeMutation.isPending && removeMutation.variables === favoriteId)
+      );
+    },
+    [addMutation.isPending, addMutation.variables, removeMutation.isPending, removeMutation.variables, getFavoriteId]
   );
 
   return {
@@ -104,6 +117,6 @@ export function useFavorites() {
     isFavorite,
     toggleFavorite,
     isMutating: addMutation.isPending || removeMutation.isPending,
+    isRestaurantMutating,
   };
 }
-

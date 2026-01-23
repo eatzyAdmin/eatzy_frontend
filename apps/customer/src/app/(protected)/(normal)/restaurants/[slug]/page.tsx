@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ImageWithFallback, RestaurantDetailShimmer, FloatingRestaurantCartShimmer } from "@repo/ui";
-import { ChevronLeft, ChevronRight, Star, MapPin, ArrowLeft, Plus, Minus, CheckCircle2 } from "@repo/ui/icons";
+import { ChevronLeft, ChevronRight, Star, MapPin, ArrowLeft, Plus, Minus, CheckCircle2, Loader2 } from "@repo/ui/icons";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useLoading, useHoverHighlight, HoverHighlightOverlay, useFlyToCart, FlyToCartLayer } from "@repo/ui";
 import type { Restaurant, Dish, MenuCategory } from "@repo/types";
@@ -207,7 +207,11 @@ export default function RestaurantDetailPage() {
                       className={`absolute top-4 right-4 backdrop-blur-md border px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-all active:scale-95 ${favorited ? 'bg-[#FFC107] border-yellow-200 text-white' : 'bg-white/20 border-white/30 text-white'
                         }`}
                     >
-                      <Star className={`w-3.5 h-3.5 ${favorited ? 'fill-white' : 'fill-white/80'}`} />
+                      {isMutating ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Star className={`w-3.5 h-3.5 ${favorited ? 'fill-white' : 'fill-white/80'}`} />
+                      )}
                       <span className="text-[12px] font-bold uppercase tracking-wide">
                         {favorited ? 'Saved' : 'Save'}
                       </span>
@@ -336,7 +340,11 @@ export default function RestaurantDetailPage() {
                       : 'bg-[#28A745] hover:bg-[#218838] text-white border-white/80'
                       }`}
                   >
-                    <Star className={`w-4 h-4 ${favorited ? 'fill-white' : 'fill-none'}`} />
+                    {isMutating ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Star className={`w-4 h-4 ${favorited ? 'fill-white' : 'fill-none'}`} />
+                    )}
                     <span className="text-[14px] font-medium uppercase tracking-wide">
                       {favorited ? 'Saved to Favorites' : 'Save to Favorites'}
                     </span>

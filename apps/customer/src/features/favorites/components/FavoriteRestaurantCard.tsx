@@ -2,17 +2,19 @@
 
 import { motion } from "@repo/ui/motion";
 import { ImageWithFallback, useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
-import { MapPin, Star, Heart } from "@repo/ui/icons";
+import { MapPin, Star, Heart, Loader2 } from "@repo/ui/icons";
 import type { Restaurant } from "@repo/types";
 
 export default function FavoriteRestaurantCard({
   restaurant,
   onClick,
-  onRemove
+  onRemove,
+  isLoading
 }: {
   restaurant: Restaurant;
   onClick: () => void;
   onRemove?: (e: React.MouseEvent) => void;
+  isLoading?: boolean;
 }) {
   const {
     containerRef,
@@ -67,9 +69,14 @@ export default function FavoriteRestaurantCard({
               e.stopPropagation();
               onRemove?.(e);
             }}
-            className="absolute top-2 right-2 md:top-3 md:right-3 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center hover:scale-110 transition-transform z-10"
+            disabled={isLoading}
+            className="absolute top-2 right-2 md:top-3 md:right-3 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center hover:scale-110 transition-transform z-10 disabled:opacity-70"
           >
-            <Heart className="w-4 h-4 md:w-5 md:h-5 text-red-500 fill-red-500" />
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-red-500 animate-spin" />
+            ) : (
+              <Heart className="w-4 h-4 md:w-5 md:h-5 text-red-500 fill-red-500" />
+            )}
           </button>
 
           {/* Rating Badge */}

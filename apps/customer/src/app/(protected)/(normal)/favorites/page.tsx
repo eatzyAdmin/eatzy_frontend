@@ -16,11 +16,16 @@ export default function FavoritesPage() {
   const { showNotification } = useNotification();
   const [searchInputValue, setSearchInputValue] = useState("");
   const [actualSearchQuery, setActualSearchQuery] = useState("");
-  const { favorites, isLoading: isFavoritesLoading, toggleFavorite } = useFavorites();
+  const { favorites, isLoading: isFavoritesLoading, toggleFavorite, isRestaurantMutating } = useFavorites();
 
   const { setIsVisible } = useBottomNav();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+
+  // Hide global loading when page mounted
+  useEffect(() => {
+    hide();
+  }, [hide]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -51,7 +56,9 @@ export default function FavoritesPage() {
       description: f.restaurant.description,
       rating: f.restaurant.averageRating,
       slug: f.restaurant.slug,
-      imageUrl: f.restaurant.avatarUrl,
+      imageUrl: f.restaurant.avatarUrl || f.restaurant.coverImageUrl,
+      avatarUrl: f.restaurant.avatarUrl,
+      coverImageUrl: f.restaurant.coverImageUrl,
       status: 'OPEN',
       categories: [],
     }));
@@ -163,6 +170,7 @@ export default function FavoritesPage() {
                       restaurant={restaurant}
                       onClick={() => handleRestaurantClick(restaurant)}
                       onRemove={() => handleRemoveFavorite(restaurant.id)}
+                      isLoading={isRestaurantMutating(Number(restaurant.id))}
                     />
                   </motion.div>
                 ))}

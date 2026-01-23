@@ -23,10 +23,10 @@ export const favoriteApi = {
   },
 
   /**
-   * Get all favorites for a customer
-   * GET /api/v1/favorites/customer/:customerId
+   * Get all favorites for current logged-in user
+   * GET /api/v1/favorites/my-favorites
    */
-  getFavoritesByCustomerId: async (customerId: number): Promise<IBackendRes<FavoriteResponse[]>> => {
-    return http.get<IBackendRes<FavoriteResponse[]>>(`/api/v1/favorites/customer/${customerId}`) as unknown as Promise<IBackendRes<FavoriteResponse[]>>;
+  getMyFavorites: async (): Promise<IBackendRes<FavoriteResponse[]>> => {
+    return http.get<IBackendRes<FavoriteResponse[]>>("/api/v1/favorites/my-favorites") as unknown as Promise<IBackendRes<FavoriteResponse[]>>;
   },
 };
