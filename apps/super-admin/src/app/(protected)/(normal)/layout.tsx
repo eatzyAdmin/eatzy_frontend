@@ -13,7 +13,8 @@ import {
   User,
   LogOut,
   Wallet,
-  ShieldCheck
+  ShieldCheck,
+  Ticket
 } from '@repo/ui/icons';
 import RestaurantNavItem from '../../../components/RestaurantNavItem';
 import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation } from '@repo/ui';
@@ -26,6 +27,7 @@ const adminMenuItems = [
   { id: 'drivers', icon: Truck, text: 'Quản lý tài xế' },
   { id: 'customers', icon: Users, text: 'Quản lý khách hàng' },
   { id: 'finance', icon: Wallet, text: 'Tài chính' },
+  { id: 'promotions', icon: Ticket, text: 'Chương trình khuyến mãi' },
   { id: 'system-config', icon: Settings, text: 'Cấu hình hệ thống' },
   { id: 'permissions', icon: ShieldCheck, text: 'Quản lý phân quyền' }
 ];
