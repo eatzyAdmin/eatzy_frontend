@@ -53,41 +53,45 @@ export default function FavoriteRestaurantCard({
       <HoverHighlightOverlay rect={rect} style={highlightStyle} />
 
       {/* Restaurant Image */}
-      {restaurant.imageUrl && (
-        <div className="relative aspect-[16/9] overflow-hidden bg-gray-100">
+      <div className="relative aspect-[16/9] overflow-hidden bg-gray-100">
+        {restaurant.imageUrl ? (
           <ImageWithFallback
             src={restaurant.imageUrl}
             alt={restaurant.name}
             fill
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+            <span className="text-4xl font-bold text-primary/40">{restaurant.name.charAt(0).toUpperCase()}</span>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-          {/* Favorite Badge */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove?.(e);
-            }}
-            disabled={isLoading}
-            className="absolute top-2 right-2 md:top-3 md:right-3 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center hover:scale-110 transition-transform z-10 disabled:opacity-70"
-          >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-red-500 animate-spin" />
-            ) : (
-              <Heart className="w-4 h-4 md:w-5 md:h-5 text-red-500 fill-red-500" />
-            )}
-          </button>
-
-          {/* Rating Badge */}
-          {restaurant.rating && (
-            <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 bg-white/95 backdrop-blur-sm px-2 py-1 md:px-3 md:py-1.5 rounded-full shadow-lg flex items-center gap-1 md:gap-1.5">
-              <Star className="w-3 h-3 md:w-4 md:h-4 text-amber-500 fill-amber-500" />
-              <span className="text-xs md:text-sm font-bold text-[#1A1A1A]">{restaurant.rating.toFixed(1)}</span>
-            </div>
+        {/* Favorite Badge */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove?.(e);
+          }}
+          disabled={isLoading}
+          className="absolute top-2 right-2 md:top-3 md:right-3 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/95 backdrop-blur-sm shadow-lg flex items-center justify-center hover:scale-110 transition-transform z-10 disabled:opacity-70"
+        >
+          {isLoading ? (
+            <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-red-500 animate-spin" />
+          ) : (
+            <Heart className="w-4 h-4 md:w-5 md:h-5 text-red-500 fill-red-500" />
           )}
-        </div>
-      )}
+        </button>
+
+        {/* Rating Badge */}
+        {restaurant.rating && (
+          <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 bg-white/95 backdrop-blur-sm px-2 py-1 md:px-3 md:py-1.5 rounded-full shadow-lg flex items-center gap-1 md:gap-1.5">
+            <Star className="w-3 h-3 md:w-4 md:h-4 text-amber-500 fill-amber-500" />
+            <span className="text-xs md:text-sm font-bold text-[#1A1A1A]">{restaurant.rating.toFixed(1)}</span>
+          </div>
+        )}
+      </div>
 
       {/* Restaurant Details */}
       <div className="p-3 md:p-5 space-y-2 md:space-y-3">

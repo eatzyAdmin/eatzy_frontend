@@ -17,6 +17,7 @@ export interface FavoriteResponse {
     description: string;
     averageRating: number;
     slug?: string;
+    imageUrl?: string; // Backend returns this from avatarUrl
     avatarUrl?: string;
     coverImageUrl?: string;
   };

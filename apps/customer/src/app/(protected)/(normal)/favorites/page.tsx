@@ -56,7 +56,7 @@ export default function FavoritesPage() {
       description: f.restaurant.description,
       rating: f.restaurant.averageRating,
       slug: f.restaurant.slug,
-      imageUrl: f.restaurant.avatarUrl || f.restaurant.coverImageUrl,
+      imageUrl: f.restaurant.imageUrl || f.restaurant.avatarUrl || f.restaurant.coverImageUrl,
       avatarUrl: f.restaurant.avatarUrl,
       coverImageUrl: f.restaurant.coverImageUrl,
       status: 'OPEN',
