@@ -193,9 +193,9 @@ export const orderApi = {
   },
 
   /**
-   * Get orders for current logged-in driver (uses auth context)
+   * Get orders for current user as driver (uses auth context)
    * GET /api/v1/orders/my-driver
-   * Supports filter via query params: filter=orderStatus != 'DELIVERED' and orderStatus != 'REJECTED'
+   * Supports filter via query params: filter=orderStatus~'PENDING' or 'PLACED' etc.
    */
   getMyDriverOrders: async (params?: {
     filter?: string;

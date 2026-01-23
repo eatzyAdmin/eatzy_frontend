@@ -6,6 +6,8 @@ export { voucherApi } from "./voucher";
 export { orderApi } from "./order";
 export { favoriteApi } from "./favorite";
 export { driverApi } from "./driver";
+export { walletApi } from "./wallet";
+export { reportApi } from "./report";
 
 // Restaurant module exports
 export {

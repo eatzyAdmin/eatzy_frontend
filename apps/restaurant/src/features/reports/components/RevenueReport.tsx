@@ -2,12 +2,12 @@
 
 import { useMemo } from 'react';
 import { motion } from '@repo/ui/motion';
-import { RevenueReportItem } from '../services/reportService';
+import { RevenueReportItemDTO } from '@repo/types';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ArrowUp, DollarSign, Wallet, Percent, ArrowDown } from 'lucide-react';
 
 interface RevenueReportProps {
-  data: RevenueReportItem[];
+  data: RevenueReportItemDTO[];
 }
 
 const formatCurrency = (value: number) =>

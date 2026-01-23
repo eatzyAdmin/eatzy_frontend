@@ -1,12 +1,13 @@
-import { DataTable, ColumnDef } from '@repo/ui';
+import { DataTable, ColumnDef, useLoading } from '@repo/ui';
 import { motion } from '@repo/ui/motion';
-import { mockOrderHistory, OrderHistoryItem } from '../data/mockHistory';
+import { OrderHistoryItem } from '../data/mockHistory';
 import { Search, Filter, Download, FileText, CheckCircle, AlertCircle, X, Clock, User, CreditCard, RotateCcw } from '@repo/ui/icons';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import WalletSearchPopup from '@/features/wallet/components/WalletSearchPopup';
 import OrderHistoryFilterModal from './OrderHistoryFilterModal';
 import OrderDetailsModal from './OrderDetailsModal';
 import OrderExportModal from './OrderExportModal';
+import { useOrderHistory } from '../hooks/useOrderHistory';
 
 const columns: ColumnDef<OrderHistoryItem>[] = [
   {
@@ -15,7 +16,7 @@ const columns: ColumnDef<OrderHistoryItem>[] = [
     className: 'w-[140px]',
     formatter: (value, item) => (
       <span className="font-mono text-xs font-medium text-gray-500 bg-white px-2 py-1.5 rounded border border-gray-100">
-        {item.id}
+        #{item.id.replace('ORD-', '')}
       </span>
     )
   },
@@ -25,8 +26,12 @@ const columns: ColumnDef<OrderHistoryItem>[] = [
     className: 'min-w-[200px]',
     formatter: (value, item) => (
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-          <User className="w-4 h-4" />
+        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 overflow-hidden">
+          {item.customerAvatar ? (
+            <img src={item.customerAvatar} alt={item.customerName} className="w-full h-full object-cover" />
+          ) : (
+            <User className="w-4 h-4" />
+          )}
         </div>
         <div className="flex flex-col">
           <span className="font-bold text-gray-900 text-sm">{item.customerName}</span>
@@ -99,11 +104,13 @@ const columns: ColumnDef<OrderHistoryItem>[] = [
     label: 'STATUS',
     key: 'status',
     formatter: (value, item) => {
+      const statusKey = item.status.toLowerCase();
       const config = {
         completed: { bg: 'bg-lime-100', text: 'text-lime-700', border: 'border-lime-200', icon: CheckCircle, label: 'Completed' },
+        delivered: { bg: 'bg-lime-100', text: 'text-lime-700', border: 'border-lime-200', icon: CheckCircle, label: 'Completed' },
         cancelled: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', icon: AlertCircle, label: 'Cancelled' },
         refunded: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200', icon: RotateCcw, label: 'Refunded' },
-      }[item.status] || { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200', icon: Clock, label: item.status };
+      }[statusKey] || { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200', icon: Clock, label: statusKey };
 
       const Icon = config.icon;
 
@@ -118,14 +125,7 @@ const columns: ColumnDef<OrderHistoryItem>[] = [
 ];
 
 export default function OrderHistoryTable() {
-  const [data] = useState(mockOrderHistory);
-  // const { showNotification } = useNotification();
   const [sortConfig, setSortConfig] = useState<{ key: keyof OrderHistoryItem; direction: 'asc' | 'desc' } | null>(null);
-  // Details Modal State
-  const [selectedOrder, setSelectedOrder] = useState<OrderHistoryItem | null>(null);
-
-  // Export Modal State
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Search State
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -134,7 +134,7 @@ export default function OrderHistoryTable() {
     description: ''
   });
 
-  // Updated Filter State
+  // Filter State
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [filterFields, setFilterFields] = useState<{
     status: string;
@@ -147,6 +147,26 @@ export default function OrderHistoryTable() {
     dateRange: { from: null, to: null },
     amountRange: { min: 0, max: 100000000 },
   });
+
+  // Use hook
+  const { orders, isLoading } = useOrderHistory({
+    size: 100, // Fetch more for table
+    status: filterFields.status || undefined,
+    dateRange: filterFields.dateRange,
+  });
+
+  // Details Modal State
+  const [selectedOrder, setSelectedOrder] = useState<OrderHistoryItem | null>(null);
+
+  // Export Modal State
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
+  const { show, hide } = useLoading();
+
+  useEffect(() => {
+    if (isLoading) show();
+    else hide();
+  }, [isLoading, show, hide]);
 
   const handleSort = (key: string) => {
     const typedKey = key as keyof OrderHistoryItem;
@@ -201,35 +221,23 @@ export default function OrderHistoryTable() {
   };
 
   const filteredAndSortedData = useMemo(() => {
-    let result = [...data];
+    let result = [...orders];
 
-    // Apply Search
+    // Apply Client-Side Search (since API search might be limited or user wants instant filtered view of current page)
     result = result.filter(item => {
       const idMatch = searchFields.id === '' || item.id.toLowerCase().includes(searchFields.id.toLowerCase());
       const nameMatch = searchFields.description === '' || item.customerName.toLowerCase().includes(searchFields.description.toLowerCase());
       return idMatch && nameMatch;
     });
 
-    // Apply Filter
+    // Apply Client-Side Filters (for fields not covered by API params or for extra precision)
+    // NOTE: Date and Status are already filtered by API hook, but repeating here ensures 
+    // correct strict filtering if API does loose matching or if we switch logic.
+    // However, paymentMethod and amountRange are definitely client-side for now.
     result = result.filter(item => {
-      let dateMatch = true;
-      const itemDate = new Date(item.createdAt);
-
-      if (filterFields.dateRange.from) {
-        if (itemDate < filterFields.dateRange.from) dateMatch = false;
-      }
-
-      if (filterFields.dateRange.to) {
-        const endDate = new Date(filterFields.dateRange.to);
-        endDate.setHours(23, 59, 59, 999);
-        if (itemDate > endDate) dateMatch = false;
-      }
-
-      const statusMatch = filterFields.status === '' || item.status === filterFields.status;
       const paymentMatch = filterFields.paymentMethod.length === 0 || filterFields.paymentMethod.includes(item.paymentMethod);
       const amountMatch = item.totalAmount >= filterFields.amountRange.min && item.totalAmount <= filterFields.amountRange.max;
-
-      return dateMatch && statusMatch && paymentMatch && amountMatch;
+      return paymentMatch && amountMatch;
     });
 
     // Apply Sort
@@ -246,7 +254,7 @@ export default function OrderHistoryTable() {
     }
 
     return result;
-  }, [data, sortConfig, searchFields, filterFields]);
+  }, [orders, sortConfig, searchFields, filterFields]);
 
   return (
     <motion.div

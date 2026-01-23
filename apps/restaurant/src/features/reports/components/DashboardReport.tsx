@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { motion } from '@repo/ui/motion';
-import { FullReportDto } from '../services/reportService';
+import { FullReportDTO } from '@repo/types';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   DollarSign,
@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 interface DashboardReportProps {
-  data: FullReportDto;
+  data: FullReportDTO;
 }
 
 const formatCurrency = (value: number) =>

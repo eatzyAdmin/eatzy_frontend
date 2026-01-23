@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef, TouchEvent, WheelEvent } from "react";
+import { useEffect, useState, useRef, TouchEvent, WheelEvent, useMemo } from "react";
 import { motion, useScroll, AnimatePresence } from "@repo/ui/motion";
 import { useLoading, TextShimmer, TransactionCardShimmer } from "@repo/ui";
-import { mockWalletStats, mockTransactions, WalletTransaction } from "@/features/wallet/data/mockWalletData";
 import WalletOverview from "@/features/wallet/components/WalletOverview";
 import TransactionCard from "@/features/wallet/components/TransactionCard";
 import TopUpDrawer from "@/features/wallet/components/TopUpDrawer";
@@ -12,50 +11,92 @@ import TransactionDetailDrawer from "@/features/wallet/components/TransactionDet
 import DriverOrderDetailDrawer from "@/features/history/components/DriverOrderDetailDrawer";
 import { mockDriverHistory, DriverHistoryOrder } from "@/features/history/data/mockDriverHistory";
 import { History, Wallet, ArrowUpRight, ArrowDownLeft, ChevronUp, CheckCircle2 } from "@repo/ui/icons";
+import { useWallet } from "@/features/wallet/hooks/useWallet";
+import { useWalletTransactions } from "@/features/wallet/hooks/useWalletTransactions";
+import { useOrderDetail } from "@/features/history/hooks/useOrderDetail";
+import { WalletTransaction } from "@/features/wallet/data/mockWalletData";
+import { WalletTransactionResponse } from "@repo/types";
 
 import { useNormalLoading } from "../context/NormalLoadingContext";
 import { useBottomNav } from "../context/BottomNavContext";
 
 export default function WalletPage() {
-  const { hide } = useLoading();
+  const { show, hide } = useLoading();
   const { stopLoading } = useNormalLoading();
   const { setIsVisible } = useBottomNav();
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
-  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<DriverHistoryOrder | null>(null);
   const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<WalletTransaction | null>(null);
   const [isTransactionDrawerOpen, setIsTransactionDrawerOpen] = useState(false);
   const [filterType, setFilterType] = useState<'ALL' | 'IN' | 'OUT'>('ALL');
 
-  const filteredTransactions = transactions.filter(tx => {
-    if (filterType === 'ALL') return true;
-    const isPositive = tx.type === 'EARNING' || tx.type === 'TOP_UP';
-    return filterType === 'IN' ? isPositive : !isPositive;
+  const { wallet, isLoading: isWalletLoading } = useWallet();
+  const { transactions: backendTransactions, isLoading: isTransactionsLoading } = useWalletTransactions({
+    type: filterType,
+    size: 100 // Get a good batch
   });
+  const { getOrderDetail, isLoading: isOrderLoading } = useOrderDetail();
+
+  const isLoading = isWalletLoading || isTransactionsLoading;
+
+  // Map backend transactions to the format expected by the UI if needed
+  // or just use them directly if formats align.
+  // The current UI uses local WalletTransaction interface.
+  const transactions = useMemo(() => {
+    return backendTransactions.map(bt => ({
+      id: bt.id.toString(),
+      type: bt.transactionType === "DELIVERY_EARNING" ? "EARNING" :
+        bt.transactionType === "WITHDRAWAL" ? "WITHDRAWAL" :
+          bt.transactionType === "DEPOSIT" ? "TOP_UP" :
+            bt.transactionType === "PAYMENT" ? "ORDER_PAYMENT" : "EARNING",
+      amount: bt.amount,
+      description: bt.description,
+      timestamp: bt.createdAt,
+      status: bt.status === "SUCCESS" ? "COMPLETED" : bt.status === "PENDING" ? "PENDING" : "FAILED",
+      referenceId: bt.order?.id?.toString()
+    })) as WalletTransaction[];
+  }, [backendTransactions]);
+
+  const filteredTransactions = transactions; // Filtering is now handled by the hook
 
   const handleFilterChange = (type: 'ALL' | 'IN' | 'OUT') => {
     if (type === filterType) return;
     setFilterType(type);
-    setIsLoading(true);
     containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    setTimeout(() => setIsLoading(false), 500);
   };
 
-  const handleTransactionClick = (tx: WalletTransaction) => {
+  const handleTransactionClick = async (tx: WalletTransaction) => {
     if (tx.type === "EARNING" && tx.referenceId) {
-      const order = mockDriverHistory.find(o => o.id === tx.referenceId || o.code === tx.referenceId);
-      if (order) {
-        setSelectedOrder(order);
+      // First try mock data (useful during development)
+      const mockOrder = mockDriverHistory.find(o => o.id === tx.referenceId || o.code === tx.referenceId);
+      if (mockOrder) {
+        setSelectedOrder(mockOrder);
         setIsOrderDrawerOpen(true);
+        return;
       }
-    } else {
-      // Handle other transaction types (Withdrawal, TopUp, COD)
-      setSelectedTransaction(tx);
-      setIsTransactionDrawerOpen(true);
+
+      // If not in mock, fetch from backend
+      const orderId = parseInt(tx.referenceId);
+      if (!isNaN(orderId)) {
+        show();
+        try {
+          const order = await getOrderDetail(orderId);
+          if (order) {
+            setSelectedOrder(order);
+            setIsOrderDrawerOpen(true);
+            return;
+          }
+        } finally {
+          hide();
+        }
+      }
     }
+
+    // Handle other transaction types (Withdrawal, TopUp, COD) or fallback
+    setSelectedTransaction(tx);
+    setIsTransactionDrawerOpen(true);
   };
 
   useEffect(() => {
@@ -158,13 +199,10 @@ export default function WalletPage() {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (!isLoading) {
       hide();
-      setIsLoading(false);
-    }, 1800);
-    setTransactions(mockTransactions);
-    return () => clearTimeout(timer);
-  }, [hide]);
+    }
+  }, [hide, isLoading]);
 
   return (
     <div className="flex flex-col h-full bg-[#F7F7F7] relative">
@@ -189,7 +227,7 @@ export default function WalletPage() {
               WALLET
             </h1> */}
 
-            {isLoading ? (
+            {isLoading && !wallet ? (
               <div className="relative overflow-hidden rounded-[32px] bg-[#1A1A1A] text-white p-6 shadow-xl shadow-black/10">
                 {/* Background decoration */}
                 <div className="absolute top-0 right-0 p-8 opacity-10">
@@ -229,7 +267,12 @@ export default function WalletPage() {
               </div>
             ) : (
               <WalletOverview
-                stats={mockWalletStats}
+                stats={{
+                  availableBalance: wallet?.balance || 0,
+                  pendingBalance: 0, // Backend might not support this yet
+                  todayEarnings: 0, // Backend might not support this yet
+                  totalWithdrawn: 0
+                }}
                 onTopUp={() => setIsTopUpOpen(true)}
                 onWithdraw={() => setIsWithdrawOpen(true)}
               />
@@ -343,7 +386,7 @@ export default function WalletPage() {
       <WithdrawDrawer
         open={isWithdrawOpen}
         onClose={() => setIsWithdrawOpen(false)}
-        balance={mockWalletStats.availableBalance}
+        balance={wallet?.balance || 0}
       />
 
       <DriverOrderDetailDrawer

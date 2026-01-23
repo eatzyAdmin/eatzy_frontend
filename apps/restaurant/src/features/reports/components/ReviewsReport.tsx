@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
-import { ReviewSummaryDto, ReviewReportItem } from '../services/reportService';
+import { ReviewSummaryDTO, ReviewReportItemDTO } from '@repo/types';
 import {
   Star,
   MessageCircle,
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 interface ReviewsReportProps {
-  data: ReviewSummaryDto;
+  data: ReviewSummaryDTO;
 }
 
 const StarRating = ({ rating, size = 'md' }: { rating: number; size?: 'sm' | 'md' | 'lg' }) => {
@@ -30,8 +30,8 @@ const StarRating = ({ rating, size = 'md' }: { rating: number; size?: 'sm' | 'md
         <Star
           key={star}
           className={`${sizeClasses[size]} ${star <= rating
-              ? 'text-yellow-400 fill-yellow-400'
-              : 'text-gray-200 fill-gray-200'
+            ? 'text-yellow-400 fill-yellow-400'
+            : 'text-gray-200 fill-gray-200'
             }`}
         />
       ))}
@@ -72,7 +72,7 @@ const RatingBar = ({
   );
 };
 
-const ReviewCard = ({ review }: { review: ReviewReportItem }) => {
+const ReviewCard = ({ review }: { review: ReviewReportItemDTO }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -265,8 +265,8 @@ export default function ReviewsReport({ data }: ReviewsReportProps) {
             <button
               onClick={() => setRatingFilter(null)}
               className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${ratingFilter === null
-                  ? 'bg-[#1A1A1A] text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-[#1A1A1A] text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
             >
               Tất cả
@@ -276,8 +276,8 @@ export default function ReviewsReport({ data }: ReviewsReportProps) {
                 key={star}
                 onClick={() => setRatingFilter(ratingFilter === star ? null : star)}
                 className={`px-3 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-1 ${ratingFilter === star
-                    ? 'bg-lime-500 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-lime-500 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
               >
                 {star} <Star className="w-3 h-3" />

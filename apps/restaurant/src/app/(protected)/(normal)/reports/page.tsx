@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
-import { Loader2 } from 'lucide-react';
 import { useNotification } from '@repo/ui';
 
 import ReportHeader, { ReportTab } from '@/features/reports/components/ReportHeader';
@@ -11,14 +10,14 @@ import RevenueReport from '@/features/reports/components/RevenueReport';
 import OrdersReport from '@/features/reports/components/OrdersReport';
 import MenuReport from '@/features/reports/components/MenuReport';
 import ReviewsReport from '@/features/reports/components/ReviewsReport';
+import { reportApi } from '@repo/api';
 import {
-  reportService,
-  RevenueReportItem,
-  OrderReportItem,
-  MenuSummaryDto,
-  ReviewSummaryDto,
-  FullReportDto,
-} from '@/features/reports/services/reportService';
+  RevenueReportItemDTO,
+  OrderReportItemDTO,
+  MenuSummaryDTO,
+  ReviewSummaryDTO,
+  FullReportDTO,
+} from '@repo/types';
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<ReportTab>('dashboard');
@@ -30,7 +29,6 @@ export default function ReportsPage() {
   const [reportData, setReportData] = useState<any>(null);
 
   const { showNotification } = useNotification();
-  const restaurantId = 'restaurant-001'; // Mock restaurant ID
 
   // Initialize dates on client mount to avoid hydration mismatch
   useEffect(() => {
@@ -54,23 +52,32 @@ export default function ReportsPage() {
 
     setIsLoading(true);
     try {
+      const startIso = startDate.toISOString();
+      const endIso = endDate.toISOString();
+      let response;
       let data;
+
       switch (activeTab) {
         case 'revenue':
-          data = await reportService.getRevenueReport(restaurantId, startDate, endDate);
+          response = await reportApi.getRevenueReport(startIso, endIso);
+          data = response.data;
           break;
         case 'orders':
-          data = await reportService.getOrdersReport(restaurantId, startDate, endDate);
+          response = await reportApi.getOrdersReport(startIso, endIso);
+          data = response.data;
           break;
         case 'menu':
-          data = await reportService.getMenuAnalytics(restaurantId);
+          response = await reportApi.getMenuAnalytics();
+          data = response.data;
           break;
         case 'reviews':
-          data = await reportService.getReviewSummary(restaurantId);
+          response = await reportApi.getReviewSummary();
+          data = response.data;
           break;
         case 'dashboard':
         default:
-          data = await reportService.getFullReport(restaurantId, startDate, endDate);
+          response = await reportApi.getFullReport(startIso, endIso);
+          data = response.data;
           break;
       }
       setReportData(data);
@@ -125,11 +132,11 @@ export default function ReportsPage() {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
         >
-          {activeTab === 'dashboard' && <DashboardReport data={reportData as FullReportDto} />}
-          {activeTab === 'revenue' && <RevenueReport data={reportData as RevenueReportItem[]} />}
-          {activeTab === 'orders' && <OrdersReport data={reportData as OrderReportItem[]} />}
-          {activeTab === 'menu' && <MenuReport data={reportData as MenuSummaryDto} />}
-          {activeTab === 'reviews' && <ReviewsReport data={reportData as ReviewSummaryDto} />}
+          {activeTab === 'dashboard' && <DashboardReport data={reportData as FullReportDTO} />}
+          {activeTab === 'revenue' && <RevenueReport data={reportData as RevenueReportItemDTO[]} />}
+          {activeTab === 'orders' && <OrdersReport data={reportData as OrderReportItemDTO[]} />}
+          {activeTab === 'menu' && <MenuReport data={reportData as MenuSummaryDTO} />}
+          {activeTab === 'reviews' && <ReviewsReport data={reportData as ReviewSummaryDTO} />}
         </motion.div>
       </AnimatePresence>
     );
