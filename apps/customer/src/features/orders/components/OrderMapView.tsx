@@ -172,84 +172,74 @@ export default function OrderMapView({ order }: { order: Order }) {
   const initialView = { longitude: order.restaurantLocation.lng, latitude: order.restaurantLocation.lat, zoom: 13 };
 
   return (
-    <div className="w-full h-full relative overflow-hidden md:rounded-none">
-      <Map
-        ref={(ref) => {
-          (mapRef.current as unknown) = ref as unknown;
-        }}
-        mapStyle="mapbox://styles/mapbox/streets-v12"
-        mapboxAccessToken={token}
-        initialViewState={initialView}
-        style={{ width: "100%", height: "100%" }}
-      >
-        <Source id="order-lines" type="geojson" data={lines as unknown as never}>
-          <Layer id="driver-to-restaurant" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#22c55e", "line-width": 6, "line-opacity": isPending ? 0 : 0.8 }} />
-          <Layer id="restaurant-to-delivery" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#3b82f6", "line-width": 6, "line-opacity": isPending ? 0 : 0.8 }} />
-        </Source>
+    <div className="h-full p-4 bg-white">
+      <div className="h-full rounded-[36px] overflow-hidden shadow-md border border-gray-200 relative">
+        <Map
+          ref={(ref) => {
+            (mapRef.current as unknown) = ref as unknown;
+          }}
+          mapStyle="mapbox://styles/mapbox/streets-v12"
+          mapboxAccessToken={token}
+          initialViewState={initialView}
+          style={{ width: "100%", height: "100%" }}
+        >
+          <Source id="order-lines" type="geojson" data={lines as unknown as never}>
+            <Layer id="driver-to-restaurant" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#22c55e", "line-width": 5, "line-opacity": isPending ? 0 : 0.95 }} />
+            <Layer id="restaurant-to-delivery" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#3b82f6", "line-width": 5, "line-opacity": isPending ? 0 : 0.95 }} />
+          </Source>
 
-        {/* Delivery Marker */}
-        <Marker longitude={order.deliveryLocation.lng} latitude={order.deliveryLocation.lat} anchor="center">
-          <div className="relative group">
-            <motion.span
-              className="absolute -inset-4 rounded-full border border-red-500/30"
-              animate={{ scale: [1, 1.8], opacity: [0.6, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-            />
-            <motion.span
-              className="absolute -inset-2 rounded-full border-2 border-red-500/50"
-              animate={{ scale: [1, 1.4], opacity: [0.8, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut", delay: 0.2 }}
-            />
-            <div className="w-5 h-5 bg-red-500 rounded-full border-[3px] border-white shadow-xl relative z-10" />
-          </div>
-        </Marker>
-
-        {/* Restaurant Marker */}
-        <Marker longitude={order.restaurantLocation.lng} latitude={order.restaurantLocation.lat} anchor="bottom">
-          <div className="flex flex-col items-center -translate-y-1">
+          <Marker longitude={order.deliveryLocation.lng} latitude={order.deliveryLocation.lat} anchor="center">
             <div className="relative">
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1.5 bg-black/20 blur-[2px] rounded-full" />
-              <div className="w-10 h-10 rounded-full bg-white border border-gray-100 shadow-xl flex items-center justify-center relative z-10">
-                <Store className="w-5 h-5 text-[#1A1A1A]" />
-              </div>
-              <div className="w-3 h-3 bg-white rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2 border-r border-b border-gray-100 z-0" />
-            </div>
-          </div>
-        </Marker>
-
-        {/* Driver Marker */}
-        {!isPending && (
-          <Marker longitude={order.driverLocation.lng} latitude={order.driverLocation.lat} anchor="center">
-            <div className="relative">
-              <motion.div
-                initial={{ rotate: 0 }}
-                animate={{ rotate: [0, 5, 0, -5, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                className="relative z-10"
-              >
-                <div className="w-10 h-10 bg-[#1A1A1A] rounded-full border-[3px] border-white shadow-2xl flex items-center justify-center">
-                  <Bike className="w-5 h-5 text-white" />
-                </div>
-              </motion.div>
-              <motion.div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full rounded-full bg-black/10 z-0"
-                animate={{ scale: [1, 1.5], opacity: [0.3, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
+              <motion.span
+                className="absolute -inset-2 rounded-full border-2 border-blue-500/40"
+                animate={{ scale: [1, 1.6], opacity: [0.7, 0] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
               />
+              <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
             </div>
           </Marker>
-        )}
 
-        {/* ETA Card - Floating */}
-        {etaText && (
-          <div className="absolute top-4 left-4 z-20">
-            <div className="bg-white/95 backdrop-blur-md pl-3 pr-4 py-2 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-white/50 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs font-bold text-[#1A1A1A]">{etaText}</span>
+          <Marker longitude={order.restaurantLocation.lng} latitude={order.restaurantLocation.lat} anchor="bottom">
+            <div className="flex flex-col items-center -translate-y-1">
+              <div className="relative">
+                <motion.span
+                  className="absolute -inset-1 rounded-full border-2 border-orange-500/40"
+                  animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                />
+                <div className="w-9 h-9 rounded-full bg-orange-500 border-2 border-white shadow-lg flex items-center justify-center">
+                  <Store className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <div className="w-2 h-2 rounded-full bg-orange-500 mt-1" />
             </div>
-          </div>
-        )}
-      </Map>
+          </Marker>
+
+          {!isPending && (
+            <Marker longitude={order.driverLocation.lng} latitude={order.driverLocation.lat} anchor="bottom">
+              <div className="flex flex-col items-center -translate-y-1">
+                <div className="relative">
+                  <motion.span
+                    className="absolute -inset-1 rounded-full border-2 border-green-500/40"
+                    animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+                  />
+                  <div className="w-9 h-9 rounded-full bg-green-500 border-2 border-white shadow-lg flex items-center justify-center">
+                    <Bike className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+                <div className="w-2 h-2 rounded-full bg-green-500 mt-1" />
+              </div>
+            </Marker>
+          )}
+
+          {etaText && (
+            <div className="absolute left-3 top-3 bg-white/90 backdrop-blur-sm border border-gray-200 text-xs text-[#1A1A1A] px-2 py-1 rounded shadow-sm">
+              {etaText}
+            </div>
+          )}
+        </Map>
+      </div>
     </div>
   );
 }
