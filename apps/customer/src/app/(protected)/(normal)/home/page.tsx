@@ -20,9 +20,9 @@ declare global {
 import FloatingScrollTrigger from '@/features/home/components/FloatingScrollTrigger';
 import RecommendedSection from '@/features/home/components/RecommendedSection';
 import { useSearchRestaurants } from '@/features/search/hooks/useSearchRestaurants';
-import { useUserLocation, DEFAULT_LOCATION_HCMC } from '@repo/hooks';
 import { mapMagazineToRestaurantWithMenu } from '@/features/search/utils/mappers';
 import type { RestaurantWithMenu } from '@/features/search/hooks/useSearch';
+import { DeliveryLocationButton, useDeliveryLocation } from '@/features/location';
 
 export default function HomePage() {
   const {
@@ -47,8 +47,10 @@ export default function HomePage() {
 
   // Recommended Section Logic (API based)
   const [showRecommended, setShowRecommended] = useState(false);
-  const { location: userLocation, isLoading: isLocationLoading } = useUserLocation();
-  const locationCoords = userLocation || DEFAULT_LOCATION_HCMC;
+
+  // Use delivery location for API calls (selected by user or GPS fallback)
+  const { location: deliveryLocation, isLoading: isLocationLoading } = useDeliveryLocation();
+  const locationCoords = deliveryLocation;
 
   const {
     restaurants: apiRestaurants,
@@ -162,6 +164,21 @@ export default function HomePage() {
         )}
       </AnimatePresence>
 
+      {/* Mobile Delivery Location - above All Categories */}
+      <AnimatePresence>
+        {!isSearchMode && !showRecommended && (
+          <motion.div
+            initial={{ opacity: 0, y: 80 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '100vh', transition: { delay: 0.15, duration: 0.8, ease: [0.33, 1, 0.68, 1] } }}
+            transition={{ duration: 0.6 }}
+            className="fixed z-50 left-3 right-3 md:hidden top-[12vh]"
+          >
+            <DeliveryLocationButton variant="compact" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* All Categories Button - hides when in search mode OR recommended mode */}
       <AnimatePresence>
         {!isSearchMode && !showRecommended && (
@@ -181,7 +198,7 @@ export default function HomePage() {
               },
             }}
             onClick={() => setShowAllCategories(true)}
-            className="fixed z-50 right-3 md:right-6 top-[15vh] md:top-[18vh] flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
+            className="fixed z-50 right-3 md:right-6 top-[18vh] md:top-[18vh] flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
           >
             <List className="w-4 h-4 md:w-5 md:h-5" />
             <span className="text-xs md:text-sm font-medium">All categories</span>

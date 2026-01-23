@@ -4,6 +4,13 @@ import { motion } from '@repo/ui/motion';
 import { Menu, BookHeart, Search, ShoppingCart } from '@repo/ui/icons';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/features/cart/hooks/useCart';
+import dynamic from 'next/dynamic';
+
+// Dynamically import DeliveryLocationButton to avoid SSR issues with zustand persist
+const DeliveryLocationButton = dynamic(
+  () => import('@/features/location/components/DeliveryLocationButton'),
+  { ssr: false }
+);
 
 interface HomeHeaderProps {
   onMenuClick?: () => void;
@@ -28,50 +35,52 @@ export default function HomeHeader({
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-3 md:p-6">
-      <div className="flex items-start justify-between">
+      <div className="flex items-center justify-between">
         {/* Left Section */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2 md:gap-4">
-            <motion.button
-              layoutId="menu-overlay"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{
-                layout: {
-                  type: "spring",
-                  damping: 16,
-                  stiffness: 100,
-                },
-              }}
-              onClick={onMenuClick}
-              className={`w-10 h-10 rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
-                ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
-                : 'bg-white/10 border-white/20 hover:bg-white/20'
-                }`}
-            >
-              <Menu strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
-            </motion.button>
+        <div className="flex items-center gap-2 md:gap-4">
+          <motion.button
+            layoutId="menu-overlay"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{
+              layout: {
+                type: "spring",
+                damping: 16,
+                stiffness: 100,
+              },
+            }}
+            onClick={onMenuClick}
+            className={`w-10 h-10 rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
+              ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
+              : 'bg-white/10 border-white/20 hover:bg-white/20'
+              }`}
+          >
+            <Menu strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
+          </motion.button>
 
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <button onClick={onLogoClick} className="select-none">
-                <h1 className={`text-xl md:text-3xl font-bold tracking-tight ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
-                  my.<span className={hideSearchIcon ? 'text-gray-700' : 'text-white/90'}>Eatzy</span>
-                </h1>
-              </button>
-            </motion.div>
-          </div>
-
-          {/* Layout Toggle */}
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex gap-2 ml-14"
-          ></motion.div>
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <button onClick={onLogoClick} className="select-none">
+              <h1 className={`text-xl md:text-3xl font-bold tracking-tight ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
+                my.<span className={hideSearchIcon ? 'text-gray-700' : 'text-white/90'}>Eatzy</span>
+              </h1>
+            </button>
+          </motion.div>
+
+          {/* Delivery Location - Desktop only (mobile has separate floating button) */}
+          {!hideSearchIcon && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
+              className="hidden md:block"
+            >
+              <DeliveryLocationButton variant="compact" />
+            </motion.div>
+          )}
         </div>
 
         {/* Right Section */}

@@ -1,10 +1,11 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Voucher, PaymentMethod } from "@repo/types";
 import { useRestaurantCart } from "@/features/cart/hooks/useCart";
 import { useCartStore } from "@repo/store";
 import { voucherApi, restaurantDetailApi } from "@repo/api";
+import { useDeliveryLocationStore } from "@/store/deliveryLocationStore";
 
 // Voucher types - using backend values: PERCENTAGE, FIXED, FREESHIP
 type DiscountVoucher = Voucher & { discountType: 'PERCENTAGE' | 'FIXED' };
@@ -14,6 +15,9 @@ export function useCheckout() {
   // Get restaurantId from cart store (set when navigating to checkout)
   const activeRestaurantId = useCartStore((s) => s.activeRestaurantId);
   const restaurantId = activeRestaurantId ? Number(activeRestaurantId) : null;
+
+  // Get delivery location from global store
+  const { selectedLocation, updateAddress } = useDeliveryLocationStore();
 
   // Get cart for this restaurant
   const { totalPrice: subtotalFromCart } = useRestaurantCart(restaurantId);
@@ -94,8 +98,23 @@ export function useCheckout() {
   const [selectedDiscountVoucherId, setSelectedDiscountVoucherId] = useState<number | null>(null);
   const [selectedShippingVoucherId, setSelectedShippingVoucherId] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("EATZYPAY");
-  const [address, setAddress] = useState<string>("");
+
+  // Address is synced with delivery location store
+  const [address, setAddressLocal] = useState<string>(selectedLocation?.address || "");
   const [notes, setNotes] = useState<string>("");
+
+  // Sync address with delivery location store
+  useEffect(() => {
+    if (selectedLocation?.address) {
+      setAddressLocal(selectedLocation.address);
+    }
+  }, [selectedLocation?.address]);
+
+  // When address changes locally, also update the store
+  const setAddress = (newAddress: string) => {
+    setAddressLocal(newAddress);
+    updateAddress(newAddress);
+  };
 
   const selectedDiscountVoucher = useMemo(
     () => discountVouchers.find(v => v.id === selectedDiscountVoucherId) || null,

@@ -3,14 +3,29 @@ import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
 import { motion } from "@repo/ui/motion";
 import { MapPin, Hand } from "@repo/ui/icons";
+import { useDeliveryLocationStore } from "@/store/deliveryLocationStore";
+
 const MapView = dynamic(() => import("@/features/checkout/components/MapView"), { ssr: false });
 
 export default function CheckoutMapSection({ children, onAddressChange }: { children?: React.ReactNode; onAddressChange?: (addr: string) => void }) {
-  const [pickupPos, setPickupPos] = useState<{ lng: number; lat: number } | undefined>(undefined);
+  // Get delivery location from store
+  const { selectedLocation, setSelectedLocation } = useDeliveryLocationStore();
+
+  // Initialize position from store
+  const [pickupPos, setPickupPos] = useState<{ lng: number; lat: number } | undefined>(
+    selectedLocation ? { lng: selectedLocation.longitude, lat: selectedLocation.latitude } : undefined
+  );
   const [places, setPlaces] = useState<Array<{ id: string; text: string; place_name: string; center: [number, number] }>>([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [flyVersion, setFlyVersion] = useState(0);
   const initializedRef = useRef(false);
+
+  // Sync initial position from store
+  useEffect(() => {
+    if (selectedLocation && !pickupPos) {
+      setPickupPos({ lng: selectedLocation.longitude, lat: selectedLocation.latitude });
+    }
+  }, [selectedLocation, pickupPos]);
 
   useEffect(() => {
     if (places.length === 0) return;
@@ -20,6 +35,24 @@ export default function CheckoutMapSection({ children, onAddressChange }: { chil
       onAddressChange?.(places[0].place_name);
     }
   }, [places, onAddressChange]);
+
+  const handleSelectPlace = (idx: number, place: { id: string; text: string; place_name: string; center: [number, number] }) => {
+    setSelectedIndex(idx);
+    const addr = place.place_name;
+    onAddressChange?.(addr);
+
+    const [lng, lat] = place.center;
+    setPickupPos({ lng, lat });
+    setFlyVersion((v) => v + 1);
+
+    // Update the global delivery location store
+    setSelectedLocation({
+      latitude: lat,
+      longitude: lng,
+      address: place.place_name,
+      placeName: place.text,
+    });
+  };
 
   return (
     <>
@@ -53,14 +86,7 @@ export default function CheckoutMapSection({ children, onAddressChange }: { chil
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
-                  onClick={() => {
-                    setSelectedIndex(idx);
-                    const addr = p.place_name;
-                    onAddressChange?.(addr);
-                    const [lng, lat] = p.center;
-                    setPickupPos({ lng, lat });
-                    setFlyVersion((v) => v + 1);
-                  }}
+                  onClick={() => handleSelectPlace(idx, p)}
                   className={`
                     relative p-4 mb-2 last:mb-0 rounded-[16px] cursor-pointer border transition-all duration-200 group
                     ${selected
@@ -93,3 +119,4 @@ export default function CheckoutMapSection({ children, onAddressChange }: { chil
     </>
   );
 }
+

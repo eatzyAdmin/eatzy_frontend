@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { restaurantTypeApi, restaurantApi } from '@repo/api';
 import type { RestaurantCategory, RestaurantMagazine, Restaurant } from '@repo/types';
-import { useUserLocation, DEFAULT_LOCATION_HCMC } from '@repo/hooks';
+import { useDeliveryLocationStore } from '@/store/deliveryLocationStore';
+import { DEFAULT_LOCATION_HCMC } from '@repo/hooks';
 import { mapMagazineToRestaurantWithMenu } from '@/features/search/utils/mappers';
 
 // Helper to get category background (still static or needs DB field)
@@ -42,9 +43,11 @@ export function useHomePage() {
   const categories = categoriesData || [];
   const activeCategory = categories[activeCategoryIndex];
 
-  // 2. Get Location
-  const { location } = useUserLocation();
-  const locationCoords = location || DEFAULT_LOCATION_HCMC;
+  // 2. Get Delivery Location from store (selected location or GPS fallback)
+  const selectedLocation = useDeliveryLocationStore((state) => state.selectedLocation);
+  const locationCoords = selectedLocation
+    ? { latitude: selectedLocation.latitude, longitude: selectedLocation.longitude }
+    : DEFAULT_LOCATION_HCMC;
 
   // 3. Get Restaurants for Active Category with Infinite Scroll
   const {

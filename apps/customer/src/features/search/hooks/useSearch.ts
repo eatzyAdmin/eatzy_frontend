@@ -2,7 +2,8 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import type { Restaurant, Dish, MenuCategory, RestaurantMagazine } from '@repo/types';
 import { useSearchRestaurants } from './useSearchRestaurants';
-import { useUserLocation, DEFAULT_LOCATION_HCMC } from '@repo/hooks';
+import { useDeliveryLocationStore } from '@/store/deliveryLocationStore';
+import { DEFAULT_LOCATION_HCMC } from '@repo/hooks';
 import { mapMagazineToRestaurantWithMenu } from '../utils/mappers';
 
 // ======== Types ========
@@ -34,9 +35,12 @@ export function useSearch() {
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Get user location
-  const { location: userLocation, isLoading: isLocationLoading } = useUserLocation();
-  const locationCoords = userLocation || DEFAULT_LOCATION_HCMC;
+  // Get delivery location from store (selected location or GPS fallback)
+  const selectedLocation = useDeliveryLocationStore((state) => state.selectedLocation);
+  const isLocationLoading = !selectedLocation;
+  const locationCoords = selectedLocation
+    ? { latitude: selectedLocation.latitude, longitude: selectedLocation.longitude }
+    : DEFAULT_LOCATION_HCMC;
 
   // Parse filters from URL
   const filters = useMemo<SearchFilters>(() => ({
