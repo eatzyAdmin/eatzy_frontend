@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Voucher, PaymentMethod } from "@repo/types";
 import { useRestaurantCart } from "@/features/cart/hooks/useCart";
-import { useSearchParams } from "next/navigation";
+import { useCartStore } from "@repo/store";
 import { voucherApi, restaurantDetailApi } from "@repo/api";
 
 // Voucher types - using backend values: PERCENTAGE, FIXED, FREESHIP
@@ -11,9 +11,9 @@ type DiscountVoucher = Voucher & { discountType: 'PERCENTAGE' | 'FIXED' };
 type ShippingVoucher = Voucher & { discountType: 'FREESHIP' };
 
 export function useCheckout() {
-  const searchParams = useSearchParams();
-  const restaurantIdFromUrl = searchParams.get('restaurantId');
-  const restaurantId = restaurantIdFromUrl ? Number(restaurantIdFromUrl) : null;
+  // Get restaurantId from cart store (set when navigating to checkout)
+  const activeRestaurantId = useCartStore((s) => s.activeRestaurantId);
+  const restaurantId = activeRestaurantId ? Number(activeRestaurantId) : null;
 
   // Get cart for this restaurant
   const { totalPrice: subtotalFromCart } = useRestaurantCart(restaurantId);

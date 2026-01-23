@@ -8,6 +8,7 @@ import { ImageWithFallback } from "@repo/ui";
 import { useLoading } from "@repo/ui";
 import { useRouter } from "next/navigation";
 import { useRestaurantCart } from "../hooks/useCart";
+import { useCartStore } from "@repo/store";
 
 interface FloatingRestaurantCartProps {
   restaurantId: string | number;
@@ -28,6 +29,7 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
     isLoading,
   } = useRestaurantCart(numericRestaurantId);
 
+  const setActiveRestaurant = useCartStore((s) => s.setActiveRestaurant);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { show } = useLoading();
@@ -40,8 +42,10 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
   const handleCheckout = () => {
     show("Đang chuyển đến Checkout...");
     setIsOpen(false);
+    // Set active restaurant in cart store before navigating
+    setActiveRestaurant(String(restaurantId));
     setTimeout(() => {
-      router.push(`/checkout?restaurantId=${restaurantId}`);
+      router.push('/checkout');
     }, 500);
   };
 

@@ -207,7 +207,7 @@ export default function CheckoutPage() {
                                 <Truck className="w-3.5 h-3.5" /> Shipping Vouchers
                                 <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[10px]">({shippingVouchers.length})</span>
                               </div>
-                              <div className="space-y-3">
+                              <div className="space-y-3 px-2">
                                 {mounted && shippingVouchers.map((v) => {
                                   const eligible = isVoucherEligible(v);
                                   return (

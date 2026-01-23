@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useLoading, CartOverlayShimmer } from "@repo/ui";
 import { useCart, cartKeys } from "../hooks/useCart";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCartStore } from "@repo/store";
 
 export default function CartOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const {
@@ -22,6 +23,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedRestIds, setSelectedRestIds] = useState<Set<number>>(new Set());
   const [isDeletingCarts, setIsDeletingCarts] = useState(false);
+  const setActiveRestaurant = useCartStore((s) => s.setActiveRestaurant);
 
   const toggleSelection = (cartId: number) => {
     const next = new Set(selectedRestIds);
@@ -66,8 +68,10 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
     } else {
       show("Đang chuyển đến Checkout...");
       onClose();
+      // Set active restaurant in cart store before navigating
+      setActiveRestaurant(String(restaurantId));
       setTimeout(() => {
-        router.push(`/checkout?restaurantId=${restaurantId}`);
+        router.push('/checkout');
       }, 300);
     }
   };
