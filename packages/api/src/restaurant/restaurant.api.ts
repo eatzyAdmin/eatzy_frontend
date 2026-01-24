@@ -1,5 +1,5 @@
 import { http } from "../http";
-import type { IBackendRes, ResultPaginationDTO, Restaurant, RestaurantMagazine, NearbyRestaurantsParams } from "../../../types/src";
+import type { IBackendRes, ResultPaginationDTO, Restaurant, RestaurantMagazine, NearbyRestaurantsParams, UpdateRestaurantRequest } from "../../../types/src";
 
 // ======== Types ========
 
@@ -41,7 +41,7 @@ export type ResRestaurantDTO = {
 
 export const restaurantApi = {
   // Get all restaurants with pagination
-  getRestaurants: (params?: RestaurantSearchParams) => {
+  getAllRestaurants: (params?: RestaurantSearchParams) => {
     const queryParams = new URLSearchParams();
     if (params?.page !== undefined) queryParams.append('page', params.page.toString());
     if (params?.size !== undefined) queryParams.append('size', params.size.toString());
@@ -74,7 +74,22 @@ export const restaurantApi = {
       ...params,
       filter: `name~'${query}'`,
     };
-    return restaurantApi.getRestaurants(searchParams);
+    return restaurantApi.getAllRestaurants(searchParams);
+  },
+
+  // Update restaurant
+  updateRestaurant: (restaurant: UpdateRestaurantRequest) => {
+    return http.put<IBackendRes<ResRestaurantDTO>>("/api/v1/restaurants", restaurant);
+  },
+
+  // Create restaurant
+  createRestaurant: (restaurant: any) => {
+    return http.post<IBackendRes<ResRestaurantDTO>>("/api/v1/restaurants", restaurant);
+  },
+
+  // Delete restaurant
+  deleteRestaurant: (id: number) => {
+    return http.delete<IBackendRes<void>>(`/api/v1/restaurants/${id}`);
   },
 
   // Get nearby restaurants with personalized ranking
@@ -110,11 +125,6 @@ export const restaurantApi = {
   // Close restaurant (for owner)
   closeRestaurant: (id: number) => {
     return http.post<IBackendRes<ResRestaurantDTO>>(`/api/v1/restaurants/${id}/close`, {});
-  },
-
-  // Delete restaurant
-  deleteRestaurant: (id: number) => {
-    return http.delete<IBackendRes<void>>(`/api/v1/restaurants/${id}`);
   },
 
   // Open my restaurant (for current owner)

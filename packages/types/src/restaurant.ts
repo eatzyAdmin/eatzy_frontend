@@ -1,4 +1,14 @@
-export type RestaurantStatus = 'OPEN' | 'CLOSED' | 'LOCKED';
+export type RestaurantStatus = 'OPEN' | 'CLOSED' | 'LOCKED' | 'PENDING' | 'REJECTED';
+
+export type RestaurantOwner = {
+  id: number;
+  name: string;
+};
+
+export type RestaurantType = {
+  id: number;
+  name: string;
+};
 
 export type RestaurantCategory = {
   id: string;
@@ -18,27 +28,55 @@ export type Review = {
 };
 
 export type Restaurant = {
-  id: string;
+  id: number;
   name: string;
   slug?: string;
-  categories: RestaurantCategory[];
-  status: RestaurantStatus;
-  rating?: number;
   address?: string;
-  imageUrl?: string;
+  description?: string;
+  latitude?: number;
+  longitude?: number;
+  contactPhone?: string;
+  status: RestaurantStatus;
+  commissionRate?: number;
+  oneStarCount?: number;
+  twoStarCount?: number;
+  threeStarCount?: number;
+  fourStarCount?: number;
+  fiveStarCount?: number;
+  averageRating?: number;
+  reviewCount?: number;
+  schedule?: string;
   avatarUrl?: string;
   coverImageUrl?: string;
-  description?: string;
+  distance?: number;
+  owner?: RestaurantOwner;
+  restaurantTypes?: RestaurantType;
+
+  // Legacy/UI fields
+  categories?: RestaurantCategory[];
+  rating?: number; // mapping to averageRating
+  imageUrl?: string; // mapping to avatarUrl or coverImageUrl
   category?: RestaurantCategory | string;
   reviews?: Review[];
-  reviewCount?: number;
-  // Super Admin specific fields
+
+  // Super Admin specific fields (Legacy)
   ownerName?: string;
   ownerPhone?: string;
   ownerEmail?: string;
   registrationDate?: string;
   totalRevenue?: number;
   totalOrders?: number;
+};
+
+export type UpdateRestaurantRequest = {
+  id: number;
+  name?: string;
+  address?: string;
+  description?: string;
+  contactPhone?: string;
+  status?: RestaurantStatus;
+  commissionRate?: number;
+  schedule?: string;
 };
 
 // ======== Restaurant Magazine Types (from backend API) ========
