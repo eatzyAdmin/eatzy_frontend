@@ -17,7 +17,7 @@ import {
   Ticket
 } from '@repo/ui/icons';
 import RestaurantNavItem from '../../../components/RestaurantNavItem';
-import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation } from '@repo/ui';
+import { useSwipeConfirmation } from '@repo/ui';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useLogout } from '@/features/auth/hooks/useLogout';
 
@@ -32,31 +32,20 @@ const adminMenuItems = [
   { id: 'permissions', icon: ShieldCheck, text: 'Quản lý phân quyền' }
 ];
 
-import { NormalLoadingProvider, useNormalLoading, NormalLoadingOverlay } from './context/NormalLoadingContext';
-
 function RestaurantLayoutContent({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { confirm } = useSwipeConfirmation();
-  const { startLoading } = useNormalLoading();
   const { user, isLoading: isAuthLoading } = useAuth();
   const { handleLogout } = useLogout();
   const [activeSection, setActiveSection] = useState('dashboard');
   const [navHovered, setNavHovered] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // Derive profile data from auth user
   const profileData = {
     fullName: user?.name || 'Super Admin',
     email: user?.email || 'admin@eatzy.com'
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitialLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Update active section based on pathname
   useEffect(() => {
@@ -73,7 +62,6 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
         description: 'Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?',
         confirmText: 'Đăng xuất',
         onConfirm: () => {
-          startLoading();
           handleLogout();
         }
       });
@@ -125,71 +113,67 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
         />
 
         {/* Profile section */}
-        {isInitialLoading ? (
-          <ProfileShimmer expanded={navHovered} />
-        ) : (
-          <motion.div
-            className="profile-section relative flex items-center p-6 border-b border-white/30 cursor-pointer group transition-all duration-300 liquid-glass-nav-item shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.1)]"
+        <motion.div
+          className="profile-section relative flex items-center p-6 border-b border-white/30 cursor-pointer group transition-all duration-300 liquid-glass-nav-item shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.1)]"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)",
+          }}
+          onClick={handleProfileClick}
+          layoutId="profile-section"
+        >
+          <div
+            className="absolute inset-0 rounded-t-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             style={{
               background:
-                "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)",
+                "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(120, 200, 65, 0.1) 100%)",
+              backdropFilter: "blur(10px)",
             }}
-            onClick={handleProfileClick}
-            layoutId="profile-section"
-          >
-            <div
-              className="absolute inset-0 rounded-t-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(120, 200, 65, 0.1) 100%)",
-                backdropFilter: "blur(10px)",
-              }}
-            />
+          />
 
-            {navHovered ? (
-              <>
-                <motion.div
-                  className="relative h-12 w-12 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.3)]"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%)",
-                    backdropFilter: "blur(15px)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                  }}
-                  layoutId="profile-avatar"
-                >
-                  <User size={22} className="text-gray-700 drop-shadow-sm" />
-                </motion.div>
-                <div className="relative ml-4">
-                  <motion.p
-                    layoutId="profile-name"
-                    className="font-semibold text-sm text-gray-800 tracking-wide drop-shadow-sm whitespace-nowrap overflow-hidden text-ellipsis"
-                  >
-                    {profileData.fullName}
-                  </motion.p>
-                  <motion.p
-                    layoutId="profile-email"
-                    className="text-xs text-gray-600 drop-shadow-sm tracking-wide whitespace-nowrap overflow-hidden text-ellipsis"
-                  >
-                    {profileData.email}
-                  </motion.p>
-                </div>
-              </>
-            ) : (
+          {navHovered ? (
+            <>
               <motion.div
-                className="relative h-12 w-12 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.3)]"
+                className="relative h-12 w-12 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.3)]"
                 style={{
                   background:
                     "linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%)",
                   backdropFilter: "blur(15px)",
                   border: "1px solid rgba(255, 255, 255, 0.2)",
                 }}
+                layoutId="profile-avatar"
               >
                 <User size={22} className="text-gray-700 drop-shadow-sm" />
               </motion.div>
-            )}
-          </motion.div>
-        )}
+              <div className="relative ml-4">
+                <motion.p
+                  layoutId="profile-name"
+                  className="font-semibold text-sm text-gray-800 tracking-wide drop-shadow-sm whitespace-nowrap overflow-hidden text-ellipsis"
+                >
+                  {profileData.fullName}
+                </motion.p>
+                <motion.p
+                  layoutId="profile-email"
+                  className="text-xs text-gray-600 drop-shadow-sm tracking-wide whitespace-nowrap overflow-hidden text-ellipsis"
+                >
+                  {profileData.email}
+                </motion.p>
+              </div>
+            </>
+          ) : (
+            <motion.div
+              className="relative h-12 w-12 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300 shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.3)]"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%)",
+                backdropFilter: "blur(15px)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+              }}
+            >
+              <User size={22} className="text-gray-700 drop-shadow-sm" />
+            </motion.div>
+          )}
+        </motion.div>
 
         {/* Navigation items */}
         <div className="relative flex-1 py-6 px-3 flex flex-col overflow-hidden">
@@ -199,36 +183,26 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
             </p>
           </div>
 
-          {isInitialLoading ? (
-            Array.from({ length: adminMenuItems.length }, (_, index) => (
-              <NavItemShimmer
-                key={`shimmer-${index}`}
+          {adminMenuItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <RestaurantNavItem
+                key={item.id}
+                icon={
+                  <IconComponent
+                    size={20}
+                    className="text-gray-600"
+                    strokeWidth={2.3}
+                  />
+                }
+                text={item.text}
                 expanded={navHovered}
-                index={index}
+                active={activeSection === item.id}
+                onClick={() => handleSectionChange(item.id)}
+                className=""
               />
-            ))
-          ) : (
-            adminMenuItems.map((item) => {
-              const IconComponent = item.icon;
-              return (
-                <RestaurantNavItem
-                  key={item.id}
-                  icon={
-                    <IconComponent
-                      size={20}
-                      className="text-gray-600"
-                      strokeWidth={2.3}
-                    />
-                  }
-                  text={item.text}
-                  expanded={navHovered}
-                  active={activeSection === item.id}
-                  onClick={() => handleSectionChange(item.id)}
-                  className=""
-                />
-              );
-            })
-          )}
+            );
+          })}
         </div>
 
         {/* Bottom section - Logout */}
@@ -239,23 +213,16 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
               "linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)",
           }}
         >
-          {isInitialLoading ? (
-            <NavItemShimmer
-              expanded={navHovered}
-              index={adminMenuItems.length}
-            />
-          ) : (
-            <RestaurantNavItem
-              icon={
-                <LogOut size={20} className="text-gray-600" strokeWidth={2.3} />
-              }
-              text="Đăng xuất"
-              expanded={navHovered}
-              active={false}
-              onClick={() => handleSectionChange('logout')}
-              className="logout-item"
-            />
-          )}
+          <RestaurantNavItem
+            icon={
+              <LogOut size={20} className="text-gray-600" strokeWidth={2.3} />
+            }
+            text="Đăng xuất"
+            expanded={navHovered}
+            active={false}
+            onClick={() => handleSectionChange('logout')}
+            className="logout-item"
+          />
         </div>
       </div >
 
@@ -269,11 +236,8 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
 
 export default function NormalLayout({ children }: { children: ReactNode }) {
   return (
-    <NormalLoadingProvider>
-      <div className="relative">
-        <RestaurantLayoutContent>{children}</RestaurantLayoutContent>
-        <NormalLoadingOverlay />
-      </div>
-    </NormalLoadingProvider>
+    <div className="relative">
+      <RestaurantLayoutContent>{children}</RestaurantLayoutContent>
+    </div>
   );
 }
