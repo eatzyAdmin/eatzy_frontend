@@ -30,7 +30,7 @@ export default function LoginPageContent() {
       showNotification({
         message: "Đăng nhập thành công!",
         type: "success",
-        format: "excel",
+        format: "Đăng nhập thành công.",
         autoHideDuration: 3000
       });
       show("Đang chuyển hướng về trang chủ...");

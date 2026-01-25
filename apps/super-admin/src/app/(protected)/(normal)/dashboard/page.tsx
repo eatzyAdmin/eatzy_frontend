@@ -1,6 +1,8 @@
 'use client';
 import { DashboardHeader, DashboardBody, DashboardSkeleton } from "@/features/dashboard/components";
 import { useDashboard } from "@/features/dashboard";
+import { useLoading } from "@repo/ui";
+import { useEffect } from "react";
 
 export default function DashboardPage() {
   const {
@@ -12,6 +14,13 @@ export default function DashboardPage() {
     isLoading,
     error
   } = useDashboard();
+  const { hide } = useLoading();
+
+  useEffect(() => {
+    if (!isLoading) {
+      hide();
+    }
+  }, [isLoading, hide]);
 
   if (isLoading) return <DashboardSkeleton />;
 

@@ -43,36 +43,3 @@ export type Dish = {
   optionGroups?: OptionGroup[];
 };
 
-// Backend uses (from OrderService.java):
-// - "PERCENTAGE" for percentage-based discounts
-// - "FIXED" for fixed amount discounts
-// - "FREESHIP" for free shipping
-export type VoucherDiscountType = 'PERCENTAGE' | 'FIXED' | 'FREESHIP';
-
-export type VoucherRestaurant = {
-  id: number;
-  name: string;
-};
-
-export type Voucher = {
-  id: number;
-  code: string;
-  description?: string;
-  discountType: VoucherDiscountType;
-  discountValue: number;
-  minOrderValue?: number;
-  maxDiscountAmount?: number;
-  usageLimitPerUser?: number;
-  startDate?: string;
-  endDate?: string;
-  totalQuantity?: number;
-  creatorType?: string;
-  restaurants?: VoucherRestaurant[];
-  // Frontend computed/legacy fields
-  title?: string;
-  isAvailable?: boolean;
-  discountPercent?: number;
-  discountAmount?: number;
-  expiresAt?: string;
-  restaurantId?: string;
-};

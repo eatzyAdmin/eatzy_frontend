@@ -71,11 +71,14 @@ const DataTable = <T extends Record<string, any>>({
       setTimeout(() => { setDisplayedData(filteredData.slice(0, itemsPerPage)); setShowShimmer(false); setIsFilteringData(false); }, 1500);
     } else {
       setDisplayedData([]);
-      setShowShimmer(true);
-      setIsFilteringData(true);
-      setTimeout(() => { setShowShimmer(false); setIsFilteringData(false); }, 1500);
+      if (isLoading) {
+        setShowShimmer(true);
+      } else {
+        setShowShimmer(true);
+        setTimeout(() => { setShowShimmer(false); setIsFilteringData(false); }, 1500);
+      }
     }
-  }, [filteredData]);
+  }, [filteredData, isLoading]);
 
   const handleFilterChange = (key: string, value: any) => {
     setIsFilteringData(true);
@@ -211,7 +214,7 @@ const DataTable = <T extends Record<string, any>>({
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
               <AnimatePresence mode="wait">
-                {showShimmer && (isFilteringData || displayedData.length === 0) ? (
+                {(showShimmer || isLoading) && (isFilteringData || displayedData.length === 0) ? (
                   Array.from({ length: itemsPerPage }, (_, index) => (<DataTableRowShimmer key={`filter-shimmer-${index}`} columnCount={columns.length} index={index} />))
                 ) : displayedData.length === 0 && !isLoading && !showShimmer ? (
                   <tr>
