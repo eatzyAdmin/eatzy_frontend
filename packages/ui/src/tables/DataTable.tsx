@@ -27,6 +27,9 @@ export type DataTableProps<T> = {
   dateRangeFilters?: Record<string, any>;
   statusFilters?: Record<string, any>;
   changeTableData?: (list: T[]) => void;
+  hasNextPage?: boolean;
+  fetchNextPage?: () => void;
+  isFetchingNextPage?: boolean;
 };
 
 const DataTable = <T extends Record<string, any>>({
@@ -47,7 +50,10 @@ const DataTable = <T extends Record<string, any>>({
   filters = {},
   dateRangeFilters = {},
   statusFilters = {},
-  changeTableData
+  changeTableData,
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage
 }: DataTableProps<T>) => {
   const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
   const [filteredData, setFilteredData] = useState<T[]>(data);
@@ -64,11 +70,28 @@ const DataTable = <T extends Record<string, any>>({
   useEffect(() => { applyFilters(); }, [data, activeFilters]);
   useEffect(() => {
     if (filteredData.length > 0) {
-      setCurrentPage(1);
-      setDisplayedData([]);
-      setShowShimmer(true);
-      setIsFilteringData(true);
-      setTimeout(() => { setDisplayedData(filteredData.slice(0, itemsPerPage)); setShowShimmer(false); setIsFilteringData(false); }, 1500);
+      const isInitialOrFilterChange = displayedData.length === 0 || !filteredData[0] || displayedData[0] !== filteredData[0];
+
+      if (isInitialOrFilterChange) {
+        setCurrentPage(1);
+        setDisplayedData([]);
+        setShowShimmer(true);
+        setIsFilteringData(true);
+        setTimeout(() => {
+          if (fetchNextPage) {
+            setDisplayedData(filteredData);
+          } else {
+            setDisplayedData(filteredData.slice(0, itemsPerPage));
+          }
+          setShowShimmer(false);
+          setIsFilteringData(false);
+        }, fetchNextPage ? 500 : 1500);
+      } else {
+        // Appending data (infinite scroll)
+        if (fetchNextPage) {
+          setDisplayedData(filteredData);
+        }
+      }
     } else {
       setDisplayedData([]);
       if (isLoading) {
@@ -78,7 +101,7 @@ const DataTable = <T extends Record<string, any>>({
         setTimeout(() => { setShowShimmer(false); setIsFilteringData(false); }, 1500);
       }
     }
-  }, [filteredData, isLoading]);
+  }, [filteredData, isLoading, fetchNextPage]);
 
   const handleFilterChange = (key: string, value: any) => {
     setIsFilteringData(true);
@@ -94,12 +117,32 @@ const DataTable = <T extends Record<string, any>>({
   };
 
   const clearAllFilters = () => { setIsFilteringData(true); setActiveFilters({}); };
-  const hasMoreData = useCallback(() => displayedData.length < filteredData.length, [displayedData.length, filteredData.length]);
+  const hasMoreData = useCallback(() => {
+    if (fetchNextPage) return hasNextPage || false;
+    return displayedData.length < filteredData.length;
+  }, [displayedData.length, filteredData.length, fetchNextPage, hasNextPage]);
+
   const loadMoreData = useCallback(() => {
-    if (isLoadingMore || !hasMoreData()) return;
-    setIsLoadingMore(true); setShowShimmer(true);
-    setTimeout(() => { const nextPage = currentPage + 1; const startIndex = currentPage * itemsPerPage; const endIndex = startIndex + itemsPerPage; const newData = filteredData.slice(startIndex, endIndex); setDisplayedData(prev => [...prev, ...newData]); setCurrentPage(nextPage); setShowShimmer(false); setIsLoadingMore(false); }, 1500);
-  }, [currentPage, filteredData, isLoadingMore, hasMoreData]);
+    if (isLoadingMore || isFetchingNextPage || !hasMoreData()) return;
+
+    if (fetchNextPage) {
+      fetchNextPage();
+      return;
+    }
+
+    setIsLoadingMore(true);
+    setShowShimmer(true);
+    setTimeout(() => {
+      const nextPage = currentPage + 1;
+      const startIndex = currentPage * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const newData = filteredData.slice(startIndex, endIndex);
+      setDisplayedData(prev => [...prev, ...newData]);
+      setCurrentPage(nextPage);
+      setShowShimmer(false);
+      setIsLoadingMore(false);
+    }, 1500);
+  }, [currentPage, filteredData, isLoadingMore, isFetchingNextPage, hasMoreData, fetchNextPage]);
 
   useEffect(() => {
     if (observerRef.current) observerRef.current.disconnect();
@@ -179,7 +222,7 @@ const DataTable = <T extends Record<string, any>>({
     }, {} as Record<string, string>);
   };
 
-  const tableRowVariants = { hidden: { opacity: 0, y: 20 }, visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: (i % itemsPerPage) * 0.05, duration: 0.4, ease: 'easeOut' } }), exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: 'easeInOut' } } };
+  const tableRowVariants = { hidden: { opacity: 0, y: 10 }, visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: (i % itemsPerPage) * 0.05, duration: 0.3, ease: 'easeOut' } }), exit: { opacity: 0, transition: { duration: 0.2 } } };
 
   return (
     <div className={className}>
@@ -195,7 +238,7 @@ const DataTable = <T extends Record<string, any>>({
       )}
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} ref={tableContainerRef} className={`bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden w-full`}>
-        <div className="overflow-x-auto w-full" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'thin' }}>
+        <div className="overflow-x-auto overflow-y-hidden w-full" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'thin' }}>
           <table className="w-full divide-y divide-gray-100" style={{ minWidth: 'max-content' }}>
             <thead className={headerClassName}>
               <tr>
@@ -213,7 +256,7 @@ const DataTable = <T extends Record<string, any>>({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
-              <AnimatePresence mode="wait">
+              <AnimatePresence initial={false}>
                 {(showShimmer || isLoading) && (isFilteringData || displayedData.length === 0) ? (
                   Array.from({ length: itemsPerPage }, (_, index) => (<DataTableRowShimmer key={`filter-shimmer-${index}`} columnCount={columns.length} index={index} />))
                 ) : displayedData.length === 0 && !isLoading && !showShimmer ? (
@@ -244,10 +287,10 @@ const DataTable = <T extends Record<string, any>>({
                         </td>
                       </motion.tr>
                     ))}
-                    {showShimmer && hasMoreData() && !isFilteringData && displayedData.length > 0 && (
-                      Array.from({ length: itemsPerPage }, (_, index) => (<DataTableRowShimmer key={`shimmer-${displayedData.length + index}`} columnCount={columns.length} index={index} />))
+                    {(showShimmer || isFetchingNextPage) && hasMoreData() && !isFilteringData && displayedData.length > 0 && (
+                      Array.from({ length: 8 }, (_, index) => (<DataTableRowShimmer key={`shimmer-${displayedData.length + index}`} columnCount={columns.length} index={index} />))
                     )}
-                    {hasMoreData() && !showShimmer && (
+                    {hasMoreData() && !(showShimmer || isFetchingNextPage) && (
                       <tr data-scroll-target="true" ref={(el) => { if (el && observerRef.current) { observerRef.current.observe(el); } }} style={{ height: '1px' }}>
                         <td colSpan={columns.length + 1} style={{ height: '1px', padding: 0 }}></td>
                       </tr>

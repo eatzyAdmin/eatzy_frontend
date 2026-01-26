@@ -19,6 +19,9 @@ export default function PromotionsPage() {
   const {
     promotions,
     isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
     refetch,
     createPromotion,
     updatePromotion,
@@ -56,7 +59,7 @@ export default function PromotionsPage() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm border border-lime-200">
+              <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <Tag size={12} />
                 Marketing Console
               </span>
@@ -86,6 +89,9 @@ export default function PromotionsPage() {
         <PromotionsTable
           data={promotions}
           isLoading={isLoading}
+          isFetchingNextPage={isFetchingNextPage}
+          hasNextPage={hasNextPage}
+          onLoadMore={fetchNextPage}
           onRefresh={refetch}
           onEdit={handleEdit}
           onDelete={(id) => deletePromotion(id)}

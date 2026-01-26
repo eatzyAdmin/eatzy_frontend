@@ -23,7 +23,7 @@ export const voucherApi = {
    * Update voucher
    * Endpoint: PUT /api/v1/vouchers
    */
-  updateVoucher: (voucher: Partial<Voucher>) => {
+  updateVoucher: (voucher: any) => {
     return http.put<IBackendRes<Voucher>>(
       `/api/v1/vouchers`,
       voucher

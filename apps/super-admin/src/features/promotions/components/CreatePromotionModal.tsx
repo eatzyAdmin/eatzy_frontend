@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import { createPortal } from 'react-dom';
-import { X, Tag, FileText, Percent, Info, Calendar, Building2, CheckCircle, Globe, Ticket, DollarSign, Truck, Search } from 'lucide-react';
-import { LoadingSpinner, useNotification, useSwipeConfirmation, DotsLoader } from '@repo/ui';
-import { CreateVoucherDto, DiscountType, Voucher, Restaurant } from '@repo/types';
-import { restaurantApi } from '@repo/api';
+import { X, Tag, FileText, Percent, Info, Calendar, Building2, CheckCircle, Globe, Ticket, DollarSign, Truck } from 'lucide-react';
+import { useNotification, useSwipeConfirmation, DotsLoader } from '@repo/ui';
+import { DiscountType, Voucher } from '@repo/types';
 import { format } from 'date-fns';
 import DateTimePicker from './DateTimePicker';
+import RestaurantSelector from './RestaurantSelector';
 
 interface CreatePromotionModalProps {
   isOpen: boolean;
@@ -19,12 +19,8 @@ interface CreatePromotionModalProps {
 }
 
 export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSave, initialData }: CreatePromotionModalProps) {
-  const { showNotification } = useNotification();
   const { confirm } = useSwipeConfirmation();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [baseFormData, setBaseFormData] = useState<string | null>(null);
-  const [resSearch, setResSearch] = useState('');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -49,12 +45,10 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
     applyToAll: true
   });
 
+  const [baseFormData, setBaseFormData] = useState<string | null>(null);
+
   useEffect(() => {
     if (isOpen) {
-      restaurantApi.getAllRestaurants({ size: 100 }).then(res => {
-        setRestaurants(res.data?.result || []);
-      });
-
       if (initialData) {
         const initialForm = {
           ...initialData,
@@ -95,12 +89,7 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
       // If end date is missing or before start date + 1 min
       if (!end || end.getTime() <= start.getTime()) {
         const newEnd = new Date(start.getTime() + 60000); // +1 minute
-        const year = newEnd.getFullYear();
-        const month = String(newEnd.getMonth() + 1).padStart(2, '0');
-        const day = String(newEnd.getDate()).padStart(2, '0');
-        const hour = String(newEnd.getHours()).padStart(2, '0');
-        const min = String(newEnd.getMinutes()).padStart(2, '0');
-        setFormData((prev: Voucher & { restaurantIds: number[], applyToAll: boolean, adjustment?: number }) => ({ ...prev, endDate: `${year}-${month}-${day}T${hour}:${min}:00` }));
+        setFormData((prev: any) => ({ ...prev, endDate: newEnd.toISOString() }));
       }
     }
   }, [formData.startDate]);
@@ -118,6 +107,7 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
     const isEdit = !!initialData;
     confirm({
       title: isEdit ? "Cập nhật chiến dịch?" : "Tạo chiến dịch mới?",
+      type: 'info',
       description: isEdit
         ? "Bạn có chắc chắn muốn cập nhật thông tin cho chiến dịch này không?"
         : "Chiến dịch sẽ được kích hoạt ngay lập tức sau khi tạo thành công.",
@@ -125,10 +115,12 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
       onConfirm: async () => {
         setIsSubmitting(true);
         try {
-          const submitData = { ...formData };
-          if (submitData.applyToAll) {
-            delete submitData.restaurantIds;
-          }
+          const submitData = {
+            ...formData,
+            restaurants: formData.applyToAll ? [] : formData.restaurantIds.map((id: number) => ({ id }))
+          };
+          delete submitData.restaurantIds;
+          delete submitData.applyToAll;
           await onSave(submitData);
           onSuccess();
           onClose();
@@ -138,16 +130,6 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
           setIsSubmitting(false);
         }
       }
-    });
-  };
-
-  const toggleRestaurant = (id: number) => {
-    setFormData((prev: Voucher & { restaurantIds: number[], applyToAll: boolean }) => {
-      const current = prev.restaurantIds || [];
-      if (current.includes(id)) {
-        return { ...prev, restaurantIds: current.filter((x: number) => x !== id) };
-      }
-      return { ...prev, restaurantIds: [...current, id] };
     });
   };
 
@@ -374,59 +356,11 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
                     </div>
 
                     {!formData.applyToAll && (
-                      <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div className="relative group">
-                          <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors flex items-center justify-center w-6 h-6">
-                            <Search size={18} />
-                          </div>
-                          <input
-                            type="text"
-                            placeholder="Search restaurants by name..."
-                            value={resSearch}
-                            onChange={(e) => setResSearch(e.target.value)}
-                            className="w-full py-4 bg-[#F8F9FA] border-2 border-transparent focus:bg-white focus:border-primary/20 rounded-3xl py-4.5 pl-14 pr-6 text-sm font-bold text-gray-900 outline-none focus:ring-4 focus:ring-primary/5 transition-all shadow-sm"
-                          />
-                        </div>
-
-                        <div className="p-2 bg-[#F8F9FA] rounded-[40px] border border-gray-100 max-h-[300px] overflow-y-auto custom-scrollbar">
-                          <div className="grid grid-cols-2 gap-3 p-1">
-                            {restaurants
-                              .filter(r => r.name.toLowerCase().includes(resSearch.toLowerCase()))
-                              .map(r => (
-                                <label
-                                  key={r.id}
-                                  className={`flex items-center gap-3 p-4 bg-white rounded-2xl border-2 transition-all cursor-pointer group
-                                    ${formData.restaurantIds.includes(r.id)
-                                      ? 'border-primary/40 bg-lime-50/30'
-                                      : 'border-transparent hover:border-gray-200 shadow-sm hover:shadow-md'}`}
-                                >
-                                  <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all 
-                                    ${formData.restaurantIds.includes(r.id)
-                                      ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-110'
-                                      : 'bg-gray-50 border-gray-100 text-transparent'}`}>
-                                    <CheckCircle size={14} strokeWidth={3} />
-                                  </div>
-                                  <input
-                                    type="checkbox"
-                                    className="hidden"
-                                    checked={formData.restaurantIds.includes(r.id)}
-                                    onChange={() => toggleRestaurant(r.id)}
-                                  />
-                                  <div className="flex flex-col">
-                                    <span className="text-[13px] font-bold text-gray-800 leading-tight">{r.name}</span>
-                                    <span className="text-[10px] font-medium text-gray-400 uppercase tracking-tight mt-0.5">Active Partner</span>
-                                  </div>
-                                </label>
-                              ))}
-                            {restaurants.filter(r => r.name.toLowerCase().includes(resSearch.toLowerCase())).length === 0 && (
-                              <div className="col-span-2 py-10 text-center">
-                                <Building2 size={32} className="mx-auto text-gray-200 mb-2" />
-                                <p className="text-sm font-bold text-gray-300 uppercase tracking-widest">No restaurants found</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      <RestaurantSelector
+                        selectedIds={formData.restaurantIds}
+                        onChange={(ids) => setFormData({ ...formData, restaurantIds: ids })}
+                        onClear={() => setFormData({ ...formData, restaurantIds: [] })}
+                      />
                     )}
                   </div>
 
@@ -465,10 +399,14 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
                           onChange={(e) => {
                             const val = Number(e.target.value);
                             if (initialData) {
+                              // Prevent decreasing quantity more than available (remaining)
+                              const minAdjustment = -(initialData.remainingQuantity || 0);
+                              const safeVal = Math.max(minAdjustment, val);
+
                               setFormData({
                                 ...formData,
-                                adjustment: val,
-                                totalQuantity: (initialData.totalQuantity || 0) + val
+                                adjustment: safeVal,
+                                totalQuantity: (initialData.totalQuantity || 0) + safeVal
                               });
                             } else {
                               const posVal = Math.max(1, val);

@@ -13,7 +13,7 @@ export function ConfigHeader({ onRefresh, isLoading }: ConfigHeaderProps) {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm border border-lime-200">
+            <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
               <Settings size={12} />
               Platform Settings
             </span>

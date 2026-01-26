@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { voucherApi } from '@repo/api';
 import { Voucher, CreateVoucherDto } from '@repo/types';
 import { useNotification } from '@repo/ui';
@@ -9,10 +9,21 @@ export function usePromotions(search?: string, filterStr?: string) {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
 
-  const { data: promotions = [], isLoading, error, refetch } = useQuery<Voucher[]>({
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useInfiniteQuery({
     queryKey: ['promotions', search, filterStr],
-    queryFn: async () => {
-      const params: any = { size: 100 };
+    queryFn: async ({ pageParam = 1 }) => {
+      const params: any = {
+        page: pageParam,
+        size: 15
+      };
 
       let filter = filterStr || '';
       if (search) {
@@ -25,9 +36,21 @@ export function usePromotions(search?: string, filterStr?: string) {
       }
 
       const res = await voucherApi.getAllVouchers(params);
-      return res.data?.result || [];
+      const result = res.data?.result || [];
+      const meta = res.data?.meta;
+
+      return {
+        items: result as Voucher[],
+        nextPage: meta && meta.page < meta.pages ? meta.page + 1 : undefined,
+        total: meta?.total || 0,
+        pages: meta?.pages || 0
+      };
     },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
   });
+
+  const promotions = data?.pages.flatMap(page => page.items) || [];
 
   const createMutation = useMutation({
     mutationFn: (data: CreateVoucherDto) => voucherApi.createVoucher(data),
@@ -41,7 +64,7 @@ export function usePromotions(search?: string, filterStr?: string) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: Partial<Voucher>) => voucherApi.updateVoucher(data),
+    mutationFn: (data: CreateVoucherDto) => voucherApi.updateVoucher(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
       showNotification({ message: 'Cập nhật chiến dịch thành công', type: 'success', format: "Đã cập nhật chiến dịch." });
@@ -76,6 +99,9 @@ export function usePromotions(search?: string, filterStr?: string) {
   return {
     promotions,
     isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
     error,
     refetch,
     createPromotion: createMutation.mutateAsync,

@@ -20,6 +20,7 @@ export interface Voucher {
   totalQuantity: number;
   remainingQuantity: number;
   active: boolean;
+  applyToAll?: boolean;
   restaurants?: Restaurant[];
   createdAt?: string;
   updatedAt?: string;

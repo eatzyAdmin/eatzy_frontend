@@ -49,7 +49,7 @@ export default function PromotionSearchPopup({
           animate={{ y: 0, x: "-50%", opacity: 1 }}
           exit={{ y: -150, x: "-50%", opacity: 0 }}
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          className="fixed top-10 left-1/2 z-[200] w-[90%] md:w-[600px]"
+          className="fixed top-6 left-1/2 z-[200] w-[90%] md:w-[600px]"
         >
           <div className="absolute -inset-10 -z-10 pointer-events-none">
             <div className="absolute inset-0 bg-black/10 blur-[60px] rounded-[60px]" />
@@ -58,26 +58,18 @@ export default function PromotionSearchPopup({
           <div className="relative bg-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] rounded-[32px] p-6 flex flex-col gap-5 border border-gray-100/50">
 
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-2">
               <h2 className="text-xl font-anton font-bold text-[#1A1A1A] flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
+                <div className="w-10 h-10 rounded-2xl bg-lime-50 text-lime-600 flex items-center justify-center border border-lime-100 shadow-sm">
                   <Search className="w-5 h-5" />
                 </div>
-                SEARCH CAMPAIGNS
+                Quick Search
               </h2>
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={handleSearchSubmit}
-                  className="p-4 rounded-full bg-gray-100 text-gray-600 hover:bg-primary hover:text-white transition-all shadow-sm hover:shadow-xl hover:-translate-y-0.5"
-                  title="Search"
-                >
-                  <Search className="w-5 h-5" strokeWidth={2.5} />
-                </button>
-
-                <button
                   onClick={() => { handleClear(); onClose(); }}
-                  className="p-4 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800 transition-colors ml-1"
+                  className="w-10 h-10 rounded-2xl bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all flex items-center justify-center"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -87,27 +79,33 @@ export default function PromotionSearchPopup({
             {/* Input Container */}
             <div className="flex flex-col gap-4">
               <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors pointer-events-none">
-                  <Search size={18} />
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-lime-500 transition-colors pointer-events-none">
+                  <Search size={22} strokeWidth={2.5} />
                 </div>
                 <input
                   type="text"
-                  placeholder="Search Campaign Name or Code..."
+                  placeholder="Type campaign code or description..."
                   value={localSearch}
                   onChange={(e) => setLocalSearch(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
                   autoFocus
-                  className="w-full bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-gray-200 focus:bg-white rounded-2xl py-4 pl-11 pr-4 text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all shadow-sm"
+                  className="w-full bg-slate-50 border-2 border-transparent focus:bg-white focus:border-lime-500/20 rounded-[24px] py-6 pl-14 pr-6 text-xl font-anton text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-8 focus:ring-lime-500/5 transition-all shadow-inner"
                 />
               </div>
             </div>
 
-            <div className="flex gap-2 justify-center mt-2">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-lg">
-                <Tag size={12} /> Code
+            <div className="flex justify-between items-center px-4 mt-1">
+              <div className="flex gap-2">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                  <Tag size={10} /> CODE
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                  <FileText size={10} /> NAME
+                </div>
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-lg">
-                <FileText size={12} /> Name
+
+              <div className="flex items-center gap-2 text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+                Press <span className="px-1.5 py-0.5 bg-gray-100 rounded text-gray-500">Enter</span> to search
               </div>
             </div>
 
