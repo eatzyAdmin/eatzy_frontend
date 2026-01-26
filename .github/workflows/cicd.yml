@@ -26,10 +26,10 @@ jobs:
           docker build -t ${{ secrets.DOCKERHUB_USER }}/eatzy_frontend_customer:latest \
             --build-arg APP_NAME=customer .
 
-      - name: Build Admin App Image
+      - name: Build Super Admin App Image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USER }}/eatzy_frontend_admin:latest \
-            --build-arg APP_NAME=admin .
+          docker build -t ${{ secrets.DOCKERHUB_USER }}/eatzy_frontend_super-admin:latest \
+            --build-arg APP_NAME=super-admin .
 
       - name: Build Driver App Image
         run: |
@@ -46,9 +46,9 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKERHUB_USER }}/eatzy_frontend_customer:latest
 
-      - name: Push Admin Image
+      - name: Push Super Admin Image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USER }}/eatzy_frontend_admin:latest
+          docker push ${{ secrets.DOCKERHUB_USER }}/eatzy_frontend_super-admin:latest
 
       - name: Push Driver Image
         run: |
