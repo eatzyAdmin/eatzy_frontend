@@ -9,7 +9,6 @@ RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 # Install dependencies
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY apps/admin/package.json ./apps/admin/package.json
 COPY apps/customer/package.json ./apps/customer/package.json
 COPY apps/driver/package.json ./apps/driver/package.json
 COPY apps/restaurant/package.json ./apps/restaurant/package.json
