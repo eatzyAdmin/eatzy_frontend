@@ -18,7 +18,17 @@ export default function ImageWithFallback({ containerClassName, className, ...pr
   }
 
   const isFill = (props as any).fill === true;
-  const hasSrc = !!props.src;
+
+  // Validate src: must be absolute URL or start with / for next/image
+  const isValidSrc = (src: any): boolean => {
+    if (!src) return false;
+    if (typeof src !== 'string') return true; // StaticImport is valid
+    const trimmed = src.trim();
+    if (trimmed === '') return false;
+    return trimmed.startsWith('/') || trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:');
+  };
+
+  const hasSrc = isValidSrc(props.src);
 
   // If no source, just return fallback
   if (!hasSrc) {

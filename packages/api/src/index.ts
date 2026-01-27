@@ -10,6 +10,7 @@ export { walletApi } from "./wallet";
 export { reportApi } from "./report";
 export { systemConfigApi } from "./system-config";
 export { fileApi } from "./file";
+export { userApi } from "./user";
 
 // Restaurant module exports
 export {
