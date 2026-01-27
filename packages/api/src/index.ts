@@ -9,6 +9,7 @@ export { driverApi } from "./driver";
 export { walletApi } from "./wallet";
 export { reportApi } from "./report";
 export { systemConfigApi } from "./system-config";
+export { fileApi } from "./file";
 
 // Restaurant module exports
 export {

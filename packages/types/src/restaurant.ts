@@ -77,6 +77,8 @@ export type UpdateRestaurantRequest = {
   status?: RestaurantStatus;
   commissionRate?: number;
   schedule?: string;
+  avatarUrl?: string;
+  coverImageUrl?: string;
 };
 
 // ======== Restaurant Magazine Types (from backend API) ========

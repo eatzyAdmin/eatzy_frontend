@@ -13,3 +13,4 @@ export * from './cart';
 export * from './favorite';
 export * from './wallet';
 export * from './report';
+export * from './file';
