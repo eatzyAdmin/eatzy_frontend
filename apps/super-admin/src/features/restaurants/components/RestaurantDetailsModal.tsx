@@ -58,9 +58,9 @@ export default function RestaurantDetailsModal({ restaurant, isOpen, onClose }: 
 
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 pointer-events-none">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 40, rotateX: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 40, rotateX: 10 }}
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="bg-[#FDFDFD] w-full max-w-5xl rounded-[50px] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.25)] pointer-events-auto flex flex-col max-h-[92vh] border border-white/40"
             >

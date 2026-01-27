@@ -149,9 +149,10 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
 
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 30 }}
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 30 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="bg-[#F8F9FA] w-full max-w-6xl h-[90vh] rounded-[48px] overflow-hidden shadow-2xl pointer-events-auto flex border border-white/20"
             >
               {/* LEFT: Form */}

@@ -184,9 +184,10 @@ export default function CreateRestaurantModal({
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
             <motion.div
               key={initialData?.id || 'new-restaurant'}
-              initial={{ opacity: 0, scale: 0.95, y: 30 }}
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 30 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="bg-[#F8F9FA] w-full max-w-6xl h-[95vh] rounded-[40px] overflow-hidden shadow-2xl pointer-events-auto flex border border-white/20"
             >
               {/* LEFT PANEL: Form Input (60%) */}
