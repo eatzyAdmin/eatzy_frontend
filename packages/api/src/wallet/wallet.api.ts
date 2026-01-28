@@ -27,4 +27,14 @@ export const walletApi = {
   subtractBalance: (id: number, amount: number) => {
     return http.put<IBackendRes<WalletResponse>>(`/api/v1/wallets/${id}/subtract-balance`, amount) as unknown as Promise<IBackendRes<WalletResponse>>;
   },
+  getAllTransactions: (params?: {
+    filter?: string;
+    page?: number;
+    size?: number;
+    sort?: string;
+  }) => {
+    return http.get<WalletTransactionsBackendRes>("/api/v1/wallet-transactions", {
+      params,
+    }) as unknown as Promise<WalletTransactionsBackendRes>;
+  },
 };

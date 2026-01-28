@@ -1,25 +1,106 @@
 'use client';
 
-import { motion } from '@repo/ui/motion';
+import { useEffect, useState } from 'react';
+import { useTransactions } from '@/features/finance/hooks/useTransactions';
+import FinanceTable from '@/features/finance/components/FinanceTable';
+import { Plus, Download, TrendingUp, Wallet, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import FinanceExportModal from '@/features/finance/components/FinanceExportModal';
 
 export default function FinancePage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStr, setFilterStr] = useState('');
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [sortConfig, setSortConfig] = useState<{ field: string; direction: 'asc' | 'desc' }>({
+    field: 'createdAt',
+    direction: 'desc'
+  });
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch
+  } = useTransactions({
+    searchTerm,
+    filter: filterStr,
+    sortField: sortConfig.field,
+    sortDirection: sortConfig.direction,
+    pageSize: 15
+  });
+
+  const transactions = data?.pages.flatMap((page) => page.result) || [];
+
+  if (!mounted) return null;
+
+  const handleSort = (field: string) => {
+    setSortConfig((prev) => ({
+      field,
+      direction: prev.field === field && prev.direction === 'desc' ? 'asc' : 'desc'
+    }));
+  };
+
+  const handleExport = async (format: 'pdf' | 'excel', scope: 'current' | 'all', columns: string[]) => {
+    // Audit log for simulation - in real app, we'd trigger a backend download or use a lib like xlsx/jspdf
+    console.log(`Exporting ${scope} audit as ${format} with columns:`, columns);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  };
+
   return (
-    <div className="p-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="liquid-glass-container p-8 rounded-3xl bg-white/50 backdrop-blur-md border border-white/20 shadow-xl"
-      >
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-          Tài chính
-        </h1>
-        <p className="text-gray-600 mt-4">
-          Báo cáo doanh thu, quản lý thanh toán và đối soát tài chính toàn hệ thống.
-        </p>
-        <div className="mt-12 flex items-center justify-center p-20 border-2 border-dashed border-gray-200 rounded-3xl">
-          <p className="text-gray-400 font-medium">Đang tổng hợp dữ liệu tài chính...</p>
+    <div className="p-8 pb-32">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-6">
+        <div>
+          <h1 className="text-5xl font-anton uppercase tracking-tighter text-gray-900 mb-2">
+            Financial <span className="text-primary italic">Ledger</span>
+          </h1>
+          <p className="text-gray-400 font-medium max-w-md leading-relaxed">
+            Real-time audit trail of all platform wallet activities and payment flows.
+          </p>
         </div>
-      </motion.div>
+
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setIsExportOpen(true)}
+            className="group flex items-center gap-4 px-8 py-5 bg-white border border-gray-100 rounded-[28px] shadow-xl shadow-black/[0.02] hover:shadow-2xl hover:border-primary/20 transition-all duration-500"
+          >
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Export Data</span>
+              <span className="text-sm font-anton text-gray-900 group-hover:text-primary transition-colors uppercase">Audit Report</span>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-gray-50 text-gray-400 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all shadow-inner">
+              <Download size={20} />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <FinanceTable
+        data={transactions}
+        isLoading={isLoading}
+        isFetchingNextPage={isFetchingNextPage}
+        hasNextPage={hasNextPage}
+        onLoadMore={fetchNextPage}
+        onRefresh={() => refetch()}
+        onSearch={(term) => setSearchTerm(term)}
+        onFilter={(query) => setFilterStr(query)}
+        searchTerm={searchTerm}
+        onSort={handleSort}
+        sortField={sortConfig.field}
+        sortDirection={sortConfig.direction}
+      />
+
+      <FinanceExportModal
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        onExport={handleExport}
+        previewData={transactions.slice(0, 10)}
+      />
     </div>
   );
 }
