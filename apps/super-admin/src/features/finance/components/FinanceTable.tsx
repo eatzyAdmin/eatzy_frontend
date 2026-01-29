@@ -198,7 +198,7 @@ export default function FinanceTable({
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-[40px] shadow-[0_8px_40px_rgba(0,0,0,0.04)] border border-gray-100/50 overflow-hidden"
     >
-      <div className="pb-4 p-8 border-b border-gray-100 flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white">
+      <div className="pb-4 p-8 flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1.5 h-6 bg-primary rounded-full" />
@@ -222,10 +222,10 @@ export default function FinanceTable({
           </button>
 
           {activeFiltersCount > 0 ? (
-            <div className="flex items-center gap-1 p-1 pr-2 bg-primary rounded-2xl shadow-lg shadow-primary/20 border border-primary/40 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center gap-1 p-1 pr-2 bg-primary rounded-full shadow-lg shadow-primary/20 border border-primary/40 animate-in fade-in zoom-in duration-200">
               <button
                 onClick={() => setIsFilterOpen(true)}
-                className="flex items-center gap-2 px-3 py-1.5 hover:bg-black/10 rounded-2xl transition-colors"
+                className="flex items-center gap-2 px-3 py-2.5 hover:bg-black/10 rounded-full transition-colors"
               >
                 <Filter className="w-4 h-4 text-white fill-current" />
                 <span className="text-xs font-bold text-white uppercase tracking-wide">Filtered</span>
@@ -260,7 +260,49 @@ export default function FinanceTable({
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="px-8 pt-0 pb-4 relative">
+        {filterQuery && (
+          <div className="flex flex-wrap items-center gap-2 animate-in slide-in-from-top-2 duration-300">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-1">Active Filters:</span>
+
+            {/* Transaction Types */}
+            {['DEPOSIT', 'WITHDRAWAL', 'PAYMENT', 'REFUND', 'EARNING', 'TOP_UP'].map(type => {
+              if (filterQuery.includes(`'${type}'`)) {
+                return (
+                  <button
+                    key={type}
+                    onClick={() => handleApplyFilters(filterQuery.replace(`'${type}'`, '').replace(/, ,/g, ',').replace(/\[,/, '[').replace(/,\]/, ']').replace(/\[\]/, '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
+                    className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+                  >
+                    <span>Category: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">{type.replace('_', ' ')}</span></span>
+                    <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
+                  </button>
+                );
+              }
+              return null;
+            })}
+
+            {/* Statuses */}
+            {['SUCCESS', 'PENDING', 'FAILED', 'COMPLETED'].map(status => {
+              if (filterQuery.includes(`'${status}'`)) {
+                return (
+                  <button
+                    key={status}
+                    onClick={() => handleApplyFilters(filterQuery.replace(`'${status}'`, '').replace(/, ,/g, ',').replace(/\[,/, '[').replace(/,\]/, ']').replace(/\[\]/, '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
+                    className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+                  >
+                    <span>Status: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">{status}</span></span>
+                    <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
+                  </button>
+                );
+              }
+              return null;
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="p-4 pt-0">
         <DataTable
           data={data}
           columns={columns}
@@ -284,7 +326,7 @@ export default function FinanceTable({
                   setSelectedTransaction(tx);
                   setIsDetailsOpen(true);
                 }}
-                className="p-2 rounded-xl text-primary bg-lime-50 hover:bg-primary hover:text-white transition-all shadow-sm group/btn"
+                className="p-2 rounded-xl text-lime-600 bg-lime-100 hover:bg-primary hover:text-white transition-all shadow-sm group/btn"
                 title="View Receipt"
               >
                 <Eye size={18} className="group-hover/btn:scale-110 transition-transform" />

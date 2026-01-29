@@ -99,6 +99,7 @@ export default function PromotionsPage() {
           onSearch={setSearchTerm}
           onFilter={setFilterQuery}
           searchTerm={searchTerm}
+          filterQuery={filterQuery}
         />
       </div>
 

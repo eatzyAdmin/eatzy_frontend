@@ -26,6 +26,7 @@ interface PromotionsTableProps {
   onSearch: (term: string) => void;
   onFilter: (query: string) => void;
   searchTerm: string;
+  filterQuery: string;
 }
 
 export default function PromotionsTable({
@@ -40,7 +41,8 @@ export default function PromotionsTable({
   onToggleStatus,
   onSearch,
   onFilter,
-  searchTerm
+  searchTerm,
+  filterQuery
 }: PromotionsTableProps) {
   const { confirm } = useSwipeConfirmation();
   const [isMounted, setIsMounted] = useState(false);
@@ -297,7 +299,7 @@ export default function PromotionsTable({
       className="bg-white rounded-[40px] shadow-[0_8px_40px_rgba(0,0,0,0.04)] border border-gray-100/50 overflow-hidden"
     >
       {/* Header with Title and Search/Filter actions */}
-      <div className="pb-4 p-8 border-b border-gray-100 flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white">
+      <div className="pb-4 p-8 flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1.5 h-6 bg-primary rounded-full" />
@@ -322,10 +324,10 @@ export default function PromotionsTable({
           </button>
 
           {activeFiltersCount > 0 ? (
-            <div className="flex items-center gap-1 p-1 pr-2 bg-primary rounded-2xl shadow-lg shadow-primary/20 border border-primary/40 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center gap-1 p-1 pr-2 bg-primary rounded-full shadow-lg shadow-primary/20 border border-primary/40 animate-in fade-in zoom-in duration-200">
               <button
                 onClick={() => setIsFilterOpen(true)}
-                className="flex items-center gap-2 px-3 py-1.5 hover:bg-black/10 rounded-2xl transition-colors"
+                className="flex items-center gap-2 px-3 py-2.5 hover:bg-black/10 rounded-full transition-colors"
               >
                 <Filter className="w-4 h-4 text-white fill-current" />
                 <span className="text-xs font-bold text-white uppercase tracking-wide">Filtered</span>
@@ -360,7 +362,63 @@ export default function PromotionsTable({
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="px-8 pt-0 pb-4 relative">
+        {filterQuery && (
+          <div className="flex flex-wrap items-center gap-2 animate-in slide-in-from-top-2 duration-300">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-1">Active Filters:</span>
+
+            {/* Campaign Status */}
+            {filterQuery.includes('active:true') && (
+              <button
+                onClick={() => handleApplyFilters(filterQuery.replace('active:true', '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
+                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+              >
+                <span>Status: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">Running</span></span>
+                <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
+              </button>
+            )}
+            {filterQuery.includes('active:false') && (
+              <button
+                onClick={() => handleApplyFilters(filterQuery.replace('active:false', '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
+                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+              >
+                <span>Status: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">Paused</span></span>
+                <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
+              </button>
+            )}
+
+            {/* Discount Type */}
+            {['PERCENTAGE', 'FIXED', 'FREESHIP'].map(type => {
+              if (filterQuery.includes(`discountType:'${type}'`)) {
+                return (
+                  <button
+                    key={type}
+                    onClick={() => handleApplyFilters(filterQuery.replace(`discountType:'${type}'`, '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
+                    className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+                  >
+                    <span>Type: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">{type}</span></span>
+                    <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
+                  </button>
+                );
+              }
+              return null;
+            })}
+
+            {/* Min Order Value */}
+            {filterQuery.includes('minOrderValue >=') && (
+              <button
+                onClick={() => handleApplyFilters(filterQuery.replace(/minOrderValue >= \d+/, '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
+                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+              >
+                <span>Order Value: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">Filtered</span></span>
+                <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="p-4 pt-0">
         {data.length === 0 && !isLoading ? (
           <div className="py-32 flex flex-col items-center justify-center text-center px-4">
             <div className="w-24 h-24 rounded-[32px] bg-gray-50 flex items-center justify-center text-gray-200 mb-6">
