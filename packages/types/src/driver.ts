@@ -45,6 +45,7 @@ export interface UserDriver {
   id: number;
   name: string;
   email: string;
+  isActive?: boolean;
 }
 
 export interface DriverProfile {

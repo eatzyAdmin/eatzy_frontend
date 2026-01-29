@@ -22,7 +22,8 @@ export default function DriversPage() {
     refetch,
     deleteDriver,
     updateDriver,
-    createDriver
+    createDriver,
+    toggleStatus
   } = useDrivers(searchTerm, filterStr, sortConfig?.field, sortConfig?.direction);
 
   return (
@@ -66,6 +67,7 @@ export default function DriversPage() {
         onRefresh={() => refetch()}
         onEdit={(driver) => updateDriver(driver)}
         onDelete={(id) => deleteDriver(id)}
+        onToggleStatus={(id: number, userId: number, isActive: boolean) => toggleStatus({ id, userId, isActive })}
         onSearch={(term) => setSearchTerm(term)}
         onFilter={(query) => setFilterStr(query)}
         searchTerm={searchTerm}

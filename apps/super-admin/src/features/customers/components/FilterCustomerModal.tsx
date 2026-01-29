@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import {
   X, CheckCircle, AlertCircle, Filter, Check,
-  RotateCcw
+  RotateCcw, ShieldCheck, Lock
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -113,26 +113,41 @@ export default function FilterCustomerModal({
                 <label className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] block">
                   Account Status
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-4">
                   <button
                     onClick={() => toggleStatus('active')}
-                    className={`p-4 rounded-2xl border-2 flex items-center gap-3 transition-all ${selectedStatuses.includes('active')
-                      ? 'border-lime-500 bg-lime-50 text-lime-700 font-bold'
-                      : 'border-gray-100 bg-white text-gray-400 hover:border-gray-200'
-                      }`}
+                    className={`flex items-center justify-between p-5 rounded-[24px] border-2 transition-all
+                      ${selectedStatuses.includes('active')
+                        ? 'bg-lime-50 border-lime-500 shadow-lg shadow-lime-500/10'
+                        : 'bg-gray-50 border-transparent hover:bg-white hover:border-gray-200 shadow-sm'}`}
                   >
-                    <CheckCircle size={18} />
-                    Active Only
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedStatuses.includes('active') ? 'bg-lime-500 text-white' : 'bg-white text-gray-400'}`}>
+                        <ShieldCheck size={18} />
+                      </div>
+                      <span className={`text-xs font-bold uppercase tracking-tight ${selectedStatuses.includes('active') ? 'text-lime-700' : 'text-gray-500'}`}>
+                        Active Only
+                      </span>
+                    </div>
+                    {selectedStatuses.includes('active') && <Check size={18} className="text-lime-500" />}
                   </button>
+
                   <button
                     onClick={() => toggleStatus('disabled')}
-                    className={`p-4 rounded-2xl border-2 flex items-center gap-3 transition-all ${selectedStatuses.includes('disabled')
-                      ? 'border-red-500 bg-red-50 text-red-700 font-bold'
-                      : 'border-gray-100 bg-white text-gray-400 hover:border-gray-200'
-                      }`}
+                    className={`flex items-center justify-between p-5 rounded-[24px] border-2 transition-all
+                      ${selectedStatuses.includes('disabled')
+                        ? 'bg-red-50 border-red-500 shadow-lg shadow-red-500/10'
+                        : 'bg-gray-50 border-transparent hover:bg-white hover:border-gray-200 shadow-sm'}`}
                   >
-                    <AlertCircle size={18} />
-                    Disabled Only
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedStatuses.includes('disabled') ? 'bg-red-500 text-white' : 'bg-white text-gray-400'}`}>
+                        <Lock size={18} />
+                      </div>
+                      <span className={`text-xs font-bold uppercase tracking-tight ${selectedStatuses.includes('disabled') ? 'text-red-700' : 'text-gray-500'}`}>
+                        Disabled Only
+                      </span>
+                    </div>
+                    {selectedStatuses.includes('disabled') && <Check size={18} className="text-red-500" />}
                   </button>
                 </div>
               </div>

@@ -89,6 +89,28 @@ export function useDrivers(search?: string, filterStr?: string, sortField?: stri
     }
   });
 
+  const toggleAccountStatusMutation = useMutation({
+    mutationFn: async ({ id, userId, isActive }: { id: number, userId: number, isActive: boolean }) => {
+      const { userApi } = await import('@repo/api');
+      return userApi.updateUserStatus(userId, !isActive);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['drivers'] });
+      showNotification({
+        type: 'success',
+        message: 'Thành công',
+        format: 'Đã cập nhật trạng thái tài khoản tài xế.'
+      });
+    },
+    onError: (error: any) => {
+      showNotification({
+        type: 'error',
+        message: 'Lỗi',
+        format: `Không thể cập nhật trạng thái: ${error.message}`
+      });
+    }
+  });
+
   return {
     drivers,
     isLoading,
@@ -100,6 +122,7 @@ export function useDrivers(search?: string, filterStr?: string, sortField?: stri
     createDriver: createMutation.mutateAsync,
     updateDriver: updateMutation.mutateAsync,
     deleteDriver: deleteMutation.mutateAsync,
-    isActionLoading: createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
+    toggleStatus: toggleAccountStatusMutation.mutateAsync,
+    isActionLoading: createMutation.isPending || updateMutation.isPending || deleteMutation.isPending || toggleAccountStatusMutation.isPending
   };
 }

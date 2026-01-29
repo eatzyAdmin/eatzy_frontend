@@ -32,12 +32,20 @@ export default function FilterRestaurantModal({
   useEffect(() => {
     if (isOpen) {
       if (activeQuery) {
+        const statuses: RestaurantStatus[] = [];
+
+        // Check for account locked
+        if (activeQuery.includes('owner.isActive:false')) {
+          statuses.push('LOCKED' as RestaurantStatus);
+        }
+
         // Simple parser for status in ['A', 'B']
         const match = activeQuery.match(/status in \[(.*)\]/);
         if (match && match[1]) {
-          const statuses = match[1].split(',').map(s => s.trim().replace(/'/g, '')) as RestaurantStatus[];
-          setSelectedStatuses(statuses);
+          const ops = match[1].split(',').map(s => s.trim().replace(/'/g, '')) as RestaurantStatus[];
+          statuses.push(...ops);
         }
+        setSelectedStatuses(statuses);
       } else {
         setSelectedStatuses([]);
       }
@@ -57,11 +65,19 @@ export default function FilterRestaurantModal({
   };
 
   const handleApply = () => {
-    let query = '';
-    if (selectedStatuses.length > 0) {
-      query = `status in [${selectedStatuses.map(s => `'${s}'`).join(',')}]`;
+    const filters: string[] = [];
+    const opStatuses = selectedStatuses.filter(s => s !== 'LOCKED');
+    const isLockedSelected = selectedStatuses.includes('LOCKED' as RestaurantStatus);
+
+    if (opStatuses.length > 0 && isLockedSelected) {
+      filters.push(`(status in [${opStatuses.map(s => `'${s}'`).join(',')}] or owner.isActive:false)`);
+    } else if (opStatuses.length > 0) {
+      filters.push(`status in [${opStatuses.map(s => `'${s}'`).join(',')}]`);
+    } else if (isLockedSelected) {
+      filters.push('owner.isActive:false');
     }
-    onApply(query);
+
+    onApply(filters.join(''));
     onClose();
   };
 

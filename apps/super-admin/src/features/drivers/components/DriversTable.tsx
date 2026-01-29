@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import {
   User, Search, Filter, Play, Pause, AlertCircle, X,
-  RotateCcw, Bike, Star, ShieldCheck, Mail, Navigation, Info, Edit, Trash2
+  RotateCcw, Bike, Star, ShieldCheck, Mail, Navigation, Info, Edit, Trash2,
+  Lock, Unlock
 } from 'lucide-react';
 import { DataTable, useSwipeConfirmation } from '@repo/ui';
 import { DriverProfile, DriverStatus, VerificationStatus } from '@repo/types';
@@ -22,6 +23,7 @@ interface DriversTableProps {
   onRefresh: () => void;
   onEdit: (driver: DriverProfile) => void;
   onDelete: (id: number) => void;
+  onToggleStatus: (id: number, userId: number, isActive: boolean) => void;
   onSearch: (term: string) => void;
   onFilter: (query: string) => void;
   searchTerm: string;
@@ -36,9 +38,9 @@ export default function DriversTable({
   isFetchingNextPage,
   hasNextPage,
   onLoadMore,
-  onRefresh,
   onEdit,
   onDelete,
+  onToggleStatus,
   onSearch,
   onFilter,
   searchTerm,
@@ -60,7 +62,23 @@ export default function DriversTable({
     setIsMounted(true);
   }, []);
 
-  const handleActionRequest = (driver: DriverProfile, type: 'delete') => {
+  const handleToggleStatusRequest = (driver: DriverProfile) => {
+    const isActive = driver.user.isActive ?? true;
+
+    confirm({
+      title: isActive ? 'Khóa tài khoản tài xế?' : 'Mở khóa tài khoản tài xế?',
+      type: isActive ? 'danger' : 'info',
+      description: isActive
+        ? `Tài xế ${driver.user.name} sẽ không thể truy cập ứng dụng Mobile App để nhận đơn sau khi bị khóa.`
+        : `Tài xế ${driver.user.name} sẽ có thể đăng nhập lại và bắt đầu làm việc ngay lập tức.`,
+      confirmText: isActive ? "Slide to Lock" : "Slide to Unlock",
+      onConfirm: async () => {
+        await onToggleStatus(driver.id, driver.user.id, isActive);
+      }
+    });
+  };
+
+  const handleDeleteRequest = (driver: DriverProfile) => {
     confirm({
       title: 'Xóa hồ sơ tài xế?',
       type: 'danger',
@@ -93,8 +111,14 @@ export default function DriversTable({
         const isAvailable = driver.status === 'AVAILABLE';
         return (
           <div className="flex items-center gap-4 py-2 group/info">
-            <div className={`w-12 h-12 rounded-2xl ${isAvailable ? 'bg-lime-100 text-lime-600' : 'bg-gray-100 text-gray-400'} flex items-center justify-center shadow-lg shadow-black/5`}>
-              <User size={20} className="stroke-[2.5]" />
+            <div className="relative group/avatar">
+              <div className={`w-12 h-12 rounded-2xl ${isAvailable ? 'bg-lime-100 text-lime-600' : 'bg-gray-100 text-gray-400'} flex items-center justify-center shadow-lg shadow-black/5 transition-transform group-hover/avatar:scale-105 duration-300`}>
+                <User size={20} className="stroke-[2.5]" />
+              </div>
+              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm
+                ${driver.status === 'AVAILABLE' ? 'bg-lime-500' :
+                  driver.status === 'BUSY' ? 'bg-red-500' : 'bg-gray-400'}`}
+              />
             </div>
             <div>
               <div className="font-anton text-lg text-[#1A1A1A] uppercase tracking-tight leading-none mb-1 flex items-center gap-2">
@@ -157,26 +181,24 @@ export default function DriversTable({
       )
     },
     {
-      label: 'OPERATIONAL STATUS',
-      key: 'status',
-      formatter: (val: string) => {
-        const isOnline = val === 'AVAILABLE' || val === 'BUSY';
+      label: 'STATUS',
+      key: 'user.isActive',
+      formatter: (_: any, driver: DriverProfile) => {
+        const isActive = driver.user.isActive ?? true;
         return (
-          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit ${isOnline ? 'bg-lime-100 text-lime-600 border border-lime-100 shadow-sm' : 'bg-gray-100 text-gray-400 border border-gray-100'}`}>
-            {val === 'AVAILABLE' ? (
+          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit ${isActive
+            ? 'bg-lime-100 text-lime-600 border border-lime-100 shadow-sm'
+            : 'bg-red-100 text-red-600 border border-red-100 shadow-sm'
+            }`}>
+            {isActive ? (
               <>
-                <Play size={10} fill="currentColor" />
-                Available
-              </>
-            ) : val === 'BUSY' ? (
-              <>
-                <Navigation size={10} fill="currentColor" />
-                In Delivery
+                <ShieldCheck size={12} strokeWidth={3.2} />
+                Unlocked
               </>
             ) : (
               <>
-                <Pause size={10} fill="currentColor" />
-                Offline
+                <Lock size={12} strokeWidth={3.2} />
+                Locked
               </>
             )}
           </span>
@@ -280,21 +302,25 @@ export default function DriversTable({
           renderActions={(driver) => (
             <div className="flex items-center gap-2">
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditingDriver(driver);
-                }}
-                className="p-2 rounded-xl text-primary bg-lime-50 hover:bg-primary hover:text-white transition-all shadow-sm"
+                onClick={(e) => { e.stopPropagation(); handleToggleStatusRequest(driver); }}
+                className={`p-2 rounded-xl transition-all duration-300 shadow-sm ${(driver.user.isActive ?? true)
+                  ? 'text-amber-500 bg-amber-100 hover:bg-amber-200'
+                  : 'text-lime-600 bg-lime-100 hover:bg-lime-200'
+                  }`}
+                title={(driver.user.isActive ?? true) ? 'Khóa tài xế (Lock)' : 'Mở khóa (Unlock)'}
+              >
+                {(driver.user.isActive ?? true) ? <Lock size={18} /> : <ShieldCheck size={18} />}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setEditingDriver(driver); }}
+                className="p-2 rounded-xl text-primary bg-lime-100 hover:bg-primary hover:text-white transition-all shadow-sm"
                 title="Audit dossier"
               >
                 <Edit size={18} />
               </button>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleActionRequest(driver, 'delete');
-                }}
-                className="p-2 rounded-xl text-red-500 bg-red-50 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                onClick={(e) => { e.stopPropagation(); handleDeleteRequest(driver); }}
+                className="p-2 rounded-xl text-red-500 bg-red-100 hover:bg-red-500 hover:text-white transition-all shadow-sm"
                 title="Delete profile"
               >
                 <Trash2 size={18} />

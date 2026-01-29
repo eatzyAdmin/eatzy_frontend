@@ -8,6 +8,7 @@ import {
   Clock, ShieldCheck, Wallet, Bike,
   FileText, Pause, Play, Navigation
 } from 'lucide-react';
+import { Lock } from '@repo/ui';
 
 interface FilterDriverModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export default function FilterDriverModal({
   activeQuery = ''
 }: FilterDriverModalProps) {
   const [status, setStatus] = useState<string[]>([]);
+  const [accountStatus, setAccountStatus] = useState<string[]>([]);
   const [verification, setVerification] = useState<string[]>([]);
   const [vehicleType, setVehicleType] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -33,8 +35,13 @@ export default function FilterDriverModal({
 
   useEffect(() => {
     if (isOpen) {
-      if (!activeQuery) {
+      if (activeQuery) {
+        if (activeQuery.includes('user.isActive:true')) setAccountStatus(['active']);
+        else if (activeQuery.includes('user.isActive:false')) setAccountStatus(['locked']);
+        else setAccountStatus([]);
+      } else {
         setStatus([]);
+        setAccountStatus([]);
         setVerification([]);
         setVehicleType([]);
       }
@@ -46,6 +53,12 @@ export default function FilterDriverModal({
 
     if (status.length > 0) {
       filters.push(`status in [${status.map(s => `'${s}'`).join(',')}]`);
+    }
+
+    if (accountStatus.includes('active')) {
+      filters.push('user.isActive:true');
+    } else if (accountStatus.includes('locked')) {
+      filters.push('user.isActive:false');
     }
 
     if (verification.includes('NATIONAL_ID')) {
@@ -68,12 +81,17 @@ export default function FilterDriverModal({
 
   const handleReset = () => {
     setStatus([]);
+    setAccountStatus([]);
     setVerification([]);
     setVehicleType([]);
   };
 
   const toggleStatus = (s: string) => {
     setStatus(current => current.includes(s) ? current.filter(i => i !== s) : [...current, s]);
+  };
+
+  const toggleAccountStatus = (s: string) => {
+    setAccountStatus(current => current.includes(s) ? [] : [s]);
   };
 
   const toggleVerification = (v: string) => {
@@ -86,7 +104,7 @@ export default function FilterDriverModal({
 
   if (!mounted) return null;
 
-  const activeCount = (status.length > 0 ? 1 : 0) + (verification.length > 0 ? 1 : 0) + (vehicleType.length > 0 ? 1 : 0);
+  const activeCount = (status.length > 0 ? 1 : 0) + (accountStatus.length > 0 ? 1 : 0) + (verification.length > 0 ? 1 : 0) + (vehicleType.length > 0 ? 1 : 0);
 
   return createPortal(
     <AnimatePresence>
@@ -152,10 +170,55 @@ export default function FilterDriverModal({
 
               {/* Body */}
               <div className="flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar space-y-10">
+                {/* Account Status */}
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <ShieldCheck size={16} className="text-lime-500" />
+                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Account Security (Lock/Unlock)</h4>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => toggleAccountStatus('active')}
+                      className={`flex items-center justify-between p-5 rounded-[24px] border-2 transition-all
+                        ${accountStatus.includes('active')
+                          ? 'bg-lime-50 border-lime-500 shadow-lg shadow-lime-500/10'
+                          : 'bg-gray-50 border-transparent hover:bg-white hover:border-gray-200 shadow-sm'}`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accountStatus.includes('active') ? 'bg-lime-500 text-white' : 'bg-white text-gray-400'}`}>
+                          <ShieldCheck size={18} />
+                        </div>
+                        <span className={`text-xs font-bold uppercase tracking-tight ${accountStatus.includes('active') ? 'text-lime-700' : 'text-gray-500'}`}>
+                          Unlocked Only
+                        </span>
+                      </div>
+                      {accountStatus.includes('active') && <Check size={18} className="text-lime-500" />}
+                    </button>
+
+                    <button
+                      onClick={() => toggleAccountStatus('locked')}
+                      className={`flex items-center justify-between p-5 rounded-[24px] border-2 transition-all
+                        ${accountStatus.includes('locked')
+                          ? 'bg-red-50 border-red-500 shadow-lg shadow-red-500/10'
+                          : 'bg-gray-50 border-transparent hover:bg-white hover:border-gray-200 shadow-sm'}`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accountStatus.includes('locked') ? 'bg-red-500 text-white' : 'bg-white text-gray-400'}`}>
+                          <Lock size={18} />
+                        </div>
+                        <span className={`text-xs font-bold uppercase tracking-tight ${accountStatus.includes('locked') ? 'text-red-700' : 'text-gray-500'}`}>
+                          Locked Only
+                        </span>
+                      </div>
+                      {accountStatus.includes('locked') && <Check size={18} className="text-red-500" />}
+                    </button>
+                  </div>
+                </section>
+
                 {/* Status Selection */}
                 <section>
                   <div className="flex items-center gap-2 mb-4">
-                    <Clock size={16} className="text-primary" />
+                    <Clock size={16} className="text-blue-500" />
                     <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Operational Status</h4>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
@@ -165,14 +228,14 @@ export default function FilterDriverModal({
                         onClick={() => toggleStatus(s)}
                         className={`p-4 rounded-2xl border-2 transition-all flex flex-col gap-2 group
                           ${status.includes(s)
-                            ? 'bg-primary/5 border-primary shadow-[0_8px_16px_rgba(132,204,22,0.1)]'
+                            ? 'bg-lime-50 border-lime-500 shadow-[0_8px_16px_rgba(132,204,22,0.1)]'
                             : 'bg-white border-gray-100 hover:border-gray-200'}`}
                       >
                         <div className="flex justify-between items-start">
-                          <div className={`p-2 rounded-xl border ${status.includes(s) ? 'bg-primary text-white border-primary' : 'bg-gray-50 text-gray-400 border-gray-100 group-hover:bg-white group-hover:border-gray-200'}`}>
+                          <div className={`p-2 rounded-xl border ${status.includes(s) ? 'bg-lime-500 text-white border-lime-500' : 'bg-gray-50 text-gray-400 border-gray-100 group-hover:bg-white group-hover:border-gray-200'}`}>
                             {s === 'AVAILABLE' ? <Play size={16} /> : s === 'BUSY' ? <Navigation size={16} /> : <Pause size={16} />}
                           </div>
-                          {status.includes(s) && <Check size={16} className="text-primary" />}
+                          {status.includes(s) && <Check size={16} className="text-lime-500" />}
                         </div>
                         <span className={`text-xs font-anton uppercase tracking-wider ${status.includes(s) ? 'text-gray-900' : 'text-gray-400'}`}>
                           {s === 'AVAILABLE' ? 'Ready to Work' : s === 'BUSY' ? 'In Delivery' : 'Not Working'}
@@ -185,7 +248,7 @@ export default function FilterDriverModal({
                 {/* Verification Checkpoint */}
                 <section>
                   <div className="flex items-center gap-2 mb-4">
-                    <ShieldCheck size={16} className="text-blue-500" />
+                    <ShieldCheck size={16} className="text-lime-500" />
                     <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Compliance & Verification</h4>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -199,18 +262,18 @@ export default function FilterDriverModal({
                         onClick={() => toggleVerification(v.id)}
                         className={`flex items-center justify-between p-5 rounded-[24px] border-2 transition-all
                           ${verification.includes(v.id)
-                            ? 'bg-blue-50 border-blue-500 shadow-lg shadow-blue-500/10'
+                            ? 'bg-lime-50 border-lime-500 shadow-lg shadow-lime-500/10'
                             : 'bg-gray-50 border-transparent hover:bg-white hover:border-gray-200 shadow-sm'}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${verification.includes(v.id) ? 'bg-blue-500 text-white' : 'bg-white text-gray-400'}`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${verification.includes(v.id) ? 'bg-lime-500 text-white' : 'bg-white text-gray-400'}`}>
                             {v.icon}
                           </div>
-                          <span className={`text-xs font-bold uppercase tracking-tight ${verification.includes(v.id) ? 'text-blue-600' : 'text-gray-500'}`}>
+                          <span className={`text-xs font-bold uppercase tracking-tight ${verification.includes(v.id) ? 'text-lime-700' : 'text-gray-500'}`}>
                             {v.label}
                           </span>
                         </div>
-                        {verification.includes(v.id) && <Check size={18} className="text-blue-500" />}
+                        {verification.includes(v.id) && <Check size={18} className="text-lime-500" />}
                       </button>
                     ))}
                   </div>
@@ -219,7 +282,7 @@ export default function FilterDriverModal({
                 {/* Vehicle Types */}
                 <section>
                   <div className="flex items-center gap-2 mb-4">
-                    <Bike size={16} className="text-amber-500" />
+                    <Bike size={16} className="text-lime-500" />
                     <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Fleet Classification</h4>
                   </div>
                   <div className="flex flex-wrap gap-3">
@@ -229,7 +292,7 @@ export default function FilterDriverModal({
                         onClick={() => toggleVehicle(v)}
                         className={`px-6 py-3 rounded-2xl border transition-all text-xs font-bold uppercase tracking-widest
                           ${vehicleType.includes(v)
-                            ? 'bg-amber-100 border-amber-300 text-amber-700 shadow-md translate-y-[-2px]'
+                            ? 'bg-lime-100 border-lime-300 text-lime-700 shadow-md translate-y-[-2px]'
                             : 'bg-white border-gray-100 text-gray-400 hover:border-gray-300 hover:text-gray-600'}`}
                       >
                         {v}

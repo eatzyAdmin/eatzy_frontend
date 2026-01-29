@@ -104,6 +104,28 @@ export function useRestaurants(search?: string, filterStr?: string) {
     }
   });
 
+  const toggleAccountStatusMutation = useMutation({
+    mutationFn: async ({ id, userId, isActive }: { id: number, userId: number, isActive: boolean }) => {
+      const { userApi } = await import('@repo/api');
+      return userApi.updateUserStatus(userId, !isActive);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restaurants', 'admin-list'] });
+      showNotification({
+        type: 'success',
+        message: 'Thành công',
+        format: 'Đã cập nhật trạng thái tài khoản chủ cửa hàng.'
+      });
+    },
+    onError: (error: any) => {
+      showNotification({
+        type: 'error',
+        message: 'Lỗi',
+        format: `Không thể cập nhật trạng thái: ${error.message}`
+      });
+    }
+  });
+
   return {
     restaurants,
     isLoading,
@@ -116,6 +138,7 @@ export function useRestaurants(search?: string, filterStr?: string) {
     updateRestaurant: updateMutation.mutateAsync,
     deleteRestaurant: deleteMutation.mutateAsync,
     toggleRestaurantStatus: toggleStatusMutation.mutateAsync,
-    isActionLoading: createMutation.isPending || updateMutation.isPending || deleteMutation.isPending || toggleStatusMutation.isPending
+    toggleStatus: toggleAccountStatusMutation.mutateAsync,
+    isActionLoading: createMutation.isPending || updateMutation.isPending || deleteMutation.isPending || toggleStatusMutation.isPending || toggleAccountStatusMutation.isPending
   };
 }

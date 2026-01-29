@@ -22,7 +22,7 @@ interface RestaurantsTableProps {
   onRefresh: () => void;
   onEdit: (restaurant: Restaurant) => void;
   onDelete: (id: number) => void;
-  onToggleStatus: (id: number, currentStatus: RestaurantStatus) => void;
+  onToggleStatus: (id: number, userId: number, isActive: boolean) => void;
   onSearch: (term: string) => void;
   onFilter: (query: string) => void;
   searchTerm: string;
@@ -55,27 +55,32 @@ export default function RestaurantsTable({
     setIsDetailsOpen(true);
   };
 
-  const handleActionRequest = (restaurant: Restaurant, type: 'delete' | 'toggle_lock') => {
-    const isDelete = type === 'delete';
-    const isLocked = restaurant.status === 'LOCKED';
+  const handleToggleStatusRequest = (restaurant: Restaurant) => {
+    const isActive = restaurant.owner?.isActive ?? true;
 
     confirm({
-      title: isDelete ? 'Xóa cửa hàng?' : (isLocked ? 'Mở khóa đối tác?' : 'Tạm khóa đối tác?'),
-      type: isDelete || !isLocked ? 'danger' : 'info',
-      description: isDelete
-        ? "Hành động này không thể hoàn tác. Cửa hàng sẽ bị xóa vĩnh viễn khỏi hệ thống."
-        : (isLocked
-          ? "Đối tác này sẽ được gỡ bỏ giới hạn và có thể tiếp tục kinh doanh trên ứng dụng."
-          : "Việc khóa sẽ đình chỉ mọi hoạt động của quán ngay lập tức. Bạn có chắc chắn muốn thực hiện?"),
-      confirmText: isDelete ? "Slide to Delete" : (isLocked ? "Slide to Unlock" : "Slide to Lock"),
+      title: isActive ? 'Tạm khóa đối tác?' : 'Mở khóa đối tác?',
+      type: isActive ? 'danger' : 'info',
+      description: isActive
+        ? `Tài khoản của đối tác ${restaurant.name} sẽ không thể đăng nhập vào hệ thống sau khi bị khóa.`
+        : `Tài khoản của đối tác ${restaurant.name} sẽ có thể đăng nhập lại vào hệ thống ngay lập tức.`,
+      confirmText: isActive ? "Slide to Lock" : "Slide to Unlock",
       onConfirm: async () => {
-        if (type === 'delete') {
-          await onDelete(restaurant.id);
-        } else {
-          // If locked, we usually bring it back to OPEN or its previous state. Default to OPEN.
-          const nextStatus: RestaurantStatus = isLocked ? 'OPEN' : 'LOCKED';
-          await onToggleStatus(restaurant.id, nextStatus);
+        if (restaurant.owner) {
+          await onToggleStatus(restaurant.id, restaurant.owner.id, isActive);
         }
+      }
+    });
+  };
+
+  const handleDeleteRequest = (restaurant: Restaurant) => {
+    confirm({
+      title: 'Xóa cửa hàng?',
+      type: 'danger',
+      description: "Hành động này không thể hoàn tác. Cửa hàng sẽ bị xóa vĩnh viễn khỏi hệ thống.",
+      confirmText: "Slide to Delete",
+      onConfirm: async () => {
+        await onDelete(restaurant.id);
       }
     });
   };
@@ -173,18 +178,21 @@ export default function RestaurantsTable({
       label: 'STATUS',
       key: 'status',
       formatter: (_: any, r: Restaurant) => {
-        const isLocked = r.status === 'LOCKED';
+        const isActive = r.owner?.isActive ?? true;
         return (
-          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit ${!isLocked ? 'bg-lime-100 text-lime-600 border border-lime-100' : 'bg-red-100 text-red-600 border border-red-100'}`}>
-            {isLocked ? (
+          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit ${isActive
+            ? 'bg-lime-100 text-lime-600 border border-lime-100 shadow-sm'
+            : 'bg-red-100 text-red-600 border border-red-100 shadow-sm'
+            }`}>
+            {isActive ? (
               <>
-                <Lock size={10} strokeWidth={2.5} />
-                Locked
+                <ShieldCheck size={12} strokeWidth={3.2} />
+                Unlocked
               </>
             ) : (
               <>
-                <ShieldCheck size={10} strokeWidth={2.5} />
-                Unlocked
+                <Lock size={12} strokeWidth={3.2} />
+                Locked
               </>
             )}
           </span>
@@ -301,21 +309,24 @@ export default function RestaurantsTable({
               return (
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleActionRequest(restaurant, 'toggle_lock')}
-                    className={`p-2 rounded-xl transition-all duration-300 shadow-sm ${isLocked ? 'text-lime-600 bg-lime-100 hover:bg-lime-200' : 'text-amber-500 bg-amber-100 hover:bg-amber-200'}`}
-                    title={isLocked ? 'Mở khóa (Unlock)' : 'Khóa đối tác (Lock)'}
+                    onClick={(e) => { e.stopPropagation(); handleToggleStatusRequest(restaurant); }}
+                    className={`p-2 rounded-xl transition-all duration-300 shadow-sm ${(restaurant.owner?.isActive ?? true)
+                      ? 'text-amber-500 bg-amber-100 hover:bg-amber-200'
+                      : 'text-lime-600 bg-lime-100 hover:bg-lime-200'
+                      }`}
+                    title={(restaurant.owner?.isActive ?? true) ? 'Khóa đối tác (Lock)' : 'Mở khóa (Unlock)'}
                   >
-                    {isLocked ? <ShieldCheck size={18} /> : <Lock size={18} />}
+                    {(restaurant.owner?.isActive ?? true) ? <Lock size={18} /> : <ShieldCheck size={18} />}
                   </button>
                   <button
-                    onClick={() => onEdit(restaurant)}
+                    onClick={(e) => { e.stopPropagation(); onEdit(restaurant); }}
                     className="p-2 rounded-xl text-lime-600 bg-lime-100 hover:bg-lime-200 transition-all duration-300 shadow-sm"
                     title="Edit details"
                   >
                     <Edit size={18} />
                   </button>
                   <button
-                    onClick={() => handleActionRequest(restaurant, 'delete')}
+                    onClick={(e) => { e.stopPropagation(); handleDeleteRequest(restaurant); }}
                     className="p-2 rounded-xl bg-red-100 text-red-500 hover:bg-red-200 transition-all duration-300 shadow-sm"
                     title="Delete"
                   >

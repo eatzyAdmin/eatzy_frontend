@@ -3,6 +3,7 @@ export type RestaurantStatus = 'OPEN' | 'CLOSED' | 'LOCKED' | 'PENDING' | 'REJEC
 export type RestaurantOwner = {
   id: number;
   name: string;
+  isActive?: boolean;
 };
 
 export type RestaurantType = {

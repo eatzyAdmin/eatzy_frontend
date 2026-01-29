@@ -26,7 +26,7 @@ export default function RestaurantsPage() {
     createRestaurant,
     updateRestaurant,
     deleteRestaurant,
-    toggleRestaurantStatus
+    toggleStatus
   } = useRestaurants(searchTerm, filterQuery);
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -51,10 +51,6 @@ export default function RestaurantsPage() {
     refetch();
   };
 
-  const handleToggleStatus = async (id: number, currentStatus: RestaurantStatus) => {
-    const newStatus: RestaurantStatus = currentStatus === 'OPEN' ? 'CLOSED' : 'OPEN';
-    await toggleRestaurantStatus({ id, status: newStatus });
-  };
 
   if (!mounted) return null;
 
@@ -101,7 +97,7 @@ export default function RestaurantsPage() {
           onRefresh={refetch}
           onEdit={handleEdit}
           onDelete={(id) => deleteRestaurant(id)}
-          onToggleStatus={handleToggleStatus}
+          onToggleStatus={(id, userId, isActive) => toggleStatus({ id, userId, isActive })}
           onSearch={setSearchTerm}
           onFilter={setFilterQuery}
           searchTerm={searchTerm}
