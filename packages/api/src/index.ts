@@ -11,6 +11,7 @@ export { reportApi } from "./report";
 export { systemConfigApi } from "./system-config";
 export { fileApi } from "./file";
 export { userApi } from "./user";
+export { customerApi } from "./customer";
 
 // Restaurant module exports
 export {

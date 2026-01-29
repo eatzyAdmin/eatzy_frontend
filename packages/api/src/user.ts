@@ -16,5 +16,8 @@ export const userApi = {
   },
   deleteUser: (id: number) => {
     return http.delete<IBackendRes<void>>(`/api/v1/users/${id}`) as unknown as Promise<IBackendRes<void>>;
+  },
+  updateUserStatus: (id: number, isActive: boolean) => {
+    return http.put<IBackendRes<any>>(`/api/v1/users/${id}/active`, { isActive }) as unknown as Promise<IBackendRes<any>>;
   }
 };
