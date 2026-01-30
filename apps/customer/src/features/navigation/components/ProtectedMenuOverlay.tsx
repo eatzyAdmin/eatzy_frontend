@@ -4,12 +4,11 @@ import { History, Home, Heart, LogOut } from "@repo/ui/icons";
 import { NavItem, NavItemShimmer, ProfileShimmer, useLoading, useSwipeConfirmation } from "@repo/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../auth/hooks/useAuth";
-import { logout } from "../../auth/api";
-import { useAuthStore } from "@repo/store";
+import { useLogout } from "../../auth/hooks/useLogout";
 
 export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user, isLoading } = useAuth();
-  const { clearAuth } = useAuthStore();
+  const { handleLogout: performLogout } = useLogout();
   const router = useRouter();
   const params = useSearchParams();
   const { show } = useLoading();
@@ -44,14 +43,7 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
       type: "danger",
       onConfirm: async () => {
         show("Đang đăng xuất...");
-        try {
-          await logout();
-        } catch (error) {
-          console.error("Logout failed:", error);
-        } finally {
-          clearAuth();
-          router.replace('/login');
-        }
+        performLogout();
       }
     });
   };

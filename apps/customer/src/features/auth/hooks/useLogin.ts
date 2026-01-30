@@ -27,15 +27,15 @@ export const useLogin = () => {
       const payload = data.data; // This is IResLoginDTO
 
       if (payload?.access_token && payload?.user) {
-        // 1. Set Access Token in Memory (Http Client)
+        // 1. Clear ALL React Query cache first (prevent data leakage between accounts)
+        queryClient.clear();
+
+        // 2. Set Access Token in Memory (Http Client)
         setAccessToken(payload.access_token);
 
-        // 2. Update Store (User info only)
+        // 3. Update Store (User info only)
         setUser(payload.user);
         setToken(null);
-
-        // 3. Invalidate auth query to ensure fresh state
-        queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
       }
     },
     onError: (error) => {

@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "@repo/ui/motion";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useSwipeConfirmation, useLoading, useNotification } from "@repo/ui";
+import { useSwipeConfirmation, useLoading } from "@repo/ui";
 import {
   User, CreditCard, ShieldCheck,
   LogOut, MapPin, Bell, HelpCircle
@@ -12,16 +11,13 @@ import { mockCustomerProfile } from "@/features/profile/data/mockProfileData";
 import CustomerProfileCard from "@/features/profile/components/CustomerProfileCard";
 import ProfileMenuItem from "@/features/profile/components/ProfileMenuItem";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { logout } from "@/features/auth/api";
-import { useAuthStore } from "@repo/store";
+import { useLogout } from "@/features/auth/hooks/useLogout";
 
 export default function ProfilePage() {
-  const router = useRouter();
   const { confirm } = useSwipeConfirmation();
   const { show, hide } = useLoading();
-  const { showNotification } = useNotification();
   const { user } = useAuth();
-  const { clearAuth } = useAuthStore();
+  const { handleLogout: performLogout, isLoading: isLoggingOut } = useLogout();
 
   // Simulate loading finish on mount (standard practice in this app)
   useEffect(() => {
@@ -39,17 +35,7 @@ export default function ProfilePage() {
       type: "danger",
       onConfirm: async () => {
         show();
-        try {
-          await logout();
-        } catch (error) {
-          console.error("Logout error", error);
-        }
-
-        // Always clear local state and redirect
-        clearAuth();
-        hide();
-        showNotification({ message: "Đăng xuất thành công", type: "success" });
-        router.push("/login");
+        performLogout();
       }
     });
   };

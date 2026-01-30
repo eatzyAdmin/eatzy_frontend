@@ -1,9 +1,7 @@
 "use client";
 
 import { motion } from "@repo/ui/motion";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { useSwipeConfirmation, useLoading, useNotification } from "@repo/ui";
+import { useSwipeConfirmation, useLoading } from "@repo/ui";
 import {
   User, CreditCard, ShieldCheck,
   LogOut, Bike, Bell, HelpCircle
@@ -13,16 +11,13 @@ import DriverProfileCard from "@/features/profile/components/DriverProfileCard";
 import ProfileMenuItem from "@/features/profile/components/ProfileMenuItem";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { logout } from "@/features/auth/api";
-import { useAuthStore } from "@repo/store";
+import { useLogout } from "@/features/auth/hooks/useLogout";
 
 export default function ProfilePage() {
-  const router = useRouter();
   const { confirm } = useSwipeConfirmation();
-  const { show, hide } = useLoading();
-  const { showNotification } = useNotification();
+  const { show } = useLoading();
   const { user } = useAuth();
-  const { clearAuth } = useAuthStore();
+  const { handleLogout: performLogout } = useLogout();
 
   const handleLogout = () => {
     confirm({
@@ -32,17 +27,7 @@ export default function ProfilePage() {
       type: "danger",
       onConfirm: async () => {
         show();
-        try {
-          await logout();
-        } catch (error) {
-          console.error("Logout error", error);
-        }
-
-        // Always clear
-        clearAuth();
-        hide();
-        showNotification({ message: "Đăng xuất thành công", type: "success" });
-        router.push("/login");
+        performLogout();
       }
     });
   };

@@ -19,8 +19,7 @@ import {
 import RestaurantNavItem from '../../../components/RestaurantNavItem';
 import { ProfileShimmer, NavItemShimmer, useSwipeConfirmation } from '@repo/ui';
 import { useAuth } from '../../../features/auth/hooks/useAuth';
-import { logout } from '../../../features/auth/api';
-import { useAuthStore } from '@repo/store';
+import { useLogout } from '../../../features/auth/hooks/useLogout';
 
 const restaurantMenuItems = [
   { id: 'orders', icon: ShoppingCart, text: 'Đơn hàng' },
@@ -42,7 +41,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
   const [activeSection, setActiveSection] = useState('orders');
   const [navHovered, setNavHovered] = useState(false);
   const { user, isLoading: isAuthLoading } = useAuth();
-  const { clearAuth } = useAuthStore();
+  const { handleLogout: performLogout } = useLogout();
 
   // Update active section based on pathname
   useEffect(() => {
@@ -60,14 +59,7 @@ function RestaurantLayoutContent({ children }: { children: ReactNode }) {
         confirmText: 'Đăng xuất',
         onConfirm: async () => {
           startLoading();
-          try {
-            await logout();
-          } catch (error) {
-            console.error("Logout error", error);
-          } finally {
-            clearAuth();
-            router.push('/login');
-          }
+          performLogout();
         }
       });
     } else {

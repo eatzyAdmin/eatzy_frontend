@@ -22,10 +22,15 @@ export const useLogin = () => {
       const payload = data.data;
 
       if (payload?.access_token && payload?.user) {
+        // 1. Clear ALL React Query cache first (prevent data leakage between accounts)
+        queryClient.clear();
+
+        // 2. Set Access Token in Memory (Http Client)
         setAccessToken(payload.access_token);
+
+        // 3. Update Store (User info only)
         setUser(payload.user);
         setToken(null);
-        queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
       }
     },
     onError: (error: Error) => {
