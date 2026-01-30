@@ -29,7 +29,7 @@ export default function CategoryManagerModal({ categories, onUpdate, onClose }: 
     const newCat: MenuCategory = {
       id: newId,
       name: 'Danh mục mới',
-      restaurantId: categories[0]?.restaurantId || 'rest-1',
+      restaurantId: '', // Will be set by API hook when saving
       displayOrder: localCategories.length + 1
     };
     setLocalCategories([...localCategories, newCat]);

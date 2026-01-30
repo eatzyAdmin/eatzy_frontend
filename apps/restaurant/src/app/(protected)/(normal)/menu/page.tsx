@@ -9,13 +9,7 @@ import DishInfoCard from '@/features/menu/components/DishInfoCard';
 import DishEditModal from '@/features/menu/components/DishEditModal';
 import CategoryManagerModal from '@/features/menu/components/CategoryManagerModal';
 import { formatVnd } from '@repo/lib';
-import { useRestaurantMenu } from '@/features/menu/hooks/useMenu';
-
-// ======== Constants ========
-
-// TODO: Get from user profile/auth when owner logs in
-// For now, use a fixed restaurant ID for development
-const RESTAURANT_ID = 1; // Change this to your test restaurant ID
+import { useMyRestaurantMenu } from '@/features/menu/hooks/useMenu';
 
 export default function MenuPage() {
   const { hide } = useLoading();
@@ -23,6 +17,7 @@ export default function MenuPage() {
   const { showNotification } = useNotification();
 
   // ======== API Data Hook ========
+  // Uses my-restaurant API - no restaurant ID needed
   const {
     dishes,
     categories,
@@ -31,7 +26,7 @@ export default function MenuPage() {
     createDish,
     updateDish,
     deleteDish,
-  } = useRestaurantMenu(RESTAURANT_ID);
+  } = useMyRestaurantMenu();
 
   const [activeCategoryId, setActiveCategoryId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -130,8 +125,9 @@ export default function MenuPage() {
 
   const handleDishUpdate = async (updatedDish: Dish) => {
     if (dishMode === 'create') {
-      const { id, ...dishWithoutId } = updatedDish;
-      const created = await createDish(dishWithoutId);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, restaurantId, ...dishData } = updatedDish;
+      const created = await createDish(dishData);
       if (created) {
         setDishMode('edit');
         setSelectedDish(created);
@@ -164,7 +160,7 @@ export default function MenuPage() {
       description: '',
       price: 0,
       imageUrl: '',
-      restaurantId: String(RESTAURANT_ID),
+      restaurantId: '', // Will be set by backend based on current owner's restaurant
       menuCategoryId: categories[0]?.id || '',
       availableQuantity: 0,
       isAvailable: true,
