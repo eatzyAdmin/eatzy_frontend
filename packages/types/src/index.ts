@@ -14,3 +14,4 @@ export * from './favorite';
 export * from './wallet';
 export * from './report';
 export * from './file';
+export * from './review';

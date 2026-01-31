@@ -1,73 +1,10 @@
 'use client';
 
 import { useState, useMemo, useEffect } from "react";
-import { Search, Star, Sparkles, CheckCircle2, MessageSquare, Map, Tag, ChefHat, ChevronDown } from "@repo/ui/icons";
+import { Search, Star, Sparkles, CheckCircle2, MessageSquare, Map, Tag, ChefHat, ChevronDown, Send, X } from "@repo/ui/icons";
 import { ImageWithFallback, ReviewItemShimmer, ReviewStatsShimmer, TextShimmer, useLoading } from "@repo/ui";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import type { Review } from "@repo/types";
-
-// Mock Data
-const mockReviews: Review[] = [
-  {
-    id: 'rev-1',
-    authorName: 'Nguyễn Văn A',
-    rating: 5,
-    date: '2 ngày trước',
-    content: 'Món ăn rất ngon, phục vụ nhiệt tình. Sẽ quay lại!',
-    authorAvatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100'
-  },
-  {
-    id: 'rev-2',
-    authorName: 'Trần Thị B',
-    rating: 4.5,
-    date: '1 tuần trước',
-    content: 'Không gian đẹp, món ăn ổn. Giá hơi cao một chút.',
-  },
-  {
-    id: 'rev-3',
-    authorName: 'Lê Văn C',
-    rating: 5,
-    date: '2 tuần trước',
-    content: 'Tuyệt vời! Giao hàng nhanh, đồ ăn vẫn còn nóng hổi.',
-    authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'
-  },
-  {
-    id: 'rev-4',
-    authorName: 'Phạm Thị D',
-    rating: 4,
-    date: '1 tháng trước',
-    content: 'Đồ ăn khá ngon nhưng ship hơi lâu.',
-  },
-  {
-    id: 'rev-5',
-    authorName: 'Hoàng Văn E',
-    rating: 3,
-    date: '1 tháng trước',
-    content: 'Món cơm hơi khô, cần cải thiện.',
-  },
-  {
-    id: 'rev-6',
-    authorName: 'Mai Thị F',
-    rating: 5,
-    date: '2 tháng trước',
-    content: 'Quán ruột của mình, ăn mãi không chán!',
-    authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100'
-  },
-  {
-    id: 'rev-7',
-    authorName: 'Ngô Văn G',
-    rating: 4.8,
-    date: '2 tháng trước',
-    content: 'Đóng gói cẩn thận, sạch sẽ.',
-  },
-  {
-    id: 'rev-8',
-    authorName: 'Đặng Thị H',
-    rating: 5,
-    date: '3 tháng trước',
-    content: '10 điểm cho chất lượng!',
-  }
-];
+import { useMyRestaurantReviews, useReplyToReview } from "@/features/store/hooks";
 
 export default function ReviewsPage() {
   const { hide } = useLoading();
@@ -75,57 +12,61 @@ export default function ReviewsPage() {
   const [sortBy, setSortBy] = useState("relevant");
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [isSortOpen, setIsSortOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
 
-  const reviews = useMemo(() => mockReviews, []);
+  // Fetch reviews from API
+  const {
+    reviews,
+    isLoading,
+    totalReviews,
+    averageRating,
+    ratingDistribution,
+    unrepliedCount
+  } = useMyRestaurantReviews();
 
-  // Initial loading simulation
+  const { replyToReview, isReplying } = useReplyToReview();
+
+  // Hide global loading on mount
   useEffect(() => {
-    const timer = setTimeout(() => {
-      hide();
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+    hide();
   }, [hide]);
 
-  // Calculate average rating
-  const rating = reviews.reduce((acc, r) => acc + r.rating, 0) / (reviews.length || 1);
-
-  const categories = [
-    { label: "Mức độ ngon", score: 4.9, icon: ChefHat },
-    { label: "Độ chính xác", score: 4.9, icon: CheckCircle2 },
-    { label: "Phục vụ", score: 5.0, icon: Sparkles },
-    { label: "Giao tiếp", score: 5.0, icon: MessageSquare },
-    { label: "Vị trí", score: 4.8, icon: Map },
-    { label: "Giá trị", score: 5.0, icon: Tag },
-  ];
-
-  const ratingDistribution = useMemo(() => {
-    if (reviews.length === 0) {
-      return [
-        { stars: 5, count: 0, percentage: 0 },
-        { stars: 4, count: 0, percentage: 0 },
-        { stars: 3, count: 0, percentage: 0 },
-        { stars: 2, count: 0, percentage: 0 },
-        { stars: 1, count: 0, percentage: 0 },
-      ];
-    }
-    const counts: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    reviews.forEach(r => {
-      const star = Math.floor(r.rating);
-      if (counts[star] !== undefined) counts[star]++;
-    });
-    return [
-      { stars: 5, count: counts[5], percentage: (counts[5] / reviews.length) * 100 },
-      { stars: 4, count: counts[4], percentage: (counts[4] / reviews.length) * 100 },
-      { stars: 3, count: counts[3], percentage: (counts[3] / reviews.length) * 100 },
-      { stars: 2, count: counts[2], percentage: (counts[2] / reviews.length) * 100 },
-      { stars: 1, count: counts[1], percentage: (counts[1] / reviews.length) * 100 },
-    ];
+  // Convert API response to display format
+  const displayReviews = useMemo(() => {
+    return reviews.map(review => ({
+      id: review.id,
+      authorName: review.customer.name,
+      rating: review.rating,
+      date: formatRelativeDate(review.createdAt),
+      content: review.comment,
+      reply: review.reply,
+      orderId: review.order.id,
+    }));
   }, [reviews]);
 
+  const categories = [
+    { label: "Mức độ ngon", score: averageRating, icon: ChefHat },
+    { label: "Độ chính xác", score: averageRating, icon: CheckCircle2 },
+    { label: "Phục vụ", score: averageRating, icon: Sparkles },
+    { label: "Giao tiếp", score: averageRating, icon: MessageSquare },
+    { label: "Vị trí", score: averageRating, icon: Map },
+    { label: "Giá trị", score: averageRating, icon: Tag },
+  ];
+
+  const ratingDistributionDisplay = useMemo(() => {
+    const total = totalReviews || 1;
+    return [
+      { stars: 5, count: ratingDistribution.fiveStar, percentage: (ratingDistribution.fiveStar / total) * 100 },
+      { stars: 4, count: ratingDistribution.fourStar, percentage: (ratingDistribution.fourStar / total) * 100 },
+      { stars: 3, count: ratingDistribution.threeStar, percentage: (ratingDistribution.threeStar / total) * 100 },
+      { stars: 2, count: ratingDistribution.twoStar, percentage: (ratingDistribution.twoStar / total) * 100 },
+      { stars: 1, count: ratingDistribution.oneStar, percentage: (ratingDistribution.oneStar / total) * 100 },
+    ];
+  }, [ratingDistribution, totalReviews]);
+
   const filteredReviews = useMemo(() => {
-    const result = reviews.filter(review =>
+    const result = displayReviews.filter(review =>
       (review.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
         review.authorName.toLowerCase().includes(searchQuery.toLowerCase())) &&
       (selectedRating === null || Math.floor(review.rating) === selectedRating)
@@ -136,10 +77,9 @@ export default function ReviewsPage() {
     } else if (sortBy === 'lowest') {
       result.sort((a, b) => a.rating - b.rating);
     }
-    // For 'relevant' and 'recent', we keep default order for now
 
     return result;
-  }, [reviews, searchQuery, sortBy, selectedRating]);
+  }, [displayReviews, searchQuery, sortBy, selectedRating]);
 
   const sortOptions = [
     { value: 'relevant', label: 'Phù hợp nhất' },
@@ -147,6 +87,17 @@ export default function ReviewsPage() {
     { value: 'highest', label: 'Đánh giá cao nhất' },
     { value: 'lowest', label: 'Đánh giá thấp nhất' },
   ];
+
+  const handleReply = async (reviewId: number) => {
+    if (!replyText.trim()) return;
+    try {
+      await replyToReview({ reviewId, reply: replyText });
+      setReplyingTo(null);
+      setReplyText("");
+    } catch {
+      // Error handled by hook
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col bg-[#F8F9FA] overflow-hidden">
@@ -158,6 +109,11 @@ export default function ReviewsPage() {
               <Star size={12} />
               Customer Feedback
             </span>
+            {unrepliedCount > 0 && (
+              <span className="px-2.5 py-0.5 rounded-lg bg-orange-100 text-orange-700 text-[10px] font-bold uppercase tracking-wider">
+                {unrepliedCount} chưa phản hồi
+              </span>
+            )}
           </div>
           <h1 className="text-4xl font-anton text-gray-900 uppercase tracking-tight">
             Reviews & Feedback
@@ -180,14 +136,14 @@ export default function ReviewsPage() {
                 <div className="flex items-center justify-center gap-4 mb-3">
                   <span className="text-4xl drop-shadow-md">🏆</span>
                   <div className="text-[80px] leading-none font-anton font-bold text-[#1A1A1A] tracking-tighter drop-shadow-sm">
-                    {rating.toFixed(1).replace('.', ',')}
+                    {averageRating.toFixed(1).replace('.', ',')}
                   </div>
                   <span className="text-4xl drop-shadow-md">🏆</span>
                 </div>
 
                 <h3 className="text-xl font-anton font-bold text-[#1A1A1A] uppercase tracking-wide mb-2">Được khách yêu thích</h3>
                 <p className="text-gray-600 text-sm leading-relaxed px-2">
-                  Top 10% quán ăn hàng đầu dựa trên đánh giá và độ tin cậy.
+                  Dựa trên {totalReviews} đánh giá từ khách hàng.
                 </p>
               </div>
 
@@ -204,7 +160,7 @@ export default function ReviewsPage() {
                     </button>
                   )}
                 </div>
-                {ratingDistribution.map((item) => (
+                {ratingDistributionDisplay.map((item) => (
                   <div
                     key={item.stars}
                     onClick={() => setSelectedRating(selectedRating === item.stars ? null : item.stars)}
@@ -227,7 +183,7 @@ export default function ReviewsPage() {
                       />
                     </div>
 
-                    <span className="text-xs font-bold text-gray-400 w-8 text-right">{Math.round(item.percentage)}%</span>
+                    <span className="text-xs font-bold text-gray-400 w-12 text-right">{item.count}</span>
                   </div>
                 ))}
               </div>
@@ -345,7 +301,7 @@ export default function ReviewsPage() {
                         <div className="flex items-center gap-4">
                           <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 ring-2 ring-white shadow-sm">
                             <ImageWithFallback
-                              src={review.authorAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${review.authorName}`}
+                              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${review.authorName}`}
                               alt={review.authorName}
                               fill
                               className="object-cover"
@@ -353,7 +309,7 @@ export default function ReviewsPage() {
                           </div>
                           <div>
                             <div className="font-bold text-[#1A1A1A] text-base">{review.authorName}</div>
-                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Verified Customer</div>
+                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Đơn #{review.orderId}</div>
                           </div>
                         </div>
 
@@ -373,16 +329,56 @@ export default function ReviewsPage() {
                       {/* Content */}
                       <div className="pl-16">
                         <div className="bg-gray-50/50 rounded-2xl p-4 relative">
-                          <div className="absolute top-4 left-0 -translate-x-1/2 w-3 h-3 bg-gray-50 rotate-45 border-l border-b border-white hidden"></div>
                           <p className="text-[#1A1A1A] leading-relaxed font-medium">
                             "{review.content}"
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-2 mt-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                          <Map className="w-3 h-3 text-[var(--primary)]" />
-                          <span>Ho Chi Minh City</span>
-                        </div>
+                        {/* Reply Section */}
+                        {review.reply ? (
+                          <div className="mt-3 bg-lime-50 rounded-2xl p-4 border border-lime-100">
+                            <div className="flex items-center gap-2 mb-2">
+                              <MessageSquare className="w-4 h-4 text-lime-600" />
+                              <span className="text-xs font-bold text-lime-700 uppercase tracking-wider">Phản hồi của bạn</span>
+                            </div>
+                            <p className="text-lime-900 text-sm font-medium">{review.reply}</p>
+                          </div>
+                        ) : replyingTo === review.id ? (
+                          <div className="mt-3">
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                placeholder="Nhập phản hồi của bạn..."
+                                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-lime-300 focus:ring-2 focus:ring-lime-100 focus:outline-none text-sm"
+                                disabled={isReplying}
+                              />
+                              <button
+                                onClick={() => handleReply(review.id)}
+                                disabled={isReplying || !replyText.trim()}
+                                className="px-4 py-3 bg-lime-500 text-white rounded-xl font-bold text-sm hover:bg-lime-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                              >
+                                <Send className="w-4 h-4" />
+                                {isReplying ? 'Đang gửi...' : 'Gửi'}
+                              </button>
+                              <button
+                                onClick={() => { setReplyingTo(null); setReplyText(""); }}
+                                className="px-3 py-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setReplyingTo(review.id)}
+                            className="mt-3 flex items-center gap-2 text-sm font-bold text-lime-600 hover:text-lime-700 transition-colors"
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                            Phản hồi đánh giá
+                          </button>
+                        )}
                       </div>
                     </motion.div>
                   ))
@@ -394,4 +390,19 @@ export default function ReviewsPage() {
       </div>
     </div>
   );
+}
+
+// Helper function to format relative date
+function formatRelativeDate(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'Hôm nay';
+  if (diffDays === 1) return 'Hôm qua';
+  if (diffDays < 7) return `${diffDays} ngày trước`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} tuần trước`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} tháng trước`;
+  return `${Math.floor(diffDays / 365)} năm trước`;
 }

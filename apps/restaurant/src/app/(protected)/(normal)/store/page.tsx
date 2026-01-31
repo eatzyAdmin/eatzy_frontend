@@ -11,34 +11,76 @@ import StoreGeneralInfoEdit from '@/features/store/components/StoreGeneralInfoEd
 import StoreLocationEdit from '@/features/store/components/StoreLocationEdit';
 import StoreMediaEdit from '@/features/store/components/StoreMediaEdit';
 import StoreScheduleEdit from '@/features/store/components/StoreScheduleEdit';
-import { mockStore } from '@/features/store/data/mockStore';
 import StoreSkeleton from '@/features/store/components/StoreSkeleton';
+import { useMyStore, useUpdateStore, type StoreInfo, type UpdateStoreRequest } from '@/features/store/hooks';
 
 export default function StorePage() {
   const { hide } = useLoading();
   const { showNotification } = useNotification();
 
-  const [store, setStore] = useState(mockStore);
   const [activeSection, setActiveSection] = useState<'general' | 'location' | 'schedule' | 'media' | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Ensure global loader is hidden and simulate local loading
+  // Fetch store data from API
+  const { store: apiStore, isLoading, refetch } = useMyStore();
+  const { updateStore, isUpdating } = useUpdateStore();
+
+  // Ensure global loader is hidden
   useEffect(() => {
     hide();
-    // Simulate data fetching delay for shimmer effect
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
   }, [hide]);
 
-  const handleUpdateStore = (updates: Partial<typeof mockStore>) => {
-    setStore(prev => ({ ...prev, ...updates }));
-    setActiveSection(null);
-    showNotification({ message: 'Thông tin cửa hàng đã được cập nhật!', type: 'success', format: 'Nếu các thông tin chưa cập nhật ngay, hãy thử tải lại nhé.' });
+  // Map API store to component format
+  const store = apiStore ? {
+    id: String(apiStore.id),
+    name: apiStore.name,
+    description: apiStore.description,
+    address: apiStore.address,
+    coords: apiStore.coords,
+    slug: apiStore.slug,
+    commissionRate: apiStore.commissionRate,
+    phone: apiStore.phone,
+    email: '', // Not available from API
+    rating: apiStore.rating,
+    reviewCount: apiStore.reviewCount,
+    status: apiStore.status,
+    imageUrl: apiStore.imageUrl,
+    categories: [], // Could be fetched separately if needed
+    openingHours: apiStore.openingHours,
+    images: apiStore.images,
+  } : null;
+
+  const handleUpdateStore = async (updates: Record<string, unknown>) => {
+    if (!apiStore || !updates) return;
+
+    try {
+      // Map frontend updates to API format
+      const apiUpdates: UpdateStoreRequest = {
+        id: apiStore.id,
+        name: updates.name as string | undefined,
+        description: updates.description as string | undefined,
+        address: updates.address as string | undefined,
+        contactPhone: updates.phone as string | undefined,
+        schedule: updates.openingHours ? JSON.stringify(updates.openingHours) : undefined,
+        avatarUrl: updates.imageUrl as string | undefined,
+      };
+
+      // Handle coords
+      const coords = updates.coords as { lat: number; lng: number } | undefined;
+      if (coords) {
+        apiUpdates.latitude = coords.lat;
+        apiUpdates.longitude = coords.lng;
+      }
+
+      await updateStore(apiUpdates);
+      setActiveSection(null);
+      refetch();
+    } catch {
+      // Error handled by hook
+    }
   };
 
-  if (isLoading) {
+
+  if (isLoading || !store) {
     return <StoreSkeleton />;
   }
 
