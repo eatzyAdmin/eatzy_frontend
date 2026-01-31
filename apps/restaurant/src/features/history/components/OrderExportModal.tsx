@@ -6,7 +6,7 @@ import {
   ChevronDown, Eye, CheckCircle, Database,
   Calendar, CreditCard, Hash, User, ShoppingBag, Phone, MapPin, AlertCircle
 } from '@repo/ui/icons';
-import { OrderHistoryItem } from '../data/mockHistory';
+import { OrderHistoryItem } from '@repo/types';
 
 // Define Column Groups Configuration
 const COLUMN_GROUPS = {

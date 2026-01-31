@@ -1,9 +1,13 @@
-import { DataTable, ColumnDef } from '@repo/ui';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { motion } from '@repo/ui/motion';
-// import { mockWallet, Transaction } from '../data/mockWallet'; // REMOVED
-import { mockOrderHistory, OrderHistoryItem } from '@/features/history/data/mockHistory';
-import { ArrowDownLeft, ArrowUpRight, Search, Filter, Download, FileText, CheckCircle, AlertCircle, X, Utensils, Landmark } from '@repo/ui/icons';
-import { useState, useMemo } from 'react';
+import {
+  ArrowDownLeft, ArrowUpRight, Search, Filter, Download, FileText,
+  CheckCircle, AlertCircle, X, Utensils, Landmark, RotateCcw
+} from '@repo/ui/icons';
+import { DataTable } from '@repo/ui';
+import { OrderHistoryItem } from '@repo/types';
 import WalletSearchPopup from './WalletSearchPopup';
 import WalletFilterModal from './WalletFilterModal';
 import WalletExportModal from './WalletExportModal';
@@ -11,156 +15,45 @@ import OrderDetailsModal from '@/features/history/components/OrderDetailsModal';
 import { useOrderDetail } from '@/features/history/hooks/useOrderDetail';
 import { useLoading } from '@repo/ui';
 import WithdrawalDetailsModal from './WithdrawalDetailsModal';
-import { useWalletTransactions } from '../hooks/useWalletTransactions';
-import { WalletTransactionResponse } from '@repo/types';
-
-// Define local Transaction interface compatible with the table
 import { Transaction } from '../types';
+import { WalletSearchFields } from '../hooks/useWalletTransactions';
 
-const columns: ColumnDef<Transaction>[] = [
-  {
-    label: 'TRANSACTION ID',
-    key: 'id',
-    className: 'w-[140px]',
-    formatter: (value, item) => (
-      <span className="font-mono text-xs font-medium text-gray-500 bg-white px-2 py-1.5 rounded border border-gray-100">
-        #{item.id.split('-')[1]}
-      </span>
-    )
-  },
-  {
-    label: 'TYPE & DESCRIPTION',
-    key: 'description',
-    className: 'min-w-[280px]',
-    formatter: (value, item) => {
-      const isFoodOrder = item.category === 'Food Order';
-      const isWithdrawal = item.category === 'Withdrawal';
+interface WalletTransactionTableProps {
+  data: Transaction[];
+  isLoading: boolean;
+  isFetchingNextPage?: boolean;
+  hasNextPage?: boolean;
+  onLoadMore?: () => void;
+  onRefresh: () => void;
+  onSearchChange: (key: string, value: string) => void;
+  onClearSearch: () => void;
+  onFilter: (query: string) => void;
+  searchFields: WalletSearchFields;
+  filterQuery: string;
+}
 
-      return (
-        <div className="flex items-start gap-3">
-          <div className={`mt-0.5 w-9 h-9 rounded-full flex items-center justify-center border shadow-sm shrink-0 ${isFoodOrder
-            ? 'bg-lime-50 text-lime-600 border-lime-100'
-            : isWithdrawal
-              ? 'bg-red-50 text-red-600 border-red-100'
-              : 'bg-gray-50 text-gray-500 border-gray-100'
-            }`}>
-            {isFoodOrder && <Utensils className="w-4 h-4" />}
-            {isWithdrawal && <Landmark className="w-4 h-4" />}
-            {!isFoodOrder && !isWithdrawal && <FileText className="w-4 h-4" />}
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <span className={`text-[10px] uppercase tracking-widest font-bold ${isFoodOrder ? 'text-lime-600' : isWithdrawal ? 'text-red-600' : 'text-gray-400'
-              }`}>
-              {item.category}
-            </span>
-            <span className="font-bold text-gray-900 text-sm md:text-base font-heading line-clamp-1">{item.description}</span>
-          </div>
-        </div>
-      );
-    }
-  },
-  {
-    label: 'DATE',
-    key: 'date',
-    className: 'min-w-[140px]',
-    formatter: (value, item) => {
-      const date = new Date(item.date);
-      return (
-        <div className="flex flex-col">
-          <span className="text-gray-900 font-semibold text-sm">
-            {date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-          </span>
-          <span className="text-gray-400 text-xs font-medium mt-0.5">
-            at {date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-          </span>
-        </div>
-      )
-    }
-  },
-  {
-    label: 'AMOUNT',
-    key: 'amount',
-    className: 'min-w-[160px]',
-    formatter: (value, item) => {
-      const isPositive = item.amount > 0;
-      return (
-        <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isPositive ? 'bg-lime-100 text-lime-600' : 'bg-red-50 text-red-500'}`}>
-            {isPositive ? <ArrowDownLeft className="w-4 h-4" strokeWidth={2.5} /> : <ArrowUpRight className="w-4 h-4" strokeWidth={2.5} />}
-          </div>
-          <div className="flex flex-col">
-            <span className={`font-bold text-sm ${isPositive ? 'text-lime-600' : 'text-red-500'}`}>
-              {isPositive ? '+' : ''}{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.amount)}
-            </span>
-            <span className="text-[10px] text-gray-400 font-medium tracking-wide">
-              Bal: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.balanceAfter)}
-            </span>
-          </div>
-        </div>
-      );
-    }
-  },
-  {
-    label: 'STATUS',
-    key: 'status',
-    formatter: (value, item) => {
-      const isSuccess = item.status === 'success';
-      return (
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border tracking-wide shadow-sm ${isSuccess
-          ? 'bg-lime-100 text-lime-700 border-lime-200'
-          : 'bg-red-100 text-red-700 border-red-200'
-          }`}>
-          {isSuccess ? <CheckCircle className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
-          {isSuccess ? 'Thành công' : 'Thất bại'}
-        </span>
-      )
-    }
-  }
-];
-
-export default function WalletTransactionTable() {
-  // Use our new hook
-  const { transactions: backendTransactions, isLoading } = useWalletTransactions({
-    size: 100 // Fetch a reasonable amount for the table
-  });
+export default function WalletTransactionTable({
+  data,
+  isLoading,
+  isFetchingNextPage,
+  hasNextPage,
+  onLoadMore,
+  onRefresh,
+  onSearchChange,
+  onClearSearch,
+  onFilter,
+  searchFields,
+  filterQuery
+}: WalletTransactionTableProps) {
   const { getOrderDetail } = useOrderDetail();
   const { show, hide } = useLoading();
 
-  // Map backend transactions to local Transaction interface
-  const data = useMemo<Transaction[]>(() => {
-    return backendTransactions.map(tx => {
-      let category = 'Unknown';
-      if (tx.transactionType === 'RESTAURANT_EARNING' || tx.transactionType === 'EARNING') category = 'Food Order';
-      else if (tx.transactionType === 'WITHDRAWAL') category = 'Withdrawal';
-      else if (tx.transactionType === 'COMMISSION_PAID') category = 'Commission';
-      else if (tx.transactionType === 'ORDER_PAYMENT') category = 'Payment';
+  const [isMounted, setIsMounted] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [activeFiltersCount, setActiveFiltersCount] = useState(0);
 
-      return {
-        id: `TRX-${tx.id}`,
-        originalId: tx.id,
-        date: tx.createdAt,
-        type: tx.amount > 0 ? 'revenue' : 'withdrawal',
-        description: tx.description,
-        amount: tx.amount,
-        status: tx.status === 'SUCCESS' ? 'success' : 'failed',
-        category: category,
-        orderId: tx.order?.id,
-        balanceAfter: tx.balanceAfter
-      };
-    });
-  }, [backendTransactions]);
-
-  const [sortConfig, setSortConfig] = useState<{ key: keyof Transaction; direction: 'asc' | 'desc' } | null>(null);
-
-  // Search State
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [searchFields, setSearchFields] = useState({
-    id: '',
-    description: ''
-  });
-
-  // Filter State
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  // Filter fields for modal
   const [filterFields, setFilterFields] = useState<{
     status: string;
     dateRange: { from: Date | null; to: Date | null };
@@ -174,110 +67,148 @@ export default function WalletTransactionTable() {
   // Modal States
   const [selectedOrder, setSelectedOrder] = useState<OrderHistoryItem | null>(null);
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<Transaction | null>(null);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
-  const handleSort = (key: string) => {
-    const typedKey = key as keyof Transaction;
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === typedKey && sortConfig.direction === 'asc') {
-      direction = 'desc';
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Column definitions
+  const columns = [
+    {
+      label: 'TRANSACTION ID',
+      key: 'id',
+      className: 'w-[140px]',
+      formatter: (_: any, item: Transaction) => (
+        <span className="font-mono text-xs font-medium text-gray-500 bg-white px-2 py-1.5 rounded border border-gray-100">
+          #{item.id.split('-')[1]}
+        </span>
+      )
+    },
+    {
+      label: 'TYPE & DESCRIPTION',
+      key: 'description',
+      className: 'min-w-[280px]',
+      formatter: (_: any, item: Transaction) => {
+        const isFoodOrder = item.category === 'Food Order';
+        const isWithdrawal = item.category === 'Withdrawal';
+
+        return (
+          <div className="flex items-start gap-3 py-2">
+            <div className={`mt-0.5 w-9 h-9 rounded-full flex items-center justify-center border shadow-sm shrink-0 ${isFoodOrder
+              ? 'bg-lime-50 text-lime-600 border-lime-100'
+              : isWithdrawal
+                ? 'bg-red-50 text-red-600 border-red-100'
+                : 'bg-gray-50 text-gray-500 border-gray-100'
+              }`}>
+              {isFoodOrder && <Utensils className="w-4 h-4" />}
+              {isWithdrawal && <Landmark className="w-4 h-4" />}
+              {!isFoodOrder && !isWithdrawal && <FileText className="w-4 h-4" />}
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className={`text-[10px] uppercase tracking-widest font-bold ${isFoodOrder ? 'text-lime-600' : isWithdrawal ? 'text-red-600' : 'text-gray-400'
+                }`}>
+                {item.category}
+              </span>
+              <span className="font-bold text-gray-900 text-sm md:text-base font-heading line-clamp-1">{item.description}</span>
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      label: 'DATE',
+      key: 'date',
+      className: 'min-w-[140px]',
+      formatter: (_: any, item: Transaction) => {
+        const date = new Date(item.date);
+        return (
+          <div className="flex flex-col py-2">
+            <span className="text-gray-900 font-semibold text-sm">
+              {date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+            </span>
+            <span className="text-gray-400 text-xs font-medium mt-0.5">
+              at {date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        )
+      }
+    },
+    {
+      label: 'AMOUNT',
+      key: 'amount',
+      className: 'min-w-[160px]',
+      formatter: (_: any, item: Transaction) => {
+        const isPositive = item.amount > 0;
+        return (
+          <div className="flex items-center gap-3 py-2">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isPositive ? 'bg-lime-100 text-lime-600' : 'bg-red-50 text-red-500'}`}>
+              {isPositive ? <ArrowDownLeft className="w-4 h-4" strokeWidth={2.5} /> : <ArrowUpRight className="w-4 h-4" strokeWidth={2.5} />}
+            </div>
+            <div className="flex flex-col">
+              <span className={`font-bold text-sm ${isPositive ? 'text-lime-600' : 'text-red-500'}`}>
+                {isPositive ? '+' : ''}{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.amount)}
+              </span>
+              <span className="text-[10px] text-gray-400 font-medium tracking-wide">
+                Bal: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.balanceAfter)}
+              </span>
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      label: 'STATUS',
+      key: 'status',
+      formatter: (_: any, item: Transaction) => {
+        const isSuccess = item.status === 'success';
+        return (
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border tracking-wide shadow-sm ${isSuccess
+            ? 'bg-lime-100 text-lime-700 border-lime-200'
+            : 'bg-red-100 text-red-700 border-red-200'
+            }`}>
+            {isSuccess ? <CheckCircle className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+            {isSuccess ? 'Thành công' : 'Thất bại'}
+          </span>
+        )
+      }
     }
-    setSortConfig({ key: typedKey, direction });
+  ];
+
+  const handleApplyFilters = (newFilters: typeof filterFields) => {
+    setFilterFields(newFilters);
+
+    // Build filter query string for API
+    const filters: string[] = [];
+
+    if (newFilters.status) {
+      filters.push(`status~'${newFilters.status.toUpperCase()}'`);
+    }
+
+    if (newFilters.dateRange.from) {
+      filters.push(`createdAt>:'${newFilters.dateRange.from.toISOString()}'`);
+    }
+    if (newFilters.dateRange.to) {
+      const toDate = new Date(newFilters.dateRange.to);
+      toDate.setHours(23, 59, 59, 999);
+      filters.push(`createdAt<:'${toDate.toISOString()}'`);
+    }
+
+    const query = filters.join(' and ');
+    onFilter(query);
+    setActiveFiltersCount(filters.length);
   };
 
-  const toggleSearch = () => {
-    if (!isSearchExpanded) setIsFilterModalOpen(false);
-    setIsSearchExpanded(!isSearchExpanded);
-  };
-
-  const isFiltered = useMemo(() => {
-    return filterFields.status !== '' ||
-      filterFields.dateRange.from !== null ||
-      filterFields.dateRange.to !== null ||
-      filterFields.amountRange.min > -100000000 ||
-      filterFields.amountRange.max < 100000000;
-  }, [filterFields]);
-
-  const clearFilters = () => {
+  const handleClearFilters = () => {
     setFilterFields({
       status: '',
       dateRange: { from: null, to: null },
       amountRange: { min: -100000000, max: 100000000 }
     });
+    onFilter('');
+    onClearSearch();
+    setActiveFiltersCount(0);
   };
-
-  const openFilterModal = () => {
-    setIsSearchExpanded(false);
-    setIsFilterModalOpen(true);
-  };
-
-  // Export State
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const handleExportData = async (format: 'pdf' | 'excel', scope: 'current' | 'all', columns: string[]) => {
-    // Simulate API/Processing delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    console.log(`Exporting ${scope} data as ${format} with columns:`, columns);
-    // Future: Implement actual file generation here
-  };
-
-  const closeFilterModal = () => {
-    setIsFilterModalOpen(false);
-  };
-
-  const filteredAndSortedData = useMemo(() => {
-    let result = [...data];
-
-    // Apply Search
-    result = result.filter(item => {
-      const idMatch = searchFields.id === '' || item.id.toLowerCase().includes(searchFields.id.toLowerCase());
-      const descMatch = searchFields.description === '' || item.description.toLowerCase().includes(searchFields.description.toLowerCase());
-      return idMatch && descMatch;
-    });
-
-    // Apply Filter
-    result = result.filter(item => {
-      let dateMatch = true;
-      const itemDate = new Date(item.date);
-
-      if (filterFields.dateRange.from) {
-        if (itemDate < filterFields.dateRange.from) dateMatch = false;
-      }
-
-      if (filterFields.dateRange.to) {
-        const endDate = new Date(filterFields.dateRange.to);
-        endDate.setHours(23, 59, 59, 999);
-        if (itemDate > endDate) dateMatch = false;
-      }
-
-      // Convert item status to lowercase for comparison if needed, or expected status value
-      const statusMatch = filterFields.status === '' || item.status.toLowerCase() === filterFields.status.toLowerCase();
-
-      const amountMatch = item.amount >= filterFields.amountRange.min && item.amount <= filterFields.amountRange.max;
-
-      return dateMatch && statusMatch && amountMatch;
-    });
-
-    // Apply Sort
-    if (sortConfig) {
-      result.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
-
-        if (aValue === undefined && bValue === undefined) return 0;
-        if (aValue === undefined) return 1;
-        if (bValue === undefined) return -1;
-
-        if (aValue < bValue) {
-          return sortConfig.direction === 'asc' ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === 'asc' ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-
-    return result;
-  }, [data, sortConfig, searchFields, filterFields]);
 
   const handleRowClick = async (item: Transaction) => {
     if ((item.category === 'Food Order' || item.type === 'revenue') && item.orderId) {
@@ -297,14 +228,19 @@ export default function WalletTransactionTable() {
     }
   };
 
+  const handleExportData = async (format: 'pdf' | 'excel', scope: 'current' | 'all', columns: string[]) => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    console.log(`Exporting ${scope} data as ${format} with columns:`, columns);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
-      className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 overflow-hidden"
+      className="bg-white rounded-[40px] shadow-[0_8px_40px_rgba(0,0,0,0.04)] border border-gray-100/50 overflow-hidden"
     >
-      <div className="pb-4 p-8 border-b border-gray-50 flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white">
+      {/* Header */}
+      <div className="pb-4 p-8 flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="w-1.5 h-6 bg-lime-400 rounded-full" />
@@ -316,27 +252,31 @@ export default function WalletTransactionTable() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Search Button */}
           <button
-            onClick={toggleSearch}
-            className={`w-12 h-12 rounded-full bg-gray-100 border transition-all shadow-sm flex items-center justify-center group ${isSearchExpanded ? 'bg-lime-100 border-lime-200 text-lime-700' : 'border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200'}`}
+            onClick={() => setIsSearchOpen(true)}
+            className={`w-12 h-12 rounded-full transition-all duration-300 flex items-center justify-center group
+                    ${(searchFields.id || searchFields.description)
+                ? 'bg-lime-500 text-white shadow-lg shadow-lime-500/30 border-transparent'
+                : 'bg-gray-100 text-gray-600 hover:bg-white hover:shadow-xl hover:-translate-y-0.5 border-transparent'}`}
             title="Search"
           >
-            <Search className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <Search className={`w-5 h-5 ${(searchFields.id || searchFields.description) ? 'animate-pulse' : 'group-hover:scale-110 transition-transform'}`} />
           </button>
 
-          {isFiltered ? (
-            <div className="flex items-center gap-1 p-1 pr-2 bg-lime-500 rounded-xl shadow-lg shadow-lime-200/50 border border-lime-400 group transition-all animate-in fade-in zoom-in duration-200">
+          {/* Filter Button */}
+          {activeFiltersCount > 0 ? (
+            <div className="flex items-center gap-1 p-1 pr-2 bg-lime-500 rounded-full shadow-lg shadow-lime-500/20 border border-lime-400 animate-in fade-in zoom-in duration-200">
               <button
-                onClick={openFilterModal}
-                className="flex items-center gap-2 px-3 py-1.5 hover:bg-lime-600 rounded-lg transition-colors"
+                onClick={() => setIsFilterOpen(true)}
+                className="flex items-center gap-2 px-3 py-2.5 hover:bg-black/10 rounded-full transition-colors"
               >
                 <Filter className="w-4 h-4 text-white fill-current" />
                 <span className="text-xs font-bold text-white uppercase tracking-wide">Filtered</span>
               </button>
-              <div className="w-px h-4 bg-lime-400 mx-0.5" />
               <button
-                onClick={clearFilters}
-                className="p-1.5 hover:bg-lime-600 text-white rounded-lg transition-colors"
+                onClick={handleClearFilters}
+                className="p-1.5 hover:bg-black/10 text-white rounded-2xl transition-colors"
                 title="Clear all"
               >
                 <X className="w-4 h-4" />
@@ -344,14 +284,15 @@ export default function WalletTransactionTable() {
             </div>
           ) : (
             <button
-              onClick={openFilterModal}
-              className="w-12 h-12 rounded-full bg-gray-100 border transition-all shadow-sm flex items-center justify-center group border-gray-100 text-gray-600 hover:bg-gray-50 hover:border-gray-200"
+              onClick={() => setIsFilterOpen(true)}
+              className="w-12 h-12 rounded-full bg-gray-100 border transition-all shadow-sm flex items-center justify-center group border-gray-100 text-gray-600 hover:bg-white hover:shadow-xl hover:-translate-y-0.5"
               title="Filter"
             >
               <Filter className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </button>
           )}
 
+          {/* Export Button */}
           <button
             onClick={() => setIsExportModalOpen(true)}
             className="px-5 py-2.5 rounded-xl bg-[#1A1A1A] text-white hover:bg-black transition-all flex items-center gap-2 shadow-lg shadow-gray-200 active:scale-95 ml-2"
@@ -359,100 +300,120 @@ export default function WalletTransactionTable() {
             <Download className="w-4 h-4" />
             <span className="text-sm font-bold uppercase tracking-wide">Export</span>
           </button>
+
+          {/* Clear All Button */}
+          {((searchFields.id || searchFields.description) || activeFiltersCount > 0) && (
+            <button
+              onClick={handleClearFilters}
+              className="w-10 h-10 rounded-full bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all ml-1 flex items-center justify-center"
+              title="Clear All"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="px-6 relative">
-        <WalletSearchPopup
-          isOpen={isSearchExpanded}
-          onClose={() => setIsSearchExpanded(false)}
-          searchFields={searchFields}
-          handleSearchChange={(key: string, value: string) => setSearchFields(prev => ({ ...prev, [key]: value }))}
-          clearSearchFields={() => setSearchFields({ id: '', description: '' })}
-        />
-
-        <WalletFilterModal
-          isOpen={isFilterModalOpen}
-          onClose={closeFilterModal}
-          filterFields={filterFields}
-          onApply={(newFilters) => setFilterFields(newFilters)}
-        />
-
-        <WalletExportModal
-          isOpen={isExportModalOpen}
-          onClose={() => setIsExportModalOpen(false)}
-          onExport={handleExportData}
-          previewData={filteredAndSortedData.slice(0, 5)}
-        />
-
-        {isFiltered && (
-          <div className="px-8 pt-4 pb-0 flex flex-wrap items-center gap-2 animate-in slide-in-from-top-2 duration-300">
+      {/* Active Filters Badges */}
+      <div className="px-8 pt-0 pb-4 relative">
+        {filterQuery && (
+          <div className="flex flex-wrap items-center gap-2 animate-in slide-in-from-top-2 duration-300">
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-1">Active Filters:</span>
 
             {filterFields.status && (
               <button
-                onClick={() => setFilterFields(prev => ({ ...prev, status: '' }))}
+                onClick={() => handleApplyFilters({ ...filterFields, status: '' })}
                 className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
               >
                 <span>Status: <span className="text-lime-600 uppercase group-hover:text-red-500 transition-colors">{filterFields.status}</span></span>
-                <X className="w-3 h-3 opacity-0 w-0 group-hover:opacity-100 group-hover:w-3 transition-all duration-300 ease-out" />
+                <X className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
               </button>
             )}
 
             {(filterFields.dateRange.from || filterFields.dateRange.to) && (
               <button
-                onClick={() => setFilterFields(prev => ({ ...prev, dateRange: { from: null, to: null } }))}
+                onClick={() => handleApplyFilters({ ...filterFields, dateRange: { from: null, to: null } })}
                 className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
               >
                 <span>Date: <span className="text-lime-600 group-hover:text-red-500 transition-colors">
                   {filterFields.dateRange.from?.toLocaleDateString()} - {filterFields.dateRange.to?.toLocaleDateString()}
                 </span></span>
-                <X className="w-3 h-3 opacity-0 w-0 group-hover:opacity-100 group-hover:w-3 transition-all duration-300 ease-out" />
-              </button>
-            )}
-
-            {(filterFields.amountRange.min > -100000000 || filterFields.amountRange.max < 100000000) && (
-              <button
-                onClick={() => setFilterFields(prev => ({ ...prev, amountRange: { min: -100000000, max: 100000000 } }))}
-                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
-              >
-                <span>Amount: <span className="text-lime-600 group-hover:text-red-500 transition-colors">
-                  {filterFields.amountRange.min.toLocaleString()} - {filterFields.amountRange.max.toLocaleString()}
-                </span></span>
-                <X className="w-3 h-3 opacity-0 w-0 group-hover:opacity-100 group-hover:w-3 transition-all duration-300 ease-out" />
+                <X className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
               </button>
             )}
           </div>
         )}
       </div>
 
-      <div className="p-4">
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20 text-gray-400">Loading transactions...</div>
+      {/* Table - DataTable handles loading states and infinite scroll */}
+      <div className="p-4 pt-0">
+        {data.length === 0 && !isLoading ? (
+          <div className="py-32 flex flex-col items-center justify-center text-center px-4">
+            <div className="w-24 h-24 rounded-[32px] bg-gray-50 flex items-center justify-center text-gray-200 mb-6">
+              <FileText size={48} />
+            </div>
+            <h3 className="text-2xl font-anton uppercase tracking-tight text-gray-900 mb-2">No Transactions Found</h3>
+            <p className="text-gray-400 text-sm max-w-xs font-medium leading-relaxed">
+              Không tìm thấy giao dịch nào khớp với tiêu chí tìm kiếm của bạn.
+            </p>
+            <button
+              onClick={handleClearFilters}
+              className="mt-8 px-8 py-4 bg-[#1A1A1A] text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-lime-500 transition-all flex items-center gap-2 group"
+            >
+              <RotateCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
+              Reset All Filters
+            </button>
+          </div>
         ) : (
           <DataTable<Transaction>
-            data={filteredAndSortedData}
+            data={data}
             columns={columns}
-            handleSort={handleSort}
-            sortField={sortConfig?.key as string}
-            sortDirection={sortConfig?.direction}
+            isLoading={isLoading}
+            isFetchingNextPage={isFetchingNextPage}
+            hasNextPage={hasNextPage}
+            fetchNextPage={onLoadMore}
             onRowClick={handleRowClick}
-            renderActions={(item) => (
+            emptyMessage="Không tìm thấy giao dịch nào."
+            handleSort={(key) => console.log('Sort by', key)}
+            renderActions={(item: Transaction) => (
               <button
-                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 rounded-full transition-all duration-300 group"
-                title="View Details"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleRowClick(item);
                 }}
+                className="p-2 rounded-xl text-gray-400 hover:text-lime-600 hover:bg-lime-100 transition-all duration-300 shadow-sm"
+                title="View Details"
               >
-                <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <FileText size={18} />
               </button>
             )}
-            headerClassName="bg-slate-200 text-gray-700 border-none rounded-xl text-[11px] font-bold uppercase tracking-widest py-4 mb-2"
+            headerClassName="bg-gray-100 text-gray-500 border-none rounded-xl py-4 mb-2"
           />
         )}
       </div>
+
+      {/* Modals */}
+      <WalletSearchPopup
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        searchFields={searchFields}
+        handleSearchChange={onSearchChange}
+        clearSearchFields={onClearSearch}
+      />
+
+      <WalletFilterModal
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        filterFields={filterFields}
+        onApply={handleApplyFilters}
+      />
+
+      <WalletExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        onExport={handleExportData}
+        previewData={data.slice(0, 5)}
+      />
 
       <OrderDetailsModal
         order={selectedOrder}

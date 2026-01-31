@@ -1,3 +1,15 @@
+// Report-specific status types
+export type ReportOrderStatus =
+    | 'PENDING'
+    | 'CONFIRMED'
+    | 'PREPARING'
+    | 'READY'
+    | 'DELIVERING'
+    | 'DELIVERED'
+    | 'CANCELLED';
+
+export type ReportPaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+export type ReportPaymentMethod = 'CASH' | 'MOMO' | 'ZALOPAY' | 'VNPAY' | 'CARD';
 
 export interface RevenueReportItemDTO {
     date: string; // LocalDate as string

@@ -142,3 +142,37 @@ export type DeliveryFeeResponse = {
   baseDistance: number;
   perKmFee: number;
 };
+
+// ======== Order History Item (for UI) ========
+// Used by restaurant app to display order history
+export interface OrderHistoryItem {
+  id: string;
+  createdAt: string;
+  customerName: string;
+  customerPhone?: string;
+  totalAmount: number;
+  paymentMethod: 'cash' | 'vnpay' | 'wallet' | 'COD' | 'VNPAY';
+  status: 'completed' | 'cancelled' | 'refunded' | 'DELIVERED' | 'CANCELLED' | 'REJECTED';
+  itemsCount: number;
+  items: { name: string; quantity: number; price: number }[];
+  deliveryFee: number;
+  discount: number;
+  voucherCode?: string;
+  platformFee: number;
+  netIncome: number;
+  customerAvatar?: string;
+  restaurantName?: string;
+  driverName?: string;
+  driver?: {
+    name: string;
+    phone: string;
+    vehicleType: string;
+    licensePlate: string;
+    rating: number;
+    totalTrips: number;
+    avatar: string;
+  };
+  reviewRating?: number;
+  pickupAddress?: string;
+  deliveryAddress?: string;
+}

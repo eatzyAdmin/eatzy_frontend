@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import { createPortal } from 'react-dom';
 import { Search, X, Hash, Type } from '@repo/ui/icons';
+import { WalletSearchFields } from '../hooks/useWalletTransactions';
 
 interface SearchFieldConfig {
-  key: string;
+  key: keyof WalletSearchFields;
   label: string;
   icon: React.ElementType;
   placeholder: string;
@@ -13,7 +14,7 @@ interface SearchFieldConfig {
 interface WalletSearchPopupProps {
   isOpen: boolean;
   onClose: () => void;
-  searchFields: Record<string, string>;
+  searchFields: WalletSearchFields;
   handleSearchChange: (key: string, value: string) => void;
   clearSearchFields: () => void;
   placeholders?: { id?: string; description?: string };
@@ -43,15 +44,9 @@ const WalletSearchPopup: React.FC<WalletSearchPopupProps> = ({
   };
 
   const handleSearchSubmit = () => {
-    Object.keys(localSearchFields).forEach(key => {
-      handleSearchChange(key, localSearchFields[key]);
-    });
-    // Optional: Close on submit or keep open? User didn't specify, but "popup" implies temporary.
-    // Let's keep it open for multi-field editing, or close? 
-    // Usually search bars stay open or results appear below. 
-    // Since it's a "popup" overlay, closing on explicit search might be annoying if you want to refine.
-    // I will trigger the search but keep it open, or maybe not.
-    // Let's just update the parent state.
+    // Submit both search fields
+    handleSearchChange('id', localSearchFields.id);
+    handleSearchChange('description', localSearchFields.description);
   };
 
   // Debounce effect to auto-search or manual?

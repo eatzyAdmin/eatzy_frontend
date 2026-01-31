@@ -9,18 +9,22 @@ export { default as ReviewsReport } from './components/ReviewsReport';
 // Types
 export type { ReportTab } from './components/ReportHeader';
 
-// Service & Types
+// Hooks
 export {
-  reportService,
-  type RevenueReportItem,
-  type OrderReportItem,
-  type MenuAnalyticsItem,
-  type CategoryAnalyticsItem,
-  type MenuSummaryDto,
-  type ReviewReportItem,
-  type ReviewSummaryDto,
-  type FullReportDto,
-  type OrderStatus,
-  type PaymentStatus,
-  type PaymentMethod,
-} from './services/reportService';
+  useReportDates,
+  useDashboardReport,
+  useRevenueReport,
+  useOrdersReport,
+  useMenuReport,
+  useReviewsReport
+} from './hooks';
+
+export type {
+  ReportDateRange,
+  UseDashboardReportOptions,
+  UseRevenueReportOptions,
+  UseOrdersReportOptions,
+  UseMenuReportOptions,
+  UseReviewsReportOptions
+} from './hooks';
+

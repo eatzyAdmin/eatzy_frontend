@@ -1,8 +1,7 @@
 "use client";
 import { useState } from "react";
 import { orderApi } from "@repo/api";
-import { OrderResponse } from "@repo/types";
-import { OrderHistoryItem } from "@/features/history/data/mockHistory";
+import { OrderResponse, OrderHistoryItem } from "@repo/types";
 
 /**
  * Helper to map API order to UI order

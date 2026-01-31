@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
-import { OrderReportItemDTO } from '@repo/types';
-import { OrderStatus } from '../services/reportService';
+import { OrderReportItemDTO, ReportOrderStatus } from '@repo/types';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import {
   ShoppingBag,
@@ -31,7 +30,7 @@ const formatCurrency = (value: number) =>
 
 const COLORS = ['#84cc16', '#1A1A1A'];
 
-const statusConfig: Record<OrderStatus, { label: string; color: string; bg: string; icon: any }> = {
+const statusConfig: Record<ReportOrderStatus, { label: string; color: string; bg: string; icon: any }> = {
   PENDING: { label: 'Chờ xác nhận', color: 'text-yellow-600', bg: 'bg-yellow-50', icon: Clock },
   CONFIRMED: { label: 'Đã xác nhận', color: 'text-blue-600', bg: 'bg-blue-50', icon: CheckCircle },
   PREPARING: { label: 'Đang nấu', color: 'text-purple-600', bg: 'bg-purple-50', icon: ChefHat },
@@ -42,7 +41,7 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; bg: stri
 };
 
 const OrderCard = ({ order }: { order: OrderReportItemDTO }) => {
-  const config = statusConfig[order.status as OrderStatus] || statusConfig['PENDING'];
+  const config = statusConfig[order.status as ReportOrderStatus] || statusConfig['PENDING'];
   const Icon = config.icon;
 
   return (
@@ -99,7 +98,7 @@ const OrderCard = ({ order }: { order: OrderReportItemDTO }) => {
 
 export default function OrdersReport({ data = [] }: OrdersReportProps) {
   const safeData = Array.isArray(data) ? data : [];
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'ALL'>('ALL');
+  const [statusFilter, setStatusFilter] = useState<ReportOrderStatus | 'ALL'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Calculate stats

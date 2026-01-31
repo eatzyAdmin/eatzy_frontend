@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import { useNotification } from '@repo/ui';
 
@@ -10,84 +10,66 @@ import RevenueReport from '@/features/reports/components/RevenueReport';
 import OrdersReport from '@/features/reports/components/OrdersReport';
 import MenuReport from '@/features/reports/components/MenuReport';
 import ReviewsReport from '@/features/reports/components/ReviewsReport';
-import { reportApi } from '@repo/api';
+
 import {
-  RevenueReportItemDTO,
-  OrderReportItemDTO,
-  MenuSummaryDTO,
-  ReviewSummaryDTO,
-  FullReportDTO,
-} from '@repo/types';
+  useReportDates,
+  useDashboardReport,
+  useRevenueReport,
+  useOrdersReport,
+  useMenuReport,
+  useReviewsReport
+} from '@/features/reports/hooks';
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<ReportTab>('dashboard');
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [reportData, setReportData] = useState<any>(null);
-
   const { showNotification } = useNotification();
 
-  // Initialize dates on client mount to avoid hydration mismatch
-  useEffect(() => {
-    const now = new Date();
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    setStartDate(firstDayOfMonth);
-    setEndDate(lastDayOfMonth);
-    setIsMounted(true);
-  }, []);
+  // Date range management with hydration safety
+  const {
+    startDate,
+    endDate,
+    isMounted,
+    handleDateChange
+  } = useReportDates();
 
-  useEffect(() => {
-    if (!isMounted || !startDate || !endDate) return;
-    // Reset data immediately when tab or filters change
-    setReportData(null);
-    fetchReportData();
-  }, [activeTab, startDate, endDate, isMounted]);
+  // Fetch data based on active tab
+  const dashboardQuery = useDashboardReport({
+    startDate,
+    endDate,
+    enabled: activeTab === 'dashboard'
+  });
 
-  const fetchReportData = async () => {
-    if (!startDate || !endDate) return;
+  const revenueQuery = useRevenueReport({
+    startDate,
+    endDate,
+    enabled: activeTab === 'revenue'
+  });
 
-    setIsLoading(true);
-    try {
-      const startIso = startDate.toISOString();
-      const endIso = endDate.toISOString();
-      let response;
-      let data;
+  const ordersQuery = useOrdersReport({
+    startDate,
+    endDate,
+    enabled: activeTab === 'orders'
+  });
 
-      switch (activeTab) {
-        case 'revenue':
-          response = await reportApi.getRevenueReport(startIso, endIso);
-          data = response.data;
-          break;
-        case 'orders':
-          response = await reportApi.getOrdersReport(startIso, endIso);
-          data = response.data;
-          break;
-        case 'menu':
-          response = await reportApi.getMenuAnalytics();
-          data = response.data;
-          break;
-        case 'reviews':
-          response = await reportApi.getReviewSummary();
-          data = response.data;
-          break;
-        case 'dashboard':
-        default:
-          response = await reportApi.getFullReport(startIso, endIso);
-          data = response.data;
-          break;
-      }
-      setReportData(data);
-    } catch (error) {
-      showNotification({ message: 'Không thể tải dữ liệu báo cáo', type: 'error' });
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+  const menuQuery = useMenuReport({
+    enabled: activeTab === 'menu'
+  });
+
+  const reviewsQuery = useReviewsReport({
+    enabled: activeTab === 'reviews'
+  });
+
+  // Get current loading state based on active tab
+  const isLoading = (() => {
+    switch (activeTab) {
+      case 'dashboard': return dashboardQuery.isLoading;
+      case 'revenue': return revenueQuery.isLoading;
+      case 'orders': return ordersQuery.isLoading;
+      case 'menu': return menuQuery.isLoading;
+      case 'reviews': return reviewsQuery.isLoading;
+      default: return false;
     }
-  };
+  })();
 
   const handleExport = (type: 'excel' | 'pdf') => {
     showNotification({
@@ -95,11 +77,6 @@ export default function ReportsPage() {
       type: 'success',
     });
     // TODO: Integrate with actual export API
-  };
-
-  const handleDateChange = (start: Date, end: Date) => {
-    setStartDate(start);
-    setEndDate(end);
   };
 
   const renderContent = () => {
@@ -121,8 +98,6 @@ export default function ReportsPage() {
       );
     }
 
-    if (!reportData) return null;
-
     return (
       <AnimatePresence mode="wait">
         <motion.div
@@ -132,11 +107,21 @@ export default function ReportsPage() {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
         >
-          {activeTab === 'dashboard' && <DashboardReport data={reportData as FullReportDTO} />}
-          {activeTab === 'revenue' && <RevenueReport data={reportData as RevenueReportItemDTO[]} />}
-          {activeTab === 'orders' && <OrdersReport data={reportData as OrderReportItemDTO[]} />}
-          {activeTab === 'menu' && <MenuReport data={reportData as MenuSummaryDTO} />}
-          {activeTab === 'reviews' && <ReviewsReport data={reportData as ReviewSummaryDTO} />}
+          {activeTab === 'dashboard' && dashboardQuery.data && (
+            <DashboardReport data={dashboardQuery.data} />
+          )}
+          {activeTab === 'revenue' && revenueQuery.data && (
+            <RevenueReport data={revenueQuery.data} />
+          )}
+          {activeTab === 'orders' && ordersQuery.data && (
+            <OrdersReport data={ordersQuery.data} />
+          )}
+          {activeTab === 'menu' && menuQuery.data && (
+            <MenuReport data={menuQuery.data} />
+          )}
+          {activeTab === 'reviews' && reviewsQuery.data && (
+            <ReviewsReport data={reviewsQuery.data} />
+          )}
         </motion.div>
       </AnimatePresence>
     );

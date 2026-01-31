@@ -5,15 +5,19 @@ import WalletStatsCards from '@/features/wallet/components/WalletStatsCards';
 import WalletTransactionTable from '@/features/wallet/components/WalletTransactionTable';
 import WalletBankInfo from '@/features/wallet/components/WalletBankInfo';
 import WithdrawModal from '@/features/wallet/components/WithdrawModal';
-import { useLoading, useNotification } from '@repo/ui';
+import { useNotification } from '@repo/ui';
 import { ChevronLeft, ChevronRight, Wallet } from '@repo/ui/icons';
+import { useWalletTransactions, WalletSearchFields } from '@/features/wallet/hooks/useWalletTransactions';
 
 export default function WalletPage() {
-  const { hide } = useLoading();
   const { showNotification } = useNotification();
-  const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Search and Filter state (lifted up from Table)
+  const [searchFields, setSearchFields] = useState<WalletSearchFields>({ id: '', description: '' });
+  const [filterQuery, setFilterQuery] = useState('');
 
   // Scroll states
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -21,12 +25,19 @@ export default function WalletPage() {
   const [canScrollRight, setCanScrollRight] = useState(true);
 
   useEffect(() => {
-    hide();
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500); // Increased slightly to show off shimmer
-    return () => clearTimeout(timer);
-  }, [hide]);
+    setMounted(true);
+  }, []);
+
+  // Use hook with search and filter params (server-side)
+  const {
+    transactions,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    total
+  } = useWalletTransactions(searchFields, filterQuery);
 
   // Check scroll state on mount and resize
   useEffect(() => {
@@ -34,7 +45,6 @@ export default function WalletPage() {
       if (scrollContainerRef.current) {
         const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
         setCanScrollLeft(scrollLeft > 0);
-        // Use a small epsilon (1px) for float math safety
         setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
       }
     };
@@ -42,7 +52,7 @@ export default function WalletPage() {
     checkScroll();
     window.addEventListener('resize', checkScroll);
     return () => window.removeEventListener('resize', checkScroll);
-  }, [isLoading]);
+  }, [mounted]);
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -58,7 +68,7 @@ export default function WalletPage() {
 
   const scrollBy = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 400; // Approximate card width
+      const scrollAmount = 400;
       scrollContainerRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -74,10 +84,22 @@ export default function WalletPage() {
     });
   };
 
+  // Handle search field change
+  const handleSearchChange = (key: string, value: string) => {
+    setSearchFields(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Clear all search fields
+  const handleClearSearch = () => {
+    setSearchFields({ id: '', description: '' });
+  };
+
+  if (!mounted) return null;
+
   return (
-    <div className="min-h-screen pb-20 px-6 pt-8 w-full max-w-full overflow-x-hidden">
-      {/* Header Section */}
-      <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+    <div className="min-h-screen bg-[#F8F9FA] pb-32">
+      {/* Header */}
+      <div className="px-8 pt-5 shrink-0">
         <div className="flex items-center gap-2 mb-2">
           <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
             <Wallet size={12} />
@@ -85,13 +107,16 @@ export default function WalletPage() {
           </span>
         </div>
         <h1 className="text-4xl font-anton text-gray-900 uppercase tracking-tight">
-          My Wallet
+          MY WALLET
         </h1>
-        <p className="text-gray-500 font-medium mt-1">Manage earnings, payouts, and bank details overview.</p>
+        <p className="text-gray-500 font-medium mt-1">
+          Manage earnings, payouts, and bank details overview.
+          {total > 0 && <span className="text-lime-600 ml-1">({total} transactions)</span>}
+        </p>
       </div>
 
       {/* Hero Stats Horizontal Scroll Container */}
-      <div className="mb-8 group relative">
+      <div className="mt-6 mb-8 group relative">
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
@@ -151,9 +176,21 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* Main Table Content - Full Width */}
-      <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-        <WalletTransactionTable />
+      {/* Main Table Content */}
+      <div className="min-h-[600px] m-6">
+        <WalletTransactionTable
+          data={transactions}
+          isLoading={isLoading}
+          isFetchingNextPage={isFetchingNextPage}
+          hasNextPage={hasNextPage}
+          onLoadMore={fetchNextPage}
+          onRefresh={refetch}
+          onSearchChange={handleSearchChange}
+          onClearSearch={handleClearSearch}
+          onFilter={setFilterQuery}
+          searchFields={searchFields}
+          filterQuery={filterQuery}
+        />
       </div>
 
       <WithdrawModal

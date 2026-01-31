@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import { ImageWithFallback } from '@repo/ui';
 import { X, User, MapPin, Clock, ShieldCheck, Package, Store, CheckCircle, AlertCircle, RotateCcw, Banknote } from '@repo/ui/icons';
-import { OrderHistoryItem } from '../data/mockHistory';
+import { OrderHistoryItem } from '@repo/types';
 
 interface OrderDetailsModalProps {
   order: OrderHistoryItem | null;
@@ -53,11 +53,15 @@ export default function OrderDetailsModal({ order, onClose }: OrderDetailsModalP
 
                 <div className="flex items-center gap-3">
                   {(() => {
-                    const config = {
+                    const statusConfig: Record<string, { bg: string; text: string; border: string; icon: typeof CheckCircle; label: string }> = {
                       completed: { bg: 'bg-lime-100', text: 'text-lime-700', border: 'border-lime-200', icon: CheckCircle, label: 'Completed' },
+                      DELIVERED: { bg: 'bg-lime-100', text: 'text-lime-700', border: 'border-lime-200', icon: CheckCircle, label: 'Delivered' },
                       cancelled: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', icon: AlertCircle, label: 'Cancelled' },
+                      CANCELLED: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', icon: AlertCircle, label: 'Cancelled' },
+                      REJECTED: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', icon: AlertCircle, label: 'Rejected' },
                       refunded: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200', icon: RotateCcw, label: 'Refunded' },
-                    }[order.status] || { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200', icon: Clock, label: order.status };
+                    };
+                    const config = statusConfig[order.status] || { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200', icon: Clock, label: order.status };
 
                     const Icon = config.icon;
 
