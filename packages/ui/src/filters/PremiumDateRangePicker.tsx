@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
-import { motion } from '@repo/ui/motion';
-import { ChevronLeft, ChevronRight } from '@repo/ui/icons';
+'use client';
 
-interface DateRange {
+import React, { useState } from 'react';
+import { motion } from '../motion';
+import { ChevronLeft, ChevronRight } from '../icons';
+
+export interface DateRange {
   from: Date | null;
   to: Date | null;
 }
 
-interface WalletDateRangePickerProps {
+export interface PremiumDateRangePickerProps {
   dateRange: DateRange;
   onChange: (range: DateRange) => void;
+  activeColor?: string; // e.g., 'lime'
 }
 
-export default function WalletDateRangePicker({ dateRange, onChange }: WalletDateRangePickerProps) {
+export const PremiumDateRangePicker = ({
+  dateRange,
+  onChange,
+  activeColor = 'lime'
+}: PremiumDateRangePickerProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const monthNames = ["January", "February", "March", "April", "May", "June",
@@ -38,7 +45,6 @@ export default function WalletDateRangePicker({ dateRange, onChange }: WalletDat
 
   const handleDateClick = (day: number, monthOffset: number) => {
     const selectedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + monthOffset, day);
-    // Reset time to 00:00:00 to avoid time shifts
     selectedDate.setHours(0, 0, 0, 0);
 
     if (!dateRange.from || (dateRange.from && dateRange.to)) {
@@ -67,7 +73,6 @@ export default function WalletDateRangePicker({ dateRange, onChange }: WalletDat
   const isInRange = (day: number, monthOffset: number) => {
     if (!dateRange.from || !dateRange.to) return false;
     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + monthOffset, day);
-    // Compare times
     return date.getTime() > dateRange.from.getTime() && date.getTime() < dateRange.to.getTime();
   };
 
@@ -78,9 +83,23 @@ export default function WalletDateRangePicker({ dateRange, onChange }: WalletDat
     const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     const blanks = Array.from({ length: firstDay }, (_, i) => i);
 
+    const activeTheme = {
+      lime: {
+        bg: 'bg-lime-500',
+        bgLight: 'bg-lime-100/50',
+        text: 'text-lime-700',
+        shadow: 'shadow-lime-500/30'
+      }
+    }[activeColor as 'lime'] || {
+      bg: 'bg-indigo-500',
+      bgLight: 'bg-indigo-100/50',
+      text: 'text-indigo-700',
+      shadow: 'shadow-indigo-500/30'
+    };
+
     return (
       <div className="flex-1 min-w-[240px]">
-        <div className="font-bold font-anton text-gray-800 text-center mb-4 uppercase tracking-wide">
+        <div className="font-bold text-gray-800 text-center mb-4 uppercase tracking-wide">
           {monthNames[month.getMonth()]} {month.getFullYear()}
         </div>
 
@@ -107,14 +126,14 @@ export default function WalletDateRangePicker({ dateRange, onChange }: WalletDat
             return (
               <div key={day} className="relative">
                 {inRange && (
-                  <div className={`absolute inset-y-0 left-0 right-0 bg-lime-100/50 ${isRowStart ? 'rounded-l-lg' : ''
+                  <div className={`absolute inset-y-0 left-0 right-0 ${activeTheme.bgLight} ${isRowStart ? 'rounded-l-lg' : ''
                     } ${isRowEnd ? 'rounded-r-lg' : ''}`} />
                 )}
                 {isStart && dateRange.to && (
-                  <div className="absolute inset-y-0 right-0 left-1/2 bg-lime-100/50" />
+                  <div className={`absolute inset-y-0 right-0 left-1/2 ${activeTheme.bgLight}`} />
                 )}
                 {isEnd && dateRange.from && (
-                  <div className="absolute inset-y-0 left-0 right-1/2 bg-lime-100/50" />
+                  <div className={`absolute inset-y-0 left-0 right-1/2 ${activeTheme.bgLight}`} />
                 )}
 
                 <motion.button
@@ -123,9 +142,9 @@ export default function WalletDateRangePicker({ dateRange, onChange }: WalletDat
                   transition={{ type: "spring", stiffness: 500, damping: 20 }}
                   onClick={() => handleDateClick(day, monthOffset)}
                   className={`relative aspect-square w-full flex items-center justify-center text-xs font-bold rounded-2xl ${isStart || isEnd
-                    ? 'bg-lime-500 text-white shadow-lg shadow-lime-500/30 z-10'
+                    ? `${activeTheme.bg} text-white shadow-lg ${activeTheme.shadow} z-10`
                     : inRange
-                      ? 'text-lime-700'
+                      ? activeTheme.text
                       : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
                     }`}
                 >
@@ -165,4 +184,4 @@ export default function WalletDateRangePicker({ dateRange, onChange }: WalletDat
       </div>
     </div>
   );
-}
+};

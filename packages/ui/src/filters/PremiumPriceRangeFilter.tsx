@@ -1,15 +1,32 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from '@repo/ui/motion';
+'use client';
 
-interface WalletPriceRangeFilterProps {
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from '../motion';
+
+export interface PriceRangeValue {
+  min: number;
+  max: number;
+}
+
+export interface PremiumPriceRangeFilterProps {
   min: number;
   max: number;
   step?: number;
-  value: { min: number; max: number };
-  onChange: (range: { min: number; max: number }) => void;
+  value: PriceRangeValue;
+  onChange: (range: PriceRangeValue) => void;
+  currencyLabel?: string;
+  activeColor?: string; // e.g., 'lime'
 }
 
-export default function WalletPriceRangeFilter({ min, max, step = 1, value, onChange }: WalletPriceRangeFilterProps) {
+export const PremiumPriceRangeFilter = ({
+  min,
+  max,
+  step = 1,
+  value,
+  onChange,
+  currencyLabel = "VND",
+  activeColor = "lime"
+}: PremiumPriceRangeFilterProps) => {
   const [localRange, setLocalRange] = useState<[number, number]>([value.min || min, value.max || max]);
   const [activeThumb, setActiveThumb] = useState<'min' | 'max' | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -26,11 +43,6 @@ export default function WalletPriceRangeFilter({ min, max, step = 1, value, onCh
   const handleMouseDown = (type: 'min' | 'max') => (e: React.MouseEvent | React.TouchEvent) => {
     isDragging.current = type;
     setActiveThumb(type);
-
-    // Prevent scrolling on touch
-    if (e.type === 'touchstart') {
-      // e.preventDefault(); // Might need to be careful with this
-    }
   };
 
   const updateRange = useCallback((clientX: number) => {
@@ -40,13 +52,12 @@ export default function WalletPriceRangeFilter({ min, max, step = 1, value, onCh
     const percent = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
     let newVal = min + (percent / 100) * (max - min);
 
-    // Apply step
     newVal = Math.round(newVal / step) * step;
     newVal = Math.max(min, Math.min(max, newVal));
 
     setLocalRange(prev => {
       const newRange = [...prev] as [number, number];
-      const buffer = (max - min) * 0.02; // Small buffer to prevent overlap
+      const buffer = (max - min) * 0.02;
 
       if (isDragging.current === 'min') {
         newRange[0] = Math.min(newVal, prev[1] - buffer);
@@ -58,7 +69,7 @@ export default function WalletPriceRangeFilter({ min, max, step = 1, value, onCh
   }, [min, max, step]);
 
   const handleMove = useCallback((e: MouseEvent | TouchEvent) => {
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientX = 'touches' in e ? (e.touches[0]?.clientX ?? 0) : (e as MouseEvent).clientX;
     updateRange(clientX);
   }, [updateRange]);
 
@@ -115,6 +126,30 @@ export default function WalletPriceRangeFilter({ min, max, step = 1, value, onCh
     { value: max, label: 'Max' },
   ];
 
+  const activeTheme = {
+    lime: {
+      from: 'from-lime-400',
+      to: 'to-lime-500',
+      shadow: 'shadow-[0_0_20px_rgba(132,204,22,0.3)]',
+      border: 'border-lime-500',
+      borderHover: 'group-hover/thumb:border-lime-600',
+      bgLight: 'bg-lime-50',
+      borderLight: 'border-lime-100',
+      textLight: 'text-lime-700',
+      focusRing: 'focus:border-lime-500 focus:ring-4 focus:ring-lime-500/10'
+    }
+  }[activeColor as 'lime'] || {
+    from: 'from-indigo-400',
+    to: 'to-indigo-500',
+    shadow: 'shadow-[0_0_20px_rgba(99,102,241,0.3)]',
+    border: 'border-indigo-500',
+    borderHover: 'group-hover/thumb:border-indigo-600',
+    bgLight: 'bg-indigo-50',
+    borderLight: 'border-indigo-100',
+    textLight: 'text-indigo-700',
+    focusRing: 'focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'
+  };
+
   return (
     <div className="bg-white p-8 rounded-[36px] border border-gray-100 shadow-[0_0_30px_rgba(0,0,0,0.06)]">
 
@@ -126,11 +161,11 @@ export default function WalletPriceRangeFilter({ min, max, step = 1, value, onCh
             <span className="text-3xl font-bold text-[#1A1A1A] tracking-tighter">{formatCurrency(localRange[0])}</span>
             <span className="text-gray-200 font-bold">/</span>
             <span className="text-3xl font-bold text-[#1A1A1A] tracking-tighter">{formatCurrency(localRange[1])}</span>
-            <span className="text-sm font-black text-gray-400 ml-1">VND</span>
+            <span className="text-sm font-black text-gray-400 ml-1">{currencyLabel}</span>
           </div>
         </div>
         <div className="hidden md:block">
-          <div className="px-3 py-1.5 rounded-full bg-lime-50 border border-lime-100 text-[10px] font-bold text-lime-700 uppercase tracking-wider">
+          <div className={`px-3 py-1.5 rounded-full ${activeTheme.bgLight} border ${activeTheme.borderLight} text-[10px] font-bold ${activeTheme.textLight} uppercase tracking-wider`}>
             Flexible Search
           </div>
         </div>
@@ -141,13 +176,12 @@ export default function WalletPriceRangeFilter({ min, max, step = 1, value, onCh
         <div className="relative w-full h-2 group" ref={trackRef}>
           {/* Base Track */}
           <div className="absolute inset-0 bg-gray-100 rounded-full overflow-hidden">
-            {/* Dynamic background patterns or dots could go here */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '10px 10px' }}></div>
           </div>
 
           {/* Active Progress Bar */}
           <div
-            className="absolute h-full bg-gradient-to-r from-lime-400 to-lime-500 rounded-full shadow-[0_0_20px_rgba(132,204,22,0.3)] transition-all duration-75"
+            className={`absolute h-full bg-gradient-to-r ${activeTheme.from} ${activeTheme.to} rounded-full ${activeTheme.shadow} transition-all duration-75`}
             style={{
               left: `${getPercentage(localRange[0])}%`,
               right: `${100 - getPercentage(localRange[1])}%`
@@ -177,9 +211,8 @@ export default function WalletPriceRangeFilter({ min, max, step = 1, value, onCh
               animate={{ scale: activeThumb === 'min' ? 1.2 : 1 }}
               className="w-full h-full flex items-center justify-center"
             >
-              <div className="w-6 h-6 bg-white border-4 border-lime-500 rounded-full shadow-lg ring-4 ring-white transition-all group-hover/thumb:border-lime-600"></div>
+              <div className={`w-6 h-6 bg-white border-4 ${activeTheme.border} rounded-full shadow-lg ring-4 ring-white transition-all ${activeTheme.borderHover}`}></div>
 
-              {/* Value Tooltip on Hover/Drag */}
               <AnimatePresence>
                 {(activeThumb === 'min' || isDragging.current === 'min') && (
                   <motion.div
@@ -206,7 +239,7 @@ export default function WalletPriceRangeFilter({ min, max, step = 1, value, onCh
               animate={{ scale: activeThumb === 'max' ? 1.2 : 1 }}
               className="w-full h-full flex items-center justify-center"
             >
-              <div className="w-6 h-6 bg-white border-4 border-lime-500 rounded-full shadow-lg ring-4 ring-white transition-all group-hover/thumb:border-lime-600"></div>
+              <div className={`w-6 h-6 bg-white border-4 ${activeTheme.border} rounded-full shadow-lg ring-4 ring-white transition-all ${activeTheme.borderHover}`}></div>
 
               <AnimatePresence>
                 {(activeThumb === 'max' || isDragging.current === 'max') && (
@@ -236,7 +269,7 @@ export default function WalletPriceRangeFilter({ min, max, step = 1, value, onCh
               value={formatCurrency(localRange[0])}
               onChange={(e) => handleInputChange('min', e.target.value)}
               onBlur={handleInputBlur}
-              className="w-full bg-gray-50 border-2 border-transparent group-hover:bg-white group-hover:border-gray-100 focus:bg-white focus:border-lime-500 focus:ring-4 focus:ring-lime-500/10 rounded-2xl py-5 pl-12 pr-6 text-xl font-bold tracking-tight text-[#1A1A1A] transition-all outline-none"
+              className={`w-full bg-gray-50 border-2 border-transparent group-hover:bg-white group-hover:border-gray-100 focus:bg-white ${activeTheme.focusRing} rounded-2xl py-5 pl-12 pr-6 text-xl font-bold tracking-tight text-[#1A1A1A] transition-all outline-none`}
             />
           </div>
         </div>
@@ -249,11 +282,11 @@ export default function WalletPriceRangeFilter({ min, max, step = 1, value, onCh
               value={formatCurrency(localRange[1])}
               onChange={(e) => handleInputChange('max', e.target.value)}
               onBlur={handleInputBlur}
-              className="w-full bg-gray-50 border-2 border-transparent group-hover:bg-white group-hover:border-gray-100 focus:bg-white focus:border-lime-500 focus:ring-4 focus:ring-lime-500/10 rounded-2xl py-5 pl-12 pr-6 text-xl font-bold tracking-tight text-[#1A1A1A] transition-all outline-none"
+              className={`w-full bg-gray-50 border-2 border-transparent group-hover:bg-white group-hover:border-gray-100 focus:bg-white ${activeTheme.focusRing} rounded-2xl py-5 pl-12 pr-6 text-xl font-bold tracking-tight text-[#1A1A1A] transition-all outline-none`}
             />
           </div>
         </div>
       </div>
     </div>
   );
-}
+};

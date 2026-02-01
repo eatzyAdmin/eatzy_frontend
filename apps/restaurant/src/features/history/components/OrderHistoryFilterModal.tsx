@@ -4,8 +4,7 @@ import {
   X, CheckCircle, AlertCircle, Calendar, CreditCard, Filter, Check,
   RotateCcw, Banknote, Wallet, List, Clock, Package, Utensils, Truck, Bike, MapPin, XCircle
 } from '@repo/ui/icons';
-import WalletDateRangePicker from '@/features/wallet/components/WalletDateRangePicker';
-import WalletPriceRangeFilter from '@/features/wallet/components/WalletPriceRangeFilter';
+import { PremiumDateRangePicker, PremiumPriceRangeFilter } from '@repo/ui';
 
 interface DateRange {
   from: Date | null;
@@ -190,7 +189,7 @@ export default function OrderHistoryFilterModal({ isOpen, onClose, filterFields,
                         </div>
                       </div>
                       <div className="bg-white p-2 rounded-[40px] shadow-sm border border-gray-100">
-                        <WalletDateRangePicker
+                        <PremiumDateRangePicker
                           dateRange={localFilters.dateRange}
                           onChange={setDateRange}
                         />
@@ -208,7 +207,7 @@ export default function OrderHistoryFilterModal({ isOpen, onClose, filterFields,
                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">Refine by order value range</p>
                         </div>
                       </div>
-                      <WalletPriceRangeFilter
+                      <PremiumPriceRangeFilter
                         min={0}
                         max={100000000}
                         step={10000}

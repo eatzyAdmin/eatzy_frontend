@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import { motion } from '@repo/ui/motion';
 import {
   ArrowDownLeft, ArrowUpRight, Search, Filter, Download, FileText,
-  CheckCircle, AlertCircle, X, Utensils, Landmark, RotateCcw
+  CheckCircle, AlertCircle, X, Utensils, Landmark, RotateCcw,
+  Clock
 } from '@repo/ui/icons';
-import { DataTable } from '@repo/ui';
+import { DataTable, PremiumSearchPopup } from '@repo/ui';
 import { OrderHistoryItem } from '@repo/types';
-import WalletSearchPopup from './WalletSearchPopup';
 import WalletFilterModal from './WalletFilterModal';
 import WalletExportModal from './WalletExportModal';
 import OrderDetailsModal from '@/features/history/components/OrderDetailsModal';
@@ -80,8 +80,8 @@ export default function WalletTransactionTable({
       key: 'id',
       className: 'w-[140px]',
       formatter: (_: any, item: Transaction) => (
-        <span className="font-mono text-xs font-medium text-gray-500 bg-white px-2 py-1.5 rounded border border-gray-100">
-          #{item.id.split('-')[1]}
+        <span className="font-mono text-[12px] font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100 shadow-sm uppercase tracking-tighter">
+          #{item.id.includes('-') ? item.id.split('-')[1] : item.id}
         </span>
       )
     },
@@ -124,12 +124,15 @@ export default function WalletTransactionTable({
         const date = new Date(item.date);
         return (
           <div className="flex flex-col py-2">
-            <span className="text-gray-900 font-semibold text-sm">
+            <span className="text-[#1A1A1A] font-bold text-[13px] uppercase tracking-tight">
               {date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
             </span>
-            <span className="text-gray-400 text-xs font-medium mt-0.5">
-              at {date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-            </span>
+            <div className="flex items-center gap-1.5 mt-1">
+              <Clock className="w-3 h-3 text-gray-300" />
+              <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-none">
+                {date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
           </div>
         )
       }
@@ -381,7 +384,7 @@ export default function WalletTransactionTable({
                   e.stopPropagation();
                   handleRowClick(item);
                 }}
-                className="p-2 rounded-xl text-gray-400 hover:text-lime-600 hover:bg-lime-100 transition-all duration-300 shadow-sm"
+                className="p-2 rounded-xl bg-lime-100 text-lime-600 hover:text-lime-700 hover:bg-lime-200 transition-all duration-300 shadow-sm"
                 title="View Details"
               >
                 <FileText size={18} />
@@ -393,12 +396,22 @@ export default function WalletTransactionTable({
       </div>
 
       {/* Modals */}
-      <WalletSearchPopup
+      <PremiumSearchPopup<{ query: string }>
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-        searchFields={searchFields}
-        handleSearchChange={onSearchChange}
-        clearSearchFields={onClearSearch}
+        value={{ query: searchFields.id || searchFields.description }}
+        onSearch={(vals) => {
+          onSearchChange('id', vals.query);
+          onSearchChange('description', vals.query);
+        }}
+        onClear={() => {
+          onClearSearch();
+          setIsSearchOpen(false);
+        }}
+        title="Transaction Search"
+        fields={[
+          { key: 'query', label: 'Universal Search', placeholder: 'ID or Description...', icon: Search },
+        ]}
       />
 
       <WalletFilterModal

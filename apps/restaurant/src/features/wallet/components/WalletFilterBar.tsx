@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from '@repo/ui/motion';
 import { Filter, X, CheckCircle, Calendar, CreditCard } from '@repo/ui/icons';
-import WalletDateRangePicker from './WalletDateRangePicker';
-import WalletPriceRangeFilter from './WalletPriceRangeFilter';
+import { PremiumDateRangePicker, PremiumPriceRangeFilter } from '@repo/ui';
 
 interface DateRange {
   from: Date | null;
@@ -110,7 +109,7 @@ const WalletFilterBar: React.FC<WalletFilterBarProps> = ({
               <Calendar size={16} className="text-lime-600" />
               Date Range
             </label>
-            <WalletDateRangePicker
+            <PremiumDateRangePicker
               dateRange={localFilters.dateRange || { from: null, to: null }}
               onChange={setDateRange}
             />
@@ -151,7 +150,7 @@ const WalletFilterBar: React.FC<WalletFilterBarProps> = ({
                 <CreditCard size={16} className="text-lime-600" />
                 Amount Range
               </label>
-              <WalletPriceRangeFilter
+              <PremiumPriceRangeFilter
                 min={0}
                 max={100000000}
                 value={localFilters.amountRange || { min: 0, max: 100000000 }}

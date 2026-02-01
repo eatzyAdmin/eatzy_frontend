@@ -6,12 +6,11 @@ import {
   Search, Filter, Download, FileText, CheckCircle, AlertCircle, X,
   Clock, User, CreditCard, RotateCcw, Bike, Banknote
 } from '@repo/ui/icons';
-import { DataTable } from '@repo/ui';
+import { DataTable, PremiumSearchPopup } from '@repo/ui';
 import { OrderHistoryItem } from '@repo/types';
 import OrderHistoryFilterModal from './OrderHistoryFilterModal';
 import OrderDetailsModal from './OrderDetailsModal';
 import OrderExportModal from './OrderExportModal';
-import OrderSearchPopup from './OrderSearchPopup';
 
 interface OrderHistoryTableProps {
   data: OrderHistoryItem[];
@@ -446,12 +445,24 @@ export default function OrderHistoryTable({
       </div>
 
       {/* Modals */}
-      <OrderSearchPopup
+      <PremiumSearchPopup<{ term: string }>
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-        searchTerm={searchTerm}
-        onSearch={onSearch}
-        onClear={() => onSearch('')}
+        value={{ term: searchTerm }}
+        onSearch={(val) => onSearch(val.term)}
+        onClear={() => {
+          onSearch('');
+          setIsSearchOpen(false);
+        }}
+        title="Order Search"
+        fields={[
+          {
+            key: 'term',
+            label: 'Order ID or Customer',
+            placeholder: 'Search by Order ID or Customer Name...',
+            icon: Search
+          }
+        ]}
       />
 
       <OrderHistoryFilterModal

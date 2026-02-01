@@ -65,3 +65,6 @@ export * from "./effects/FlyToCart";
 export { default as OrderHistoryCardShimmer } from "./feedback/shimmer/OrderHistoryCardShimmer";
 export { default as ImageWithFallback } from "./media/ImageWithFallback";
 export { default as InfiniteScrollContainer, type InfiniteScrollContainerProps } from "./feedback/InfiniteScrollContainer";
+export { PremiumSearchPopup } from "./search/PremiumSearchPopup";
+export { PremiumDateRangePicker } from "./filters/PremiumDateRangePicker";
+export { PremiumPriceRangeFilter } from "./filters/PremiumPriceRangeFilter";
