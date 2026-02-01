@@ -284,9 +284,10 @@ const OrderExportModal: React.FC<OrderExportModalProps> = ({
           {/* Modal Container Wrapper */}
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 pointer-events-none">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="w-full max-w-6xl pointer-events-auto"
             >
               <div className="bg-white rounded-[36px] p-0 shadow-2xl border border-white/20 ring-1 ring-black/5 flex flex-col md:flex-row relative overflow-hidden h-[90vh]">
@@ -301,7 +302,7 @@ const OrderExportModal: React.FC<OrderExportModalProps> = ({
                     <h2 className="text-2xl font-anton font-bold text-[#1A1A1A]">EXPORT ORDERS</h2>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto space-y-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  <div className="flex-1 overflow-y-auto space-y-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {/* Format Selection */}
                     <div className="space-y-3">
                       <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Select Format</label>
@@ -436,14 +437,16 @@ const OrderExportModal: React.FC<OrderExportModalProps> = ({
                     </div>
                     {/* Column Selection */}
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between px-1">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Select Columns</label>
-                        <span className="text-xs font-medium text-lime-600 bg-lime-50 px-2 py-1 rounded-full border border-lime-100">
-                          {Object.values(selectedColumns).filter(Boolean).length} Selected
+                      <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Select Columns</label>
+                        </div>
+                        <span className="text-[11px] font-bold text-lime-700 bg-lime-100/80 px-3 py-1 rounded-full border border-lime-200/50 backdrop-blur-sm">
+                          {Object.values(selectedColumns).filter(Boolean).length} FIELDS
                         </span>
                       </div>
 
-                      <div className="space-y-3 pb-2">
+                      <div className="space-y-2 pb-2">
                         {Object.entries(COLUMN_GROUPS).map(([key, group]) => {
                           const groupCols = group.columns;
                           const selectedCount = groupCols.filter(c => selectedColumns[c.key]).length;
@@ -451,23 +454,31 @@ const OrderExportModal: React.FC<OrderExportModalProps> = ({
                           const isExpanded = !!expandedGroups[key];
 
                           return (
-                            <div key={key} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <div key={key} className="space-y-2">
+                              {/* Group Header Wrapper - Pill Design */}
                               <div
-                                className="w-full px-4 py-3 flex items-center justify-between bg-gray-50/50 cursor-pointer hover:bg-gray-50 transition-colors"
+                                className={`
+                                    w-full px-4 py-2.5 rounded-[22px] border-2 transition-all duration-300 flex items-center justify-between cursor-pointer
+                                    ${isExpanded
+                                    ? 'bg-white border-lime-100 shadow-sm'
+                                    : 'bg-white border-gray-50 hover:border-lime-100/60 hover:bg-lime-50/40'
+                                  }
+                                  `}
                                 onClick={() => toggleGroup(key)}
                               >
                                 <div className="flex items-center gap-3">
-                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${isExpanded ? 'bg-lime-500 border-lime-500 text-white' : 'bg-white border-gray-200 text-gray-400'}`}>
+                                  <div className={`w-9 h-9 rounded-[14px] flex items-center justify-center transition-all ${isExpanded ? 'bg-lime-500 text-white shadow-lime-100' : 'bg-gray-50 text-gray-400'}`}>
                                     {group.icon}
                                   </div>
                                   <div className="text-left">
-                                    <span className="text-sm font-bold text-gray-900 block">{group.label}</span>
-                                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">{selectedCount}/{groupCols.length} Selected</span>
+                                    <span className={`text-[13px] font-bold transition-colors ${isExpanded ? 'text-[#1A1A1A]' : 'text-gray-500'}`}>{group.label}</span>
+                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">{selectedCount}/{groupCols.length} ACTIVE</p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                  <div
-                                    role="button"
+
+                                <div className="flex items-center gap-2">
+                                  {/* Select All Toggle */}
+                                  <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       const newState = { ...selectedColumns };
@@ -476,17 +487,22 @@ const OrderExportModal: React.FC<OrderExportModalProps> = ({
                                       });
                                       setSelectedColumns(newState);
                                     }}
-                                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${isAllSelected
-                                      ? 'bg-lime-500 border-lime-500 shadow-sm'
-                                      : 'bg-white border-gray-200 hover:border-lime-400'
-                                      }`}
+                                    className={`
+                                        w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300
+                                        ${isAllSelected
+                                        ? 'bg-lime-500 text-white'
+                                        : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                                      }
+                                      `}
                                     title={isAllSelected ? "Unselect All" : "Select All"}
                                   >
-                                    {isAllSelected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={4} />}
-                                  </div>
-                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors`}>
+                                    <Check size={12} strokeWidth={4} />
+                                  </button>
+
+                                  {/* Expand Indicator */}
+                                  <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${isExpanded ? 'bg-lime-50 text-lime-600' : 'text-gray-400'}`}>
                                     <ChevronDown
-                                      className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                                      className={`w-4 h-4 transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`}
                                     />
                                   </div>
                                 </div>
@@ -498,36 +514,51 @@ const OrderExportModal: React.FC<OrderExportModalProps> = ({
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
-                                    className="border-t border-gray-100"
+                                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                                    className="overflow-hidden"
                                   >
-                                    <div className="p-2 space-y-1">
+                                    <div className="pl-6 pr-2 space-y-2 py-1">
                                       {groupCols.map(col => {
                                         const isSelected = selectedColumns[col.key];
                                         return (
                                           <div
                                             key={col.key}
                                             onClick={() => toggleColumn(col.key)}
-                                            className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-200 border ${isSelected
-                                              ? 'bg-lime-50/50 border-lime-200 shadow-sm'
-                                              : 'bg-white border-transparent hover:bg-gray-50'
-                                              }`}
+                                            className={`
+                                                group flex items-center justify-between p-2 rounded-[24px] cursor-pointer transition-all duration-300 border-2
+                                                ${isSelected
+                                                ? 'bg-lime-50 border-lime-100 shadow-sm'
+                                                : 'bg-white border-gray-50 hover:border-lime-100/60 hover:bg-lime-50/40'
+                                              }
+                                              `}
                                           >
                                             <div className="flex items-center gap-3">
-                                              <div className={`p-2 rounded-lg transition-colors ${isSelected ? 'bg-lime-100 text-lime-700' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'
-                                                }`}>
+                                              {/* Icon Box */}
+                                              <div className={`
+                                                  w-9 h-9 rounded-[14px] flex items-center justify-center flex-shrink-0 transition-all duration-300
+                                                  ${isSelected
+                                                  ? 'bg-lime-100 text-lime-600'
+                                                  : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                                                }
+                                                `}>
                                                 {col.icon}
                                               </div>
-                                              <span className={`text-sm font-medium transition-colors ${isSelected ? 'text-gray-900' : 'text-gray-500 group-hover:text-gray-700'
-                                                }`}>
+
+                                              {/* Label */}
+                                              <span className={`text-[13px] font-bold tracking-tight transition-all ${isSelected ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
                                                 {col.label}
                                               </span>
                                             </div>
 
-                                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${isSelected
-                                              ? 'bg-lime-500 border-lime-500 scale-110'
-                                              : 'border-gray-300 bg-white group-hover:border-lime-400'
-                                              }`}>
-                                              {isSelected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
+                                            {/* Checkmark Circle at the end */}
+                                            <div className={`
+                                                w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500
+                                                ${isSelected
+                                                ? "bg-lime-500 text-white scale-100"
+                                                : "bg-gray-100 text-transparent scale-90"
+                                              }
+                                              `}>
+                                              <Check size={12} strokeWidth={4} className={isSelected ? "opacity-100" : "opacity-0"} />
                                             </div>
                                           </div>
                                         );

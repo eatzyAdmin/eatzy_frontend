@@ -32,8 +32,9 @@ export function useOrderHistory(search?: string, filterStr?: string) {
             // Build filter string
             let filter = filterStr || '';
             if (search) {
-                // Search by order ID
-                const searchFilter = `id ~ '${search}'`;
+                // Search by order ID OR customer name
+                // Using Spring Filter syntax: (id ~ 'search' or customer.name ~ 'search')
+                const searchFilter = `(id ~ '${search}' or customer.name ~ '${search}')`;
                 filter = filter ? `${filter} and ${searchFilter}` : searchFilter;
             }
 

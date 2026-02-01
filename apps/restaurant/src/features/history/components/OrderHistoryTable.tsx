@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import { motion } from '@repo/ui/motion';
 import {
   Search, Filter, Download, FileText, CheckCircle, AlertCircle, X,
-  Clock, User, CreditCard, RotateCcw
+  Clock, User, CreditCard, RotateCcw, Bike, Banknote
 } from '@repo/ui/icons';
 import { DataTable } from '@repo/ui';
 import { OrderHistoryItem } from '@repo/types';
 import OrderHistoryFilterModal from './OrderHistoryFilterModal';
 import OrderDetailsModal from './OrderDetailsModal';
 import OrderExportModal from './OrderExportModal';
-import WalletSearchPopup from '@/features/wallet/components/WalletSearchPopup';
+import OrderSearchPopup from './OrderSearchPopup';
 
 interface OrderHistoryTableProps {
   data: OrderHistoryItem[];
@@ -49,11 +49,13 @@ export default function OrderHistoryTable({
   const [filterFields, setFilterFields] = useState<{
     status: string;
     paymentMethod: string[];
+    paymentStatus: string;
     dateRange: { from: Date | null; to: Date | null };
     amountRange: { min: number; max: number };
   }>({
     status: '',
     paymentMethod: [],
+    paymentStatus: '',
     dateRange: { from: null, to: null },
     amountRange: { min: 0, max: 100000000 },
   });
@@ -69,7 +71,7 @@ export default function OrderHistoryTable({
       key: 'id',
       className: 'w-[140px]',
       formatter: (_: any, item: OrderHistoryItem) => (
-        <span className="font-mono text-xs font-medium text-gray-500 bg-white px-2 py-1.5 rounded border border-gray-100">
+        <span className="font-mono text-[12px] font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100 shadow-sm uppercase tracking-tighter">
           #{item.id.replace('ORD-', '')}
         </span>
       )
@@ -77,19 +79,19 @@ export default function OrderHistoryTable({
     {
       label: 'CUSTOMER',
       key: 'customerName',
-      className: 'min-w-[200px]',
+      className: 'min-w-[220px]',
       formatter: (_: any, item: OrderHistoryItem) => (
-        <div className="flex items-center gap-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 overflow-hidden">
+        <div className="flex items-center gap-4 py-2">
+          <div className="w-10 h-10 rounded-2xl bg-lime-50 border border-lime-100 shadow-sm flex items-center justify-center text-lime-500 overflow-hidden group-hover:scale-105 transition-transform">
             {item.customerAvatar ? (
               <img src={item.customerAvatar} alt={item.customerName} className="w-full h-full object-cover" />
             ) : (
-              <User className="w-4 h-4" />
+              <User className="w-5 h-5" />
             )}
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-gray-900 text-sm">{item.customerName}</span>
-            <span className="text-[10px] text-gray-400 font-medium">{item.customerPhone}</span>
+            <span className="font-bold text-[#1A1A1A] text-[13px] tracking-tight leading-tight">{item.customerName}</span>
+            <span className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">{item.customerPhone}</span>
           </div>
         </div>
       )
@@ -97,25 +99,22 @@ export default function OrderHistoryTable({
     {
       label: 'ITEMS',
       key: 'itemsCount',
-      className: 'min-w-[220px]',
+      className: 'max-w-[350px]',
       formatter: (_: any, item: OrderHistoryItem) => (
         <div className="flex flex-col gap-1 py-2">
-          <div className="flex items-center flex-wrap gap-y-1 gap-x-1.5">
-            {item.items.slice(0, 3).map((i, idx) => (
-              <div key={idx} className="flex items-center gap-1">
-                <span className="flex-shrink-0 h-6 px-2 rounded-lg bg-gray-100 text-[#1A1A1A] font-anton font-bold text-xs flex items-center justify-center border border-gray-200">
+          <div className="w-full truncate" title={item.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}>
+            {item.items.map((i, idx) => (
+              <div key={idx} className="inline-flex items-center gap-1.5 mr-3 align-middle">
+                <span className="flex-shrink-0 min-w-[32px] h-8 px-2 rounded-xl bg-lime-50 text-lime-700 font-bold text-xs flex items-center justify-center border border-lime-100 shadow-sm">
                   {i.quantity}x
                 </span>
-                <span className="text-xs text-gray-700 font-bold whitespace-nowrap">
-                  {i.name}{idx < Math.min(item.items.length, 3) - 1 ? ',' : ''}
+                <span className="text-sm text-gray-700 font-bold whitespace-nowrap">
+                  {i.name}{idx < item.items.length - 1 ? ',' : ''}
                 </span>
               </div>
             ))}
-            {item.items.length > 3 && (
-              <span className="text-xs text-gray-400 font-medium">...</span>
-            )}
           </div>
-          <span className="text-[10px] text-gray-400 font-medium tracking-wide">
+          <span className="text-[10px] text-gray-400 font-medium tracking-wide leading-none uppercase tracking-widest mt-1">
             {item.itemsCount} items total
           </span>
         </div>
@@ -124,17 +123,20 @@ export default function OrderHistoryTable({
     {
       label: 'DATE',
       key: 'createdAt',
-      className: 'min-w-[140px]',
+      className: 'min-w-[160px]',
       formatter: (_: any, item: OrderHistoryItem) => {
         const date = new Date(item.createdAt);
         return (
           <div className="flex flex-col py-2">
-            <span className="text-gray-900 font-semibold text-sm">
+            <span className="text-[#1A1A1A] font-bold text-[13px] uppercase tracking-tight">
               {date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
             </span>
-            <span className="text-gray-400 text-xs font-medium mt-0.5">
-              at {date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-            </span>
+            <div className="flex items-center gap-1.5 mt-1">
+              <Clock className="w-3 h-3 text-gray-300" />
+              <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-none">
+                {date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
           </div>
         )
       }
@@ -142,15 +144,18 @@ export default function OrderHistoryTable({
     {
       label: 'TOTAL',
       key: 'totalAmount',
-      className: 'min-w-[120px]',
+      className: 'min-w-[140px]',
       formatter: (_: any, item: OrderHistoryItem) => (
         <div className="flex flex-col py-2">
-          <span className="font-bold text-gray-900 text-sm">
+          <span className="font-bold text-[#1A1A1A] text-sm tracking-tighter">
             {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.totalAmount)}
           </span>
-          <span className="text-[10px] text-gray-400 flex items-center gap-1 uppercase font-medium">
-            <CreditCard className="w-3 h-3" /> {item.paymentMethod}
-          </span>
+          <div className="flex items-center gap-1.5 mt-1">
+            <div className="px-1.5 py-0.5 rounded-md bg-gray-50 border border-gray-100 flex items-center gap-1">
+              <CreditCard className="w-2.5 h-2.5 text-gray-400" />
+              <span className="text-[9px] text-gray-400 uppercase font-black tracking-widest">{item.paymentMethod}</span>
+            </div>
+          </div>
         </div>
       )
     },
@@ -158,15 +163,22 @@ export default function OrderHistoryTable({
       label: 'STATUS',
       key: 'status',
       formatter: (_: any, item: OrderHistoryItem) => {
-        const statusKey = item.status.toLowerCase();
-        const config = {
-          completed: { bg: 'bg-lime-100', text: 'text-lime-700', border: 'border-lime-200', icon: CheckCircle, label: 'Completed' },
-          delivered: { bg: 'bg-lime-100', text: 'text-lime-700', border: 'border-lime-200', icon: CheckCircle, label: 'Completed' },
-          cancelled: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', icon: AlertCircle, label: 'Cancelled' },
-          refunded: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200', icon: RotateCcw, label: 'Refunded' },
+        const statusKey = item.status.toUpperCase();
+        const config: any = {
+          PENDING: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200', icon: Clock, label: 'Chờ xử lý' },
+          PREPARING: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200', icon: RotateCcw, label: 'Đang chuẩn bị' },
+          READY: { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-200', icon: CheckCircle, label: 'Chờ giao hàng' },
+          DRIVER_ASSIGNED: { bg: 'bg-violet-100', text: 'text-violet-700', border: 'border-violet-200', icon: User, label: 'Đã có tài xế' },
+          PICKED_UP: { bg: 'bg-cyan-100', text: 'text-cyan-700', border: 'border-cyan-200', icon: Bike, label: 'Đang giao hàng' },
+          ARRIVED: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200', icon: CheckCircle, label: 'Đã đến nơi' },
+          DELIVERED: { bg: 'bg-lime-100', text: 'text-lime-700', border: 'border-lime-200', icon: CheckCircle, label: 'Hoàn thành' },
+          COMPLETED: { bg: 'bg-lime-100', text: 'text-lime-700', border: 'border-lime-200', icon: CheckCircle, label: 'Hoàn thành' },
+          REJECTED: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', icon: AlertCircle, label: 'Đã hủy' },
+          CANCELLED: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200', icon: AlertCircle, label: 'Đã hủy' },
+          REFUNDED: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200', icon: RotateCcw, label: 'Đã hoàn tiền' },
         }[statusKey] || { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200', icon: Clock, label: statusKey };
 
-        const Icon = config.icon;
+        const Icon = config.icon || Clock;
 
         return (
           <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border tracking-wide shadow-sm ${config.bg} ${config.text} ${config.border}`}>
@@ -181,20 +193,45 @@ export default function OrderHistoryTable({
   const handleApplyFilters = (newFilters: typeof filterFields) => {
     setFilterFields(newFilters);
 
-    // Build filter query string for API
+    // Build filter query string for API (Spring Filter syntax)
     const filters: string[] = [];
 
+    // 1. Order Status
     if (newFilters.status) {
-      filters.push(`orderStatus~'${newFilters.status}'`);
+      filters.push(`orderStatus:'${newFilters.status}'`);
     }
 
+    // 2. Payment Method
+    if (newFilters.paymentMethod.length > 0) {
+      const methodFilters = newFilters.paymentMethod
+        .flatMap(m => [`paymentMethod:'${m}'`, `paymentMethod:'${m.toLowerCase()}'`])
+        .join(' or ');
+      filters.push(`(${methodFilters})`);
+    }
+
+    // 3. Payment Status
+    if (newFilters.paymentStatus) {
+      filters.push(`paymentStatus:'${newFilters.paymentStatus}'`);
+    }
+
+    // 4. Date Range
     if (newFilters.dateRange.from) {
-      filters.push(`createdAt>:'${newFilters.dateRange.from.toISOString()}'`);
+      const fromDate = new Date(newFilters.dateRange.from);
+      fromDate.setHours(0, 0, 0, 0);
+      filters.push(`createdAt>:'${fromDate.toISOString()}'`);
     }
     if (newFilters.dateRange.to) {
       const toDate = new Date(newFilters.dateRange.to);
       toDate.setHours(23, 59, 59, 999);
       filters.push(`createdAt<:'${toDate.toISOString()}'`);
+    }
+
+    // 5. Amount Range
+    if (newFilters.amountRange.min > 0) {
+      filters.push(`totalAmount>=${newFilters.amountRange.min}`);
+    }
+    if (newFilters.amountRange.max < 100000000) {
+      filters.push(`totalAmount<=${newFilters.amountRange.max}`);
     }
 
     const query = filters.join(' and ');
@@ -206,6 +243,7 @@ export default function OrderHistoryTable({
     setFilterFields({
       status: '',
       paymentMethod: [],
+      paymentStatus: '',
       dateRange: { from: null, to: null },
       amountRange: { min: 0, max: 100000000 },
     });
@@ -281,10 +319,10 @@ export default function OrderHistoryTable({
           {/* Export Button */}
           <button
             onClick={() => setIsExportModalOpen(true)}
-            className="px-5 py-2.5 rounded-xl bg-[#1A1A1A] text-white hover:bg-black transition-all flex items-center gap-2 shadow-lg shadow-gray-200 active:scale-95 ml-2"
+            className="px-6 py-3.5 rounded-2xl bg-[#1A1A1A] text-white hover:bg-black transition-all flex items-center gap-2.5 shadow-lg shadow-gray-200 active:scale-95 ml-2 border border-black group"
           >
-            <Download className="w-4 h-4" />
-            <span className="text-sm font-bold uppercase tracking-wide">Export</span>
+            <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+            <span className="text-sm font-bold uppercase tracking-wider">Export</span>
           </button>
 
           {/* Clear All Button */}
@@ -316,6 +354,26 @@ export default function OrderHistoryTable({
               </button>
             )}
 
+            {filterFields.paymentMethod.length > 0 && (
+              <button
+                onClick={() => handleApplyFilters({ ...filterFields, paymentMethod: [] })}
+                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+              >
+                <span>Thanh toán: <span className="text-lime-600 uppercase group-hover:text-red-500 transition-colors">{filterFields.paymentMethod.join(', ')}</span></span>
+                <X className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
+              </button>
+            )}
+
+            {filterFields.paymentStatus && (
+              <button
+                onClick={() => handleApplyFilters({ ...filterFields, paymentStatus: '' })}
+                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+              >
+                <span>TT Thanh toán: <span className="text-lime-600 uppercase group-hover:text-red-500 transition-colors">{filterFields.paymentStatus}</span></span>
+                <X className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
+              </button>
+            )}
+
             {(filterFields.dateRange.from || filterFields.dateRange.to) && (
               <button
                 onClick={() => handleApplyFilters({ ...filterFields, dateRange: { from: null, to: null } })}
@@ -323,6 +381,18 @@ export default function OrderHistoryTable({
               >
                 <span>Date: <span className="text-lime-600 group-hover:text-red-500 transition-colors">
                   {filterFields.dateRange.from?.toLocaleDateString()} - {filterFields.dateRange.to?.toLocaleDateString()}
+                </span></span>
+                <X className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
+              </button>
+            )}
+
+            {(filterFields.amountRange.min > 0 || filterFields.amountRange.max < 100000000) && (
+              <button
+                onClick={() => handleApplyFilters({ ...filterFields, amountRange: { min: 0, max: 100000000 } })}
+                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
+              >
+                <span>Giá: <span className="text-lime-600 group-hover:text-red-500 transition-colors">
+                  {filterFields.amountRange.min.toLocaleString()} - {filterFields.amountRange.max.toLocaleString()}
                 </span></span>
                 <X className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
               </button>
@@ -335,7 +405,7 @@ export default function OrderHistoryTable({
       <div className="p-4 pt-0">
         {data.length === 0 && !isLoading ? (
           <div className="py-32 flex flex-col items-center justify-center text-center px-4">
-            <div className="w-24 h-24 rounded-[32px] bg-gray-50 flex items-center justify-center text-gray-200 mb-6">
+            <div className="w-24 h-24 rounded-[36px] bg-gray-50 flex items-center justify-center text-gray-200 mb-8 border-4 border-white shadow-inner">
               <FileText size={48} />
             </div>
             <h3 className="text-2xl font-anton uppercase tracking-tight text-gray-900 mb-2">No Orders Found</h3>
@@ -344,9 +414,9 @@ export default function OrderHistoryTable({
             </p>
             <button
               onClick={handleClearFilters}
-              className="mt-8 px-8 py-4 bg-[#1A1A1A] text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-lime-500 transition-all flex items-center gap-2 group"
+              className="mt-10 px-10 py-4 bg-[#1A1A1A] text-white rounded-[20px] text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-lime-500 transition-all flex items-center gap-3 group shadow-xl shadow-gray-200"
             >
-              <RotateCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
+              <RotateCcw size={16} className="group-hover:rotate-180 transition-transform duration-500" />
               Reset All Filters
             </button>
           </div>
@@ -364,7 +434,7 @@ export default function OrderHistoryTable({
             renderActions={(item: OrderHistoryItem) => (
               <button
                 onClick={() => setSelectedOrder(item)}
-                className="p-2 rounded-xl text-gray-400 hover:text-lime-600 hover:bg-lime-100 transition-all duration-300 shadow-sm"
+                className="p-2 rounded-xl bg-lime-100 text-lime-600 hover:text-lime-700 hover:bg-lime-200 transition-all duration-300 shadow-sm"
                 title="View Details"
               >
                 <FileText size={18} />
@@ -376,15 +446,12 @@ export default function OrderHistoryTable({
       </div>
 
       {/* Modals */}
-      <WalletSearchPopup
+      <OrderSearchPopup
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-        searchFields={{ id: searchTerm, description: '' }}
-        handleSearchChange={(key: string, value: string) => {
-          if (key === 'id') onSearch(value);
-        }}
-        clearSearchFields={() => onSearch('')}
-        placeholders={{ id: 'Search Order ID...', description: 'Search Customer Name...' }}
+        searchTerm={searchTerm}
+        onSearch={onSearch}
+        onClear={() => onSearch('')}
       />
 
       <OrderHistoryFilterModal

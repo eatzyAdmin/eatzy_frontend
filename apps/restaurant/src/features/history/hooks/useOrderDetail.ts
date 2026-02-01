@@ -15,8 +15,8 @@ export function mapOrderResponseToOrderHistoryItem(res: OrderResponse): OrderHis
         customerAvatar: undefined,
         customerPhone: res.customer.phoneNumber,
         totalAmount: res.totalAmount,
-        paymentMethod: res.paymentMethod.toLowerCase() as 'cash' | 'vnpay' | 'wallet',
-        status: res.orderStatus.toLowerCase() as 'completed' | 'cancelled' | 'refunded',
+        paymentMethod: res.paymentMethod as any,
+        status: res.orderStatus as any,
         itemsCount: res.orderItems.length,
         items: res.orderItems.map(item => ({
             name: item.dish.name,

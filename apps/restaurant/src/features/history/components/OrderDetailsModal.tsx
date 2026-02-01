@@ -27,10 +27,10 @@ export default function OrderDetailsModal({ order, onClose }: OrderDetailsModalP
 
           <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 pointer-events-none">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 30 }}
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 30 }}
-              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="bg-[#F8F9FA] w-full max-w-2xl rounded-[40px] overflow-hidden shadow-2xl pointer-events-auto flex flex-col max-h-[90vh] border border-white/20"
             >
               {/* Header */}
@@ -105,7 +105,7 @@ export default function OrderDetailsModal({ order, onClose }: OrderDetailsModalP
                       </div>
                     </div>
 
-                    <div className="h-px bg-gray-200 w-full mb-3" />
+                    <div className="h-px bg-gray-100 w-full mb-3" />
 
                     <div className="mt-auto">
                       <div className="text-[10px] font-bold text-gray-400 uppercase mb-0.5">Phone</div>
@@ -127,7 +127,7 @@ export default function OrderDetailsModal({ order, onClose }: OrderDetailsModalP
                           </div>
                         </div>
 
-                        <div className="h-px bg-gray-200 w-full mb-3" />
+                        <div className="h-px bg-gray-100 w-full mb-3" />
 
                         <div className="flex items-center mt-auto">
                           <div className="flex-1 pr-4">
@@ -280,30 +280,32 @@ export default function OrderDetailsModal({ order, onClose }: OrderDetailsModalP
                 </div>
 
                 {/* Profit Info */}
-                <div className="bg-white rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
-                  <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30">
-                    <Banknote className="w-5 h-5 text-gray-400" />
-                    <h4 className="font-bold text-[#1A1A1A]">Profit Information</h4>
+                {!(order.status === 'cancelled' || order.status === 'CANCELLED' || order.status === 'REJECTED') && (
+                  <div className="bg-white rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
+                    <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30">
+                      <Banknote className="w-5 h-5 text-gray-400" />
+                      <h4 className="font-bold text-[#1A1A1A]">Profit Information</h4>
+                    </div>
+
+                    <div className="p-6 space-y-3">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-500 font-medium">Order Subtotal</span>
+                        <span className="font-bold text-gray-900">{formatCurrency(order.netIncome + order.platformFee)}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-500 font-medium">Platform Commission (15%)</span>
+                        <span className="font-bold text-[var(--danger)]">-{formatCurrency(order.platformFee)}</span>
+                      </div>
+
+                      <div className="h-px bg-gray-100 my-2" />
+
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-[#1A1A1A] text-base">Net Income</span>
+                        <span className="font-anton text-2xl text-[var(--primary)]">{formatCurrency(order.netIncome)}</span>
+                      </div>
+                    </div>
                   </div>
-
-                  <div className="p-6 space-y-3">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500 font-medium">Order Subtotal</span>
-                      <span className="font-bold text-gray-900">{formatCurrency(order.netIncome + order.platformFee)}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500 font-medium">Platform Commission (15%)</span>
-                      <span className="font-bold text-[var(--danger)]">-{formatCurrency(order.platformFee)}</span>
-                    </div>
-
-                    <div className="h-px bg-gray-100 my-2" />
-
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-[#1A1A1A] text-base">Net Income</span>
-                      <span className="font-anton text-2xl text-[var(--primary)]">{formatCurrency(order.netIncome)}</span>
-                    </div>
-                  </div>
-                </div>
+                )}
 
               </div>
 

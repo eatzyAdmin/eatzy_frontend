@@ -120,8 +120,9 @@ export default function WalletDateRangePicker({ dateRange, onChange }: WalletDat
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 20 }}
                   onClick={() => handleDateClick(day, monthOffset)}
-                  className={`relative aspect-square w-full flex items-center justify-center text-xs font-bold transition-all rounded-lg ${isStart || isEnd
+                  className={`relative aspect-square w-full flex items-center justify-center text-xs font-bold rounded-2xl ${isStart || isEnd
                     ? 'bg-lime-500 text-white shadow-lg shadow-lime-500/30 z-10'
                     : inRange
                       ? 'text-lime-700'

@@ -237,22 +237,39 @@ const DataTable = <T extends Record<string, any>>({
         />
       )}
 
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} ref={tableContainerRef} className={`bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden w-full`}>
-        <div className="overflow-x-auto overflow-y-hidden w-full" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'thin' }}>
-          <table className="w-full divide-y divide-gray-100" style={{ minWidth: 'max-content' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        ref={tableContainerRef}
+        className={`bg-white rounded-[32px] border-2 border-gray-100 shadow-sm overflow-hidden w-full`}
+      >
+        <div className="overflow-x-auto overflow-y-hidden w-full" style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+          <table className="w-full divide-y-2 divide-gray-50" style={{ minWidth: 'max-content' }}>
             <thead className={headerClassName}>
               <tr>
                 {columns.map((column) => (
-                  <th key={column.key} scope="col" className={`px-3 sm:px-4 lg:px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer hover:bg-black/20 transition-colors whitespace-nowrap ${column.className || ''}`} onClick={() => column.sortable !== false && handleSort(column.key)}>
-                    <div className="flex items-center">
-                      <span>{column.label}</span>
+                  <th
+                    key={column.key}
+                    scope="col"
+                    className={`px-6 py-5 text-left text-[10px] font-bold uppercase tracking-[0.15em] cursor-pointer hover:bg-gray-100 transition-colors whitespace-nowrap ${column.className || ''}`}
+                    onClick={() => column.sortable !== false && handleSort(column.key)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="opacity-70">{column.label}</span>
                       {sortField === column.key && (
-                        <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.4 }}>{sortDirection === 'asc' ? <ChevronUp className="ml-1 w-4 h-4" /> : <ChevronDown className="ml-1 w-4 h-4" />}</motion.span>
+                        <motion.span
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {sortDirection === 'asc' ? <ChevronUp className="w-3.5 h-3.5 text-lime-500" /> : <ChevronDown className="w-3.5 h-3.5 text-lime-500" />}
+                        </motion.span>
                       )}
                     </div>
                   </th>
                 ))}
-                <th scope="col" className="px-3 sm:px-4 lg:px-6 py-4 text-right text-xs font-medium uppercase tracking-wider whitespace-nowrap">Thao tác</th>
+                <th scope="col" className="px-6 py-5 text-right text-[10px] font-bold uppercase tracking-[0.15em] whitespace-nowrap opacity-70">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
@@ -270,19 +287,68 @@ const DataTable = <T extends Record<string, any>>({
                 ) : !(showShimmer && (isFilteringData || displayedData.length === 0)) && (
                   <>
                     {displayedData.map((item, i) => (
-                      <motion.tr key={String(item[keyField])} custom={i} variants={tableRowVariants} initial="hidden" animate="visible" exit="exit" className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => onRowClick && onRowClick(item)}>
+                      <motion.tr
+                        key={String(item[keyField])}
+                        custom={i}
+                        variants={tableRowVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="hover:bg-gray-50 transition-colors cursor-pointer group"
+                        onClick={() => onRowClick && onRowClick(item)}
+                      >
                         {columns.map((column) => {
-                          if (column.type === 'status') { return (<td key={column.key} className={`px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap ${column.className || ''}`}><StatusBadge status={item[column.key]} /></td>); }
-                          let value = item[column.key]; if (column.key.includes('.')) { const keys = column.key.split('.'); value = keys.reduce((obj: any, k: string) => obj && obj[k], item); }
-                          if (column.formatter) { value = column.formatter(value, item); }
-                          return (<td key={column.key} className={`px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap ${column.className || ''}`}>{column.formatter ? value : (<div className="text-sm text-gray-800">{value as any}</div>)}</td>);
+                          if (column.type === 'status') {
+                            return (
+                              <td key={column.key} className={`px-6 py-5 whitespace-nowrap ${column.className || ''}`}>
+                                <StatusBadge status={item[column.key]} />
+                              </td>
+                            );
+                          }
+                          let value = item[column.key];
+                          if (column.key.includes('.')) {
+                            const keys = column.key.split('.');
+                            value = keys.reduce((obj: any, k: string) => obj && obj[k], item);
+                          }
+                          if (column.formatter) {
+                            value = column.formatter(value, item);
+                          }
+                          return (
+                            <td key={column.key} className={`px-6 py-5 whitespace-nowrap ${column.className || ''}`}>
+                              {column.formatter ? value : (
+                                <div className="text-[13px] font-bold text-[#1A1A1A] uppercase tracking-tight group-hover:text-lime-600 transition-colors">
+                                  {value as any}
+                                </div>
+                              )}
+                            </td>
+                          );
                         })}
-                        <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
-                            {renderActions ? renderActions(item) : (<>
-                              {onEditClick && (<motion.button onClick={() => onEditClick(item)} whileHover={{ scale: 1.15, rotate: 5 }} whileTap={{ scale: 0.95 }} className="text-primary hover:text-primary-dark p-1.5 rounded-full hover:bg-primary/10"><Edit size={18} /></motion.button>)}
-                              {onDeleteClick && (<motion.button onClick={() => onDeleteClick(item)} whileHover={{ scale: 1.15, rotate: -5 }} whileTap={{ scale: 0.95 }} className="text-red-600 hover:text-red-800 p-1.5 rounded-full hover:bg-red-50"><Trash size={18} /></motion.button>)}
-                            </>)}
+                        <td className="px-6 py-5 whitespace-nowrap text-right">
+                          <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                            {renderActions ? renderActions(item) : (
+                              <>
+                                {onEditClick && (
+                                  <motion.button
+                                    onClick={() => onEditClick(item)}
+                                    whileHover={{ scale: 1.1, y: -2 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="w-9 h-9 flex items-center justify-center bg-lime-50 text-lime-600 rounded-xl hover:bg-lime-500 hover:text-white transition-all shadow-sm"
+                                  >
+                                    <Edit size={16} />
+                                  </motion.button>
+                                )}
+                                {onDeleteClick && (
+                                  <motion.button
+                                    onClick={() => onDeleteClick(item)}
+                                    whileHover={{ scale: 1.1, y: -2 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="w-9 h-9 flex items-center justify-center bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                  >
+                                    <Trash size={16} />
+                                  </motion.button>
+                                )}
+                              </>
+                            )}
                           </div>
                         </td>
                       </motion.tr>

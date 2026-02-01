@@ -147,7 +147,7 @@ export default function CheckoutPage() {
       deliveryLongitude: selectedLocation.longitude,
       specialInstructions: notes || undefined,
       deliveryFee: baseFee,
-      paymentMethod: paymentMethod === "EATZYPAY" ? "VNPAY" : "COD",
+      paymentMethod: paymentMethod === "EATZYPAY" ? "WALLET" : (paymentMethod === "CASH" ? "COD" : "VNPAY"),
       orderItems: cartItems.map(item => ({
         dish: { id: item.dish.id },
         quantity: item.quantity,
