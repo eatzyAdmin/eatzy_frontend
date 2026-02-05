@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import {
   Filter, X, RotateCcw, Check,
   Clock, ShieldCheck, Wallet, Bike,
-  FileText, Pause, Play, Navigation
-} from 'lucide-react';
-import { Lock } from '@repo/ui';
+  FileText, Pause, Play, Navigation, Lock, List, Truck, CheckCircle,
+  AlertCircle
+} from '@repo/ui/icons';
 
 interface FilterDriverModalProps {
   isOpen: boolean;
@@ -50,31 +50,13 @@ export default function FilterDriverModal({
 
   const handleApply = () => {
     const filters: string[] = [];
-
-    if (status.length > 0) {
-      filters.push(`status in [${status.map(s => `'${s}'`).join(',')}]`);
-    }
-
-    if (accountStatus.includes('active')) {
-      filters.push('user.isActive:true');
-    } else if (accountStatus.includes('locked')) {
-      filters.push('user.isActive:false');
-    }
-
-    if (verification.includes('NATIONAL_ID')) {
-      filters.push("national_id_status == 'APPROVED'");
-    }
-    if (verification.includes('LICENSE')) {
-      filters.push("driver_license_status == 'APPROVED'");
-    }
-    if (verification.includes('BANK')) {
-      filters.push("bank_account_status == 'APPROVED'");
-    }
-
-    if (vehicleType.length > 0) {
-      filters.push(`vehicle_type in [${vehicleType.map(v => `'${v}'`).join(',')}]`);
-    }
-
+    if (status.length > 0) filters.push(`status in [${status.map(s => `'${s}'`).join(',')}]`);
+    if (accountStatus.includes('active')) filters.push('user.isActive:true');
+    else if (accountStatus.includes('locked')) filters.push('user.isActive:false');
+    if (verification.includes('NATIONAL_ID')) filters.push("national_id_status == 'APPROVED'");
+    if (verification.includes('LICENSE')) filters.push("driver_license_status == 'APPROVED'");
+    if (verification.includes('BANK')) filters.push("bank_account_status == 'APPROVED'");
+    if (vehicleType.length > 0) filters.push(`vehicle_type in [${vehicleType.map(v => `'${v}'`).join(',')}]`);
     onApply(filters.join(' and '));
     onClose();
   };
@@ -87,10 +69,12 @@ export default function FilterDriverModal({
   };
 
   const toggleStatus = (s: string) => {
+    if (s === '') { setStatus([]); return; }
     setStatus(current => current.includes(s) ? current.filter(i => i !== s) : [...current, s]);
   };
 
   const toggleAccountStatus = (s: string) => {
+    if (s === '') { setAccountStatus([]); return; }
     setAccountStatus(current => current.includes(s) ? [] : [s]);
   };
 
@@ -106,200 +90,325 @@ export default function FilterDriverModal({
 
   const activeCount = (status.length > 0 ? 1 : 0) + (accountStatus.length > 0 ? 1 : 0) + (verification.length > 0 ? 1 : 0) + (vehicleType.length > 0 ? 1 : 0);
 
+  const themeClasses: Record<string, any> = {
+    lime: { bg: 'bg-lime-50 border-lime-100', text: 'text-lime-800', iconBox: 'bg-lime-200 text-lime-700', check: 'bg-lime-500' },
+    amber: { bg: 'bg-amber-50 border-amber-100', text: 'text-amber-800', iconBox: 'bg-amber-200 text-amber-700', check: 'bg-amber-500' },
+    red: { bg: 'bg-red-50 border-red-100', text: 'text-red-800', iconBox: 'bg-red-200 text-red-700', check: 'bg-red-500' },
+    gray: { bg: 'bg-gray-50 border-gray-100', text: 'text-gray-900', iconBox: 'bg-gray-100 text-gray-400', check: 'bg-gray-900' },
+  };
+
   return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-md z-[600]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-md z-[600]"
           />
 
-          {/* Modal Container */}
-          <div className="fixed inset-0 z-[601] flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-[610] flex items-center justify-center p-4 md:p-8 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="bg-white w-[800px] max-w-[95vw] rounded-[32px] p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] border border-gray-100 pointer-events-auto"
+              className="bg-[#F8F9FA] w-[1100px] max-w-[98vw] rounded-[48px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative overflow-hidden flex flex-col max-h-[95vh] border border-gray-100 pointer-events-auto"
             >
               {/* Header */}
-              <div className="flex items-center justify-between mb-8 shrink-0">
-                <h2 className="text-2xl font-anton font-bold text-[#1A1A1A] flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-lime-100 text-primary flex items-center justify-center">
-                    <Filter className="w-6 h-6" />
+              <div className="relative px-6 py-5 md:px-9 md:py-6 border-b border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4 shrink-0 bg-white">
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[#1A1A1A] text-white flex items-center justify-center shadow-lg shadow-black/10 shrink-0">
+                    <Filter className="w-5 h-5 md:w-6 md:h-6" />
                   </div>
-                  FILTER DRIVERS
-                  {activeCount > 0 && (
-                    <span className="text-sm font-sans font-medium text-primary bg-lime-50 px-3 py-1 rounded-full ml-1">
-                      {activeCount} Active Section{activeCount > 1 ? 's' : ''}
-                    </span>
-                  )}
-                </h2>
+                  <div>
+                    <h2 className="text-xl md:text-2xl font-anton font-bold text-[#1A1A1A] tracking-tight uppercase leading-none">Driver Filtering</h2>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap">Refine fleet operations</span>
+                      {activeCount > 0 && (
+                        <span className="flex items-center gap-1.5 text-[9px] md:text-[10px] font-bold text-lime-700 bg-lime-100 px-2 py-0.5 rounded-full border border-lime-200">
+                          <div className="w-1 h-1 rounded-full bg-lime-600 animate-pulse"></div>
+                          {activeCount} ACTIVE
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleReset}
-                    className="p-4 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-all"
-                    title="Reset Filters"
-                  >
-                    <RotateCcw className="w-5 h-5" />
-                  </button>
+                <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0">
+                  {activeCount > 0 && (
+                    <button
+                      onClick={handleReset}
+                      className="group flex items-center gap-2 px-3 py-2 md:px-5 md:py-3.5 rounded-xl md:rounded-2xl bg-white text-gray-400 font-bold text-[10px] md:text-xs border border-gray-100 shadow-sm hover:text-red-600 hover:border-red-100 hover:bg-red-50 transition-all duration-300"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-[-120deg] transition-transform duration-500" />
+                      RESET ALL
+                    </button>
+                  )}
 
                   <button
                     onClick={handleApply}
-                    className="p-4 rounded-full bg-gray-100 text-gray-700 hover:bg-primary hover:text-white transition-all shadow-sm hover:shadow-primary/20 hover:-translate-y-0.5"
-                    title="Apply Filters"
+                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 md:px-8 md:py-4 rounded-xl md:rounded-3xl bg-lime-500 text-white font-bold text-xs md:text-sm tracking-widest hover:bg-lime-600 transition-all shadow-lg active:scale-95 whitespace-nowrap"
                   >
-                    <Check className="w-5 h-5" strokeWidth={3} />
+                    <Check className="w-4 h-4 md:w-5 md:h-5" strokeWidth={3} />
+                    APPLY FILTERS
                   </button>
+
+                  <div className="hidden md:block w-px h-8 bg-gray-200 mx-1"></div>
 
                   <button
                     onClick={onClose}
-                    className="p-4 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition-colors"
+                    className="p-2 md:p-4 rounded-full bg-gray-100 border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:shadow transition-all shrink-0"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-5 h-5 md:w-6 md:h-6" />
                   </button>
                 </div>
               </div>
 
               {/* Body */}
-              <div className="flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar space-y-10">
-                {/* Account Status */}
-                <section>
-                  <div className="flex items-center gap-2 mb-4">
-                    <ShieldCheck size={16} className="text-lime-500" />
-                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Account Security (Lock/Unlock)</h4>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button
-                      onClick={() => toggleAccountStatus('active')}
-                      className={`flex items-center justify-between p-5 rounded-[24px] border-2 transition-all
-                        ${accountStatus.includes('active')
-                          ? 'bg-lime-50 border-lime-500 shadow-lg shadow-lime-500/10'
-                          : 'bg-gray-50 border-transparent hover:bg-white hover:border-gray-200 shadow-sm'}`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accountStatus.includes('active') ? 'bg-lime-500 text-white' : 'bg-white text-gray-400'}`}>
-                          <ShieldCheck size={18} />
+              <div className="flex-1 overflow-y-auto p-10 space-y-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                  {/* Column 1: Account & Fleet */}
+                  <div className="space-y-10">
+                    <div className="space-y-5">
+                      <div className="flex items-center gap-3 px-2">
+                        <div className="w-11 h-11 rounded-2xl bg-lime-50 text-lime-600 flex items-center justify-center border border-lime-100 shadow-sm">
+                          <ShieldCheck size={22} strokeWidth={2.5} />
                         </div>
-                        <span className={`text-xs font-bold uppercase tracking-tight ${accountStatus.includes('active') ? 'text-lime-700' : 'text-gray-500'}`}>
-                          Unlocked Only
-                        </span>
+                        <div>
+                          <h3 className="text-[17px] font-bold text-[#1A1A1A] tracking-tight leading-none uppercase">Account Trust</h3>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">Security & state</p>
+                        </div>
                       </div>
-                      {accountStatus.includes('active') && <Check size={18} className="text-lime-500" />}
-                    </button>
-
-                    <button
-                      onClick={() => toggleAccountStatus('locked')}
-                      className={`flex items-center justify-between p-5 rounded-[24px] border-2 transition-all
-                        ${accountStatus.includes('locked')
-                          ? 'bg-red-50 border-red-500 shadow-lg shadow-red-500/10'
-                          : 'bg-gray-50 border-transparent hover:bg-white hover:border-gray-200 shadow-sm'}`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accountStatus.includes('locked') ? 'bg-red-500 text-white' : 'bg-white text-gray-400'}`}>
-                          <Lock size={18} />
-                        </div>
-                        <span className={`text-xs font-bold uppercase tracking-tight ${accountStatus.includes('locked') ? 'text-red-700' : 'text-gray-500'}`}>
-                          Locked Only
-                        </span>
+                      <div className="grid grid-cols-1 gap-2">
+                        {[
+                          { key: '', label: 'All Accounts', icon: <List size={20} />, theme: 'lime' },
+                          { key: 'active', label: 'Active (Unlocked)', icon: <ShieldCheck size={20} />, theme: 'lime' },
+                          { key: 'locked', label: 'Locked Accounts', icon: <Lock size={20} />, theme: 'red' },
+                        ].map((item) => {
+                          const active = (item.key === '' && accountStatus.length === 0) || accountStatus.includes(item.key);
+                          const currentTheme = themeClasses[item.theme];
+                          return (
+                            <button
+                              key={item.label}
+                              onClick={() => toggleAccountStatus(item.key)}
+                              className={`
+                                relative w-full text-left p-2.5 rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-4
+                                ${active
+                                  ? `${currentTheme.bg} shadow-sm`
+                                  : "bg-white border-gray-50 hover:border-gray-100 hover:bg-gray-50/30"
+                                }
+                              `}
+                            >
+                              <div className={`
+                                w-10 h-10 rounded-[16px] flex items-center justify-center transition-all duration-300
+                                ${active
+                                  ? currentTheme.iconBox
+                                  : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                                }
+                              `}>
+                                {item.icon}
+                              </div>
+                              <span className={`flex-1 text-[14px] font-bold transition-all ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                                {item.label}
+                              </span>
+                              <div className={`
+                                w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500
+                                ${active
+                                  ? `${currentTheme.check} text-white scale-100`
+                                  : "bg-gray-100 text-transparent scale-90"
+                                }
+                              `}>
+                                <Check size={14} strokeWidth={4} className={active ? "opacity-100" : "opacity-0"} />
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
-                      {accountStatus.includes('locked') && <Check size={18} className="text-red-500" />}
-                    </button>
-                  </div>
-                </section>
+                    </div>
 
-                {/* Status Selection */}
-                <section>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Clock size={16} className="text-blue-500" />
-                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Operational Status</h4>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    {['AVAILABLE', 'BUSY', 'OFFLINE'].map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => toggleStatus(s)}
-                        className={`p-4 rounded-2xl border-2 transition-all flex flex-col gap-2 group
-                          ${status.includes(s)
-                            ? 'bg-lime-50 border-lime-500 shadow-[0_8px_16px_rgba(132,204,22,0.1)]'
-                            : 'bg-white border-gray-100 hover:border-gray-200'}`}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div className={`p-2 rounded-xl border ${status.includes(s) ? 'bg-lime-500 text-white border-lime-500' : 'bg-gray-50 text-gray-400 border-gray-100 group-hover:bg-white group-hover:border-gray-200'}`}>
-                            {s === 'AVAILABLE' ? <Play size={16} /> : s === 'BUSY' ? <Navigation size={16} /> : <Pause size={16} />}
-                          </div>
-                          {status.includes(s) && <Check size={16} className="text-lime-500" />}
+                    <div className="space-y-5">
+                      <div className="flex items-center gap-3 px-2">
+                        <div className="w-11 h-11 rounded-2xl bg-lime-50 text-lime-600 flex items-center justify-center border border-lime-100 shadow-sm">
+                          <Bike size={22} strokeWidth={2.5} />
                         </div>
-                        <span className={`text-xs font-anton uppercase tracking-wider ${status.includes(s) ? 'text-gray-900' : 'text-gray-400'}`}>
-                          {s === 'AVAILABLE' ? 'Ready to Work' : s === 'BUSY' ? 'In Delivery' : 'Not Working'}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Verification Checkpoint */}
-                <section>
-                  <div className="flex items-center gap-2 mb-4">
-                    <ShieldCheck size={16} className="text-lime-500" />
-                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Compliance & Verification</h4>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {[
-                      { id: 'NATIONAL_ID', label: 'Verified ID Card', icon: <FileText size={18} /> },
-                      { id: 'LICENSE', label: 'Valid Driving License', icon: <Bike size={18} /> },
-                      { id: 'BANK', label: 'Approved Payout Method', icon: <Wallet size={18} /> }
-                    ].map((v) => (
-                      <button
-                        key={v.id}
-                        onClick={() => toggleVerification(v.id)}
-                        className={`flex items-center justify-between p-5 rounded-[24px] border-2 transition-all
-                          ${verification.includes(v.id)
-                            ? 'bg-lime-50 border-lime-500 shadow-lg shadow-lime-500/10'
-                            : 'bg-gray-50 border-transparent hover:bg-white hover:border-gray-200 shadow-sm'}`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${verification.includes(v.id) ? 'bg-lime-500 text-white' : 'bg-white text-gray-400'}`}>
-                            {v.icon}
-                          </div>
-                          <span className={`text-xs font-bold uppercase tracking-tight ${verification.includes(v.id) ? 'text-lime-700' : 'text-gray-500'}`}>
-                            {v.label}
-                          </span>
+                        <div>
+                          <h3 className="text-[17px] font-bold text-[#1A1A1A] tracking-tight leading-none uppercase">Fleet Type</h3>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">Vehicle classification</p>
                         </div>
-                        {verification.includes(v.id) && <Check size={18} className="text-lime-500" />}
-                      </button>
-                    ))}
+                      </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        {[
+                          { key: 'Motorcycle', label: 'Gas Motorcycle', icon: <Bike size={20} />, theme: 'lime' },
+                          { key: 'Electric Bike', label: 'Electric Bike', icon: <Truck size={20} />, theme: 'lime' },
+                        ].map((item) => {
+                          const active = vehicleType.includes(item.key);
+                          const currentTheme = themeClasses[item.theme];
+                          return (
+                            <button
+                              key={item.key}
+                              onClick={() => toggleVehicle(item.key)}
+                              className={`
+                                relative w-full text-left p-2.5 rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-4
+                                ${active
+                                  ? `${currentTheme.bg} shadow-sm`
+                                  : "bg-white border-gray-50 hover:border-gray-100 hover:bg-gray-50/30"
+                                }
+                              `}
+                            >
+                              <div className={`
+                                w-10 h-10 rounded-[16px] flex items-center justify-center transition-all duration-300
+                                ${active
+                                  ? currentTheme.iconBox
+                                  : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                                }
+                              `}>
+                                {item.icon}
+                              </div>
+                              <span className={`flex-1 text-[14px] font-bold transition-all ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                                {item.label}
+                              </span>
+                              <div className={`
+                                w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500
+                                ${active
+                                  ? `${currentTheme.check} text-white scale-100`
+                                  : "bg-gray-100 text-transparent scale-90"
+                                }
+                              `}>
+                                <Check size={14} strokeWidth={4} className={active ? "opacity-100" : "opacity-0"} />
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
-                </section>
 
-                {/* Vehicle Types */}
-                <section>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Bike size={16} className="text-lime-500" />
-                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Fleet Classification</h4>
+                  {/* Column 2: Operational Status */}
+                  <div className="space-y-10">
+                    <div className="space-y-5">
+                      <div className="flex items-center gap-3 px-2">
+                        <div className="w-11 h-11 rounded-2xl bg-[#EEF2FF] text-indigo-600 flex items-center justify-center border border-indigo-100 shadow-sm">
+                          <Clock size={22} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                          <h3 className="text-[17px] font-bold text-[#1A1A1A] tracking-tight leading-none uppercase">Current Pulse</h3>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">Operational Activity</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        {[
+                          { key: '', label: 'All Status', icon: <List size={20} />, theme: 'lime' },
+                          { key: 'AVAILABLE', label: 'Ready to Work', icon: <Play size={20} />, theme: 'lime' },
+                          { key: 'BUSY', label: 'Busy (In Delivery)', icon: <Navigation size={20} />, theme: 'amber' },
+                          { key: 'OFFLINE', label: 'Offline / Rest', icon: <Pause size={20} />, theme: 'red' },
+                        ].map((item) => {
+                          const active = (item.key === '' && status.length === 0) || status.includes(item.key);
+                          const currentTheme = themeClasses[item.theme];
+                          return (
+                            <button
+                              key={item.label}
+                              onClick={() => toggleStatus(item.key)}
+                              className={`
+                                relative w-full text-left p-2.5 rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-4
+                                ${active
+                                  ? `${currentTheme.bg} shadow-sm`
+                                  : "bg-white border-gray-100 hover:border-gray-100 hover:bg-gray-50/30"
+                                }
+                              `}
+                            >
+                              <div className={`
+                                w-10 h-10 rounded-[16px] flex items-center justify-center transition-all duration-300
+                                ${active
+                                  ? currentTheme.iconBox
+                                  : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                                }
+                              `}>
+                                {item.icon}
+                              </div>
+                              <span className={`flex-1 text-[14px] font-bold transition-all ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                                {item.label}
+                              </span>
+                              <div className={`
+                                w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500
+                                ${active
+                                  ? `${currentTheme.check} text-white scale-100`
+                                  : "bg-gray-100 text-transparent scale-90"
+                                }
+                              `}>
+                                <Check size={14} strokeWidth={4} className={active ? "opacity-100" : "opacity-0"} />
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-3">
-                    {['Motorcycle', 'Electric Bike'].map((v) => (
-                      <button
-                        key={v}
-                        onClick={() => toggleVehicle(v)}
-                        className={`px-6 py-3 rounded-2xl border transition-all text-xs font-bold uppercase tracking-widest
-                          ${vehicleType.includes(v)
-                            ? 'bg-lime-100 border-lime-300 text-lime-700 shadow-md translate-y-[-2px]'
-                            : 'bg-white border-gray-100 text-gray-400 hover:border-gray-300 hover:text-gray-600'}`}
-                      >
-                        {v}
-                      </button>
-                    ))}
+
+                  {/* Column 3: Compliance & Verification */}
+                  <div className="space-y-10">
+                    <div className="space-y-5">
+                      <div className="flex items-center gap-3 px-2">
+                        <div className="w-11 h-11 rounded-2xl bg-[#FFF7ED] text-orange-600 flex items-center justify-center border border-orange-100 shadow-sm">
+                          <CheckCircle size={22} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                          <h3 className="text-[17px] font-bold text-[#1A1A1A] tracking-tight leading-none uppercase">Compliance</h3>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">KYC & Document Verification</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        {[
+                          { id: 'NATIONAL_ID', label: 'Verified ID Card', icon: <FileText size={20} /> },
+                          { id: 'LICENSE', label: 'Valid Driving License', icon: <Bike size={20} /> },
+                          { id: 'BANK', label: 'Approved Bank Payout', icon: <Wallet size={20} /> }
+                        ].map((v) => {
+                          const active = verification.includes(v.id);
+                          return (
+                            <button
+                              key={v.label}
+                              onClick={() => toggleVerification(v.id)}
+                              className={`
+                                relative w-full text-left p-2.5 rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-4
+                                ${active
+                                  ? "bg-orange-50 border-orange-100 shadow-sm"
+                                  : "bg-white border-gray-50 hover:border-gray-100 hover:bg-gray-50/30"
+                                }
+                              `}
+                            >
+                              <div className={`
+                                w-10 h-10 rounded-[16px] flex items-center justify-center transition-all duration-300
+                                ${active
+                                  ? 'bg-orange-200 text-orange-700'
+                                  : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                                }
+                              `}>
+                                {v.icon}
+                              </div>
+                              <span className={`flex-1 text-[14px] font-bold transition-all ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                                {v.label}
+                              </span>
+                              <div className={`
+                                w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500
+                                ${active
+                                  ? "bg-orange-500 text-white scale-100"
+                                  : "bg-gray-100 text-transparent scale-90"
+                                }
+                              `}>
+                                <Check size={14} strokeWidth={4} className={active ? "opacity-100" : "opacity-0"} />
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                   </div>
-                </section>
+
+                </div>
               </div>
             </motion.div>
           </div>

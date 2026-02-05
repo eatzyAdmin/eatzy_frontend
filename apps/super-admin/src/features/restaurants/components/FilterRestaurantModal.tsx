@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import {
   X, Filter, Check, RotateCcw,
-  Play, Pause, Lock, Clock, Building2
-} from 'lucide-react';
+  Play, Pause, Lock, Clock, Building2, List, Store, MapPin
+} from '@repo/ui/icons';
 import { RestaurantStatus } from '@repo/types';
 
 interface FilterRestaurantModalProps {
@@ -33,13 +33,9 @@ export default function FilterRestaurantModal({
     if (isOpen) {
       if (activeQuery) {
         const statuses: RestaurantStatus[] = [];
-
-        // Check for account locked
         if (activeQuery.includes('owner.isActive:false')) {
           statuses.push('LOCKED' as RestaurantStatus);
         }
-
-        // Simple parser for status in ['A', 'B']
         const match = activeQuery.match(/status in \[(.*)\]/);
         if (match && match[1]) {
           const ops = match[1].split(',').map(s => s.trim().replace(/'/g, '')) as RestaurantStatus[];
@@ -53,6 +49,7 @@ export default function FilterRestaurantModal({
   }, [isOpen, activeQuery]);
 
   const toggleStatus = (status: RestaurantStatus) => {
+    if (status === ('' as any)) { setSelectedStatuses([]); return; }
     setSelectedStatuses(prev =>
       prev.includes(status)
         ? prev.filter(s => s !== status)
@@ -81,14 +78,22 @@ export default function FilterRestaurantModal({
     onClose();
   };
 
-  const activeCount = selectedStatuses.length > 0 ? 1 : 0;
+  const themeClasses: Record<string, any> = {
+    lime: { bg: 'bg-lime-50 border-lime-100', text: 'text-lime-800', iconBox: 'bg-lime-200 text-lime-700', check: 'bg-lime-500' },
+    amber: { bg: 'bg-amber-50 border-amber-100', text: 'text-amber-800', iconBox: 'bg-amber-200 text-amber-700', check: 'bg-amber-500' },
+    red: { bg: 'bg-red-50 border-red-100', text: 'text-red-800', iconBox: 'bg-red-200 text-red-700', check: 'bg-red-500' },
+    gray: { bg: 'bg-gray-50 border-gray-100', text: 'text-gray-900', iconBox: 'bg-gray-100 text-gray-400', check: 'bg-gray-900' },
+  };
 
-  const STATUS_CONFIG = [
-    { value: 'OPEN', label: 'Open', icon: Play, activeBg: 'bg-lime-50', activeText: 'text-lime-700', activeBorder: 'border-lime-500' },
-    { value: 'CLOSED', label: 'Closed', icon: Pause, activeBg: 'bg-gray-50', activeText: 'text-gray-700', activeBorder: 'border-gray-500' },
-    { value: 'LOCKED', label: 'Locked', icon: Lock, activeBg: 'bg-red-50', activeText: 'text-red-700', activeBorder: 'border-red-500' },
-    { value: 'PENDING', label: 'Pending', icon: Clock, activeBg: 'bg-amber-50', activeText: 'text-amber-700', activeBorder: 'border-amber-500' },
-  ] as const;
+  const statusItems = [
+    { value: ('' as any), label: 'All Restaurants', icon: <List size={22} />, theme: 'lime', desc: 'Complete network overview' },
+    { value: 'OPEN', label: 'Open Stores', icon: <Play size={22} />, theme: 'lime', desc: 'Actively accepting orders' },
+    { value: 'CLOSED', label: 'Closed Stores', icon: <Pause size={22} />, theme: 'red', desc: 'Currently non-operational' },
+    { value: 'LOCKED', label: 'Locked / Disabled', icon: <Lock size={22} />, theme: 'red', desc: 'Account access restricted' },
+    { value: 'PENDING', label: 'Pending Approval', icon: <Clock size={22} />, theme: 'amber', desc: 'Awaiting platform vetting' },
+  ];
+
+  const activeCount = selectedStatuses.length > 0 ? 1 : 0;
 
   if (!mounted) return null;
 
@@ -96,109 +101,133 @@ export default function FilterRestaurantModal({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-md z-[600]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-md z-[600]"
           />
 
-          {/* Modal Container */}
-          <div className="fixed inset-0 z-[601] flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-[610] flex items-center justify-center p-4 md:p-8 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="bg-white w-[800px] max-w-[95vw] rounded-[32px] p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] border border-gray-100 pointer-events-auto"
+              className="bg-[#F8F9FA] w-[1000px] max-w-[98vw] rounded-[48px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative overflow-hidden flex flex-col max-h-[95vh] border border-gray-100 pointer-events-auto"
             >
               {/* Header */}
-              <div className="flex items-center justify-between mb-8 shrink-0">
-                <h2 className="text-2xl font-anton font-bold text-[#1A1A1A] flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-lime-100 text-primary flex items-center justify-center">
-                    <Filter className="w-6 h-6" />
+              <div className="relative px-9 py-6 border-b border-gray-100 flex items-center justify-between shrink-0 bg-white">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-[#1A1A1A] text-white flex items-center justify-center shadow-lg shadow-black/10">
+                      <Filter className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-anton font-bold text-[#1A1A1A] tracking-tight uppercase">Merchant Filtering</h2>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Refine restaurant network</span>
+                        {activeCount > 0 && (
+                          <span className="flex items-center gap-1.5 text-[10px] font-bold text-lime-700 bg-lime-100 px-2 py-0.5 rounded-full border border-lime-200">
+                            <div className="w-1 h-1 rounded-full bg-lime-600 animate-pulse"></div>
+                            {activeCount} SECTIONS ACTIVE
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  FILTER RESTAURANTS
-                  {activeCount > 0 && (
-                    <span className="text-sm font-sans font-medium text-primary bg-lime-50 px-3 py-1 rounded-full ml-1">
-                      {activeCount} Active Section
-                    </span>
-                  )}
-                </h2>
+                </div>
 
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleReset}
-                    className="p-4 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-all"
-                    title="Reset Filters"
-                  >
-                    <RotateCcw className="w-5 h-5" />
-                  </button>
+                <div className="flex items-center gap-4">
+                  {activeCount > 0 && (
+                    <button
+                      onClick={handleReset}
+                      className="group flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-white text-gray-400 font-bold text-xs border border-gray-100 shadow-sm hover:text-red-600 hover:border-red-100 hover:bg-red-50 transition-all duration-300"
+                    >
+                      <RotateCcw className="w-4 h-4 group-hover:rotate-[-120deg] transition-transform duration-500" />
+                      RESET ALL
+                    </button>
+                  )}
 
                   <button
                     onClick={handleApply}
-                    className="p-4 rounded-full bg-gray-100 text-gray-700 hover:bg-primary hover:text-white transition-all shadow-sm hover:shadow-primary/20 hover:-translate-y-0.5"
-                    title="Apply Filters"
+                    className="flex items-center gap-2 px-8 py-4 rounded-3xl bg-lime-500 text-white font-bold text-sm tracking-widest hover:bg-lime-600 transition-all shadow-[0_8px_30px_rgba(132,204,22,0.3)] hover:shadow-lime-300 hover:-translate-y-1 active:scale-95"
                   >
                     <Check className="w-5 h-5" strokeWidth={3} />
+                    APPLY FILTERS
                   </button>
+
+                  <div className="w-px h-10 bg-gray-200 ml-2 mr-2"></div>
 
                   <button
                     onClick={onClose}
-                    className="p-4 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition-colors"
+                    className="p-4 rounded-full bg-gray-100 border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:shadow-lg transition-all"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-6 h-6" />
                   </button>
                 </div>
               </div>
 
               {/* Body */}
-              <div className="flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar">
-                <div className="space-y-8">
-
-                  {/* Operational Status */}
-                  <div className="space-y-4">
-                    <label className="text-sm font-bold text-gray-900 flex items-center gap-2 uppercase tracking-wide">
-                      <Building2 size={18} className="text-primary" />
-                      Operational Status
-                    </label>
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm grid grid-cols-2 gap-3">
-                      {STATUS_CONFIG.map(config => {
-                        const Icon = config.icon;
-                        const isSelected = selectedStatuses.includes(config.value);
-
-                        return (
-                          <button
-                            key={config.value}
-                            onClick={() => toggleStatus(config.value)}
-                            className={`py-4 px-5 text-sm font-bold rounded-2xl transition-all border-2 text-left flex items-center gap-3 group
-                                        ${isSelected
-                                ? `${config.activeBg} ${config.activeText} ${config.activeBorder} shadow-md`
-                                : 'bg-white text-gray-500 border-gray-100 hover:border-gray-200 hover:bg-gray-50'
-                              }`}
-                          >
-                            <div className={`p-2 rounded-xl ${isSelected ? 'bg-white/50' : 'bg-gray-100 group-hover:bg-white transition-colors'}`}>
-                              <Icon size={18} className={isSelected ? 'scale-110 transition-transform text-current' : ''} />
-                            </div>
-                            <span className="flex-1 uppercase tracking-tight">{config.label}</span>
-                            {isSelected && <Check className="w-5 h-5" strokeWidth={3} />}
-                          </button>
-                        );
-                      })}
+              <div className="flex-1 overflow-y-auto p-12">
+                <div className="max-w-4xl mx-auto space-y-12">
+                  <div className="flex items-center gap-4 px-2">
+                    <div className="w-12 h-12 rounded-2xl bg-lime-50 text-lime-600 flex items-center justify-center border border-lime-100">
+                      <Building2 size={26} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <h3 className="text-[17px] font-bold text-[#1A1A1A] tracking-tight leading-none uppercase">Store Operations</h3>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">Select merchant states</p>
                     </div>
                   </div>
 
-                  {/* Coming Soon Section */}
-                  <div className="p-8 bg-gray-50 rounded-[32px] border border-gray-100 border-dashed text-center">
-                    <div className="w-16 h-16 rounded-full bg-white mx-auto flex items-center justify-center text-gray-300 mb-4 shadow-sm">
-                      <Clock size={32} />
-                    </div>
-                    <h3 className="text-sm font-anton text-gray-900 uppercase tracking-wider mb-2">More Filters Coming Soon</h3>
-                    <p className="text-xs text-gray-400 font-medium max-w-xs mx-auto leading-relaxed">
-                      We are working on adding Rating Range, Commission Tiers, and Category filters to further refine your restaurant network management.
-                    </p>
+                  <div className="grid grid-cols-3 gap-6">
+                    {statusItems.map((item) => {
+                      const active = (item.value === '' && selectedStatuses.length === 0) || selectedStatuses.includes(item.value);
+                      const currentTheme = themeClasses[item.theme];
+                      return (
+                        <button
+                          key={item.label}
+                          onClick={() => toggleStatus(item.value)}
+                          className={`
+                            relative text-left p-6 rounded-[36px] border-2 transition-all duration-300 group flex items-start gap-4
+                            ${active
+                              ? `${currentTheme.bg} shadow-sm`
+                              : "bg-white border-gray-50 hover:border-gray-100 hover:bg-gray-50/30"
+                            }
+                          `}
+                        >
+                          <div className={`
+                            w-14 h-14 rounded-[20px] flex items-center justify-center transition-all duration-300 shrink-0
+                            ${active
+                              ? currentTheme.iconBox
+                              : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                            }
+                          `}>
+                            {item.icon}
+                          </div>
+                          <div className="pt-2 pr-6">
+                            <span className={`block text-lg font-bold transition-all ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                              {item.label}
+                            </span>
+                            <p className={`text-[11px] mt-1 font-medium leading-relaxed transition-all ${active ? "text-gray-500" : "text-gray-400"}`}>
+                              {item.desc}
+                            </p>
+                          </div>
+
+                          <div className={`
+                            absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500
+                            ${active
+                              ? `${currentTheme.check} text-white scale-100`
+                              : "bg-gray-100 text-transparent scale-90"
+                            }
+                          `}>
+                            <Check size={14} strokeWidth={4} className={active ? "opacity-100" : "opacity-0"} />
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

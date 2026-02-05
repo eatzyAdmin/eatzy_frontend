@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import {
-  X, CheckCircle, AlertCircle, Calendar, Filter, Check,
-  RotateCcw, Clock, CreditCard, ArrowUpRight, ArrowDownLeft
-} from 'lucide-react';
+  X, CheckCircle, AlertCircle, Filter, Check,
+  RotateCcw, Clock, CreditCard, ArrowUpRight, ArrowDownLeft, Banknote, List, Receipt
+} from '@repo/ui/icons';
+import { createPortal } from 'react-dom';
 
 interface FilterFinanceModalProps {
   isOpen: boolean;
@@ -15,20 +16,20 @@ interface FilterFinanceModalProps {
 }
 
 const TRANSACTION_TYPES = [
-  { label: 'Deposit', value: 'DEPOSIT', icon: ArrowDownLeft, color: 'text-lime-600', bg: 'bg-lime-50', border: 'border-lime-500' },
-  { label: 'Withdrawal', value: 'WITHDRAWAL', icon: ArrowUpRight, color: 'text-lime-600', bg: 'bg-lime-50', border: 'border-lime-500' },
-  { label: 'Payment', value: 'PAYMENT', icon: CreditCard, color: 'text-lime-600', bg: 'bg-lime-50', border: 'border-lime-500' },
-  { label: 'Refund', value: 'REFUND', icon: RotateCcw, color: 'text-lime-600', bg: 'bg-lime-50', border: 'border-lime-500' },
-  { label: 'Earning', value: 'EARNING', icon: CheckCircle, color: 'text-lime-600', bg: 'bg-lime-50', border: 'border-lime-500' },
-  { label: 'Top Up', value: 'TOP_UP', icon: Clock, color: 'text-lime-600', bg: 'bg-lime-50', border: 'border-lime-500' },
+  { label: 'Deposit', value: 'DEPOSIT', icon: <ArrowDownLeft size={20} />, theme: 'lime', desc: 'Inbound funds' },
+  { label: 'Withdrawal', value: 'WITHDRAWAL', icon: <ArrowUpRight size={20} />, theme: 'lime', desc: 'Outbound payouts' },
+  { label: 'Payment', value: 'PAYMENT', icon: <CreditCard size={20} />, theme: 'lime', desc: 'Sale transactions' },
+  { label: 'Refund', value: 'REFUND', icon: <RotateCcw size={20} />, theme: 'lime', desc: 'Credited reversals' },
+  { label: 'Earning', value: 'EARNING', icon: <CheckCircle size={20} />, theme: 'lime', desc: 'Commission accruals' },
+  { label: 'Top Up', value: 'TOP_UP', icon: <Clock size={20} />, theme: 'lime', desc: 'Balance replenishment' },
 ];
 
-const STATUS_CONFIG = {
-  SUCCESS: { label: 'Success', icon: CheckCircle, color: 'text-lime-600', bg: 'bg-lime-50', border: 'border-lime-500' },
-  PENDING: { label: 'Pending', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-500' },
-  FAILED: { label: 'Failed', icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-500' },
-  COMPLETED: { label: 'Done', icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-500' },
-};
+const STATUS_CONFIG = [
+  { key: 'SUCCESS', label: 'Success', icon: <CheckCircle size={20} />, theme: 'lime' },
+  { key: 'PENDING', label: 'Pending', icon: <Clock size={20} />, theme: 'amber' },
+  { key: 'FAILED', label: 'Failed', icon: <AlertCircle size={20} />, theme: 'red' },
+  { key: 'COMPLETED', label: 'Completed', icon: <CheckCircle size={20} />, theme: 'lime' },
+];
 
 export default function FilterFinanceModal({
   isOpen,
@@ -38,10 +39,14 @@ export default function FilterFinanceModal({
 }: FilterFinanceModalProps) {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
-      // Reset for initial simplicity, could parse activeQuery if needed
       setSelectedTypes([]);
       setSelectedStatuses([]);
     }
@@ -76,132 +81,200 @@ export default function FilterFinanceModal({
     onClose();
   };
 
+  const themeClasses: Record<string, any> = {
+    lime: { bg: 'bg-lime-50 border-lime-100', text: 'text-lime-800', iconBox: 'bg-lime-200 text-lime-700', check: 'bg-lime-500' },
+    amber: { bg: 'bg-amber-50 border-amber-100', text: 'text-amber-800', iconBox: 'bg-amber-200 text-amber-700', check: 'bg-amber-500' },
+    red: { bg: 'bg-red-50 border-red-100', text: 'text-red-800', iconBox: 'bg-red-200 text-red-700', check: 'bg-red-500' },
+  };
+
   const activeCount = selectedTypes.length + selectedStatuses.length;
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-md z-[600]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-md z-[600]"
           />
 
-          {/* Modal Container */}
-          <div className="fixed inset-0 z-[610] flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-[610] flex items-center justify-center p-4 md:p-8 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="bg-white w-[800px] max-w-[95vw] rounded-[40px] p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] border border-gray-100 pointer-events-auto"
+              className="bg-[#F8F9FA] w-[850px] max-w-[98vw] rounded-[48px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] relative overflow-hidden flex flex-col max-h-[95vh] border border-gray-100 pointer-events-auto"
             >
               {/* Header */}
-              <div className="flex items-center justify-between mb-8 shrink-0">
-                <h2 className="text-2xl font-anton font-bold text-[#1A1A1A] flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                    <Filter className="w-6 h-6" />
+              <div className="relative px-9 py-6 border-b border-gray-100 flex items-center justify-between shrink-0 bg-white">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-[#1A1A1A] text-white flex items-center justify-center shadow-lg shadow-black/10">
+                      <Filter className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-anton font-bold text-[#1A1A1A] tracking-tight uppercase">Ledger Filtering</h2>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Finance</span>
+                        {activeCount > 0 && (
+                          <span className="flex items-center gap-1.5 text-[10px] font-bold text-lime-700 bg-lime-100 px-2 py-0.5 rounded-full border border-lime-200">
+                            <div className="w-1 h-1 rounded-full bg-lime-600 animate-pulse"></div>
+                            {activeCount} SELECTIONS
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  FILTER LEDGER
-                  {activeCount > 0 && (
-                    <span className="text-sm font-sans font-medium text-primary bg-primary/10 px-3 py-1 rounded-full ml-1">
-                      {activeCount} Selection
-                    </span>
-                  )}
-                </h2>
+                </div>
 
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleReset}
-                    className="p-4 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-all shadow-inner"
-                    title="Reset Filters"
-                  >
-                    <RotateCcw className="w-5 h-5" />
-                  </button>
+                <div className="flex items-center gap-4">
+                  {activeCount > 0 && (
+                    <button
+                      onClick={handleReset}
+                      className="group flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-white text-gray-400 font-bold text-xs border border-gray-100 shadow-sm hover:text-red-600 hover:border-red-100 hover:bg-red-50 transition-all duration-300"
+                    >
+                      <RotateCcw className="w-4 h-4 group-hover:rotate-[-120deg] transition-transform duration-500" />
+                      RESET ALL
+                    </button>
+                  )}
 
                   <button
                     onClick={handleApply}
-                    className="p-4 rounded-full bg-[#1A1A1A] text-white hover:bg-primary transition-all shadow-xl shadow-black/10 hover:-translate-y-0.5"
-                    title="Apply Filters"
+                    className="flex items-center gap-2 px-8 py-4 rounded-3xl bg-lime-500 text-white font-bold text-sm tracking-widest hover:bg-lime-600 transition-all shadow-[0_8px_30px_rgba(132,204,22,0.3)] hover:shadow-lime-300 hover:-translate-y-1 active:scale-95"
                   >
                     <Check className="w-5 h-5" strokeWidth={3} />
+                    APPLY FILTERS
                   </button>
+
+                  <div className="w-px h-10 bg-gray-200 ml-2 mr-2"></div>
 
                   <button
                     onClick={onClose}
-                    className="p-4 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition-colors"
+                    className="p-4 rounded-full bg-gray-100 border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:shadow-lg transition-all"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-6 h-6" />
                   </button>
                 </div>
               </div>
 
               {/* Body */}
-              <div className="flex-1 overflow-y-auto pr-2 pb-4 custom-scrollbar">
-                <div className="space-y-10">
+              <div className="flex-1 overflow-y-auto p-12">
+                <div className="max-w-5xl mx-auto space-y-12">
 
-                  {/* Transaction Status */}
-                  <div className="space-y-5">
-                    <label className="text-xs font-black text-gray-400 flex items-center gap-3 uppercase tracking-[0.2em]">
-                      Settlement Status
-                      <div className="flex-1 h-px bg-gray-100" />
-                    </label>
-                    <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm grid grid-cols-2 lg:grid-cols-4 gap-3">
-                      {Object.entries(STATUS_CONFIG).map(([status, config]) => {
-                        const isSelected = selectedStatuses.includes(status);
-                        const Icon = config.icon;
+                  {/* Settlement Section */}
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 px-2">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shadow-sm">
+                        <CheckCircle size={26} strokeWidth={2.5} />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-[#1A1A1A] tracking-tight leading-none uppercase">Settlement Scope</h3>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">Filter by transaction state</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      {STATUS_CONFIG.map((item) => {
+                        const active = selectedStatuses.includes(item.key);
+                        const currentTheme = themeClasses[item.theme];
                         return (
                           <button
-                            key={status}
-                            onClick={() => toggleStatus(status)}
-                            className={`py-3 px-4 text-[10px] font-black rounded-2xl transition-all border-2 flex items-center justify-center gap-2 uppercase tracking-widest
-                              ${isSelected
-                                ? `${config.bg} ${config.color} ${config.border} shadow-lg scale-105`
-                                : 'bg-white text-gray-400 border-gray-50 hover:border-gray-200 hover:bg-gray-50'
-                              }`}
+                            key={item.key}
+                            onClick={() => toggleStatus(item.key)}
+                            className={`
+                              relative text-left p-3.5 rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-4
+                              ${active
+                                ? `${currentTheme.bg} shadow-sm`
+                                : "bg-white border-gray-50 hover:border-gray-100 hover:bg-gray-50/30"
+                              }
+                            `}
                           >
-                            <Icon size={12} strokeWidth={isSelected ? 3 : 2} />
-                            {config.label}
+                            <div className={`
+                              w-11 h-11 rounded-[18px] flex items-center justify-center transition-all duration-300 shrink-0
+                              ${active
+                                ? currentTheme.iconBox
+                                : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                              }
+                            `}>
+                              {item.icon}
+                            </div>
+                            <span className={`flex-1 text-[15px] font-bold transition-all ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                              {item.label}
+                            </span>
+                            <div className={`
+                              w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 shrink-0
+                              ${active
+                                ? `${currentTheme.check} text-white scale-100`
+                                : "bg-gray-100 text-transparent scale-90"
+                              }
+                            `}>
+                              <Check size={14} strokeWidth={4} className={active ? "opacity-100" : "opacity-0"} />
+                            </div>
                           </button>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* Transaction Type */}
-                  <div className="space-y-5">
-                    <label className="text-xs font-black text-gray-400 flex items-center gap-3 uppercase tracking-[0.2em]">
-                      Transaction Category
-                      <div className="flex-1 h-px bg-gray-100" />
-                    </label>
-                    <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm grid grid-cols-2 gap-4">
-                      {TRANSACTION_TYPES.map(type => {
-                        const Icon = type.icon;
-                        const isSelected = selectedTypes.includes(type.value);
-
+                  {/* Transaction Class Section */}
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 px-2">
+                      <div className="w-12 h-12 rounded-2xl bg-lime-50 text-lime-600 flex items-center justify-center border border-lime-100 shadow-sm">
+                        <Banknote size={26} strokeWidth={2.5} />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-[#1A1A1A] tracking-tight leading-none uppercase">Transaction Class</h3>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1.5">Select ledger categories</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                      {TRANSACTION_TYPES.map((item) => {
+                        const active = selectedTypes.includes(item.value);
+                        const currentTheme = themeClasses[item.theme];
                         return (
                           <button
-                            key={type.value}
-                            onClick={() => toggleType(type.value)}
-                            className={`py-4 px-6 text-sm font-bold rounded-[24px] transition-all border-2 text-left flex items-center gap-4 group
-                                                                    ${isSelected
-                                ? `${type.bg} ${type.color} ${type.border} shadow-md`
-                                : 'bg-white text-gray-500 border-gray-50 hover:border-gray-200 hover:bg-gray-50'
-                              }`}
+                            key={item.value}
+                            onClick={() => toggleType(item.value)}
+                            className={`
+                              relative text-left p-5 rounded-[40px] border-2 transition-all duration-300 group flex flex-col items-center justify-center gap-4 min-h-[145px]
+                              ${active
+                                ? `${currentTheme.bg} shadow-sm`
+                                : "bg-white border-gray-50 hover:border-gray-100 hover:bg-gray-50/30"
+                              }
+                            `}
                           >
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors
-                                                            ${isSelected ? 'bg-white/50' : 'bg-gray-50 group-hover:bg-white border border-gray-100'}`}>
-                              <Icon size={18} className={isSelected ? 'scale-110 transition-transform' : ''} />
+                            <div className={`
+                              w-14 h-14 rounded-[22px] flex items-center justify-center transition-all duration-300
+                              ${active
+                                ? currentTheme.iconBox
+                                : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                              }
+                            `}>
+                              {item.icon}
                             </div>
-                            <div className="flex-1 flex flex-col">
-                              <span className="text-[10px] uppercase font-black tracking-widest leading-none mb-1 opacity-60">Category</span>
-                              <span className="font-anton uppercase text-lg tracking-tight leading-none">{type.label}</span>
+                            <div className="text-center">
+                              <span className={`block text-[16px] font-bold transition-all ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                                {item.label}
+                              </span>
+                              <p className={`text-[9px] mt-1 font-bold uppercase tracking-widest transition-all ${active ? "text-lime-700/60" : "text-gray-400"}`}>
+                                {item.desc}
+                              </p>
                             </div>
-                            {isSelected && <div className="w-2 h-2 rounded-full bg-current shadow-lg" />}
+
+                            <div className={`
+                              absolute top-5 right-5 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-500
+                              ${active
+                                ? `${currentTheme.check} text-white scale-100`
+                                : "bg-gray-100 text-transparent scale-90"
+                              }
+                            `}>
+                              <Check size={14} strokeWidth={4} className={active ? "opacity-100" : "opacity-0"} />
+                            </div>
                           </button>
                         );
                       })}
@@ -214,6 +287,7 @@ export default function FilterFinanceModal({
           </div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
