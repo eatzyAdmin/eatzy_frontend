@@ -295,57 +295,80 @@ const FinanceExportModal: React.FC<FinanceExportModalProps> = ({
                     <div className="space-y-3">
                       <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Select Format</label>
                       <div className="grid grid-cols-2 gap-4 px-2">
+                        {/* PDF Format */}
                         <motion.div
-                          whileHover={{ y: -3, scale: 1.03 }}
+                          whileHover={{ y: -3, scale: 1.02 }}
                           whileTap={{ scale: 0.97 }}
-                          className={`p-4 border rounded-xl cursor-pointer flex flex-col items-center relative overflow-hidden ${format === 'pdf'
-                            ? 'border-red-300 shadow-[0_5px_20px_rgba(239,68,68,0.15)] bg-gradient-to-br from-red-50 to-red-100/50'
-                            : 'bg-white border-gray-200 hover:border-red-200 hover:shadow-[0_5px_15px_rgba(0,0,0,0.05)]'
-                            } transition-all duration-300`}
                           onClick={() => setFormat('pdf')}
+                          className={`
+                            group relative p-4 rounded-[28px] border-2 cursor-pointer flex flex-col items-center justify-center transition-all duration-300
+                            ${format === 'pdf'
+                              ? 'bg-red-50 border-red-100 shadow-[0_10px_25px_-5px_rgba(239,68,68,0.1)]'
+                              : 'bg-white border-gray-50 hover:border-red-100/60 hover:bg-red-50/40'
+                            }
+                          `}
                         >
-                          <div className={`p-3 rounded-full mb-2 ${format === 'pdf' ? 'bg-red-100' : 'bg-gray-100'
-                            } transition-colors duration-300`}>
-                            <FileText className={`w-7 h-7 ${format === 'pdf' ? 'text-red-500' : 'text-gray-400'}`} />
+                          <div className={`
+                            w-14 h-14 rounded-[20px] flex items-center justify-center mb-3 transition-all duration-300
+                            ${format === 'pdf'
+                              ? 'bg-red-100 text-red-600 shadow-sm'
+                              : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                            }
+                          `}>
+                            <FileText className="w-7 h-7" />
                           </div>
-                          <span className={`text-sm font-semibold ${format === 'pdf' ? 'text-red-600' : 'text-gray-600'}`}>
+                          <span className={`text-[15px] font-bold tracking-tight transition-all ${format === 'pdf' ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
                             PDF
                           </span>
-                          {format === 'pdf' && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="absolute top-3 right-3 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shadow-md"
-                            >
-                              <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                            </motion.div>
-                          )}
+
+                          {/* Checkmark Circle */}
+                          <div className={`
+                            absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-500
+                            ${format === 'pdf'
+                              ? "bg-red-500 text-white scale-100 shadow-sm"
+                              : "bg-gray-100/50 text-transparent scale-0"
+                            }
+                          `}>
+                            <Check size={12} strokeWidth={4} />
+                          </div>
                         </motion.div>
 
+                        {/* Excel Format */}
                         <motion.div
-                          whileHover={{ y: -3, scale: 1.03 }}
+                          whileHover={{ y: -3, scale: 1.02 }}
                           whileTap={{ scale: 0.97 }}
                           onClick={() => setFormat('excel')}
-                          className={`p-4 border rounded-xl cursor-pointer flex flex-col items-center relative overflow-hidden transition-all duration-300 ${format === 'excel'
-                            ? 'border-lime-500 shadow-[0_5px_20px_rgba(132,204,22,0.15)] bg-gradient-to-br from-lime-50 to-lime-100/50'
-                            : 'bg-white border-gray-200 hover:border-lime-200 hover:shadow-[0_5px_15px_rgba(0,0,0,0.05)]'
-                            }`}
+                          className={`
+                            group relative p-4 rounded-[28px] border-2 cursor-pointer flex flex-col items-center justify-center transition-all duration-300
+                            ${format === 'excel'
+                              ? 'bg-lime-50 border-lime-100 shadow-[0_10px_25px_-5px_rgba(132,204,22,0.1)]'
+                              : 'bg-white border-gray-50 hover:border-lime-100/60 hover:bg-lime-50/40'
+                            }
+                          `}
                         >
-                          <div className={`p-3 rounded-full mb-2 transition-colors duration-300 ${format === 'excel' ? 'bg-lime-100' : 'bg-gray-100'}`}>
-                            <LayoutGrid className={`w-7 h-7 ${format === 'excel' ? 'text-lime-600' : 'text-gray-400'}`} />
+                          <div className={`
+                            w-14 h-14 rounded-[20px] flex items-center justify-center mb-3 transition-all duration-300
+                            ${format === 'excel'
+                              ? 'bg-lime-100 text-lime-600 shadow-sm'
+                              : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                            }
+                          `}>
+                            <LayoutGrid className="w-7 h-7" />
                           </div>
-                          <span className={`text-sm font-semibold ${format === 'excel' ? 'text-lime-600' : 'text-gray-600'}`}>
+                          <span className={`text-[15px] font-bold tracking-tight transition-all ${format === 'excel' ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
                             Excel
                           </span>
-                          {format === 'excel' && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="absolute top-3 right-3 w-5 h-5 bg-lime-500 rounded-full flex items-center justify-center shadow-md"
-                            >
-                              <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                            </motion.div>
-                          )}
+
+                          {/* Checkmark Circle */}
+                          <div className={`
+                            absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-500
+                            ${format === 'excel'
+                              ? "bg-lime-500 text-white scale-100 shadow-sm"
+                              : "bg-gray-100/50 text-transparent scale-0"
+                            }
+                          `}>
+                            <Check size={12} strokeWidth={4} />
+                          </div>
                         </motion.div>
                       </div>
                     </div>
@@ -354,63 +377,83 @@ const FinanceExportModal: React.FC<FinanceExportModalProps> = ({
                     <div className="space-y-3">
                       <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Export Scope</label>
                       <div className="space-y-3 px-2">
+                        {/* Current View */}
                         <motion.div
                           onClick={() => setScope('current')}
                           whileTap={{ scale: 0.98 }}
-                          className={`relative p-4 rounded-xl border-2 cursor-pointer flex items-start gap-4 transition-all duration-300 group ${scope === 'current'
-                            ? 'border-lime-500 bg-lime-50/50 shadow-lg shadow-lime-100/50'
-                            : 'bg-white border-gray-100 hover:border-lime-200 hover:shadow-md hover:bg-gray-50/50'
-                            }`}
+                          className={`
+                            group flex items-center justify-between p-2 rounded-[24px] cursor-pointer transition-all duration-300 border-2
+                            ${scope === 'current'
+                              ? 'bg-lime-50 border-lime-100 shadow-sm'
+                              : 'bg-white border-gray-50 hover:border-lime-100/60 hover:bg-lime-50/40'
+                            }
+                          `}
                         >
-                          <div className={`p-3 rounded-xl shrink-0 transition-colors duration-300 ${scope === 'current' ? 'bg-lime-100 text-lime-600' : 'bg-gray-100 text-gray-400 group-hover:bg-white group-hover:text-lime-500'}`}>
-                            <ListFilter className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className={`text-sm font-bold transition-colors ${scope === 'current' ? 'text-gray-900' : 'text-gray-600 group-hover:text-gray-900'}`}>Current View</span>
-                              {scope === 'current' ? (
-                                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                                  <div className="w-5 h-5 rounded-full bg-lime-500 flex items-center justify-center shadow-sm">
-                                    <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                                  </div>
-                                </motion.div>
-                              ) : (
-                                <div className="w-5 h-5 rounded-full border-2 border-gray-200 group-hover:border-lime-300 transition-colors" />
-                              )}
+                          <div className="flex items-center gap-3">
+                            <div className={`
+                              w-10 h-10 rounded-[14px] flex items-center justify-center flex-shrink-0 transition-all duration-300
+                              ${scope === 'current'
+                                ? 'bg-lime-100 text-lime-600'
+                                : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                              }
+                            `}>
+                              <ListFilter className="w-5 h-5" />
                             </div>
-                            <p className="text-xs text-gray-500 leading-relaxed font-medium">
-                              Export data based on your current active filters and search results.
-                            </p>
+                            <div className="text-left">
+                              <span className={`text-[14px] font-bold tracking-tight block transition-all ${scope === 'current' ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                                Current View
+                              </span>
+                              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Filtered Results</span>
+                            </div>
+                          </div>
+                          <div className={`
+                            w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500
+                            ${scope === 'current'
+                              ? "bg-lime-500 text-white scale-100"
+                              : "bg-gray-100 text-transparent scale-90"
+                            }
+                          `}>
+                            <Check size={12} strokeWidth={4} className={scope === 'current' ? "opacity-100" : "opacity-0"} />
                           </div>
                         </motion.div>
 
+                        {/* All History */}
                         <motion.div
                           onClick={() => setScope('all')}
                           whileTap={{ scale: 0.98 }}
-                          className={`relative p-4 rounded-xl border-2 cursor-pointer flex items-start gap-4 transition-all duration-300 group ${scope === 'all'
-                            ? 'border-lime-500 bg-lime-50/50 shadow-lg shadow-lime-100/50'
-                            : 'bg-white border-gray-100 hover:border-lime-200 hover:shadow-md hover:bg-gray-50/50'
-                            }`}
+                          className={`
+                            group flex items-center justify-between p-2 rounded-[24px] cursor-pointer transition-all duration-300 border-2
+                            ${scope === 'all'
+                              ? 'bg-lime-50 border-lime-100 shadow-sm'
+                              : 'bg-white border-gray-50 hover:border-lime-100/60 hover:bg-lime-50/40'
+                            }
+                          `}
                         >
-                          <div className={`p-3 rounded-xl shrink-0 transition-colors duration-300 ${scope === 'all' ? 'bg-lime-100 text-lime-600' : 'bg-gray-100 text-gray-400 group-hover:bg-white group-hover:text-lime-500'}`}>
-                            <Database className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className={`text-sm font-bold transition-colors ${scope === 'all' ? 'text-gray-900' : 'text-gray-600 group-hover:text-gray-900'}`}>All History</span>
-                              {scope === 'all' ? (
-                                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                                  <div className="w-5 h-5 rounded-full bg-lime-500 flex items-center justify-center shadow-sm">
-                                    <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                                  </div>
-                                </motion.div>
-                              ) : (
-                                <div className="w-5 h-5 rounded-full border-2 border-gray-200 group-hover:border-lime-300 transition-colors" />
-                              )}
+                          <div className="flex items-center gap-3">
+                            <div className={`
+                              w-10 h-10 rounded-[14px] flex items-center justify-center flex-shrink-0 transition-all duration-300
+                              ${scope === 'all'
+                                ? 'bg-lime-100 text-lime-600'
+                                : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                              }
+                            `}>
+                              <Database className="w-5 h-5" />
                             </div>
-                            <p className="text-xs text-gray-500 leading-relaxed font-medium">
-                              Export your complete platform ledger history without any filters applied.
-                            </p>
+                            <div className="text-left">
+                              <span className={`text-[14px] font-bold tracking-tight block transition-all ${scope === 'all' ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                                All History
+                              </span>
+                              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Complete Ledger</span>
+                            </div>
+                          </div>
+                          <div className={`
+                            w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500
+                            ${scope === 'all'
+                              ? "bg-lime-500 text-white scale-100"
+                              : "bg-gray-100 text-transparent scale-90"
+                            }
+                          `}>
+                            <Check size={12} strokeWidth={4} className={scope === 'all' ? "opacity-100" : "opacity-0"} />
                           </div>
                         </motion.div>
                       </div>
@@ -418,10 +461,12 @@ const FinanceExportModal: React.FC<FinanceExportModalProps> = ({
 
                     {/* Column Selection */}
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between px-1">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Select Columns</label>
-                        <span className="text-xs font-medium text-lime-600 bg-lime-50 px-2 py-1 rounded-full border border-lime-100">
-                          {Object.values(selectedColumns).filter(Boolean).length} Selected
+                      <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Select Columns</label>
+                        </div>
+                        <span className="text-[11px] font-bold text-lime-700 bg-lime-100/80 px-3 py-1 rounded-full border border-lime-200/50 backdrop-blur-sm">
+                          {Object.values(selectedColumns).filter(Boolean).length} FIELDS
                         </span>
                       </div>
 
@@ -433,23 +478,31 @@ const FinanceExportModal: React.FC<FinanceExportModalProps> = ({
                           const isExpanded = !!expandedGroups[key];
 
                           return (
-                            <div key={key} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <div key={key} className="space-y-2">
+                              {/* Group Header Wrapper - Pill Design */}
                               <div
-                                className="w-full px-4 py-3 flex items-center justify-between bg-gray-50/50 cursor-pointer hover:bg-gray-50 transition-colors"
+                                className={`
+                                    w-full px-4 py-2.5 rounded-[22px] border-2 transition-all duration-300 flex items-center justify-between cursor-pointer
+                                    ${isExpanded
+                                    ? 'bg-white border-lime-100 shadow-sm'
+                                    : 'bg-white border-gray-50 hover:border-lime-100/60 hover:bg-lime-50/40'
+                                  }
+                                  `}
                                 onClick={() => toggleGroup(key)}
                               >
                                 <div className="flex items-center gap-3">
-                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${isExpanded ? 'bg-lime-500 border-lime-500 text-white' : 'bg-white border-gray-200 text-gray-400'}`}>
+                                  <div className={`w-9 h-9 rounded-[14px] flex items-center justify-center transition-all ${isExpanded ? 'bg-lime-500 text-white shadow-lime-100' : 'bg-gray-50 text-gray-400'}`}>
                                     {group.icon}
                                   </div>
                                   <div className="text-left">
-                                    <span className="text-sm font-bold text-gray-900 block">{group.label}</span>
-                                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">{selectedCount}/{groupCols.length} Selected</span>
+                                    <span className={`text-[13px] font-bold transition-colors ${isExpanded ? 'text-[#1A1A1A]' : 'text-gray-500'}`}>{group.label}</span>
+                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">{selectedCount}/{groupCols.length} ACTIVE</p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                  <div
-                                    role="button"
+
+                                <div className="flex items-center gap-2">
+                                  {/* Select All Toggle */}
+                                  <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       const newState = { ...selectedColumns };
@@ -458,17 +511,22 @@ const FinanceExportModal: React.FC<FinanceExportModalProps> = ({
                                       });
                                       setSelectedColumns(newState);
                                     }}
-                                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${isAllSelected
-                                      ? 'bg-lime-500 border-lime-500 shadow-sm'
-                                      : 'bg-white border-gray-200 hover:border-lime-400'
-                                      }`}
+                                    className={`
+                                        w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300
+                                        ${isAllSelected
+                                        ? 'bg-lime-500 text-white'
+                                        : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                                      }
+                                      `}
                                     title={isAllSelected ? "Unselect All" : "Select All"}
                                   >
-                                    {isAllSelected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={4} />}
-                                  </div>
-                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors`}>
+                                    <Check size={12} strokeWidth={4} />
+                                  </button>
+
+                                  {/* Expand Indicator */}
+                                  <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${isExpanded ? 'bg-lime-50 text-lime-600' : 'text-gray-400'}`}>
                                     <ChevronDown
-                                      className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                                      className={`w-4 h-4 transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`}
                                     />
                                   </div>
                                 </div>
@@ -480,36 +538,51 @@ const FinanceExportModal: React.FC<FinanceExportModalProps> = ({
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
-                                    className="border-t border-gray-100"
+                                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                                    className="overflow-hidden"
                                   >
-                                    <div className="p-2 space-y-1">
+                                    <div className="pl-6 pr-2 space-y-2 py-1">
                                       {groupCols.map(col => {
                                         const isSelected = selectedColumns[col.key];
                                         return (
                                           <div
                                             key={col.key}
                                             onClick={() => toggleColumn(col.key)}
-                                            className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-200 border ${isSelected
-                                              ? 'bg-lime-50/50 border-lime-200 shadow-sm'
-                                              : 'bg-white border-transparent hover:bg-gray-50'
-                                              }`}
+                                            className={`
+                                                group flex items-center justify-between p-2 rounded-[24px] cursor-pointer transition-all duration-300 border-2
+                                                ${isSelected
+                                                ? 'bg-lime-50 border-lime-100 shadow-sm'
+                                                : 'bg-white border-gray-50 hover:border-lime-100/60 hover:bg-lime-50/40'
+                                              }
+                                              `}
                                           >
                                             <div className="flex items-center gap-3">
-                                              <div className={`p-2 rounded-lg transition-colors ${isSelected ? 'bg-lime-100 text-lime-700' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'
-                                                }`}>
+                                              {/* Icon Box */}
+                                              <div className={`
+                                                  w-9 h-9 rounded-[14px] flex items-center justify-center flex-shrink-0 transition-all duration-300
+                                                  ${isSelected
+                                                  ? 'bg-lime-100 text-lime-600'
+                                                  : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                                                }
+                                                `}>
                                                 {col.icon}
                                               </div>
-                                              <span className={`text-sm font-semibold transition-colors ${isSelected ? 'text-gray-800' : 'text-gray-500 group-hover:text-gray-700'
-                                                }`}>
+
+                                              {/* Label */}
+                                              <span className={`text-[13px] font-bold tracking-tight transition-all ${isSelected ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
                                                 {col.label}
                                               </span>
                                             </div>
 
-                                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${isSelected
-                                              ? 'bg-lime-500 border-lime-500 scale-110'
-                                              : 'border-gray-300 bg-white group-hover:border-lime-400'
-                                              }`}>
-                                              {isSelected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
+                                            {/* Checkmark Circle at the end */}
+                                            <div className={`
+                                                w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500
+                                                ${isSelected
+                                                ? "bg-lime-500 text-white scale-100"
+                                                : "bg-gray-100 text-transparent scale-90"
+                                              }
+                                              `}>
+                                              <Check size={12} strokeWidth={4} className={isSelected ? "opacity-100" : "opacity-0"} />
                                             </div>
                                           </div>
                                         );
