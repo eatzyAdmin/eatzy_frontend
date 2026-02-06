@@ -7,20 +7,12 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --primary: #78C841;
-  --secondary: #B4E50D;
-  --warning: #FF9B2F;
-  --danger: #FB4141;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-    --primary: #78C841;
-    --secondary: #B4E50D;
-    --warning: #FF9B2F;
-    --danger: #FB4141;
   }
 }
 

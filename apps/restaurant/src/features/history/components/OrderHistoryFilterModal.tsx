@@ -180,7 +180,7 @@ export default function OrderHistoryFilterModal({ isOpen, onClose, filterFields,
                     {/* Date Range Section */}
                     <div className="space-y-5">
                       <div className="flex items-center gap-3 px-2">
-                        <div className="w-11 h-11 rounded-2xl bg-[#EEF2FF] text-indigo-600 flex items-center justify-center border border-indigo-100 shadow-sm">
+                        <div className="w-11 h-11 rounded-2xl bg-[#F7FEE7] text-lime-600 flex items-center justify-center border border-lime-100 shadow-sm">
                           <Calendar size={22} strokeWidth={2.5} />
                         </div>
                         <div>
@@ -199,7 +199,7 @@ export default function OrderHistoryFilterModal({ isOpen, onClose, filterFields,
                     {/* Amount Range Section */}
                     <div className="space-y-5">
                       <div className="flex items-center gap-3 px-2">
-                        <div className="w-11 h-11 rounded-2xl bg-[#FFF7ED] text-orange-600 flex items-center justify-center border border-orange-100 shadow-sm">
+                        <div className="w-11 h-11 rounded-2xl bg-[#F7FEE7] text-lime-600 flex items-center justify-center border border-lime-100 shadow-sm">
                           <Banknote size={22} strokeWidth={2.5} />
                         </div>
                         <div>
@@ -298,12 +298,30 @@ export default function OrderHistoryFilterModal({ isOpen, onClose, filterFields,
 
                       <div className="grid grid-cols-1 gap-3">
                         {[
-                          { key: '', label: 'All Status', icon: <List size={18} /> },
-                          { key: 'PAID', label: 'Fully Paid', icon: <CheckCircle size={18} /> },
-                          { key: 'UNPAID', label: 'Outstanding', icon: <Clock size={18} /> },
-                          { key: 'REFUNDED', label: 'Reversed', icon: <RotateCcw size={18} /> },
+                          { key: '', label: 'All Status', icon: <List size={18} />, color: 'lime' },
+                          { key: 'PAID', label: 'Fully Paid', icon: <CheckCircle size={18} />, color: 'lime' },
+                          { key: 'UNPAID', label: 'Outstanding', icon: <Clock size={18} />, color: 'amber' },
+                          { key: 'REFUNDED', label: 'Reversed', icon: <RotateCcw size={18} />, color: 'red' },
                         ].map((item) => {
                           const active = localFilters.paymentStatus === item.key;
+                          const themeClasses: Record<string, any> = {
+                            lime: {
+                              bg: 'bg-lime-50 border-lime-100',
+                              check: 'bg-lime-500',
+                              iconBox: 'bg-lime-200 text-lime-700',
+                            },
+                            amber: {
+                              bg: 'bg-amber-50 border-amber-100',
+                              check: 'bg-amber-500',
+                              iconBox: 'bg-amber-200 text-amber-700',
+                            },
+                            red: {
+                              bg: 'bg-red-50 border-red-100',
+                              check: 'bg-red-500',
+                              iconBox: 'bg-red-200 text-red-700',
+                            }
+                          };
+
                           return (
                             <button
                               key={item.key}
@@ -311,7 +329,7 @@ export default function OrderHistoryFilterModal({ isOpen, onClose, filterFields,
                               className={`
                                 relative w-full text-left p-2.5 rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-4
                                 ${active
-                                  ? "bg-lime-50 border-lime-100 shadow-sm"
+                                  ? `${themeClasses[item.color].bg} shadow-sm`
                                   : "bg-white border-gray-100 hover:border-gray-100 hover:bg-gray-50/30"
                                 }
                               `}
@@ -320,7 +338,7 @@ export default function OrderHistoryFilterModal({ isOpen, onClose, filterFields,
                               <div className={`
                                 w-11 h-11 rounded-[18px] flex items-center justify-center flex-shrink-0 transition-all duration-300
                                 ${active
-                                  ? 'bg-lime-200 text-lime-700'
+                                  ? themeClasses[item.color].iconBox
                                   : 'bg-gray-50 text-gray-400 group-hover:bg-white'
                                 }
                               `}>
@@ -336,7 +354,7 @@ export default function OrderHistoryFilterModal({ isOpen, onClose, filterFields,
                               <div className={`
                                 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500
                                 ${active
-                                  ? "bg-lime-500 text-white scale-100"
+                                  ? `${themeClasses[item.color].check} text-white scale-100`
                                   : "bg-gray-100 text-transparent scale-90"
                                 }
                               `}>

@@ -5,14 +5,16 @@ import { motion, AnimatePresence } from '@repo/ui/motion';
 import {
   User, Search, Filter, Play, Pause, AlertCircle, X,
   RotateCcw, Bike, Star, ShieldCheck, Mail, Navigation, Info, Edit, Trash2,
-  Lock, Unlock
+  Lock, Unlock, Activity
 } from 'lucide-react';
-import { DataTable, useSwipeConfirmation } from '@repo/ui';
-import { DriverProfile, DriverStatus, VerificationStatus } from '@repo/types';
+import { DataTable, useSwipeConfirmation, SearchPopup, TableHeader } from '@repo/ui';
+import { DriverProfile } from '@repo/types';
 import FilterDriverModal from './FilterDriverModal';
 import DriverDetailsModal from './DriverDetailsModal';
 import EditDriverModal from './EditDriverModal';
-import DriverSearchPopup from './DriverSearchPopup';
+import { getDriversColumns } from './DriversColumns';
+import DriversFilterBadges from './DriversFilterBadges';
+import { useMemo } from 'react';
 
 interface DriversTableProps {
   data: DriverProfile[];
@@ -38,6 +40,7 @@ export default function DriversTable({
   isFetchingNextPage,
   hasNextPage,
   onLoadMore,
+  onRefresh,
   onEdit,
   onDelete,
   onToggleStatus,
@@ -90,127 +93,23 @@ export default function DriversTable({
     });
   };
 
-  const getVerificationBadge = (status?: VerificationStatus) => {
-    switch (status) {
-      case 'APPROVED':
-        return <ShieldCheck size={14} className="text-lime-500" />;
-      case 'PENDING':
-        return <AlertCircle size={14} className="text-amber-500 animate-pulse" />;
-      case 'REJECTED':
-        return <X size={14} className="text-red-500" />;
-      default:
-        return <Info size={14} className="text-gray-300" />;
-    }
-  };
-
-  const columns = [
-    {
-      label: 'DRIVER IDENTITY',
-      key: 'user.name',
-      formatter: (_: any, driver: DriverProfile) => {
-        const isAvailable = driver.status === 'AVAILABLE';
-        return (
-          <div className="flex items-center gap-4 py-2 group/info">
-            <div className="relative group/avatar">
-              <div className={`w-12 h-12 rounded-2xl ${isAvailable ? 'bg-lime-100 text-lime-600' : 'bg-gray-100 text-gray-400'} flex items-center justify-center shadow-lg shadow-black/5 transition-transform group-hover/avatar:scale-105 duration-300`}>
-                <User size={20} className="stroke-[2.5]" />
-              </div>
-              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm
-                ${driver.status === 'AVAILABLE' ? 'bg-lime-500' :
-                  driver.status === 'BUSY' ? 'bg-red-500' : 'bg-gray-400'}`}
-              />
-            </div>
-            <div>
-              <div className="font-anton text-lg text-[#1A1A1A] uppercase tracking-tight leading-none mb-1 flex items-center gap-2">
-                {driver.user.name}
-                {getVerificationBadge(driver.profile_photo_status)}
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
-                <Mail size={10} /> {driver.user.email}
-              </div>
-            </div>
-          </div>
-        );
-      }
-    },
-    {
-      label: 'FLEET & COD',
-      key: 'vehicle_license_plate',
-      formatter: (_: any, driver: DriverProfile) => (
-        <div className="py-2">
-          <div className="flex items-center gap-2 mb-1">
-            <Bike size={14} className="text-primary" />
-            <span className="font-anton text-sm text-gray-900 uppercase">
-              {driver.vehicle_license_plate || 'N/A'}
-            </span>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              {driver.vehicle_brand} {driver.vehicle_model}
-            </span>
-            <div className="text-[9px] font-bold text-primary uppercase tracking-tight flex items-center gap-1 mt-1 bg-lime-50 px-2 py-0.5 rounded-md w-fit border border-lime-100">
-              COD Limit: {new Intl.NumberFormat('vi-VN').format(driver.codLimit || 0)}đ
-            </div>
-          </div>
-        </div>
-      )
-    },
-    {
-      label: 'PERFORMANCE',
-      key: 'averageRating',
-      formatter: (_: any, driver: DriverProfile) => (
-        <div className="py-2 flex items-center gap-6">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <Star size={14} className="text-amber-400 fill-amber-400" />
-              <span className="font-anton text-sm text-gray-900">
-                {driver.averageRating?.toFixed(1) || '0.0'}
-              </span>
-            </div>
-          </div>
-
-          <div className="h-8 w-px bg-gray-100" />
-
-          <div className="flex flex-col">
-            <span className="font-anton text-sm text-gray-900 mb-0.5">
-              {driver.completedTrips || 0}
-            </span>
-            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Total Trips</span>
-          </div>
-        </div>
-      )
-    },
-    {
-      label: 'STATUS',
-      key: 'user.isActive',
-      formatter: (_: any, driver: DriverProfile) => {
-        const isActive = driver.user.isActive ?? true;
-        return (
-          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit ${isActive
-            ? 'bg-lime-100 text-lime-600 border border-lime-100 shadow-sm'
-            : 'bg-red-100 text-red-600 border border-red-100 shadow-sm'
-            }`}>
-            {isActive ? (
-              <>
-                <ShieldCheck size={12} strokeWidth={3.2} />
-                Unlocked
-              </>
-            ) : (
-              <>
-                <Lock size={12} strokeWidth={3.2} />
-                Locked
-              </>
-            )}
-          </span>
-        );
-      }
-    }
-  ];
+  const columns = useMemo(() => getDriversColumns(), []);
 
   const handleApplyFilters = (query: string) => {
     setFilterQuery(query);
     onFilter(query);
     setActiveFiltersCount(query ? query.split(' and ').length : 0);
+  };
+
+  const removeFilter = (part: string | RegExp) => {
+    const newQuery = filterQuery.replace(part, '')
+      .replace(/, ,/g, ',')
+      .replace(/\[,/, '[')
+      .replace(/,\]/, ']')
+      .replace(/\[\]/, '')
+      .replace(/^\s*and\s*|\s*and\s*$/g, '')
+      .trim();
+    handleApplyFilters(newQuery);
   };
 
   if (!isMounted) return null;
@@ -221,140 +120,22 @@ export default function DriversTable({
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-[40px] shadow-[0_8px_40px_rgba(0,0,0,0.04)] border border-gray-100/50 overflow-hidden"
     >
-      <div className="pb-4 p-8 flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-1.5 h-6 bg-primary rounded-full" />
-            <h3 className="text-2xl font-anton uppercase tracking-tight text-gray-900">Partner Drivers</h3>
-          </div>
-          <p className="text-sm font-medium text-gray-400 pl-3.5" style={{ wordSpacing: "1px" }}>
-            Monitor and manage your delivery network and partner performance.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsSearchOpen(true)}
-            className={`w-12 h-12 rounded-full transition-all duration-300 flex items-center justify-center group
-                    ${searchTerm
-                ? 'bg-primary text-white shadow-lg shadow-primary/30 border-transparent'
-                : 'bg-gray-100 text-gray-600 hover:bg-white hover:shadow-xl hover:-translate-y-0.5 border-transparent'}`}
-            title="Search"
-          >
-            <Search className={`w-5 h-5 ${searchTerm ? 'animate-pulse' : 'group-hover:scale-110 transition-transform'}`} />
-          </button>
-
-          {activeFiltersCount > 0 ? (
-            <div className="flex items-center gap-1 p-1 pr-2 bg-primary rounded-full shadow-lg shadow-primary/20 border border-primary/40 animate-in fade-in zoom-in duration-200">
-              <button
-                onClick={() => setIsFilterOpen(true)}
-                className="flex items-center gap-2 px-3 py-2.5 hover:bg-black/10 rounded-full transition-colors"
-              >
-                <Filter className="w-4 h-4 text-white fill-current" />
-                <span className="text-xs font-bold text-white uppercase tracking-wide">Filtered</span>
-              </button>
-              <button
-                onClick={() => { handleApplyFilters(''); }}
-                className="p-1.5 hover:bg-black/10 text-white rounded-2xl transition-colors"
-                title="Clear all"
-              >
-                <X size={16} className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsFilterOpen(true)}
-              className="w-12 h-12 rounded-full bg-gray-100 border transition-all shadow-sm flex items-center justify-center group border-gray-100 text-gray-600 hover:bg-white hover:shadow-xl hover:-translate-y-0.5"
-              title="Filter"
-            >
-              <Filter className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </button>
-          )}
-
-          {(searchTerm || activeFiltersCount > 0) && (
-            <button
-              onClick={() => { onSearch(''); handleApplyFilters(''); }}
-              className="w-10 h-10 rounded-full bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all ml-1 flex items-center justify-center"
-              title="Clear All"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-      </div>
+      <TableHeader
+        title="Partner Drivers"
+        description="Monitor and manage your delivery network and partner performance."
+        searchTerm={searchTerm}
+        activeFiltersCount={activeFiltersCount}
+        onSearchClick={() => setIsSearchOpen(true)}
+        onFilterClick={() => setIsFilterOpen(true)}
+        onClearAll={() => { onSearch(''); handleApplyFilters(''); }}
+        onResetFilters={() => handleApplyFilters('')}
+      />
 
       <div className="px-8 pt-0 pb-4 relative">
-        {filterQuery && (
-          <div className="flex flex-wrap items-center gap-2 animate-in slide-in-from-top-2 duration-300">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-1">Active Filters:</span>
-
-            {/* Operational Status */}
-            {['AVAILABLE', 'BUSY', 'OFFLINE'].map(s => {
-              if (filterQuery.includes(`'${s}'`)) {
-                return (
-                  <button
-                    key={s}
-                    onClick={() => handleApplyFilters(filterQuery.replace(`'${s}'`, '').replace(/, ,/g, ',').replace(/\[,/, '[').replace(/,\]/, ']').replace(/\[\]/, '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
-                    className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
-                  >
-                    <span>Status: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">{s}</span></span>
-                    <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
-                  </button>
-                );
-              }
-              return null;
-            })}
-
-            {/* Account Status */}
-            {filterQuery.includes('user.isActive:true') && (
-              <button
-                onClick={() => handleApplyFilters(filterQuery.replace('user.isActive:true', '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
-                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
-              >
-                <span>Account: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">Unlocked</span></span>
-                <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
-              </button>
-            )}
-            {filterQuery.includes('user.isActive:false') && (
-              <button
-                onClick={() => handleApplyFilters(filterQuery.replace('user.isActive:false', '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
-                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
-              >
-                <span>Account: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">Locked</span></span>
-                <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
-              </button>
-            )}
-
-            {/* Verification */}
-            {filterQuery.includes("national_id_status == 'APPROVED'") && (
-              <button
-                onClick={() => handleApplyFilters(filterQuery.replace("national_id_status == 'APPROVED'", "").replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
-                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
-              >
-                <span>Docs: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">ID Verified</span></span>
-                <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
-              </button>
-            )}
-            {/* Add more for other verifications if needed, but these are most common */}
-
-            {/* Vehicle */}
-            {['Motorcycle', 'Electric Bike'].map(v => {
-              if (filterQuery.includes(`'${v}'`)) {
-                return (
-                  <button
-                    key={v}
-                    onClick={() => handleApplyFilters(filterQuery.replace(`'${v}'`, '').replace(/, ,/g, ',').replace(/\[,/, '[').replace(/,\]/, ']').replace(/\[\]/, '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
-                    className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
-                  >
-                    <span>Fleet: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">{v}</span></span>
-                    <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
-                  </button>
-                );
-              }
-              return null;
-            })}
-          </div>
-        )}
+        <DriversFilterBadges
+          filterQuery={filterQuery}
+          onRemoveFilter={removeFilter}
+        />
       </div>
 
       <div className="p-4 pt-0">
@@ -368,7 +149,10 @@ export default function DriversTable({
           handleSort={onSort}
           sortField={sortField}
           sortDirection={sortDirection}
-          emptyMessage="No drivers found matching your search criteria."
+          emptyTitle="No Drivers Found"
+          emptyMessage="Không tìm thấy tài xế nào khớp với tiêu chí tìm kiếm của bạn. Hãy thử thay đổi bộ lọc."
+          emptyIcon={<Bike size={48} />}
+          onResetFilters={() => { onSearch(''); handleApplyFilters(''); onRefresh(); }}
           onRowClick={(driver) => {
             setSelectedDriver(driver);
             setIsDetailsOpen(true);
@@ -405,11 +189,16 @@ export default function DriversTable({
         />
       </div>
 
-      <DriverSearchPopup
+      <SearchPopup<{ term: string }>
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-        searchTerm={searchTerm}
-        onSearch={onSearch}
+        value={{ term: searchTerm }}
+        onSearch={(vals) => onSearch(vals.term)}
+        onClear={() => onSearch('')}
+        title="Driver Search"
+        fields={[
+          { key: 'term', label: 'Universal Search', placeholder: 'Search by ID, Name, Phone or Vehicle...', icon: Search },
+        ]}
       />
 
       <FilterDriverModal

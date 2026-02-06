@@ -6,14 +6,15 @@ import {
   Search, Filter, Play, Pause, AlertCircle, X,
   RotateCcw, Wallet, ArrowUpRight, ArrowDownLeft,
   Calendar, User, Clock, CheckCircle2, XCircle, Info, ChevronRight,
-  Eye, Receipt
+  Eye, Receipt, Activity, Banknote
 } from 'lucide-react';
-import { DataTable, useSwipeConfirmation } from '@repo/ui';
+import { DataTable, useSwipeConfirmation, SearchPopup, TableHeader } from '@repo/ui';
 import { WalletTransactionResponse, WalletTransactionStatus, WalletTransactionType } from '@repo/types';
-import { format } from 'date-fns';
-import FinanceSearchPopup from './FinanceSearchPopup';
 import FilterFinanceModal from './FilterFinanceModal';
 import TransactionDetailsModal from './TransactionDetailsModal';
+import { getFinanceColumns } from './FinanceColumns';
+import FinanceFilterBadges from './FinanceFilterBadges';
+import { useMemo } from 'react';
 
 interface FinanceTableProps {
   data: WalletTransactionResponse[];
@@ -56,138 +57,23 @@ export default function FinanceTable({
     setIsMounted(true);
   }, []);
 
-  const getTransactionTypeStyle = (type: string) => {
-    const isCredit = ['DEPOSIT', 'REFUND', 'DELIVERY_EARNING', 'RESTAURANT_EARNING', 'EARNING', 'TOP_UP'].includes(type);
-    return {
-      isCredit,
-      color: isCredit ? 'text-lime-600 bg-lime-50 border-lime-100' : 'text-orange-600 bg-orange-50 border-orange-100',
-      icon: isCredit ? <ArrowDownLeft size={14} className="stroke-[2.5]" /> : <ArrowUpRight size={14} className="stroke-[3]" />
-    };
-  };
-
-  const getStatusBadge = (status: WalletTransactionStatus) => {
-    switch (status) {
-      case 'SUCCESS':
-      case 'COMPLETED':
-        return (
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit bg-lime-100 text-lime-600 border border-lime-100/50">
-            <CheckCircle2 size={12} strokeWidth={3.2} />
-            Success
-          </span>
-        );
-      case 'PENDING':
-        return (
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit bg-amber-100 text-amber-600 border border-amber-100/50">
-            <Clock size={12} strokeWidth={3.2} className="animate-pulse" />
-            Pending
-          </span>
-        );
-      case 'FAILED':
-        return (
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit bg-red-100 text-red-600 border border-red-100/50">
-            <AlertCircle size={12} strokeWidth={3.2} />
-            Failed
-          </span>
-        );
-      default:
-        return (
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit bg-gray-100 text-gray-400 border border-gray-100/50">
-            <Info size={10} />
-            {status}
-          </span>
-        );
-    }
-  };
-
-  const columns = [
-    {
-      label: 'TRANSACTION & ENTITY',
-      key: 'id',
-      formatter: (_: any, tx: WalletTransactionResponse) => {
-        const typeStyle = getTransactionTypeStyle(tx.transactionType as string);
-        return (
-          <div className="flex items-center gap-4 py-3 group/info">
-            <div className="relative shrink-0 transition-transform duration-300 group-hover:scale-105">
-              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm border ${typeStyle.color}`}>
-                <Wallet size={20} strokeWidth={1.5} />
-              </div>
-            </div>
-            <div>
-              <div className="font-anton text-lg text-[#1A1A1A] uppercase tracking-tight leading-none mb-1 flex items-center gap-2">
-                TX-{tx.id.toString().padStart(6, '0')}
-                <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-black border ${typeStyle.color}`}>
-                  {tx.transactionType.replace('_', ' ')}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
-                <User size={10} /> {tx.wallet.user.name}
-                <div className="w-1 h-1 rounded-full bg-gray-300" />
-                <span className="truncate max-w-[150px]">{tx.description}</span>
-              </div>
-            </div>
-          </div>
-        );
-      }
-    },
-    {
-      label: 'FINANCIAL IMPACT',
-      key: 'amount',
-      formatter: (_: any, tx: WalletTransactionResponse) => {
-        const typeStyle = getTransactionTypeStyle(tx.transactionType as string);
-        return (
-          <div className="py-2 flex items-center gap-6">
-            <div className="flex flex-col">
-              <div className={`flex items-center gap-1.5 mb-0.5 font-anton text-lg ${typeStyle.isCredit ? 'text-lime-600' : 'text-orange-600'}`}>
-                {typeStyle.isCredit ? '+' : '-'}{new Intl.NumberFormat('vi-VN').format(tx.amount)}đ
-              </div>
-              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Transaction Value</span>
-            </div>
-
-            <div className="h-8 w-px bg-gray-100" />
-
-            <div className="flex flex-col">
-              <span className="font-anton text-sm text-gray-900 mb-0.5">
-                {new Intl.NumberFormat('vi-VN').format(tx.balanceAfter)}đ
-              </span>
-              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Running Balance</span>
-            </div>
-          </div>
-        )
-      }
-    },
-    {
-      label: 'TIMELINE',
-      key: 'createdAt',
-      formatter: (val: string) => {
-        const date = new Date(val);
-        return (
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center shadow-sm">
-              <Calendar size={16} strokeWidth={2.5} />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-anton text-gray-900 uppercase tracking-tight">
-                {format(date, 'MMM d, yyyy')}
-              </span>
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                {format(date, 'HH:mm:ss')}
-              </span>
-            </div>
-          </div>
-        );
-      }
-    },
-    {
-      label: 'SETTLEMENT STATUS',
-      key: 'status',
-      formatter: (val: WalletTransactionStatus) => getStatusBadge(val)
-    }
-  ];
+  const columns = useMemo(() => getFinanceColumns(), []);
 
   const handleApplyFilters = (query: string) => {
     setFilterQuery(query);
     onFilter(query);
     setActiveFiltersCount(query ? query.split(' and ').length : 0);
+  };
+
+  const removeFilter = (part: string | RegExp) => {
+    const newQuery = filterQuery.replace(part, '')
+      .replace(/, ,/g, ',')
+      .replace(/\[,/, '[')
+      .replace(/,\]/, ']')
+      .replace(/\[\]/, '')
+      .replace(/^\s*and\s*|\s*and\s*$/g, '')
+      .trim();
+    handleApplyFilters(newQuery);
   };
 
   if (!isMounted) return null;
@@ -198,108 +84,22 @@ export default function FinanceTable({
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-[40px] shadow-[0_8px_40px_rgba(0,0,0,0.04)] border border-gray-100/50 overflow-hidden"
     >
-      <div className="pb-4 p-8 flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-1.5 h-6 bg-primary rounded-full" />
-            <h3 className="text-2xl font-anton uppercase tracking-tight text-gray-900">Financial Records</h3>
-          </div>
-          <p className="text-sm font-medium text-gray-400 pl-3.5" style={{ wordSpacing: "1px" }}>
-            Comprehensive overview of all platform transactions and wallet movements.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsSearchOpen(true)}
-            className={`w-12 h-12 rounded-full transition-all duration-300 flex items-center justify-center group
-                    ${searchTerm
-                ? 'bg-primary text-white shadow-lg shadow-primary/30 border-transparent'
-                : 'bg-gray-100 text-gray-600 hover:bg-white hover:shadow-xl hover:-translate-y-0.5 border-transparent'}`}
-            title="Search"
-          >
-            <Search className={`w-5 h-5 ${searchTerm ? 'animate-pulse' : 'group-hover:scale-110 transition-transform'}`} />
-          </button>
-
-          {activeFiltersCount > 0 ? (
-            <div className="flex items-center gap-1 p-1 pr-2 bg-primary rounded-full shadow-lg shadow-primary/20 border border-primary/40 animate-in fade-in zoom-in duration-200">
-              <button
-                onClick={() => setIsFilterOpen(true)}
-                className="flex items-center gap-2 px-3 py-2.5 hover:bg-black/10 rounded-full transition-colors"
-              >
-                <Filter className="w-4 h-4 text-white fill-current" />
-                <span className="text-xs font-bold text-white uppercase tracking-wide">Filtered</span>
-              </button>
-              <button
-                onClick={() => { handleApplyFilters(''); }}
-                className="p-1.5 hover:bg-black/10 text-white rounded-2xl transition-colors"
-                title="Clear all"
-              >
-                <X size={16} className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsFilterOpen(true)}
-              className="w-12 h-12 rounded-full bg-gray-100 border transition-all shadow-sm flex items-center justify-center group border-gray-100 text-gray-600 hover:bg-white hover:shadow-xl hover:-translate-y-0.5"
-              title="Filter"
-            >
-              <Filter className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </button>
-          )}
-
-          {(searchTerm || activeFiltersCount > 0) && (
-            <button
-              onClick={() => { onSearch(''); handleApplyFilters(''); }}
-              className="w-10 h-10 rounded-full bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all ml-1 flex items-center justify-center"
-              title="Clear All"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-      </div>
+      <TableHeader
+        title="Finance & Transactions"
+        description="Monitor system revenue, driver payouts and customer refunds."
+        searchTerm={searchTerm}
+        activeFiltersCount={activeFiltersCount}
+        onSearchClick={() => setIsSearchOpen(true)}
+        onFilterClick={() => setIsFilterOpen(true)}
+        onClearAll={() => { onSearch(''); handleApplyFilters(''); }}
+        onResetFilters={() => handleApplyFilters('')}
+      />
 
       <div className="px-8 pt-0 pb-4 relative">
-        {filterQuery && (
-          <div className="flex flex-wrap items-center gap-2 animate-in slide-in-from-top-2 duration-300">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-1">Active Filters:</span>
-
-            {/* Transaction Types */}
-            {['DEPOSIT', 'WITHDRAWAL', 'PAYMENT', 'REFUND', 'EARNING', 'TOP_UP'].map(type => {
-              if (filterQuery.includes(`'${type}'`)) {
-                return (
-                  <button
-                    key={type}
-                    onClick={() => handleApplyFilters(filterQuery.replace(`'${type}'`, '').replace(/, ,/g, ',').replace(/\[,/, '[').replace(/,\]/, ']').replace(/\[\]/, '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
-                    className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
-                  >
-                    <span>Category: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">{type.replace('_', ' ')}</span></span>
-                    <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
-                  </button>
-                );
-              }
-              return null;
-            })}
-
-            {/* Statuses */}
-            {['SUCCESS', 'PENDING', 'FAILED', 'COMPLETED'].map(status => {
-              if (filterQuery.includes(`'${status}'`)) {
-                return (
-                  <button
-                    key={status}
-                    onClick={() => handleApplyFilters(filterQuery.replace(`'${status}'`, '').replace(/, ,/g, ',').replace(/\[,/, '[').replace(/,\]/, ']').replace(/\[\]/, '').replace(/^\s*and\s*|\s*and\s*$/g, '').trim())}
-                    className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border bg-white border-gray-200 text-gray-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all"
-                  >
-                    <span>Status: <span className="text-primary uppercase group-hover:text-red-500 transition-colors">{status}</span></span>
-                    <X size={12} className="w-0 opacity-0 group-hover:w-3 group-hover:opacity-100 transition-all duration-300" />
-                  </button>
-                );
-              }
-              return null;
-            })}
-          </div>
-        )}
+        <FinanceFilterBadges
+          filterQuery={filterQuery}
+          onRemoveFilter={removeFilter}
+        />
       </div>
 
       <div className="p-4 pt-0">
@@ -313,7 +113,10 @@ export default function FinanceTable({
           handleSort={onSort}
           sortField={sortField}
           sortDirection={sortDirection}
+          emptyTitle="No transactions found"
           emptyMessage="No transactions found matching your criteria."
+          emptyIcon={<Receipt size={48} />}
+          onResetFilters={() => { onSearch(''); handleApplyFilters(''); onRefresh(); }}
           onRowClick={(tx) => {
             setSelectedTransaction(tx);
             setIsDetailsOpen(true);
@@ -337,11 +140,16 @@ export default function FinanceTable({
         />
       </div>
 
-      <FinanceSearchPopup
+      <SearchPopup<{ term: string }>
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-        searchTerm={searchTerm}
-        onSearch={onSearch}
+        value={{ term: searchTerm }}
+        onSearch={(vals) => onSearch(vals.term)}
+        onClear={() => onSearch('')}
+        title="Finance Search"
+        fields={[
+          { key: 'term', label: 'Universal Search', placeholder: 'Search by ID, User, Type or Description...', icon: Search },
+        ]}
       />
 
       <FilterFinanceModal

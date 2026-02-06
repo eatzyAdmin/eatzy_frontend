@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { colorRgb, colors } from "../../packages/ui/src/tokens/colors";
 
 const config: Config = {
   content: [
@@ -19,12 +20,12 @@ const config: Config = {
         fjalla: ["var(--font-fjalla)"],
       },
       colors: {
+        primary: `rgb(${colorRgb.primary} / <alpha-value>)`,
+        secondary: `rgb(${colorRgb.secondary} / <alpha-value>)`,
+        warning: `rgb(${colorRgb.warning} / <alpha-value>)`,
+        danger: `rgb(${colorRgb.danger} / <alpha-value>)`,
         background: "var(--background)",
         foreground: "var(--foreground)",
-        primary: "var(--primary)",
-        secondary: "var(--secondary)",
-        warning: "var(--warning)",
-        danger: "var(--danger)",
       },
       keyframes: {
         float: { "0%, 100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-8px)" } },
@@ -38,7 +39,7 @@ const config: Config = {
         smoke: { "0%": { transform: "translateY(0) scale(1)", opacity: "0.6" }, "100%": { transform: "translateY(-60px) scale(1.3)", opacity: "0" } },
         reveal: { from: { clipPath: "inset(0 100% 0 0)" }, to: { clipPath: "inset(0 0 0 0)" } },
         shimmer: { "0%": { backgroundPosition: "-1000px 0" }, "100%": { backgroundPosition: "1000px 0" } },
-        pulseBorder: { "0%, 100%": { borderColor: "rgba(120, 200, 65, 0.3)" }, "50%": { borderColor: "rgba(120, 200, 65, 0.8)" } },
+        pulseBorder: { "0%, 100%": { borderColor: `rgba(${colorRgb.primary}, 0.3)` }, "50%": { borderColor: `rgba(${colorRgb.primary}, 0.8)` } },
       },
       animation: {
         "float-slow": "float 6s ease-in-out infinite",
@@ -67,6 +68,18 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    ({ addBase }: any) => {
+      addBase({
+        ':root': {
+          '--primary': colors.primary,
+          '--secondary': colors.secondary,
+          '--warning': colors.warning,
+          '--danger': colors.danger,
+          '--primary-rgb': colorRgb.primary,
+        },
+      });
+    },
+  ],
 };
 export default config;

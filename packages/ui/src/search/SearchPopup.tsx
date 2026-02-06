@@ -12,7 +12,7 @@ export interface SearchFieldConfig<T> {
   icon?: React.ElementType;
 }
 
-export interface PremiumSearchPopupProps<T> {
+export interface SearchPopupProps<T> {
   isOpen: boolean;
   onClose: () => void;
   value: T;
@@ -22,7 +22,7 @@ export interface PremiumSearchPopupProps<T> {
   title?: string;
 }
 
-export function PremiumSearchPopup<T>({
+export function SearchPopup<T>({
   isOpen,
   onClose,
   value,
@@ -30,7 +30,7 @@ export function PremiumSearchPopup<T>({
   onClear,
   fields,
   title = "Search"
-}: PremiumSearchPopupProps<T>) {
+}: SearchPopupProps<T>) {
   const [localValues, setLocalValues] = useState<T>(value);
   const [mounted, setMounted] = useState(false);
 
@@ -84,7 +84,7 @@ export function PremiumSearchPopup<T>({
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-xl font-anton font-bold text-[#1A1A1A] flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-lime-50 text-lime-600 flex items-center justify-center border border-lime-100 shadow-sm">
+                <div className="w-10 h-10 rounded-2xl bg-lime-50 text-primary flex items-center justify-center border border-primary/20 shadow-sm">
                   <Search className="w-5 h-5" />
                 </div>
                 {title}
@@ -107,7 +107,7 @@ export function PremiumSearchPopup<T>({
                 return (
                   <div key={String(field.key)} className="relative group">
                     {Icon && (
-                      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-lime-600 transition-colors pointer-events-none">
+                      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors pointer-events-none">
                         <Icon size={20} />
                       </div>
                     )}
@@ -118,7 +118,7 @@ export function PremiumSearchPopup<T>({
                       onChange={(e) => handleInputChange(field.key, e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
                       autoFocus={idx === 0}
-                      className={`w-full bg-slate-50 border-2 border-transparent focus:bg-white focus:border-lime-200 rounded-[24px] py-5 px-6 ${Icon ? 'pl-14' : ''} text-lg font-bold text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-lime-500/5 transition-all shadow-inner`}
+                      className={`w-full bg-slate-50 border-2 border-transparent focus:bg-white focus:border-primary/20 rounded-[24px] py-6 px-6 ${Icon ? 'pl-14' : ''} text-xl font-anton text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-primary/5 transition-all shadow-inner`}
                     />
                   </div>
                 );

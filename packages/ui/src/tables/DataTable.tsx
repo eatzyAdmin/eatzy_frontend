@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronUp, Edit, Trash, RefreshCcw } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit, Trash, RefreshCcw, Search } from "lucide-react";
 import StatusBadge from "../feedback/StatusBadge";
 import DataTableRowShimmer from "../feedback/shimmer/DataTableRowShimmer";
 import DataTableFilter from "./DataTableFilter";
@@ -30,6 +30,9 @@ export type DataTableProps<T> = {
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
   isFetchingNextPage?: boolean;
+  emptyTitle?: string;
+  emptyIcon?: React.ReactNode;
+  onResetFilters?: () => void;
 };
 
 const DataTable = <T extends Record<string, any>>({
@@ -53,7 +56,10 @@ const DataTable = <T extends Record<string, any>>({
   changeTableData,
   hasNextPage,
   fetchNextPage,
-  isFetchingNextPage
+  isFetchingNextPage,
+  emptyTitle = "No Data Found",
+  emptyIcon,
+  onResetFilters
 }: DataTableProps<T>) => {
   const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
   const [filteredData, setFilteredData] = useState<T[]>(data);
@@ -278,9 +284,29 @@ const DataTable = <T extends Record<string, any>>({
                   Array.from({ length: itemsPerPage }, (_, index) => (<DataTableRowShimmer key={`filter-shimmer-${index}`} columnCount={columns.length} index={index} />))
                 ) : displayedData.length === 0 && !isLoading && !showShimmer ? (
                   <tr>
-                    <td colSpan={columns.length + 1} className="px-6 py-10 text-center">
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center text-gray-500">
-                        {isLoading ? (<><RefreshCcw size={32} className="text-primary animate-spin mb-3" /><p>Đang tải dữ liệu...</p></>) : (<><svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><p>{Object.keys(activeFilters).length > 0 ? 'Không có dữ liệu phù hợp với bộ lọc' : emptyMessage}</p></>)}
+                    <td colSpan={columns.length + 1} className="px-6 py-20 text-center">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="flex flex-col items-center justify-center text-center max-w-md mx-auto"
+                      >
+                        <div className="w-24 h-24 rounded-[36px] bg-gray-50 flex items-center justify-center text-gray-200 mb-8 border-4 border-white shadow-inner">
+                          {emptyIcon || <Search size={48} />}
+                        </div>
+                        <h3 className="text-2xl font-anton uppercase tracking-tight text-gray-900 mb-2">{emptyTitle}</h3>
+                        <p className="text-gray-400 text-sm font-medium leading-relaxed mb-8">
+                          {Object.keys(activeFilters).length > 0 ? 'Không tìm thấy dữ liệu khớp với tiêu chí lọc của bạn. Hãy thử thay đổi bộ lọc.' : emptyMessage}
+                        </p>
+                        {onResetFilters && (
+                          <button
+                            onClick={onResetFilters}
+                            className="px-10 py-4 bg-[#1A1A1A] text-white rounded-[20px] text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-lime-500 transition-all flex items-center gap-3 group shadow-xl shadow-gray-200"
+                          >
+                            <RefreshCcw size={16} className="group-hover:rotate-180 transition-transform duration-500" />
+                            Reset All Filters
+                          </button>
+                        )}
                       </motion.div>
                     </td>
                   </tr>
