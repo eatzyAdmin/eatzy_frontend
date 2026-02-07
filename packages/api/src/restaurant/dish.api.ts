@@ -22,49 +22,7 @@ export type BackendDishDTO = {
   }>;
 };
 
-// ======== Mappers ========
-
-export function mapBackendDishToFrontend(dto: BackendDishDTO): Dish {
-  return {
-    id: String(dto.id),
-    name: dto.name,
-    description: dto.description || '',
-    price: dto.price,
-    imageUrl: dto.imageUrl || '',
-    restaurantId: dto.restaurant?.id ? String(dto.restaurant.id) : '',
-    menuCategoryId: dto.category?.id ? String(dto.category.id) : '',
-    availableQuantity: dto.availabilityQuantity || 0,
-    isAvailable: dto.availabilityQuantity > 0,
-    optionGroups: dto.menuOptionGroups?.map(g => ({
-      id: String(g.id),
-      title: g.title,
-      required: g.required,
-      minSelect: g.minSelect,
-      maxSelect: g.maxSelect,
-      options: g.options.map(o => ({
-        id: String(o.id),
-        name: o.name,
-        price: o.price,
-      })),
-    })),
-  };
-}
-
-export function mapFrontendDishToBackend(
-  dish: Omit<Dish, 'id'> & { id?: string },
-  restaurantId?: number
-): Record<string, unknown> {
-  return {
-    id: dish.id ? Number(dish.id) : undefined,
-    name: dish.name,
-    description: dish.description,
-    price: dish.price,
-    imageUrl: dish.imageUrl,
-    availabilityQuantity: dish.availableQuantity,
-    restaurant: { id: restaurantId || Number(dish.restaurantId) },
-    category: dish.menuCategoryId ? { id: Number(dish.menuCategoryId) } : undefined,
-  };
-}
+import { mapBackendDishToFrontend, mapFrontendDishToBackend } from "./mappers/dish.mapper";
 
 // ======== API ========
 

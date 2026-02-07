@@ -11,37 +11,62 @@ export type MenuCategoryDTO = {
   displayOrder?: number;
 };
 
+import { mapCategoryDTOToMenuCategory, mapMenuCategoryToDTO } from "./mappers/menu-category.mapper";
+import type { MenuCategory } from "../../../types/src";
+
 // ======== API ========
 
 export const menuCategoryApi = {
   // Get all categories for a restaurant
-  getCategoriesByRestaurantId: (restaurantId: number) => {
-    return http.get<IBackendRes<MenuCategoryDTO[]>>(
+  getCategoriesByRestaurantId: async (restaurantId: number): Promise<IBackendRes<MenuCategory[]>> => {
+    const response = await http.get<IBackendRes<MenuCategoryDTO[]>>(
       `/api/v1/dish-categories/restaurant/${restaurantId}`
-    ) as unknown as Promise<IBackendRes<MenuCategoryDTO[]>>;
+    ) as unknown as IBackendRes<MenuCategoryDTO[]>;
+
+    return {
+      ...response,
+      data: response.data?.map(mapCategoryDTOToMenuCategory) || [],
+    };
   },
 
   // Get single category by ID
-  getCategoryById: (id: number) => {
-    return http.get<IBackendRes<MenuCategoryDTO>>(
+  getCategoryById: async (id: number): Promise<IBackendRes<MenuCategory>> => {
+    const response = await http.get<IBackendRes<MenuCategoryDTO>>(
       `/api/v1/dish-categories/${id}`
-    ) as unknown as Promise<IBackendRes<MenuCategoryDTO>>;
+    ) as unknown as IBackendRes<MenuCategoryDTO>;
+
+    return {
+      ...response,
+      data: response.data ? mapCategoryDTOToMenuCategory(response.data) : undefined,
+    } as IBackendRes<MenuCategory>;
   },
 
   // Create new category
-  createCategory: (category: Omit<MenuCategoryDTO, 'id'>) => {
-    return http.post<IBackendRes<MenuCategoryDTO>>(
+  createCategory: async (category: Omit<MenuCategory, 'id' | 'restaurantId'>, restaurantId: number): Promise<IBackendRes<MenuCategory>> => {
+    const dto = mapMenuCategoryToDTO({ ...category, id: '0', restaurantId: String(restaurantId) } as MenuCategory, restaurantId);
+    const response = await http.post<IBackendRes<MenuCategoryDTO>>(
       `/api/v1/dish-categories`,
-      category
-    ) as unknown as Promise<IBackendRes<MenuCategoryDTO>>;
+      dto
+    ) as unknown as IBackendRes<MenuCategoryDTO>;
+
+    return {
+      ...response,
+      data: response.data ? mapCategoryDTOToMenuCategory(response.data) : undefined,
+    } as IBackendRes<MenuCategory>;
   },
 
   // Update category
-  updateCategory: (category: MenuCategoryDTO) => {
-    return http.put<IBackendRes<MenuCategoryDTO>>(
+  updateCategory: async (category: MenuCategory, restaurantId: number): Promise<IBackendRes<MenuCategory>> => {
+    const dto = mapMenuCategoryToDTO(category, restaurantId);
+    const response = await http.put<IBackendRes<MenuCategoryDTO>>(
       `/api/v1/dish-categories`,
-      category
-    ) as unknown as Promise<IBackendRes<MenuCategoryDTO>>;
+      dto
+    ) as unknown as IBackendRes<MenuCategoryDTO>;
+
+    return {
+      ...response,
+      data: response.data ? mapCategoryDTOToMenuCategory(response.data) : undefined,
+    } as IBackendRes<MenuCategory>;
   },
 
   // Delete category

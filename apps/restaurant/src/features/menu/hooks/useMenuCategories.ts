@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { menuCategoryApi, type MenuCategoryDTO } from '@repo/api';
+import { menuCategoryApi } from '@repo/api';
 import type { MenuCategory } from '@repo/types';
 import { useNotification } from '@repo/ui';
 import { useCallback } from 'react';
@@ -12,31 +12,13 @@ export interface UseMenuCategoriesResult {
   createCategory: (category: Omit<MenuCategory, 'id' | 'restaurantId'>) => Promise<MenuCategory | null>;
   updateCategory: (category: MenuCategory) => Promise<MenuCategory | null>;
   deleteCategory: (id: string) => Promise<boolean>;
+  updateAllCategories: (currentCategories: MenuCategory[], newCategories: MenuCategory[]) => Promise<void>;
 
   // Mutation states
   isCreatingCategory: boolean;
   isUpdatingCategory: boolean;
   isDeletingCategory: boolean;
-}
-
-// ======== Mapper Functions ========
-
-function mapCategoryDTOToMenuCategory(dto: MenuCategoryDTO): MenuCategory {
-  return {
-    id: String(dto.id),
-    name: dto.name,
-    restaurantId: dto.restaurant?.id ? String(dto.restaurant.id) : '',
-    displayOrder: dto.displayOrder,
-  };
-}
-
-function mapMenuCategoryToDTO(category: MenuCategory, restaurantId: number): MenuCategoryDTO {
-  return {
-    id: Number(category.id),
-    name: category.name,
-    restaurant: { id: restaurantId },
-    displayOrder: category.displayOrder,
-  };
+  isUpdatingAll: boolean;
 }
 
 // ======== Hook ========
@@ -82,16 +64,11 @@ export function useMenuCategories(
         throw new Error('Không tìm thấy thông tin nhà hàng');
       }
 
-      const dto: Omit<MenuCategoryDTO, 'id'> = {
-        name: category.name,
-        restaurant: { id: targetRestaurantId },
-        displayOrder: category.displayOrder,
-      };
-      const response = await menuCategoryApi.createCategory(dto);
+      const response = await menuCategoryApi.createCategory(category, targetRestaurantId);
       if (response.statusCode !== 201 && response.statusCode !== 200) {
         throw new Error(response.message || 'Không thể tạo danh mục');
       }
-      return mapCategoryDTOToMenuCategory(response.data!);
+      return response.data!;
     },
     onSuccess: () => {
       invalidateMenu();
@@ -101,7 +78,7 @@ export function useMenuCategories(
     },
     onError: (error: Error) => {
       if (showNotifications) {
-        showNotification({ message: error.message, type: 'error' });
+        showNotification({ message: 'Cập nhật thất bại', type: 'error', format: error.message });
       }
     },
   });
@@ -114,12 +91,11 @@ export function useMenuCategories(
         throw new Error('Không tìm thấy thông tin nhà hàng');
       }
 
-      const dto = mapMenuCategoryToDTO(category, targetRestaurantId);
-      const response = await menuCategoryApi.updateCategory(dto);
+      const response = await menuCategoryApi.updateCategory(category, targetRestaurantId);
       if (response.statusCode !== 200) {
         throw new Error(response.message || 'Không thể cập nhật danh mục');
       }
-      return mapCategoryDTOToMenuCategory(response.data!);
+      return response.data!;
     },
     onSuccess: () => {
       invalidateMenu();
@@ -129,7 +105,7 @@ export function useMenuCategories(
     },
     onError: (error: Error) => {
       if (showNotifications) {
-        showNotification({ message: error.message, type: 'error' });
+        showNotification({ message: 'Cập nhật thất bại', type: 'error', format: error.message });
       }
     },
   });
@@ -150,7 +126,51 @@ export function useMenuCategories(
     },
     onError: (error: Error) => {
       if (showNotifications) {
-        showNotification({ message: error.message, type: 'error' });
+        showNotification({ message: 'Cập nhật thất bại', type: 'error', format: error.message });
+      }
+    },
+  });
+
+  // Update all categories (bulk) mutation
+  const updateAllCategoriesMutation = useMutation({
+    mutationFn: async ({ current, next }: { current: MenuCategory[], next: MenuCategory[] }) => {
+      const targetRestaurantId = Number(restaurantId || 0);
+      if (!targetRestaurantId) {
+        throw new Error('Không tìm thấy thông tin nhà hàng');
+      }
+
+      const originalIds = new Set(current.map(c => c.id));
+      const nextIds = new Set(next.map(c => c.id));
+
+      // 1. Delete
+      const toDelete = current.filter(c => !nextIds.has(c.id));
+      for (const cat of toDelete) {
+        await menuCategoryApi.deleteCategory(Number(cat.id));
+      }
+
+      // 2. Create & Update
+      for (const cat of next) {
+        if (!originalIds.has(cat.id)) {
+          // Create
+          await menuCategoryApi.createCategory(cat, targetRestaurantId);
+        } else {
+          // Update
+          const original = current.find(c => c.id === cat.id);
+          if (original && (original.name !== cat.name || original.displayOrder !== cat.displayOrder)) {
+            await menuCategoryApi.updateCategory(cat, targetRestaurantId);
+          }
+        }
+      }
+    },
+    onSuccess: () => {
+      invalidateMenu();
+      if (showNotifications) {
+        showNotification({ message: 'Cập nhật danh mục thành công!', type: 'success' });
+      }
+    },
+    onError: (error: Error) => {
+      if (showNotifications) {
+        showNotification({ message: 'Cập nhật thất bại', type: 'error', format: error.message });
       }
     },
   });
@@ -182,6 +202,10 @@ export function useMenuCategories(
     }
   }, [deleteCategoryMutation]);
 
+  const updateAllCategories = useCallback(async (current: MenuCategory[], next: MenuCategory[]) => {
+    await updateAllCategoriesMutation.mutateAsync({ current, next });
+  }, [updateAllCategoriesMutation]);
+
   // ======== Return ========
 
   return {
@@ -189,10 +213,12 @@ export function useMenuCategories(
     createCategory,
     updateCategory,
     deleteCategory,
+    updateAllCategories,
 
     // Mutation states
     isCreatingCategory: createCategoryMutation.isPending,
     isUpdatingCategory: updateCategoryMutation.isPending,
     isDeletingCategory: deleteCategoryMutation.isPending,
+    isUpdatingAll: updateAllCategoriesMutation.isPending,
   };
 }

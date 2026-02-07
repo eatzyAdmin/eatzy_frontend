@@ -10,9 +10,10 @@ interface CategoryManagerModalProps {
   categories: MenuCategory[];
   onUpdate: (newCategories: MenuCategory[]) => void;
   onClose: () => void;
+  isSaving?: boolean;
 }
 
-export default function CategoryManagerModal({ categories, onUpdate, onClose }: CategoryManagerModalProps) {
+export default function CategoryManagerModal({ categories, onUpdate, onClose, isSaving }: CategoryManagerModalProps) {
   const { confirm } = useSwipeConfirmation();
   const { showNotification } = useNotification();
 
@@ -98,7 +99,6 @@ export default function CategoryManagerModal({ categories, onUpdate, onClose }: 
         }));
 
         onUpdate(ordered);
-        showNotification({ message: 'Cập nhật danh mục thành công', type: 'success' });
         onClose();
       }
     });
@@ -194,10 +194,15 @@ export default function CategoryManagerModal({ categories, onUpdate, onClose }: 
       <div className="p-6 border-t border-gray-100 bg-gray-50">
         <button
           onClick={handleSave}
-          className="w-full bg-[var(--primary)] text-white py-3 rounded-xl font-bold uppercase tracking-wide shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          disabled={isSaving}
+          className={`w-full bg-[var(--primary)] text-white py-3 rounded-xl font-bold uppercase tracking-wide shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
         >
-          <Save className="w-4 h-4" />
-          <span>Lưu thay đổi</span>
+          {isSaving ? (
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <Save className="w-4 h-4" />
+          )}
+          <span>{isSaving ? 'ĐANG LƯU...' : 'Lưu thay đổi'}</span>
         </button>
       </div>
     </div>

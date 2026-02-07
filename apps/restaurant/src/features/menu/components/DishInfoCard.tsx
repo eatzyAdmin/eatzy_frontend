@@ -15,9 +15,10 @@ interface DishInfoCardProps {
   mode?: 'edit' | 'create';
   categories?: MenuCategory[];
   layoutId?: string;
+  isSaving?: boolean;
 }
 
-export default function DishInfoCard({ dish, originalDish, onUpdate, onDraftChange, onClose, mode = 'edit', categories, layoutId }: DishInfoCardProps) {
+export default function DishInfoCard({ dish, originalDish, onUpdate, onDraftChange, onClose, mode = 'edit', categories, layoutId, isSaving }: DishInfoCardProps) {
   const { confirm } = useSwipeConfirmation();
   const { showNotification } = useNotification();
   const [isCatOpen, setIsCatOpen] = useState(false);
@@ -52,10 +53,6 @@ export default function DishInfoCard({ dish, originalDish, onUpdate, onDraftChan
 
   const executeSave = () => {
     onUpdate(dish);
-    showNotification({
-      message: mode === 'create' ? 'Đã thêm món mới thành công!' : 'Đã cập nhật món ăn thành công!',
-      type: 'success'
-    });
     onClose();
   };
 
@@ -219,13 +216,18 @@ export default function DishInfoCard({ dish, originalDish, onUpdate, onDraftChan
       <div className="mt-4 pt-4 border-t border-gray-200/50">
         <button
           onClick={handleSaveDetails}
-          className={`w-full py-4 text-white rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all ${hasChanges()
-            ? 'bg-[var(--primary)] shadow-[var(--primary)]/30 hover:shadow-[var(--primary)]/50 hover:scale-[1.02] active:scale-[0.98]'
-            : 'bg-gray-300 shadow-none cursor-not-allowed opacity-70'
+          disabled={isSaving || !hasChanges()}
+          className={`w-full py-4 text-white rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all ${isSaving || !hasChanges()
+            ? 'bg-gray-300 shadow-none cursor-not-allowed opacity-70'
+            : 'bg-[var(--primary)] shadow-[var(--primary)]/30 hover:shadow-[var(--primary)]/50 hover:scale-[1.02] active:scale-[0.98]'
             }`}
         >
-          <Save className="w-5 h-5" />
-          <span>{mode === 'create' ? 'TẠO MÓN' : hasChanges() ? 'LƯU THAY ĐỔI' : 'ĐÃ LƯU'}</span>
+          {isSaving ? (
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <Save className="w-5 h-5" />
+          )}
+          <span>{isSaving ? 'ĐANG LƯU...' : mode === 'create' ? 'TẠO MÓN' : hasChanges() ? 'LƯU THAY ĐỔI' : 'ĐÃ LƯU'}</span>
         </button>
       </div>
     </motion.div>

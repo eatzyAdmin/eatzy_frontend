@@ -136,7 +136,7 @@ export function useMyRestaurantMenu(
     },
     onError: (error: Error) => {
       if (showNotifications) {
-        showNotification({ message: error.message, type: 'error' });
+        showNotification({ message: 'Thao tác thất bại', type: 'error', format: error.message });
       }
     },
   });
@@ -153,12 +153,12 @@ export function useMyRestaurantMenu(
     onSuccess: () => {
       invalidateMenu();
       if (showNotifications) {
-        showNotification({ message: 'Đã cập nhật món ăn thành công!', type: 'success' });
+        showNotification({ message: 'Đã cập nhật món ăn thành công!', type: 'success', format: 'Đã cập nhật món ăn thành công!' });
       }
     },
     onError: (error: Error) => {
       if (showNotifications) {
-        showNotification({ message: error.message, type: 'error' });
+        showNotification({ message: 'Thao tác thất bại', type: 'error', format: error.message });
       }
     },
   });
@@ -174,12 +174,12 @@ export function useMyRestaurantMenu(
     onSuccess: () => {
       invalidateMenu();
       if (showNotifications) {
-        showNotification({ message: 'Đã xóa món ăn!', type: 'success' });
+        showNotification({ message: 'Đã xóa món ăn!', type: 'success', format: 'Đã xóa món ăn!' });
       }
     },
     onError: (error: Error) => {
       if (showNotifications) {
-        showNotification({ message: error.message, type: 'error' });
+        showNotification({ message: 'Thao tác thất bại', type: 'error', format: error.message });
       }
     },
   });

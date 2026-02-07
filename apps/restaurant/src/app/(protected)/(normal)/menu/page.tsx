@@ -9,7 +9,7 @@ import DishInfoCard from '@/features/menu/components/DishInfoCard';
 import DishEditModal from '@/features/menu/components/DishEditModal';
 import CategoryManagerModal from '@/features/menu/components/CategoryManagerModal';
 import { formatVnd } from '@repo/lib';
-import { useMyRestaurantMenu } from '@/features/menu/hooks/useMenu';
+import { useMyRestaurantMenu, useMenuCategories } from '@/features/menu/hooks/useMenu';
 
 export default function MenuPage() {
   const { hide } = useLoading();
@@ -21,12 +21,17 @@ export default function MenuPage() {
   const {
     dishes,
     categories,
+    restaurantId,
     isLoading,
     isError,
     createDish,
     updateDish,
     deleteDish,
+    isCreatingDish,
+    isUpdatingDish,
   } = useMyRestaurantMenu();
+
+  const isSavingDish = isCreatingDish || isUpdatingDish;
 
   const [activeCategoryId, setActiveCategoryId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -129,14 +134,15 @@ export default function MenuPage() {
       const { id, restaurantId, ...dishData } = updatedDish;
       const created = await createDish(dishData);
       if (created) {
-        setDishMode('edit');
-        setSelectedDish(created);
+        // If we want to stay open in edit mode after creation:
+        // setDishMode('edit');
+        // setSelectedDish(created);
+        // But usually, common UX is to close after Save. 
+        // DishInfoCard calls onClose() already, so we just let it finish.
       }
     } else {
-      const updated = await updateDish(updatedDish);
-      if (updated) {
-        setSelectedDish(updated);
-      }
+      await updateDish(updatedDish);
+      // Removed setSelectedDish(updated) to prevent reopening
     }
   };
 
@@ -183,9 +189,21 @@ export default function MenuPage() {
 
   // ======== Category Handlers ========
 
-  const handleUpdateCategories = async (_newCategories: MenuCategory[]) => {
-    // CategoryManagerModal should call individual create/update/delete APIs
-    // This callback is kept for compatibility, refetch happens automatically
+  const {
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    updateAllCategories,
+    isCreatingCategory,
+    isUpdatingCategory,
+    isDeletingCategory,
+    isUpdatingAll
+  } = useMenuCategories(restaurantId);
+
+  const isCategoryWorking = isCreatingCategory || isUpdatingCategory || isDeletingCategory || isUpdatingAll;
+
+  const handleUpdateCategories = async (newCategories: MenuCategory[]) => {
+    await updateAllCategories(categories, newCategories);
   };
 
   // ======== Render ========
@@ -397,6 +415,7 @@ export default function MenuPage() {
                     mode={dishMode}
                     categories={categories}
                     layoutId={dishMode === 'edit' ? `dish-card-${selectedDish.id}` : undefined}
+                    isSaving={isSavingDish}
                   />
                 </motion.div>
 
@@ -440,6 +459,7 @@ export default function MenuPage() {
                 categories={categories}
                 onUpdate={handleUpdateCategories}
                 onClose={() => setShowCategoryManager(false)}
+                isSaving={isCategoryWorking}
               />
             </motion.div>
           </motion.div>
