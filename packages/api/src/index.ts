@@ -26,11 +26,10 @@ export {
   type MenuCategoryDTO,
   type PaginationParams,
   type RestaurantSearchParams,
-  type RestaurantDetail,
-  type RestaurantMenu,
   type BackendRestaurantDetailDTO,
   type BackendRestaurantMenuDTO,
 } from "./restaurant";
 
 export * from "./restaurant/mappers/dish.mapper";
 export * from "./restaurant/mappers/menu-category.mapper";
+export * from "./restaurant/mappers/restaurant.mapper";

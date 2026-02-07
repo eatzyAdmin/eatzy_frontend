@@ -6,7 +6,7 @@ import StoreLocationMap from "./StoreLocationMap";
 
 interface StoreLocationEditProps {
   store: { address: string; coords: { lat: number; lng: number };[key: string]: unknown };
-  onSave: (updates: { address: string; coords: { lat: number; lng: number } }) => void;
+  onSave: (updates: Partial<{ address: string; coords: { lat: number; lng: number } }>) => Promise<void>;
   onClose: () => void;
   layoutId?: string;
 }
@@ -16,12 +16,15 @@ export default function StoreLocationEdit({ store, onSave, onClose, layoutId }: 
   const [coords, setCoords] = useState(store.coords);
   const { showNotification } = useNotification();
   const { confirm } = useSwipeConfirmation();
-  const [initialJson] = useState(() => JSON.stringify({ address: store.address, coords: store.coords }));
 
   const handleSave = () => {
-    const currentData = { address, coords };
-    const currentJson = JSON.stringify(currentData);
-    if (currentJson === initialJson) {
+    const updates: any = {};
+    if (address !== store.address) updates.address = address;
+    if (coords.lat !== store.coords.lat || coords.lng !== store.coords.lng) {
+      updates.coords = coords;
+    }
+
+    if (Object.keys(updates).length === 0) {
       showNotification({
         type: 'error',
         message: 'Bạn chưa thực hiện thay đổi nào!',
@@ -37,7 +40,7 @@ export default function StoreLocationEdit({ store, onSave, onClose, layoutId }: 
       type: 'info',
       confirmText: 'Lưu thay đổi',
       onConfirm: async () => {
-        onSave(currentData);
+        await onSave(updates);
       }
     });
   };

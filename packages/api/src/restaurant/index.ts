@@ -7,8 +7,6 @@ export { menuCategoryApi, type MenuCategoryDTO } from './menu-category.api';
 export { restaurantTypeApi } from './restaurant-type.api';
 export {
   restaurantDetailApi,
-  type RestaurantDetail,
-  type RestaurantMenu,
   type BackendRestaurantDetailDTO,
   type BackendRestaurantMenuDTO,
   type BackendDishCategoryDTO,

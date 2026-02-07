@@ -1,5 +1,6 @@
 import { http } from "../http";
-import type { IBackendRes, Restaurant, Dish, MenuCategory, OptionGroup } from "../../../types/src";
+import type { IBackendRes, RestaurantDetail, RestaurantMenu } from "../../../types/src";
+import { mapBackendRestaurantDetail, mapBackendRestaurantMenu } from "./mappers/restaurant.mapper";
 
 // ======== Backend DTOs ========
 
@@ -71,139 +72,6 @@ export type BackendRestaurantDetailDTO = {
   owner?: { id: number; name: string };
   restaurantTypes?: { id: number; name: string };
 };
-
-
-// ======== Frontend Types ========
-
-export type RestaurantDetail = {
-  id: string;
-  name: string;
-  slug: string;
-  address: string;
-  description?: string;
-  latitude?: number;
-  longitude?: number;
-  contactPhone?: string;
-  status: string;
-  rating: number;
-  reviewCount: number;
-  schedule?: string;
-  distance?: number;
-  ownerName?: string;
-  restaurantType?: string;
-  avatarUrl?: string;
-  coverImageUrl?: string;
-  // Star counts for rating breakdown
-  oneStarCount: number;
-  twoStarCount: number;
-  threeStarCount: number;
-  fourStarCount: number;
-  fiveStarCount: number;
-};
-
-export type RestaurantMenu = {
-  restaurantId: string;
-  restaurantName: string;
-  categories: MenuCategory[];
-  dishes: Dish[];
-};
-
-// ======== Mappers ========
-
-function mapBackendRestaurantDetail(dto: BackendRestaurantDetailDTO): RestaurantDetail {
-  const oneStarCount = dto.oneStarCount || 0;
-  const twoStarCount = dto.twoStarCount || 0;
-  const threeStarCount = dto.threeStarCount || 0;
-  const fourStarCount = dto.fourStarCount || 0;
-  const fiveStarCount = dto.fiveStarCount || 0;
-  const reviewCount = oneStarCount + twoStarCount + threeStarCount + fourStarCount + fiveStarCount;
-
-  return {
-    id: String(dto.id),
-    name: dto.name,
-    slug: dto.slug,
-    address: dto.address,
-    description: dto.description,
-    latitude: dto.latitude,
-    longitude: dto.longitude,
-    contactPhone: dto.contactPhone,
-    status: dto.status,
-    rating: dto.averageRating || 0,
-    reviewCount,
-    schedule: dto.schedule,
-    distance: dto.distance,
-    ownerName: dto.owner?.name,
-    restaurantType: dto.restaurantTypes?.name,
-    avatarUrl: dto.avatarUrl,
-    coverImageUrl: dto.coverImageUrl,
-    oneStarCount,
-    twoStarCount,
-    threeStarCount,
-    fourStarCount,
-    fiveStarCount,
-  };
-}
-
-function mapBackendMenuOptionGroup(dto: BackendMenuOptionGroupDTO): OptionGroup {
-  return {
-    id: String(dto.id),
-    title: dto.name,
-    minSelect: dto.minChoices,
-    maxSelect: dto.maxChoices,
-    required: (dto.minChoices || 0) > 0,
-    options: dto.menuOptions.map(opt => ({
-      id: String(opt.id),
-      name: opt.name,
-      price: opt.priceAdjustment || 0,
-    })),
-  };
-}
-
-function mapBackendMenuDish(dto: BackendMenuDishDTO, categoryId: string, restaurantId: string): Dish {
-  return {
-    id: String(dto.id),
-    name: dto.name,
-    description: dto.description || '',
-    price: dto.price,
-    imageUrl: dto.imageUrl || '',
-    restaurantId,
-    menuCategoryId: categoryId,
-    availableQuantity: dto.availabilityQuantity || 0,
-    isAvailable: dto.availabilityQuantity > 0,
-    optionGroups: dto.menuOptionGroups?.map(mapBackendMenuOptionGroup),
-  };
-}
-
-function mapBackendRestaurantMenu(dto: BackendRestaurantMenuDTO): RestaurantMenu {
-  const restaurantId = String(dto.id);
-  const categories: MenuCategory[] = [];
-  const dishes: Dish[] = [];
-
-  // "dishes" field is actually array of categories with dishes inside
-  dto.dishes?.forEach((category, index) => {
-    const categoryId = String(category.id);
-
-    // Add category
-    categories.push({
-      id: categoryId,
-      name: category.name,
-      restaurantId,
-      displayOrder: index + 1,
-    });
-
-    // Add dishes from this category
-    category.dishes?.forEach(dish => {
-      dishes.push(mapBackendMenuDish(dish, categoryId, restaurantId));
-    });
-  });
-
-  return {
-    restaurantId,
-    restaurantName: dto.name,
-    categories,
-    dishes,
-  };
-}
 
 // ======== API ========
 
@@ -292,6 +160,37 @@ export const restaurantDetailApi = {
     const response = await http.post<IBackendRes<BackendRestaurantDetailDTO>>(
       `/api/v1/restaurants/${id}/close`,
       {}
+    ) as unknown as IBackendRes<BackendRestaurantDetailDTO>;
+
+    return {
+      ...response,
+      data: response.data ? mapBackendRestaurantDetail(response.data) : undefined,
+    } as IBackendRes<RestaurantDetail>;
+  },
+
+  /**
+   * Get current owner's restaurant details (no ID required)
+   * Endpoint: GET /api/v1/restaurants/my-restaurant
+   */
+  getMyRestaurant: async (): Promise<IBackendRes<RestaurantDetail>> => {
+    const response = await http.get<IBackendRes<BackendRestaurantDetailDTO>>(
+      `/api/v1/restaurants/my-restaurant`
+    ) as unknown as IBackendRes<BackendRestaurantDetailDTO>;
+
+    return {
+      ...response,
+      data: response.data ? mapBackendRestaurantDetail(response.data) : undefined,
+    } as IBackendRes<RestaurantDetail>;
+  },
+
+  /**
+   * Update current owner's restaurant details (no ID required)
+   * Endpoint: PUT /api/v1/restaurants/my-restaurant
+   */
+  updateMyRestaurant: async (updates: any): Promise<IBackendRes<RestaurantDetail>> => {
+    const response = await http.put<IBackendRes<BackendRestaurantDetailDTO>>(
+      `/api/v1/restaurants/my-restaurant`,
+      updates
     ) as unknown as IBackendRes<BackendRestaurantDetailDTO>;
 
     return {

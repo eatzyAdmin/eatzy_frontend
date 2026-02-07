@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { Clock, X, Save, Trash2, Plus, Check } from "@repo/ui/icons";
 import { TimeInput, useNotification, useSwipeConfirmation } from "@repo/ui";
+import { parseTimeToMinutes, formatMinutesToTime } from "@repo/lib";
 
 interface DaySchedule {
   day: string;
@@ -13,7 +14,7 @@ interface DaySchedule {
 
 interface StoreScheduleEditProps {
   store: { openingHours: DaySchedule[] };
-  onSave: (updates: { openingHours: DaySchedule[] }) => void;
+  onSave: (updates: Partial<{ openingHours: DaySchedule[] }>) => Promise<void>;
   onClose: () => void;
   layoutId?: string;
 }
@@ -36,17 +37,6 @@ const ZONES = [
   { label: 'CHIỀU', start: 14, end: 18 },
   { label: 'TỐI', start: 18, end: 24 },
 ];
-
-const parseTimeToMinutes = (time: string) => {
-  const [h, m] = time.split(':').map(Number);
-  return h * 60 + m;
-};
-
-const formatMinutesToTime = (minutes: number) => {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-};
 
 export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: StoreScheduleEditProps) {
   const [openingHours, setOpeningHours] = useState<DaySchedule[]>(() => {
@@ -224,7 +214,7 @@ export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: 
       type: 'info',
       confirmText: 'Lưu thay đổi',
       onConfirm: async () => {
-        onSave({ openingHours });
+        await onSave({ openingHours });
       }
     });
   };

@@ -5,24 +5,34 @@ import { useNotification, useSwipeConfirmation } from "@repo/ui";
 
 interface StoreGeneralInfoEditProps {
   store: { name: string; description: string; phone: string; email: string;[key: string]: unknown };
-  onSave: (updates: { name: string; description: string; phone: string; email: string }) => void;
+  onSave: (updates: Partial<{ name: string; description: string; phone: string; email: string }>) => Promise<void>;
   onClose: () => void;
   layoutId?: string;
 }
 
 export default function StoreGeneralInfoEdit({ store, onSave, onClose, layoutId }: StoreGeneralInfoEditProps) {
-  const [formData, setFormData] = useState({ ...store });
+  const [formData, setFormData] = useState({
+    name: store.name,
+    description: store.description || '',
+    phone: store.phone || '',
+    email: store.email || ''
+  });
   const { showNotification } = useNotification();
   const { confirm } = useSwipeConfirmation();
-  const [initialJson] = useState(() => JSON.stringify(store));
 
   const handleChange = (field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSave = () => {
-    const currentJson = JSON.stringify(formData);
-    if (currentJson === initialJson) {
+    // Only send changed fields for partial update
+    const updates: Record<string, any> = {};
+    if (formData.name !== store.name) updates.name = formData.name;
+    if (formData.description !== (store.description || '')) updates.description = formData.description;
+    if (formData.phone !== (store.phone || '')) updates.phone = formData.phone;
+    if (formData.email !== (store.email || '')) updates.email = formData.email;
+
+    if (Object.keys(updates).length === 0) {
       showNotification({
         type: 'error',
         message: 'Bạn chưa thực hiện thay đổi nào!',
@@ -38,7 +48,7 @@ export default function StoreGeneralInfoEdit({ store, onSave, onClose, layoutId 
       type: 'info',
       confirmText: 'Lưu thay đổi',
       onConfirm: async () => {
-        onSave(formData);
+        await onSave(updates);
       }
     });
   };

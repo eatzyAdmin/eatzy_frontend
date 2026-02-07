@@ -1,5 +1,32 @@
 export type RestaurantStatus = 'OPEN' | 'CLOSED' | 'LOCKED' | 'PENDING' | 'REJECTED';
 
+export interface OpeningHour {
+  day: string;
+  isOpen: boolean;
+  shifts: { open: string; close: string }[];
+}
+
+export type StoreInfo = {
+  id: number;
+  name: string;
+  description: string;
+  address: string;
+  coords: { lat: number; lng: number };
+  slug: string;
+  commissionRate: number;
+  phone: string;
+  email: string;
+  rating: number;
+  reviewCount: number;
+  status: RestaurantStatus | string;
+  imageUrl: string;
+  coverImageUrl?: string;
+  schedule?: string;
+  openingHours: OpeningHour[];
+  images: string[];
+  [key: string]: any;
+};
+
 export type RestaurantOwner = {
   id: number;
   name: string;
@@ -70,7 +97,7 @@ export type Restaurant = {
 };
 
 export type UpdateRestaurantRequest = {
-  id: number;
+  id?: number;
   name?: string;
   address?: string;
   description?: string;
@@ -80,7 +107,11 @@ export type UpdateRestaurantRequest = {
   schedule?: string;
   avatarUrl?: string;
   coverImageUrl?: string;
+  latitude?: number;
+  longitude?: number;
 };
+
+export type UpdateStoreRequest = UpdateRestaurantRequest;
 
 // ======== Restaurant Magazine Types (from backend API) ========
 
@@ -135,4 +166,37 @@ export type NearbyRestaurantsParams = {
   typeId?: number;  // Filter by restaurant type/category ID
   page?: number;
   size?: number;
+};
+
+export type RestaurantDetail = {
+  id: string;
+  name: string;
+  slug: string;
+  address: string;
+  description?: string;
+  latitude?: number;
+  longitude?: number;
+  contactPhone?: string;
+  status: string;
+  rating: number;
+  reviewCount: number;
+  schedule?: string;
+  distance?: number;
+  ownerName?: string;
+  restaurantType?: string;
+  avatarUrl?: string;
+  coverImageUrl?: string;
+  // Star counts for rating breakdown
+  oneStarCount: number;
+  twoStarCount: number;
+  threeStarCount: number;
+  fourStarCount: number;
+  fiveStarCount: number;
+};
+
+export type RestaurantMenu = {
+  restaurantId: string;
+  restaurantName: string;
+  categories: import('./menu').MenuCategory[];
+  dishes: import('./menu').Dish[];
 };

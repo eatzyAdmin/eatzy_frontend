@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
-import { useLoading, useNotification } from '@repo/ui';
+import { useLoading } from '@repo/ui';
 import StoreHeader from '@/features/store/components/StoreHeader';
 import StoreGeneralInfo from '@/features/store/components/StoreGeneralInfo';
 import StoreLocation from '@/features/store/components/StoreLocation';
@@ -12,16 +12,15 @@ import StoreLocationEdit from '@/features/store/components/StoreLocationEdit';
 import StoreMediaEdit from '@/features/store/components/StoreMediaEdit';
 import StoreScheduleEdit from '@/features/store/components/StoreScheduleEdit';
 import StoreSkeleton from '@/features/store/components/StoreSkeleton';
-import { useMyStore, useUpdateStore, type StoreInfo, type UpdateStoreRequest } from '@/features/store/hooks';
+import { useMyStore, useUpdateStore } from '@/features/store/hooks';
 
 export default function StorePage() {
   const { hide } = useLoading();
-  const { showNotification } = useNotification();
 
   const [activeSection, setActiveSection] = useState<'general' | 'location' | 'schedule' | 'media' | null>(null);
 
-  // Fetch store data from API
-  const { store: apiStore, isLoading, refetch } = useMyStore();
+  // Fetch store data
+  const { store, isLoading } = useMyStore();
   const { updateStore, isUpdating } = useUpdateStore();
 
   // Ensure global loader is hidden
@@ -29,56 +28,10 @@ export default function StorePage() {
     hide();
   }, [hide]);
 
-  // Map API store to component format
-  const store = apiStore ? {
-    id: String(apiStore.id),
-    name: apiStore.name,
-    description: apiStore.description,
-    address: apiStore.address,
-    coords: apiStore.coords,
-    slug: apiStore.slug,
-    commissionRate: apiStore.commissionRate,
-    phone: apiStore.phone,
-    email: '', // Not available from API
-    rating: apiStore.rating,
-    reviewCount: apiStore.reviewCount,
-    status: apiStore.status,
-    imageUrl: apiStore.imageUrl,
-    categories: [], // Could be fetched separately if needed
-    openingHours: apiStore.openingHours,
-    images: apiStore.images,
-  } : null;
-
-  const handleUpdateStore = async (updates: Record<string, unknown>) => {
-    if (!apiStore || !updates) return;
-
-    try {
-      // Map frontend updates to API format
-      const apiUpdates: UpdateStoreRequest = {
-        id: apiStore.id,
-        name: updates.name as string | undefined,
-        description: updates.description as string | undefined,
-        address: updates.address as string | undefined,
-        contactPhone: updates.phone as string | undefined,
-        schedule: updates.openingHours ? JSON.stringify(updates.openingHours) : undefined,
-        avatarUrl: updates.imageUrl as string | undefined,
-      };
-
-      // Handle coords
-      const coords = updates.coords as { lat: number; lng: number } | undefined;
-      if (coords) {
-        apiUpdates.latitude = coords.lat;
-        apiUpdates.longitude = coords.lng;
-      }
-
-      await updateStore(apiUpdates);
-      setActiveSection(null);
-      refetch();
-    } catch {
-      // Error handled by hook
-    }
+  const handleUpdateStore = async (updates: Record<string, any>) => {
+    await updateStore(updates);
+    setActiveSection(null);
   };
-
 
   if (isLoading || !store) {
     return <StoreSkeleton />;

@@ -5,7 +5,7 @@ import { ImageWithFallback, useNotification, useSwipeConfirmation } from "@repo/
 
 interface StoreMediaEditProps {
   store: { images?: string[];[key: string]: unknown };
-  onSave: (updates: { images: string[] }) => void;
+  onSave: (updates: Partial<{ images: string[] }>) => Promise<void>;
   onClose: () => void;
   layoutId?: string;
 }
@@ -155,7 +155,7 @@ export default function StoreMediaEdit({ store, onSave, onClose, layoutId }: Sto
       onConfirm: async () => {
         // Wait for animation
         await new Promise(resolve => setTimeout(resolve, 300));
-        onSave({ images: finalUrls });
+        await onSave({ images: finalUrls });
       }
     });
   };
@@ -178,7 +178,6 @@ export default function StoreMediaEdit({ store, onSave, onClose, layoutId }: Sto
 
   // Get dragging item data
   const draggingItem = items.find(i => i.id === draggingId);
-
   const activeCount = items.filter(i => !i.isDeleted).length;
 
   return (
