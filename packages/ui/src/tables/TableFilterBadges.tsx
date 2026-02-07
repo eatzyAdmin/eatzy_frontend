@@ -143,7 +143,7 @@ export default function TableFilterBadges({
                 badge.onRemove();
               }}
               className={`
-                group relative flex items-center gap-2.5 pl-1.5 pr-2 py-1.5 rounded-[22px] border-2 
+                group relative flex items-center gap-2.5 pl-1.5 pr-1.5 py-1.5 rounded-[22px] border-2 
                 transition-all duration-300 shadow-sm outline-none
                 ${theme.bg} ${theme.hover}
               `}
