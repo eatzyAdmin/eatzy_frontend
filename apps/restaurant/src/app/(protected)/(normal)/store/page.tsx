@@ -6,10 +6,8 @@ import StoreHeader from '@/features/store/components/StoreHeader';
 import StoreGeneralInfo from '@/features/store/components/StoreGeneralInfo';
 import StoreLocation from '@/features/store/components/StoreLocation';
 import StoreSchedule from '@/features/store/components/StoreSchedule';
-import StoreMedia from '@/features/store/components/StoreMedia';
 import StoreGeneralInfoEdit from '@/features/store/components/StoreGeneralInfoEdit';
 import StoreLocationEdit from '@/features/store/components/StoreLocationEdit';
-import StoreMediaEdit from '@/features/store/components/StoreMediaEdit';
 import StoreScheduleEdit from '@/features/store/components/StoreScheduleEdit';
 import StoreSkeleton from '@/features/store/components/StoreSkeleton';
 import { useMyStore, useUpdateStore } from '@/features/store/hooks';
@@ -17,7 +15,7 @@ import { useMyStore, useUpdateStore } from '@/features/store/hooks';
 export default function StorePage() {
   const { hide } = useLoading();
 
-  const [activeSection, setActiveSection] = useState<'general' | 'location' | 'schedule' | 'media' | null>(null);
+  const [activeSection, setActiveSection] = useState<'general' | 'location' | 'schedule' | null>(null);
 
   // Fetch store data
   const { store, isLoading } = useMyStore();
@@ -38,44 +36,49 @@ export default function StorePage() {
   }
 
   return (
-    <div className="min-h-screen pb-20 pr-8 pl-4">
+    <div className="min-h-screen pb-20 pr-8 pl-4 bg-gray-50/30">
       <StoreHeader store={store} />
 
       <main className="px-8 -mt-20 relative z-10 w-full max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-7 space-y-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <StoreGeneralInfo
-                store={store}
-                onEdit={() => setActiveSection('general')}
-                layoutId="store-card-general"
-              />
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <div className="flex flex-col gap-8">
+          {/* Top Section - General Info takes full width for a more prominent look */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <StoreGeneralInfo
+              store={store}
+              onEdit={() => setActiveSection('general')}
+              layoutId="store-card-general"
+            />
+          </motion.div>
+
+          {/* Bottom Section - Location and Schedule side by side */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <motion.div
+              className="lg:col-span-7 h-full"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
               <StoreLocation
                 store={store}
                 onEdit={() => setActiveSection('location')}
                 layoutId="store-card-location"
               />
             </motion.div>
-          </div>
 
-          {/* Right Column */}
-          <div className="lg:col-span-5 flex flex-col gap-8 h-full">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <motion.div
+              className="lg:col-span-5 h-full"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
               <StoreSchedule
                 store={store}
                 onEdit={() => setActiveSection('schedule')}
                 layoutId="store-card-schedule"
-              />
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex-1">
-              {/* Media currently view-only */}
-              <StoreMedia
-                store={store}
-                onEdit={() => setActiveSection('media')}
-                layoutId="store-card-media"
               />
             </motion.div>
           </div>
@@ -136,25 +139,6 @@ export default function StorePage() {
                 onSave={handleUpdateStore}
                 onClose={() => setActiveSection(null)}
                 layoutId="store-card-schedule"
-              />
-            </div>
-          </motion.div>
-        )}
-
-        {activeSection === 'media' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setActiveSection(null)}
-            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-md flex items-center justify-center p-8"
-          >
-            <div onClick={e => e.stopPropagation()}>
-              <StoreMediaEdit
-                store={store}
-                onSave={handleUpdateStore}
-                onClose={() => setActiveSection(null)}
-                layoutId="store-card-media"
               />
             </div>
           </motion.div>

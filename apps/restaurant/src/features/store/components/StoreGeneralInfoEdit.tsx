@@ -55,7 +55,10 @@ export default function StoreGeneralInfoEdit({ store, onSave, onClose, layoutId 
 
   return (
     <motion.div
-      layoutId={layoutId}
+      initial={{ opacity: 0, scale: 0.9, y: 30 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9, y: 30 }}
+      transition={{ type: "spring", damping: 25, stiffness: 200 }}
       className="bg-white w-[600px] max-w-full rounded-[32px] p-8 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]"
     >
       <div className="flex items-center justify-between mb-8">
