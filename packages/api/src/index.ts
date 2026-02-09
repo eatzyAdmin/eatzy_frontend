@@ -3,10 +3,8 @@ export { http } from "./http";
 export { authApi } from "./auth";
 export { cartApi } from "./cart";
 export { voucherApi } from "./voucher";
-export { orderApi } from "./order";
 export { favoriteApi } from "./favorite";
 export { driverApi } from "./driver";
-export { walletApi } from "./wallet";
 export { reportApi } from "./report";
 export { systemConfigApi } from "./system-config";
 export { fileApi } from "./file";
@@ -33,3 +31,11 @@ export {
 export * from "./restaurant/mappers/dish.mapper";
 export * from "./restaurant/mappers/menu-category.mapper";
 export * from "./restaurant/mappers/restaurant.mapper";
+
+// Order module exports
+export { orderApi } from "./order";
+export * from "./order/mappers/order.mapper";
+
+// Wallet module exports
+export { walletApi } from "./wallet";
+export * from "./wallet/mappers/wallet.mapper";

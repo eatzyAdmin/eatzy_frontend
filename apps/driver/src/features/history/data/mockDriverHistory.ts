@@ -1,15 +1,5 @@
-import { Order } from "@repo/types";
+import type { DriverHistoryOrder } from "@repo/types";
 
-export interface DriverHistoryOrder extends Order {
-  earnings: number; // Net Income
-  platformFee: number;
-  distance: number; // in km
-  duration: number; // in minutes
-  customerName: string;
-  voucherCode?: string;
-}
-
-// function removed
 
 export const mockDriverHistory: DriverHistoryOrder[] = [
   {

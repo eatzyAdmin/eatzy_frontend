@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { formatVnd } from "@repo/lib";
-import { DriverHistoryOrder } from "../data/mockDriverHistory";
+import { DriverHistoryOrder } from "@repo/types";
 import { Wallet, Bike } from "@repo/ui/icons";
 
 export default function HistoryStats({ orders }: { orders: DriverHistoryOrder[] }) {

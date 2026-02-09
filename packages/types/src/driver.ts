@@ -124,3 +124,50 @@ export interface CreateDriverProfileDto {
 export interface UpdateDriverProfileDto extends Partial<DriverProfile> {
   id: number;
 }
+
+/**
+ * Driver order history item - extends Order with driver-specific fields
+ * Used in driver app history feature
+ */
+export interface DriverHistoryOrder {
+  id: string;
+  code?: string;
+  status: string;
+  restaurantId: string;
+  deliveryLocation: {
+    lat: number;
+    lng: number;
+    address?: string;
+  };
+  restaurantLocation: {
+    lat: number;
+    lng: number;
+    name?: string;
+    address?: string;
+  };
+  driverLocation: {
+    lat: number;
+    lng: number;
+    name?: string;
+  };
+  items: {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    restaurantId: string;
+    imageUrl?: string;
+  }[];
+  subtotal: number;
+  fee: number;
+  discount: number;
+  total: number;
+  createdAt?: string;
+  earnings: number; // Driver's net income
+  platformFee: number;
+  distance: number; // in km
+  duration: number; // in minutes
+  customerName: string;
+  voucherCode?: string;
+}
+

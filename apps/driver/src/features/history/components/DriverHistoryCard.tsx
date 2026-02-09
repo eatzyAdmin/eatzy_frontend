@@ -3,7 +3,7 @@
 import { motion } from "@repo/ui/motion";
 import { Clock, MapPin, Store, ArrowRight, CheckCircle2, XCircle } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
-import { DriverHistoryOrder } from "../data/mockDriverHistory";
+import { DriverHistoryOrder } from "@repo/types";
 
 export default function DriverHistoryCard({ order, onClick }: { order: DriverHistoryOrder; onClick: () => void }) {
   const isDelivered = order.status === "DELIVERED";
@@ -17,7 +17,7 @@ export default function DriverHistoryCard({ order, onClick }: { order: DriverHis
     <motion.div
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="bg-white rounded-[28px] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col relative overflow-hidden group hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300"
+      className="bg-white rounded-[28px] p-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col relative overflow-hidden group hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300"
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
@@ -31,8 +31,6 @@ export default function DriverHistoryCard({ order, onClick }: { order: DriverHis
               <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-lg uppercase tracking-wider border border-gray-100">
                 #{order.code || 'ORD'}
               </span>
-              <div className="h-1 w-1 rounded-full bg-gray-300" />
-              <span className="text-xs font-medium text-gray-400">Food Delivery</span>
             </div>
           </div>
         </div>

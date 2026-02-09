@@ -1,77 +1,136 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
-import { walletApi } from "@repo/api";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import type { WalletTransactionResponse } from "@repo/types";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { walletApi, mapWalletTransactionToDriverWalletTransaction } from "@repo/api";
+import type { DriverWalletTransaction } from "@repo/types";
+import { WALLET_CREDIT_TYPES, WALLET_DEBIT_TYPES } from "@repo/types";
 
-export interface UseWalletTransactionsResult {
-    transactions: WalletTransactionResponse[];
-    isLoading: boolean;
-    isError: boolean;
-    error: Error | null;
-    refetch: () => void;
-    totalTransactions: number;
+export interface UseWalletTransactionsParams {
+    /** Transaction type filter */
+    type?: 'ALL' | 'IN' | 'OUT';
+    /** Search term for description */
+    search?: string;
 }
 
-/**
- * Hook to get wallet transactions for the logged-in driver
- */
-export function useWalletTransactions(params?: {
-    page?: number;
-    size?: number;
-    type?: 'ALL' | 'IN' | 'OUT';
-    search?: string;
-}): UseWalletTransactionsResult {
-    const { user } = useAuth();
-    const isLoggedIn = !!user?.id;
+export interface UseWalletTransactionsResult {
+    /** List of wallet transactions */
+    transactions: DriverWalletTransaction[];
+    /** Whether initial loading is in progress */
+    isLoading: boolean;
+    /** Whether fetching next page is in progress */
+    isFetchingNextPage: boolean;
+    /** Whether there are more pages to load */
+    hasNextPage: boolean;
+    /** Fetch the next page */
+    fetchNextPage: () => void;
+    /** Error if any */
+    error: Error | null;
+    /** Refetch function */
+    refetch: () => void;
+    /** Total number of transactions */
+    total: number;
+}
 
-    // Build filter for transaction types
-    // IN: DEPOSIT, REFUND, DELIVERY_EARNING, TOP_UP, EARNING
-    // OUT: WITHDRAWAL, PAYMENT, COMMISSION_PAID, ORDER_PAYMENT
+// Query key factory for wallet queries
+export const driverWalletKeys = {
+    all: ['driver-wallet'] as const,
+    transactions: () => [...driverWalletKeys.all, 'transactions'] as const,
+    transactionsWithFilters: (type?: string, search?: string) =>
+        [...driverWalletKeys.transactions(), { type, search }] as const,
+};
+
+// ======== Hook ========
+
+/**
+ * Hook to fetch wallet transactions with filtering and pagination
+ * Uses infinite query for load-more functionality
+ * 
+ * @param params - Filter and search parameters
+ * @returns Wallet transactions data and pagination controls
+ * 
+ * @example
+ * ```tsx
+ * const { transactions, isLoading, hasNextPage, fetchNextPage } = useWalletTransactions({
+ *   type: 'IN', // Filter by credit transactions
+ *   search: 'delivery' // Search in description
+ * });
+ * ```
+ */
+export function useWalletTransactions(params?: UseWalletTransactionsParams): UseWalletTransactionsResult {
+    // Build filter for transaction types using shared constants
+    // Springfilter syntax: ':' for equals (enum), '~' for contains (string like)
+    const buildTypeFilter = (types: readonly string[]) => {
+        return `(${types.map(t => `transactionType:'${t}'`).join(' or ')})`;
+    };
+
     let typeFilter = "";
     if (params?.type === "IN") {
-        typeFilter = "(transactionType~'DEPOSIT' or transactionType~'REFUND' or transactionType~'DELIVERY_EARNING' or transactionType~'TOP_UP' or transactionType~'EARNING')";
+        typeFilter = buildTypeFilter(WALLET_CREDIT_TYPES);
     } else if (params?.type === "OUT") {
-        typeFilter = "(transactionType~'WITHDRAWAL' or transactionType~'PAYMENT' or transactionType~'COMMISSION_PAID' or transactionType~'ORDER_PAYMENT')";
+        typeFilter = buildTypeFilter(WALLET_DEBIT_TYPES);
     }
 
-    // Add search query if provided (e.g. searching in description)
+    // Add search query if provided (searching in description - text field)
+    // Springfilter: '~' with wildcards for string contains
     let finalFilter = typeFilter;
     if (params?.search) {
         const s = params.search.trim();
         if (s) {
-            const searchQuery = `description ~ '*${s}*'`;
+            const searchQuery = `description~'*${s}*'`;
             finalFilter = finalFilter ? `${finalFilter} and ${searchQuery}` : searchQuery;
         }
     }
 
-    const query = useQuery({
-        queryKey: ["wallet-transactions", "my", finalFilter, params?.page, params?.size],
-        queryFn: async () => {
+    const {
+        data,
+        isLoading,
+        error,
+        refetch,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage
+    } = useInfiniteQuery({
+        queryKey: driverWalletKeys.transactionsWithFilters(params?.type, params?.search),
+        queryFn: async ({ pageParam = 1 }) => {
             const response = await walletApi.getMyWalletTransactions({
-                filter: finalFilter,
-                page: params?.page ?? 0,
-                size: params?.size ?? 50,
+                filter: finalFilter || undefined,
+                page: pageParam,
+                size: 15,
                 sort: "createdAt,desc",
             });
 
             if (response.statusCode === 200 && response.data) {
-                return response.data.result || [];
+                const result = response.data.result || [];
+                const meta = response.data.meta;
+
+                // Use mapper from @repo/api
+                const transactions: DriverWalletTransaction[] = result.map(mapWalletTransactionToDriverWalletTransaction);
+
+                return {
+                    items: transactions,
+                    nextPage: meta && meta.page < meta.pages ? meta.page + 1 : undefined,
+                    total: meta?.total || 0,
+                    pages: meta?.pages || 0
+                };
             }
-            return [];
+
+            return { items: [], nextPage: undefined, total: 0, pages: 0 };
         },
-        enabled: isLoggedIn,
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) => lastPage.nextPage,
         staleTime: 30 * 1000, // 30 seconds
     });
 
-    const transactions = query.data || [];
+    // Flatten all pages into single array
+    const transactions = data?.pages.flatMap(page => page.items) || [];
 
     return {
         transactions,
-        isLoading: query.isLoading,
-        isError: query.isError,
-        error: query.error,
-        refetch: query.refetch,
-        totalTransactions: transactions.length,
+        isLoading,
+        isFetchingNextPage,
+        hasNextPage: hasNextPage ?? false,
+        fetchNextPage,
+        error: error as Error | null,
+        refetch,
+        total: data?.pages[0]?.total || 0
     };
 }

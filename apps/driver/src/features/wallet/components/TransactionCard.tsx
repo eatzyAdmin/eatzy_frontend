@@ -2,45 +2,64 @@
 
 import { motion } from "@repo/ui/motion";
 import { formatVnd } from "@repo/lib";
-import { WalletTransaction } from "../data/mockWalletData";
-import { CheckCircle2, ArrowUpRight, ArrowDownLeft, Bike, DollarSign } from "@repo/ui/icons";
+import {
+  DriverWalletTransaction,
+  WalletTransactionType,
+  WalletDisplayStatus,
+  isWalletCreditType,
+  isWalletDebitType,
+  isWalletEarningType,
+} from "@repo/types";
+import { ArrowUpRight, ArrowDownLeft, Bike, DollarSign, RefreshCw } from "@repo/ui/icons";
 
-const getIcon = (type: WalletTransaction["type"]) => {
-  switch (type) {
-    case "EARNING":
-      return <Bike className="w-5 h-5 text-[var(--primary)]" />;
-    case "WITHDRAWAL":
-      return <ArrowUpRight className="w-5 h-5 text-red-500" />;
-    case "TOP_UP":
-      return <ArrowDownLeft className="w-5 h-5 text-green-500" />;
-    case "ORDER_PAYMENT":
-      return <DollarSign className="w-5 h-5 text-purple-500" />;
-    default:
-      return <CheckCircle2 className="w-5 h-5 text-gray-500" />;
+const getIcon = (type: WalletTransactionType | string) => {
+  // Earning types - show bike
+  if (isWalletEarningType(type)) {
+    return <Bike className="w-5 h-5 text-[var(--primary)]" />;
   }
+  // Debit types - show arrow up (money out)
+  if (isWalletDebitType(type)) {
+    return <ArrowUpRight className="w-5 h-5 text-red-500" />;
+  }
+  // Refund - show refresh icon
+  if (type === WalletTransactionType.REFUND) {
+    return <RefreshCw className="w-5 h-5 text-blue-500" />;
+  }
+  // Credit types - show arrow down (money in)
+  if (isWalletCreditType(type)) {
+    return <ArrowDownLeft className="w-5 h-5 text-green-500" />;
+  }
+  // Default
+  return <DollarSign className="w-5 h-5 text-gray-500" />;
 };
 
-const getBgColor = (type: WalletTransaction["type"]) => {
-  switch (type) {
-    case "EARNING": return "bg-[var(--primary)]/10";
-    case "WITHDRAWAL": return "bg-red-50";
-    case "TOP_UP": return "bg-green-50";
-    case "ORDER_PAYMENT": return "bg-purple-50";
-    default: return "bg-gray-50";
+const getBgColor = (type: WalletTransactionType | string) => {
+  if (isWalletEarningType(type)) {
+    return "bg-[var(--primary)]/10";
   }
+  if (isWalletDebitType(type)) {
+    return "bg-red-50";
+  }
+  if (type === WalletTransactionType.REFUND) {
+    return "bg-blue-50";
+  }
+  if (isWalletCreditType(type)) {
+    return "bg-green-50";
+  }
+  return "bg-gray-50";
 };
 
-const getStatusColor = (status: WalletTransaction["status"]) => {
+const getStatusColor = (status: WalletDisplayStatus) => {
   switch (status) {
-    case "COMPLETED": return "text-green-600 bg-green-50";
-    case "PENDING": return "text-yellow-600 bg-yellow-50";
-    case "FAILED": return "text-red-600 bg-red-50";
+    case WalletDisplayStatus.COMPLETED: return "text-green-600 bg-green-50";
+    case WalletDisplayStatus.PENDING: return "text-yellow-600 bg-yellow-50";
+    case WalletDisplayStatus.FAILED: return "text-red-600 bg-red-50";
     default: return "text-gray-600 bg-gray-50";
   }
 };
 
-export default function TransactionCard({ transaction, onClick }: { transaction: WalletTransaction; onClick?: () => void }) {
-  const isPositive = transaction.type === "EARNING" || transaction.type === "TOP_UP";
+export default function TransactionCard({ transaction, onClick }: { transaction: DriverWalletTransaction; onClick?: () => void }) {
+  const isPositive = isWalletCreditType(transaction.type);
   const date = new Date(transaction.timestamp);
 
   return (
@@ -65,7 +84,7 @@ export default function TransactionCard({ transaction, onClick }: { transaction:
         <p className={`font-bold font-anton text-base ${isPositive ? 'text-[var(--primary)]' : 'text-[#1A1A1A]'} whitespace-nowrap shrink-0`}>
           {isPositive ? '+' : ''}{formatVnd(transaction.amount)}
         </p>
-        {transaction.status !== 'COMPLETED' && (
+        {transaction.status !== WalletDisplayStatus.COMPLETED && (
           <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide mt-0.5 ${getStatusColor(transaction.status)}`}>
             {transaction.status}
           </span>

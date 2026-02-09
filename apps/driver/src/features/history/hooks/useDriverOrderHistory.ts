@@ -1,78 +1,126 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
-import { orderApi } from "@repo/api";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { DriverHistoryOrder } from "../data/mockDriverHistory";
-import { mapOrderResponseToDriverHistoryOrder } from "./useOrderDetail";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { orderApi, mapOrderResponseToDriverHistoryOrder } from "@repo/api";
+import type { DriverHistoryOrder } from "@repo/types";
+
+export interface UseDriverOrderHistoryParams {
+    /** Filter by order status */
+    status?: "ALL" | "DELIVERED" | "CANCELLED";
+    /** Search term for order ID, restaurant name, or address */
+    search?: string;
+}
 
 export interface UseDriverOrderHistoryResult {
+    /** List of driver's historical orders */
     orders: DriverHistoryOrder[];
+    /** Whether initial loading is in progress */
     isLoading: boolean;
-    isError: boolean;
+    /** Whether fetching next page is in progress */
+    isFetchingNextPage: boolean;
+    /** Whether there are more pages to load */
+    hasNextPage: boolean;
+    /** Function to fetch the next page */
+    fetchNextPage: () => void;
+    /** Error if any occurred */
     error: Error | null;
+    /** Function to refetch data */
     refetch: () => void;
-    totalOrders: number;
+    /** Total number of orders */
+    total: number;
+    /** Total number of pages */
+    pages: number;
 }
+
+// ======== Hook ========
 
 /**
  * Hook to get order history for the logged-in driver
+ * Uses infinite query pattern for server-side pagination
+ * 
+ * @param params - Filter and search parameters
+ * @returns Order history data and pagination controls
+ * 
+ * @example
+ * ```tsx
+ * const { orders, isLoading, hasNextPage, fetchNextPage } = useDriverOrderHistory({
+ *   status: "DELIVERED",
+ *   search: "Pizza"
+ * });
+ * ```
  */
-export function useDriverOrderHistory(params?: {
-    page?: number;
-    size?: number;
-    status?: "ALL" | "DELIVERED" | "CANCELLED";
-    search?: string;
-}): UseDriverOrderHistoryResult {
-    const { user } = useAuth();
-    const isLoggedIn = !!user?.id;
-
+export function useDriverOrderHistory(params?: UseDriverOrderHistoryParams): UseDriverOrderHistoryResult {
     // Build filter for order statuses
+    // Springfilter syntax: ':' for equals, '~' for contains (like)
     let statusFilter = "";
     if (params?.status === "DELIVERED") {
-        statusFilter = "orderStatus~'DELIVERED'";
+        statusFilter = "orderStatus:'DELIVERED'";
     } else if (params?.status === "CANCELLED") {
-        statusFilter = "orderStatus~'CANCELLED'";
+        statusFilter = "orderStatus:'CANCELLED'";
     } else {
-        // For ALL, we might want to only show meaningful history (e.g. delivered and cancelled)
-        statusFilter = "(orderStatus~'DELIVERED' or orderStatus~'CANCELLED')";
+        // For ALL, show meaningful history (delivered and cancelled)
+        statusFilter = "(orderStatus:'DELIVERED' or orderStatus:'CANCELLED')";
     }
 
     // Add search query if provided
+    // Springfilter: '~' with wildcards for string contains
     let finalFilter = statusFilter;
     if (params?.search) {
         const s = params.search.trim();
         if (s) {
-            const searchQuery = `(id : ${s} or restaurant.name ~ '*${s}*' or deliveryAddress ~ '*${s}*')`;
+            // Search in restaurant name and delivery address (text fields)
+            const searchQuery = `(restaurant.name~'*${s}*' or deliveryAddress~'*${s}*')`;
             finalFilter = `${statusFilter} and ${searchQuery}`;
         }
     }
 
-    const query = useQuery({
-        queryKey: ["orders", "history", "driver", finalFilter, params?.page, params?.size],
-        queryFn: async () => {
+    const {
+        data,
+        isLoading,
+        error,
+        refetch,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage
+    } = useInfiniteQuery({
+        queryKey: ["orders", "history", "driver", finalFilter],
+        queryFn: async ({ pageParam = 1 }) => {
             const response = await orderApi.getMyDriverOrders({
                 filter: finalFilter,
-                page: params?.page ?? 0,
-                size: params?.size ?? 50,
+                page: pageParam,
+                size: 15,
             });
 
             if (response.statusCode === 200 && response.data) {
-                return (response.data.result || []).map(mapOrderResponseToDriverHistoryOrder);
+                const result = response.data.result || [];
+                const meta = response.data.meta;
+
+                return {
+                    items: result.map(mapOrderResponseToDriverHistoryOrder) as DriverHistoryOrder[],
+                    nextPage: meta && meta.page < meta.pages ? meta.page + 1 : undefined,
+                    total: meta?.total || 0,
+                    pages: meta?.pages || 0
+                };
             }
-            return [];
+
+            return { items: [], nextPage: undefined, total: 0, pages: 0 };
         },
-        enabled: isLoggedIn,
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) => lastPage.nextPage,
         staleTime: 60 * 1000, // 1 minute
     });
 
-    const orders = query.data || [];
+    // Flatten all pages into single array
+    const orders = data?.pages.flatMap(page => page.items) || [];
 
     return {
         orders,
-        isLoading: query.isLoading,
-        isError: query.isError,
-        error: query.error,
-        refetch: query.refetch,
-        totalOrders: orders.length,
+        isLoading,
+        isFetchingNextPage,
+        hasNextPage: hasNextPage ?? false,
+        fetchNextPage,
+        error: error as Error | null,
+        refetch,
+        total: data?.pages[0]?.total || 0,
+        pages: data?.pages[0]?.pages || 0
     };
 }

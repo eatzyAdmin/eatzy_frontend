@@ -163,6 +163,9 @@ importers:
       '@repo/fonts':
         specifier: workspace:*
         version: link:../../packages/fonts
+      '@repo/hooks':
+        specifier: workspace:*
+        version: link:../../packages/hooks
       '@repo/lib':
         specifier: workspace:*
         version: link:../../packages/lib
@@ -382,6 +385,9 @@ importers:
 
   packages/api:
     dependencies:
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../types
       axios:
         specifier: ^1.7.7
         version: 1.13.2

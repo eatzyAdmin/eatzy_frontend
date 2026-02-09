@@ -80,8 +80,8 @@ export default function WalletFilterModal({ isOpen, onClose, filterFields, onApp
 
   const statusItems = [
     { key: '', label: 'All Status', icon: <List size={20} />, theme: 'lime' },
-    { key: 'success', label: 'Success', icon: <CheckCircle size={20} />, theme: 'lime' },
-    { key: 'failed', label: 'Failed', icon: <XCircle size={20} />, theme: 'red' },
+    { key: 'SUCCESS', label: 'Success', icon: <CheckCircle size={20} />, theme: 'lime' },
+    { key: 'FAILED', label: 'Failed', icon: <XCircle size={20} />, theme: 'red' },
   ];
 
   const themeClasses: Record<string, any> = {

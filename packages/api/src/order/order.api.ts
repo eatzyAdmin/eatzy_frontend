@@ -1,11 +1,11 @@
-import { http } from "./http";
+import { http } from "../http";
 import type {
   IBackendRes,
   CreateOrderRequest,
   OrderResponse,
   CalculateDeliveryFeeRequest,
   DeliveryFeeResponse
-} from "../../types/src";
+} from "@repo/types";
 
 /**
  * Order API endpoints

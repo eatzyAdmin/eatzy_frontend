@@ -1,63 +1,50 @@
 "use client";
 
-import { useEffect, useState, useRef, TouchEvent, WheelEvent, useMemo } from "react";
+import { useEffect, useState, useRef, TouchEvent, WheelEvent } from "react";
 import { motion, useScroll, AnimatePresence } from "@repo/ui/motion";
-import { useLoading, TextShimmer, TransactionCardShimmer } from "@repo/ui";
+import { TextShimmer, TransactionCardShimmer } from "@repo/ui";
+import { useInfiniteScroll } from "@repo/hooks";
 import WalletOverview from "@/features/wallet/components/WalletOverview";
 import TransactionCard from "@/features/wallet/components/TransactionCard";
 import TopUpDrawer from "@/features/wallet/components/TopUpDrawer";
 import WithdrawDrawer from "@/features/wallet/components/WithdrawDrawer";
 import TransactionDetailDrawer from "@/features/wallet/components/TransactionDetailDrawer";
-import DriverOrderDetailDrawer from "@/features/history/components/DriverOrderDetailDrawer";
-import { mockDriverHistory, DriverHistoryOrder } from "@/features/history/data/mockDriverHistory";
 import { History, Wallet, ArrowUpRight, ArrowDownLeft, ChevronUp, CheckCircle2 } from "@repo/ui/icons";
 import { useWallet } from "@/features/wallet/hooks/useWallet";
 import { useWalletTransactions } from "@/features/wallet/hooks/useWalletTransactions";
-import { useOrderDetail } from "@/features/history/hooks/useOrderDetail";
-import { WalletTransaction } from "@/features/wallet/data/mockWalletData";
-import { WalletTransactionResponse } from "@repo/types";
+import { DriverWalletTransaction, WalletTransactionType } from "@repo/types";
 
 import { useBottomNav } from "../context/BottomNavContext";
 
 export default function WalletPage() {
-  const { show, hide } = useLoading();
   const { setIsVisible } = useBottomNav();
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<DriverHistoryOrder | null>(null);
-  const [isOrderDrawerOpen, setIsOrderDrawerOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<WalletTransaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<DriverWalletTransaction | null>(null);
   const [isTransactionDrawerOpen, setIsTransactionDrawerOpen] = useState(false);
   const [filterType, setFilterType] = useState<'ALL' | 'IN' | 'OUT'>('ALL');
 
   const { wallet, isLoading: isWalletLoading } = useWallet();
-  const { transactions: backendTransactions, isLoading: isTransactionsLoading } = useWalletTransactions({
-    type: filterType,
-    size: 100 // Get a good batch
+  const {
+    transactions,
+    isLoading: isTransactionsLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useWalletTransactions({
+    type: filterType
   });
-  const { getOrderDetail, isLoading: isOrderLoading } = useOrderDetail();
 
   const isLoading = isWalletLoading || isTransactionsLoading;
 
-  // Map backend transactions to the format expected by the UI if needed
-  // or just use them directly if formats align.
-  // The current UI uses local WalletTransaction interface.
-  const transactions = useMemo(() => {
-    return backendTransactions.map(bt => ({
-      id: bt.id.toString(),
-      type: bt.transactionType === "DELIVERY_EARNING" ? "EARNING" :
-        bt.transactionType === "WITHDRAWAL" ? "WITHDRAWAL" :
-          bt.transactionType === "DEPOSIT" ? "TOP_UP" :
-            bt.transactionType === "PAYMENT" ? "ORDER_PAYMENT" : "EARNING",
-      amount: bt.amount,
-      description: bt.description,
-      timestamp: bt.createdAt,
-      status: bt.status === "SUCCESS" ? "COMPLETED" : bt.status === "PENDING" ? "PENDING" : "FAILED",
-      referenceId: bt.order?.id?.toString()
-    })) as WalletTransaction[];
-  }, [backendTransactions]);
-
-  const filteredTransactions = transactions; // Filtering is now handled by the hook
+  // Auto-load more when scrolling to bottom
+  const { sentinelRef } = useInfiniteScroll({
+    hasMore: hasNextPage,
+    isLoadingMore: isFetchingNextPage,
+    isLoading: isLoading,
+    onLoadMore: fetchNextPage,
+    rootMargin: '300px',
+  });
 
   const handleFilterChange = (type: 'ALL' | 'IN' | 'OUT') => {
     if (type === filterType) return;
@@ -65,34 +52,7 @@ export default function WalletPage() {
     containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleTransactionClick = async (tx: WalletTransaction) => {
-    if (tx.type === "EARNING" && tx.referenceId) {
-      // First try mock data (useful during development)
-      const mockOrder = mockDriverHistory.find(o => o.id === tx.referenceId || o.code === tx.referenceId);
-      if (mockOrder) {
-        setSelectedOrder(mockOrder);
-        setIsOrderDrawerOpen(true);
-        return;
-      }
-
-      // If not in mock, fetch from backend
-      const orderId = parseInt(tx.referenceId);
-      if (!isNaN(orderId)) {
-        show();
-        try {
-          const order = await getOrderDetail(orderId);
-          if (order) {
-            setSelectedOrder(order);
-            setIsOrderDrawerOpen(true);
-            return;
-          }
-        } finally {
-          hide();
-        }
-      }
-    }
-
-    // Handle other transaction types (Withdrawal, TopUp, COD) or fallback
+  const handleTransactionClick = (tx: DriverWalletTransaction) => {
     setSelectedTransaction(tx);
     setIsTransactionDrawerOpen(true);
   };
@@ -192,11 +152,7 @@ export default function WalletPage() {
     containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  useEffect(() => {
-    if (!isLoading) {
-      hide();
-    }
-  }, [hide, isLoading]);
+
 
   return (
     <div className="flex flex-col h-full bg-[#F7F7F7] relative">
@@ -328,31 +284,41 @@ export default function WalletPage() {
           ) : (
             <>
               <AnimatePresence mode="popLayout">
-                {filteredTransactions.map((tx, index) => (
-                  <motion.div
-                    key={tx.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
+                {transactions.map((tx: DriverWalletTransaction, index: number) => (
+                  <motion.div key={tx.id}>
                     <TransactionCard transaction={tx} onClick={() => handleTransactionClick(tx)} />
                   </motion.div>
                 ))}
               </AnimatePresence>
 
-              {filteredTransactions.length === 0 ? (
+              {transactions.length === 0 ? (
                 <div className="text-center py-10 text-gray-400 text-sm">Chưa có giao dịch nào</div>
               ) : (
-                <div className="py-12 flex items-center justify-center gap-4 opacity-60">
-                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
+                <>
+                  {/* Sentinel for infinite scroll */}
+                  <div ref={sentinelRef} />
+
+                  {/* Loading shimmer when fetching more */}
+                  {isFetchingNextPage && (
+                    <div className="py-4">
+                      <TransactionCardShimmer cardCount={2} />
                     </div>
-                    <span className="text-[14px] font-bold text-gray-400 uppercase font-anton">End of list</span>
-                  </div>
-                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
-                </div>
+                  )}
+
+                  {/* End of list indicator */}
+                  {!hasNextPage && !isFetchingNextPage && (
+                    <div className="py-12 flex items-center justify-center gap-4 opacity-60">
+                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
+                        </div>
+                        <span className="text-[14px] font-bold text-gray-400 uppercase font-anton">End of list</span>
+                      </div>
+                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
@@ -381,12 +347,6 @@ export default function WalletPage() {
         open={isWithdrawOpen}
         onClose={() => setIsWithdrawOpen(false)}
         balance={wallet?.balance || 0}
-      />
-
-      <DriverOrderDetailDrawer
-        open={isOrderDrawerOpen}
-        order={selectedOrder}
-        onClose={() => setIsOrderDrawerOpen(false)}
       />
 
       <TransactionDetailDrawer

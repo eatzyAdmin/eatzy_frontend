@@ -7,7 +7,7 @@ import {
   CreditCard, ExternalLink, Printer, Share2, Copy, Package, Store, MapPin,
   ShieldCheck, Banknote, AlertCircle
 } from 'lucide-react';
-import { WalletTransactionResponse, OrderResponse } from '@repo/types';
+import { WalletTransactionResponse, OrderResponse, isWalletCreditType, WalletTransactionStatus, WalletDisplayStatus } from '@repo/types';
 import { orderApi } from '@repo/api';
 import { ImageWithFallback } from '@repo/ui';
 import { createPortal } from 'react-dom';
@@ -64,7 +64,7 @@ export default function TransactionDetailsModal({
   const tx = transaction;
   if (!tx) return null;
 
-  const isCredit = ['DEPOSIT', 'REFUND', 'DELIVERY_EARNING', 'RESTAURANT_EARNING', 'EARNING', 'TOP_UP'].includes(tx.transactionType as string);
+  const isCredit = isWalletCreditType(tx.transactionType);
   const date = new Date(tx.createdAt);
 
   return createPortal(
@@ -99,9 +99,9 @@ export default function TransactionDetailsModal({
 
                 <div className="flex items-center gap-3">
                   <div className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm border flex items-center gap-2
-                                        ${tx.status === 'SUCCESS' || tx.status === 'COMPLETED' ? 'bg-lime-100 text-lime-700 border-lime-200' :
-                      tx.status === 'PENDING' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-red-100 text-red-700 border-red-200'}`}>
-                    {tx.status === 'SUCCESS' || tx.status === 'COMPLETED' ? <CheckCircle2 size={14} /> : tx.status === 'PENDING' ? <Clock size={14} /> : <XCircle size={14} />}
+                    ${tx.status === WalletTransactionStatus.SUCCESS || tx.status === WalletDisplayStatus.COMPLETED ? 'bg-lime-100 text-lime-700 border-lime-200' :
+                      tx.status === WalletTransactionStatus.PENDING ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-red-100 text-red-700 border-red-200'}`}>
+                    {tx.status === WalletTransactionStatus.SUCCESS || tx.status === WalletDisplayStatus.COMPLETED ? <CheckCircle2 size={14} /> : tx.status === WalletTransactionStatus.PENDING ? <Clock size={14} /> : <XCircle size={14} />}
                     {tx.status}
                   </div>
                   <button
@@ -193,13 +193,9 @@ export default function TransactionDetailsModal({
                           <div className="bg-white rounded-[28px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col h-full">
                             <div className="flex items-center gap-3 mb-4">
                               <div className="relative w-10 h-10 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
-                                {orderDetail.customer.avatar ? (
-                                  <ImageWithFallback src={orderDetail.customer.avatar} alt={orderDetail.customer.name} fill className="object-cover" />
-                                ) : (
-                                  <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-                                    <User className="w-5 h-5 text-gray-400" />
-                                  </div>
-                                )}
+                                <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+                                  <User className="w-5 h-5 text-gray-400" />
+                                </div>
                               </div>
                               <div>
                                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Customer</h4>
@@ -221,13 +217,9 @@ export default function TransactionDetailsModal({
                               <div className="h-full flex flex-col">
                                 <div className="flex items-center gap-3 mb-4">
                                   <div className="relative w-10 h-10 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 flex-shrink-0">
-                                    {orderDetail.driver.avatar ? (
-                                      <ImageWithFallback src={orderDetail.driver.avatar} alt={orderDetail.driver.name} fill className="object-cover" />
-                                    ) : (
-                                      <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-                                        <User className="w-5 h-5 text-gray-400" />
-                                      </div>
-                                    )}
+                                    <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+                                      <User className="w-5 h-5 text-gray-400" />
+                                    </div>
                                   </div>
                                   <div>
                                     <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Driver</h4>
@@ -345,7 +337,7 @@ export default function TransactionDetailsModal({
                               <span className="font-bold text-gray-900">{formatCurrency(orderDetail.deliveryFee)}</span>
                             </div>
 
-                            {orderDetail.discountAmount > 0 && (
+                            {(orderDetail.discountAmount || 0) > 0 && (
                               <div className="flex justify-between items-center text-sm">
                                 <div className="flex items-center gap-2">
                                   <span className="text-gray-500 font-medium">Discount</span>
@@ -355,7 +347,7 @@ export default function TransactionDetailsModal({
                                     </span>
                                   )}
                                 </div>
-                                <span className="font-bold text-primary">-{formatCurrency(orderDetail.discountAmount)}</span>
+                                <span className="font-bold text-primary">-{formatCurrency(orderDetail.discountAmount || 0)}</span>
                               </div>
                             )}
 

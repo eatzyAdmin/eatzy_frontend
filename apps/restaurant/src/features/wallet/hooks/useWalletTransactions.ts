@@ -3,9 +3,15 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { walletApi } from '@repo/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import type { WalletTransactionResponse, WalletTransaction } from '@repo/types';
+import {
+    WalletTransactionResponse,
+    WalletTransaction,
+    WalletTransactionType,
+    WalletTransactionStatus,
+    WALLET_CREDIT_TYPES,
+    WALLET_DEBIT_TYPES,
+} from '@repo/types';
 import { walletKeys } from './useWallet';
-
 
 export interface WalletSearchFields {
     id: string;
@@ -15,10 +21,6 @@ export interface WalletSearchFields {
 /**
  * Hook to fetch wallet transactions for current restaurant
  * Uses infinite query pattern for server-side pagination
- * 
- * @param searchFields - Search fields object with id and description
- * @param filterStr - Filter string in Spring Filter format
- * @param type - Transaction type filter: 'ALL' | 'IN' | 'OUT'
  */
 export function useWalletTransactions(
     searchFields?: WalletSearchFields,
@@ -27,6 +29,10 @@ export function useWalletTransactions(
 ) {
     const { user } = useAuth();
     const isLoggedIn = !!user?.id;
+
+    const buildTypeFilter = (types: readonly string[]) => {
+        return `(${types.map(t => `transactionType:'${t}'`).join(' or ')})`;
+    };
 
     const {
         data,
@@ -42,29 +48,24 @@ export function useWalletTransactions(
             // Build filter string
             let filter = filterStr || '';
 
-            // Add type filter
+            // Add type filter using shared constants
             if (type === 'IN') {
-                const typeFilter = "(transactionType~'RESTAURANT_EARNING')";
+                const typeFilter = buildTypeFilter(WALLET_CREDIT_TYPES);
                 filter = filter ? `${filter} and ${typeFilter}` : typeFilter;
             } else if (type === 'OUT') {
-                const typeFilter = "(transactionType~'WITHDRAWAL' or transactionType~'COMMISSION_PAID' or transactionType~'ORDER_PAYMENT')";
+                const typeFilter = buildTypeFilter(WALLET_DEBIT_TYPES);
                 filter = filter ? `${filter} and ${typeFilter}` : typeFilter;
             }
 
             // Add search filters
             const searchConditions: string[] = [];
-
-            // Search by ID
             if (searchFields?.id?.trim()) {
                 searchConditions.push(`id ~ '${searchFields.id.trim()}'`);
             }
-
-            // Search by description
             if (searchFields?.description?.trim()) {
                 searchConditions.push(`description ~ '*${searchFields.description.trim()}*'`);
             }
 
-            // Combine search conditions with OR
             if (searchConditions.length > 0) {
                 const searchQuery = searchConditions.length === 1
                     ? searchConditions[0]
@@ -83,13 +84,13 @@ export function useWalletTransactions(
                 const result = response.data.result || [];
                 const meta = response.data.meta;
 
-                // Map to WalletTransaction interface
                 const transactions: WalletTransaction[] = result.map((tx: WalletTransactionResponse) => {
-                    let category = 'Unknown';
-                    if (tx.transactionType === 'RESTAURANT_EARNING' || tx.transactionType === 'EARNING') category = 'Food Order';
-                    else if (tx.transactionType === 'WITHDRAWAL') category = 'Withdrawal';
-                    else if (tx.transactionType === 'COMMISSION_PAID') category = 'Commission';
-                    else if (tx.transactionType === 'ORDER_PAYMENT') category = 'Payment';
+                    let category = 'Other';
+                    if (tx.transactionType === WalletTransactionType.RESTAURANT_EARNING) category = 'Food Order';
+                    else if (tx.transactionType === WalletTransactionType.WITHDRAWAL) category = 'Withdrawal';
+                    else if (tx.transactionType === WalletTransactionType.COMMISSION_PAID) category = 'Commission';
+                    else if (tx.transactionType === WalletTransactionType.PAYMENT) category = 'Order Payment';
+                    else if (tx.transactionType === WalletTransactionType.REFUND) category = 'Refund';
 
                     return {
                         id: `TRX-${tx.id}`,
@@ -98,7 +99,7 @@ export function useWalletTransactions(
                         type: tx.amount > 0 ? 'revenue' : 'withdrawal',
                         description: tx.description,
                         amount: tx.amount,
-                        status: tx.status === 'SUCCESS' ? 'success' : 'failed',
+                        status: tx.status === WalletTransactionStatus.SUCCESS ? 'success' : 'failed',
                         category: category,
                         orderId: tx.order?.id,
                         balanceAfter: tx.balanceAfter
@@ -116,12 +117,12 @@ export function useWalletTransactions(
             return { items: [], nextPage: undefined, total: 0, pages: 0 };
         },
         initialPageParam: 1,
-        getNextPageParam: (lastPage) => lastPage.nextPage,
+        getNextPageParam: (lastPage: { nextPage?: number }) => lastPage.nextPage,
         enabled: isLoggedIn
     });
 
     // Flatten all pages into single array
-    const transactions = data?.pages.flatMap(page => page.items) || [];
+    const transactions = data?.pages.flatMap((page: { items: WalletTransaction[] }) => page.items) || [];
 
     return {
         transactions,

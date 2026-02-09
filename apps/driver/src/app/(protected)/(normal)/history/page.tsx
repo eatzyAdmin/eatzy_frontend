@@ -3,8 +3,9 @@
 import { useEffect, useState, useMemo, useRef, TouchEvent, WheelEvent } from "react";
 import { motion, AnimatePresence, useScroll } from "@repo/ui/motion";
 import { Search, Inbox, ChevronUp, CheckCircle2, Wallet, Bike } from "@repo/ui/icons";
-import { useLoading, TextShimmer, HistoryCardShimmer } from "@repo/ui";
-import { getDriverHistory, DriverHistoryOrder } from "@/features/history/data/mockDriverHistory";
+import { TextShimmer, HistoryCardShimmer } from "@repo/ui";
+import { useInfiniteScroll } from "@repo/hooks";
+import type { DriverHistoryOrder } from "@repo/types";
 import HistoryStats from "@/features/history/components/HistoryStats";
 import HistoryFilter from "@/features/history/components/HistoryFilter";
 import DriverHistoryCard from "@/features/history/components/DriverHistoryCard";
@@ -14,7 +15,6 @@ import { useBottomNav } from "../context/BottomNavContext";
 import { useDriverOrderHistory } from "@/features/history/hooks/useDriverOrderHistory";
 
 export default function HistoryPage() {
-  const { hide } = useLoading();
   const { setIsVisible } = useBottomNav();
   const [filter, setFilter] = useState<"ALL" | "DELIVERED" | "CANCELLED">("ALL");
   const [selectedOrder, setSelectedOrder] = useState<DriverHistoryOrder | null>(null);
@@ -22,10 +22,25 @@ export default function HistoryPage() {
   const [searchInputValue, setSearchInputValue] = useState("");
   const [actualSearchQuery, setActualSearchQuery] = useState("");
 
-  const { orders, isLoading, isError, error, refetch } = useDriverOrderHistory({
+  const {
+    orders,
+    isLoading,
+    refetch,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useDriverOrderHistory({
     status: filter,
-    search: actualSearchQuery,
-    size: 50
+    search: actualSearchQuery
+  });
+
+  // Auto-load more when scrolling to bottom
+  const { sentinelRef } = useInfiniteScroll({
+    hasMore: hasNextPage,
+    isLoadingMore: isFetchingNextPage,
+    isLoading: isLoading,
+    onLoadMore: fetchNextPage,
+    rootMargin: '300px',
   });
 
   // Scroll animation state
@@ -116,12 +131,7 @@ export default function HistoryPage() {
     containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Simulated data fetch & loading
-  useEffect(() => {
-    if (!isLoading) {
-      hide();
-    }
-  }, [hide, isLoading]);
+
 
   const filteredOrders = orders; // Filtering is now handled by the hook
 
@@ -271,16 +281,31 @@ export default function HistoryPage() {
               </AnimatePresence>
 
               {filteredOrders.length > 0 && (
-                <div className="py-12 flex items-center justify-center gap-4 opacity-60">
-                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
+                <>
+                  {/* Sentinel for infinite scroll */}
+                  <div ref={sentinelRef} />
+
+                  {/* Loading shimmer when fetching more */}
+                  {isFetchingNextPage && (
+                    <div className="py-4">
+                      <HistoryCardShimmer cardCount={1} />
                     </div>
-                    <span className="text-[14px] font-bold text-gray-400 uppercase font-anton">End of list</span>
-                  </div>
-                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
-                </div>
+                  )}
+
+                  {/* End of list indicator */}
+                  {!hasNextPage && !isFetchingNextPage && (
+                    <div className="py-12 flex items-center justify-center gap-4 opacity-60">
+                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
+                        </div>
+                        <span className="text-[14px] font-bold text-gray-400 uppercase font-anton">End of list</span>
+                      </div>
+                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
