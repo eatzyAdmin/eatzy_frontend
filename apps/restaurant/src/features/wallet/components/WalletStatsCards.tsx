@@ -1,13 +1,23 @@
 import { motion } from '@repo/ui/motion';
 import { CreditCard, TrendingUp, DollarSign, ArrowUpRight } from '@repo/ui/icons';
-import { mockWallet } from '../data/mockWallet';
+import { formatCurrency } from '@repo/lib';
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-};
 
-export default function WalletStatsCards({ onWithdraw, isLoading = false, children }: { onWithdraw?: () => void, isLoading?: boolean, children?: React.ReactNode }) {
-  const { balance } = mockWallet;
+interface WalletStatsCardsProps {
+  balance: number;
+  todayEarnings?: number;
+  onWithdraw?: () => void;
+  isLoading?: boolean;
+  children?: React.ReactNode;
+}
+
+export default function WalletStatsCards({
+  balance,
+  todayEarnings = 0,
+  onWithdraw,
+  isLoading = false,
+  children
+}: WalletStatsCardsProps) {
 
   return (
     <div className="flex gap-6 pb-6 snap-x scrollbar-hide">
@@ -31,7 +41,7 @@ export default function WalletStatsCards({ onWithdraw, isLoading = false, childr
             {isLoading ? (
               <div className="h-10 w-48 bg-white/20 animate-pulse rounded-lg" />
             ) : (
-              formatCurrency(balance.available)
+              formatCurrency(balance)
             )}
           </div>
           <div className="text-xs text-white/60 font-medium">Updated just now</div>
@@ -66,7 +76,7 @@ export default function WalletStatsCards({ onWithdraw, isLoading = false, childr
             {isLoading ? (
               <div className="h-9 w-40 bg-gray-200 animate-pulse rounded-lg" />
             ) : (
-              formatCurrency(balance.total_earnings_today)
+              formatCurrency(todayEarnings)
             )}
           </div>
         </div>

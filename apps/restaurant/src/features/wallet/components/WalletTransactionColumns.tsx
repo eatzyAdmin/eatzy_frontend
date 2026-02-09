@@ -1,6 +1,6 @@
 import React from 'react';
 import { Utensils, Landmark, FileText, Clock, ArrowDownLeft, ArrowUpRight, CheckCircle, AlertCircle } from '@repo/ui/icons';
-import { Transaction } from '../types';
+import type { WalletTransaction } from '@repo/types';
 
 export const getWalletTransactionColumns = () => {
   return [
@@ -8,7 +8,7 @@ export const getWalletTransactionColumns = () => {
       label: 'TRANSACTION ID',
       key: 'id',
       className: 'w-[140px]',
-      formatter: (_: any, item: Transaction) => (
+      formatter: (_: unknown, item: WalletTransaction) => (
         <span className="font-mono text-[12px] font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100 shadow-sm uppercase tracking-tighter">
           #{item.id.includes('-') ? item.id.split('-')[1] : item.id}
         </span>
@@ -18,7 +18,7 @@ export const getWalletTransactionColumns = () => {
       label: 'TYPE & DESCRIPTION',
       key: 'description',
       className: 'min-w-[280px]',
-      formatter: (_: any, item: Transaction) => {
+      formatter: (_: unknown, item: WalletTransaction) => {
         const isFoodOrder = item.category === 'Food Order';
         const isWithdrawal = item.category === 'Withdrawal';
 
@@ -49,7 +49,7 @@ export const getWalletTransactionColumns = () => {
       label: 'DATE',
       key: 'date',
       className: 'min-w-[140px]',
-      formatter: (_: any, item: Transaction) => {
+      formatter: (_: unknown, item: WalletTransaction) => {
         const date = new Date(item.date);
         return (
           <div className="flex flex-col py-2">
@@ -70,7 +70,7 @@ export const getWalletTransactionColumns = () => {
       label: 'AMOUNT',
       key: 'amount',
       className: 'min-w-[160px]',
-      formatter: (_: any, item: Transaction) => {
+      formatter: (_: unknown, item: WalletTransaction) => {
         const isPositive = item.amount > 0;
         return (
           <div className="flex items-center gap-3 py-2">
@@ -92,7 +92,7 @@ export const getWalletTransactionColumns = () => {
     {
       label: 'STATUS',
       key: 'status',
-      formatter: (_: any, item: Transaction) => {
+      formatter: (_: unknown, item: WalletTransaction) => {
         const isSuccess = item.status === 'success';
         return (
           <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border tracking-wide shadow-sm ${isSuccess

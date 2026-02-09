@@ -3,27 +3,24 @@
 import { useState, useEffect } from 'react';
 import { motion } from '@repo/ui/motion';
 import {
-  ArrowDownLeft, ArrowUpRight, Search, Filter, Download, FileText,
-  CheckCircle, AlertCircle, X, Utensils, Landmark, RotateCcw,
-  Clock, Calendar, Banknote
+  Search, Download, FileText
 } from '@repo/ui/icons';
 import { DataTable, SearchPopup, TableHeader } from '@repo/ui';
-import { OrderHistoryItem } from '@repo/types';
+import type { WalletTransaction } from '@repo/types';
 import WalletFilterModal from './WalletFilterModal';
 import WalletExportModal from './WalletExportModal';
 import OrderDetailsModal from '@/features/history/components/OrderDetailsModal';
 import { useOrderDetail } from '@/features/history/hooks/useOrderDetail';
-import { useLoading } from '@repo/ui';
 import WithdrawalDetailsModal from './WithdrawalDetailsModal';
-import { Transaction } from '../types';
 import { WalletSearchFields } from '../hooks/useWalletTransactions';
 import { getWalletTransactionColumns } from './WalletTransactionColumns';
 import WalletFilterBadges from './WalletFilterBadges';
 import { useMemo } from 'react';
 
 interface WalletTransactionTableProps {
-  data: Transaction[];
+  data: WalletTransaction[];
   isLoading: boolean;
+
   isFetchingNextPage?: boolean;
   hasNextPage?: boolean;
   onLoadMore?: () => void;
@@ -48,13 +45,13 @@ export default function WalletTransactionTable({
   searchFields,
   filterQuery
 }: WalletTransactionTableProps) {
-  const { getOrderDetail } = useOrderDetail();
-  const { show, hide } = useLoading();
+  const { order, isLoading: isOrderLoading, fetchOrder, clearOrder } = useOrderDetail();
 
   const [isMounted, setIsMounted] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   // Filter fields for modal
   const [filterFields, setFilterFields] = useState<{
@@ -68,8 +65,7 @@ export default function WalletTransactionTable({
   });
 
   // Modal States
-  const [selectedOrder, setSelectedOrder] = useState<OrderHistoryItem | null>(null);
-  const [selectedWithdrawal, setSelectedWithdrawal] = useState<Transaction | null>(null);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState<WalletTransaction | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   useEffect(() => {
@@ -98,6 +94,14 @@ export default function WalletTransactionTable({
       filters.push(`createdAt<:'${toDate.toISOString()}'`);
     }
 
+    // Amount Range filter
+    if (newFilters.amountRange.min > -100000000) {
+      filters.push(`amount>=${newFilters.amountRange.min}`);
+    }
+    if (newFilters.amountRange.max < 100000000) {
+      filters.push(`amount<=${newFilters.amountRange.max}`);
+    }
+
     const query = filters.join(' and ');
     onFilter(query);
     setActiveFiltersCount(filters.length);
@@ -115,22 +119,19 @@ export default function WalletTransactionTable({
     onRefresh();
   };
 
-  const handleRowClick = async (item: Transaction) => {
-    if ((item.category === 'Food Order' || item.type === 'revenue') && item.orderId) {
-      try {
-        show();
-        const order = await getOrderDetail(item.orderId);
-        if (order) {
-          setSelectedOrder(order);
-        }
-      } catch (error) {
-        console.error("Failed to fetch order details", error);
-      } finally {
-        hide();
-      }
+  const handleRowClick = (item: WalletTransaction) => {
+    // Show order details for Food Order, Commission, or revenue transactions
+    if ((item.category === 'Food Order' || item.category === 'Commission' || item.type === 'revenue') && item.orderId) {
+      setIsOrderModalOpen(true);
+      fetchOrder(item.orderId);
     } else if (item.category === 'Withdrawal') {
       setSelectedWithdrawal(item);
     }
+  };
+
+  const handleCloseOrderModal = () => {
+    setIsOrderModalOpen(false);
+    clearOrder();
   };
 
   const handleExportData = async (format: 'pdf' | 'excel', scope: 'current' | 'all', columns: string[]) => {
@@ -177,7 +178,7 @@ export default function WalletTransactionTable({
 
       {/* Table - DataTable handles loading states and infinite scroll */}
       <div className="p-4 pt-0">
-        <DataTable<Transaction>
+        <DataTable<WalletTransaction>
           data={data}
           columns={columns}
           isLoading={isLoading}
@@ -190,7 +191,7 @@ export default function WalletTransactionTable({
           emptyIcon={<FileText size={48} />}
           onResetFilters={handleClearFilters}
           handleSort={(key) => console.log('Sort by', key)}
-          renderActions={(item: Transaction) => (
+          renderActions={(item: WalletTransaction) => (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -240,8 +241,10 @@ export default function WalletTransactionTable({
       />
 
       <OrderDetailsModal
-        order={selectedOrder}
-        onClose={() => setSelectedOrder(null)}
+        order={order}
+        onClose={handleCloseOrderModal}
+        isLoading={isOrderLoading}
+        isOpen={isOrderModalOpen}
       />
 
       <WithdrawalDetailsModal

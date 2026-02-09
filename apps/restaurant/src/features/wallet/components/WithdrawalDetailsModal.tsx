@@ -1,15 +1,13 @@
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import { X, CheckCircle, AlertCircle, Clock, Banknote, Landmark, FileText } from '@repo/ui/icons';
-import { Transaction } from '../types';
+import type { WalletTransaction } from '@repo/types';
+import { formatCurrency } from '@repo/lib';
 
 interface WithdrawalDetailsModalProps {
-  transaction: Transaction | null;
+  transaction: WalletTransaction | null;
   onClose: () => void;
 }
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Math.abs(amount));
-};
 
 export default function WithdrawalDetailsModal({ transaction, onClose }: WithdrawalDetailsModalProps) {
   // Mock bank info since it's not fully in the transaction object yet, or use what's available

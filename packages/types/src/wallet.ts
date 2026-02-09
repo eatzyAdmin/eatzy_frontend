@@ -45,5 +45,29 @@ export interface WalletTransactionResponse {
     transactionDate: string;
 }
 
+export interface BankAccountInfo {
+    bankName: string;
+    accountNumber: string;
+    holderName: string;
+    branch?: string;
+}
+
+/**
+ * Mapped transaction type for frontend display (transformed from WalletTransactionResponse)
+ */
+export interface WalletTransaction {
+    id: string;
+    originalId: number; // Keep original ID for API calls
+    date: string;
+    type: string;
+    description: string;
+    amount: number;
+    status: string;
+    category: string;
+    orderId?: number;
+    balanceAfter: number;
+    [key: string]: unknown; // For DataTable compatibility
+}
+
 export type WalletBackendRes = IBackendRes<WalletResponse>;
 export type WalletTransactionsBackendRes = IBackendRes<ResultPaginationDTO<WalletTransactionResponse[]>>;

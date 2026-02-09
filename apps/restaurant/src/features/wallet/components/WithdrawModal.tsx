@@ -2,13 +2,17 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import { X, ChevronRight, ChevronLeft, AlertTriangle, Wallet } from '@repo/ui/icons';
 import { SwipeToConfirm } from '@repo/ui';
-import { mockWallet } from '../data/mockWallet';
+import { formatCurrency } from '@repo/lib';
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-};
 
-export default function WithdrawModal({ isOpen, onClose, onConfirm }: { isOpen: boolean; onClose: () => void; onConfirm: (amount: number) => void }) {
+interface WithdrawModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (amount: number) => void;
+  maxBalance?: number;
+}
+
+export default function WithdrawModal({ isOpen, onClose, onConfirm, maxBalance = 0 }: WithdrawModalProps) {
   const [step, setStep] = useState<'input' | 'confirm'>('input');
   const [amountStr, setAmountStr] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -24,7 +28,8 @@ export default function WithdrawModal({ isOpen, onClose, onConfirm }: { isOpen: 
     }
   }, [isOpen]);
 
-  const maxAmount = mockWallet.balance.available;
+  const maxAmount = maxBalance;
+
 
   const handleNext = () => {
     const val = parseInt(amountStr.replace(/\D/g, ''), 10);

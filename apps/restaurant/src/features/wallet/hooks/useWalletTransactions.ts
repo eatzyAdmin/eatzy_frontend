@@ -3,8 +3,9 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { walletApi } from '@repo/api';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import type { WalletTransactionResponse } from '@repo/types';
-import { Transaction } from '../types';
+import type { WalletTransactionResponse, WalletTransaction } from '@repo/types';
+import { walletKeys } from './useWallet';
+
 
 export interface WalletSearchFields {
     id: string;
@@ -36,7 +37,7 @@ export function useWalletTransactions(
         hasNextPage,
         isFetchingNextPage
     } = useInfiniteQuery({
-        queryKey: ['wallet-transactions', 'my', searchFields?.id, searchFields?.description, filterStr, type],
+        queryKey: walletKeys.transactionsWithFilters(searchFields?.id, searchFields?.description, filterStr, type),
         queryFn: async ({ pageParam = 1 }) => {
             // Build filter string
             let filter = filterStr || '';
@@ -82,8 +83,8 @@ export function useWalletTransactions(
                 const result = response.data.result || [];
                 const meta = response.data.meta;
 
-                // Map to local Transaction interface
-                const transactions: Transaction[] = result.map((tx: WalletTransactionResponse) => {
+                // Map to WalletTransaction interface
+                const transactions: WalletTransaction[] = result.map((tx: WalletTransactionResponse) => {
                     let category = 'Unknown';
                     if (tx.transactionType === 'RESTAURANT_EARNING' || tx.transactionType === 'EARNING') category = 'Food Order';
                     else if (tx.transactionType === 'WITHDRAWAL') category = 'Withdrawal';

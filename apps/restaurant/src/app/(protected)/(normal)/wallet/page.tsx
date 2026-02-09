@@ -7,7 +7,7 @@ import WalletBankInfo from '@/features/wallet/components/WalletBankInfo';
 import WithdrawModal from '@/features/wallet/components/WithdrawModal';
 import { useNotification } from '@repo/ui';
 import { ChevronLeft, ChevronRight, Wallet } from '@repo/ui/icons';
-import { useWalletTransactions, WalletSearchFields } from '@/features/wallet/hooks/useWalletTransactions';
+import { useMyWallet, useWalletTransactions, type WalletSearchFields } from '@/features/wallet/hooks';
 
 export default function WalletPage() {
   const { showNotification } = useNotification();
@@ -31,13 +31,22 @@ export default function WalletPage() {
   // Use hook with search and filter params (server-side)
   const {
     transactions,
-    isLoading,
+    isLoading: isLoadingTransactions,
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
     refetch,
     total
   } = useWalletTransactions(searchFields, filterQuery);
+
+  // Fetch wallet info (balance, bank details)
+  const {
+    balance,
+    isLoading: isLoadingWallet
+  } = useMyWallet();
+
+  const isLoading = isLoadingTransactions || isLoadingWallet;
+
 
   // Check scroll state on mount and resize
   useEffect(() => {
@@ -122,7 +131,7 @@ export default function WalletPage() {
           onScroll={handleScroll}
           className="overflow-x-auto -mx-6 px-6 w-full pb-6 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
-          <WalletStatsCards onWithdraw={() => setIsWithdrawModalOpen(true)} isLoading={isLoading}>
+          <WalletStatsCards balance={balance} onWithdraw={() => setIsWithdrawModalOpen(true)} isLoading={isLoading}>
             {/* Bank Info Card */}
             <div className="min-w-[400px] snap-start">
               <WalletBankInfo isLoading={isLoading} />
@@ -197,6 +206,7 @@ export default function WalletPage() {
         isOpen={isWithdrawModalOpen}
         onClose={() => setIsWithdrawModalOpen(false)}
         onConfirm={handleWithdrawConfirm}
+        maxBalance={balance}
       />
     </div>
   );

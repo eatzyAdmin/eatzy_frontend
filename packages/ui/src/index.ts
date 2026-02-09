@@ -66,6 +66,7 @@ export * from "./effects/HoverHighlight";
 export * from "./effects/TapRipple";
 export * from "./effects/FlyToCart";
 export { default as OrderHistoryCardShimmer } from "./feedback/shimmer/OrderHistoryCardShimmer";
+export { default as OrderDetailsModalShimmer } from "./feedback/shimmer/OrderDetailsModalShimmer";
 export { default as ImageWithFallback } from "./media/ImageWithFallback";
 export { default as InfiniteScrollContainer, type InfiniteScrollContainerProps } from "./feedback/InfiniteScrollContainer";
 export { SearchPopup } from "./search/SearchPopup";

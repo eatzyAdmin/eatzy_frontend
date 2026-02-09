@@ -45,6 +45,7 @@ export default function OrderHistoryTable({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState<OrderHistoryItem | null>(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Filter fields for modal
@@ -183,7 +184,10 @@ export default function OrderHistoryTable({
           isFetchingNextPage={isFetchingNextPage}
           hasNextPage={hasNextPage}
           fetchNextPage={onLoadMore}
-          onRowClick={(item) => setSelectedOrder(item)}
+          onRowClick={(item) => {
+            setSelectedOrder(item);
+            setIsOrderModalOpen(true);
+          }}
           emptyTitle="No Orders Found"
           emptyMessage="Không tìm thấy đơn hàng nào khớp với tiêu chí tìm kiếm của bạn. Hãy thử thay đổi bộ lọc."
           emptyIcon={<FileText size={48} />}
@@ -191,7 +195,10 @@ export default function OrderHistoryTable({
           handleSort={(key) => console.log('Sort by', key)}
           renderActions={(item: OrderHistoryItem) => (
             <button
-              onClick={() => setSelectedOrder(item)}
+              onClick={() => {
+                setSelectedOrder(item);
+                setIsOrderModalOpen(true);
+              }}
               className="p-2 rounded-xl bg-lime-100 text-lime-600 hover:text-lime-700 hover:bg-lime-200 transition-all duration-300 shadow-sm"
               title="View Details"
             >
@@ -232,7 +239,11 @@ export default function OrderHistoryTable({
 
       <OrderDetailsModal
         order={selectedOrder}
-        onClose={() => setSelectedOrder(null)}
+        onClose={() => {
+          setIsOrderModalOpen(false);
+          setSelectedOrder(null);
+        }}
+        isOpen={isOrderModalOpen}
       />
 
       <OrderExportModal

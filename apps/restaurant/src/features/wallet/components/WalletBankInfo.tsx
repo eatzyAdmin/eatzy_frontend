@@ -1,8 +1,22 @@
-import { mockWallet } from '../data/mockWallet';
 import { CreditCard, ShieldCheck } from '@repo/ui/icons';
+import type { BankAccountInfo } from '@repo/types';
 
-export default function WalletBankInfo({ isLoading = false }: { isLoading?: boolean }) {
-  const { bank_account } = mockWallet;
+interface WalletBankInfoProps {
+  bankAccount?: BankAccountInfo;
+  isLoading?: boolean;
+}
+
+// Default/fallback data when API doesn't provide bank info
+const DEFAULT_BANK_ACCOUNT: BankAccountInfo = {
+  bankName: 'Vietcombank',
+  accountNumber: '**** **** **** 9988',
+  holderName: 'RESTAURANT PARTNER',
+  branch: 'Ho Chi Minh City'
+};
+
+
+export default function WalletBankInfo({ bankAccount, isLoading = false }: WalletBankInfoProps) {
+  const bank = bankAccount || DEFAULT_BANK_ACCOUNT;
 
   return (
     <div className="w-full h-full flex items-center justify-center">
@@ -14,7 +28,7 @@ export default function WalletBankInfo({ isLoading = false }: { isLoading?: bool
         <div className="relative z-10 flex flex-col h-full gap-6 justify-center">
           <div className="flex justify-between items-start">
             <div className="text-xl font-bold tracking-wider font-anton">
-              {isLoading ? <div className="h-7 w-32 bg-white/20 animate-pulse rounded-md" /> : bank_account.bank_name}
+              {isLoading ? <div className="h-7 w-32 bg-white/20 animate-pulse rounded-md" /> : bank.bankName}
             </div>
             <CreditCard className="w-8 h-8 opacity-80" />
           </div>
@@ -30,7 +44,7 @@ export default function WalletBankInfo({ isLoading = false }: { isLoading?: bool
               <ShieldCheck className="w-6 h-6 opacity-60" />
             </div>
             <div className="font-mono text-2xl tracking-widest drop-shadow-md">
-              {isLoading ? <div className="h-8 w-56 bg-white/20 animate-pulse rounded-md" /> : bank_account.account_number}
+              {isLoading ? <div className="h-8 w-56 bg-white/20 animate-pulse rounded-md" /> : bank.accountNumber}
             </div>
           </div>
 
@@ -38,13 +52,13 @@ export default function WalletBankInfo({ isLoading = false }: { isLoading?: bool
             <div>
               <div className="text-[10px] uppercase opacity-70 tracking-widest mb-1">Card Holder</div>
               <div className="font-bold tracking-wide text-sm">
-                {isLoading ? <div className="h-4 w-32 bg-white/20 animate-pulse rounded mt-1" /> : bank_account.holder_name}
+                {isLoading ? <div className="h-4 w-32 bg-white/20 animate-pulse rounded mt-1" /> : bank.holderName}
               </div>
             </div>
             <div className="text-right">
               <div className="text-[10px] uppercase opacity-70 tracking-widest mb-1">Branch</div>
               <div className="font-bold text-xs">
-                {isLoading ? <div className="h-4 w-20 bg-white/20 animate-pulse rounded mt-1 ml-auto" /> : bank_account.branch}
+                {isLoading ? <div className="h-4 w-20 bg-white/20 animate-pulse rounded mt-1 ml-auto" /> : bank.branch || 'N/A'}
               </div>
             </div>
           </div>

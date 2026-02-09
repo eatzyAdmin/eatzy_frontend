@@ -46,10 +46,11 @@ export function mapOrderResponseToOrderHistoryItem(res: OrderResponse): OrderHis
 }
 
 export function useOrderDetail() {
+    const [order, setOrder] = useState<OrderHistoryItem | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const getOrderDetail = async (orderId: number | string): Promise<OrderHistoryItem | null> => {
+    const fetchOrder = (orderId: number | string) => {
         // Handle if orderId comes as string "ORD-123"
         let parsedId = orderId;
         if (typeof orderId === 'string' && orderId.startsWith('ORD-')) {
@@ -58,24 +59,31 @@ export function useOrderDetail() {
             parsedId = parseInt(orderId, 10);
         }
 
-        if (isNaN(parsedId as number)) return null;
+        if (isNaN(parsedId as number)) return;
 
         setIsLoading(true);
         setError(null);
-        try {
-            const response = await orderApi.getOrderById(parsedId as number);
-            if (response.statusCode === 200 && response.data) {
-                return mapOrderResponseToOrderHistoryItem(response.data);
-            }
-            setError("Failed to fetch order details");
-            return null;
-        } catch (err) {
-            setError("An error occurred while fetching order details");
-            return null;
-        } finally {
-            setIsLoading(false);
-        }
+
+        orderApi.getOrderById(parsedId as number)
+            .then((response) => {
+                if (response.statusCode === 200 && response.data) {
+                    setOrder(mapOrderResponseToOrderHistoryItem(response.data));
+                } else {
+                    setError("Failed to fetch order details");
+                }
+            })
+            .catch(() => {
+                setError("An error occurred while fetching order details");
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     };
 
-    return { getOrderDetail, isLoading, error };
+    const clearOrder = () => {
+        setOrder(null);
+        setError(null);
+    };
+
+    return { order, isLoading, error, fetchOrder, clearOrder };
 }
