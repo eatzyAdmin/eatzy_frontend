@@ -72,3 +72,4 @@ export { default as InfiniteScrollContainer, type InfiniteScrollContainerProps }
 export { SearchPopup } from "./search/SearchPopup";
 export { PremiumDateRangePicker } from "./filters/PremiumDateRangePicker";
 export { PremiumPriceRangeFilter } from "./filters/PremiumPriceRangeFilter";
+export { default as OrderReviewTabShimmer } from "./feedback/shimmer/OrderReviewTabShimmer";

@@ -67,6 +67,7 @@ export type OrderRestaurant = {
   id: number;
   name: string;
   address?: string;
+  imageUrl?: string;
   latitude?: number;
   longitude?: number;
 };
@@ -74,6 +75,7 @@ export type OrderRestaurant = {
 export type OrderDriver = {
   id: number;
   name: string;
+  avatarUrl?: string;
   vehicleType?: string;
   vehicleDetails?: string;
   averageRating?: string;

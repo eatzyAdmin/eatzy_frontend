@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star, Send, Award, ShieldCheck, Quote, User as UserIcon } from "@repo/ui/icons";
-import { ImageWithFallback } from "@repo/ui";
+import { ImageWithFallback, OrderReviewTabShimmer } from "@repo/ui";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { useSwipeConfirmation, useNotification } from "@repo/ui";
 import type { OrderResponse } from "@repo/types";
+import { useReview } from "@/features/orders/hooks/useReview";
 
 interface OrderReviewTabProps {
   order: OrderResponse;
@@ -12,11 +12,20 @@ interface OrderReviewTabProps {
 }
 
 export default function OrderReviewTab({
+  order,
   driver,
   restaurant,
 }: OrderReviewTabProps) {
-  const { confirm } = useSwipeConfirmation();
-  const { showNotification } = useNotification();
+  const {
+    restaurantReview,
+    driverReview,
+    isLoading,
+    isRestaurantReviewed,
+    isDriverReviewed,
+    handleReviewRestaurant,
+    handleReviewDriver,
+    isSubmitting,
+  } = useReview(order.id);
 
   const [restaurantRating, setRestaurantRating] = useState(0);
   const [restaurantComment, setRestaurantComment] = useState("");
@@ -26,46 +35,21 @@ export default function OrderReviewTab({
   const [hoveredRestaurantRating, setHoveredRestaurantRating] = useState(0);
   const [hoveredDriverRating, setHoveredDriverRating] = useState(0);
 
-  const [isRestaurantSubmitted, setIsRestaurantSubmitted] = useState(false);
-  const [isDriverSubmitted, setIsDriverSubmitted] = useState(false);
-
-  const handleSubmitRestaurant = async () => {
-    if (restaurantRating === 0 || !restaurantComment.trim()) {
-      showNotification({ type: "error", message: "Vui lòng chọn số sao và viết nhận xét!", format: "Điền đầy đủ thông tin trước khi gửi đánh giá nhé!" });
-      return;
+  // Sync existing reviews to local state when they load
+  useEffect(() => {
+    if (restaurantReview) {
+      setRestaurantRating(restaurantReview.rating);
+      setRestaurantComment(restaurantReview.comment || "");
     }
-
-    confirm({
-      title: "Gửi đánh giá nhà hàng?",
-      type: "success",
-      description: "Vuốt để xác nhận gửi đánh giá của bạn",
-      onConfirm: async () => {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setIsRestaurantSubmitted(true);
-        showNotification({ type: "success", message: "Đánh giá nhà hàng thành công!", format: "Đánh giá đã được ghi nhận thành công!" });
-      }
-    });
-  };
-
-  const handleSubmitDriver = async () => {
-    if (!driver) return;
-
-    if (driverRating === 0 || !driverComment.trim()) {
-      showNotification({ type: "error", message: "Vui lòng chọn số sao và viết nhận xét!", format: "Điền đầy đủ thông tin trước khi gửi đánh giá nhé!" });
-      return;
+    if (driverReview) {
+      setDriverRating(driverReview.rating);
+      setDriverComment(driverReview.comment || "");
     }
+  }, [restaurantReview, driverReview]);
 
-    confirm({
-      title: "Gửi đánh giá tài xế?",
-      type: "success",
-      description: "Vuốt để xác nhận gửi đánh giá của bạn",
-      onConfirm: async () => {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setIsDriverSubmitted(true);
-        showNotification({ type: "success", message: "Đánh giá tài xế thành công!", format: "Đánh giá đã được ghi nhận thành công!" });
-      }
-    });
-  };
+  if (isLoading) {
+    return <OrderReviewTabShimmer />;
+  }
 
   const renderRestaurantCard = (isSubmitted: boolean) => (
     <div className="bg-white rounded-[32px] p-8 shadow-[0_6px_20px_rgba(0,0,0,0.06)] border border-gray-100 flex flex-col items-center text-center h-full max-h-[600px] relative overflow-hidden">
@@ -77,7 +61,7 @@ export default function OrderReviewTab({
           <div className="relative w-24 h-24 mb-4">
             <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-gray-50 border border-gray-100 shadow-sm">
               <ImageWithFallback
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(restaurant.name)}&background=random&color=fff&size=512`}
+                src={restaurant.imageUrl || ""}
                 alt={restaurant.name}
                 fill
                 className="object-cover"
@@ -120,11 +104,12 @@ export default function OrderReviewTab({
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            onClick={handleSubmitRestaurant}
-            className="w-full h-16 rounded-2xl bg-[var(--primary)] text-white text-xl uppercase font-anton font-semibold shadow-sm flex items-center justify-center gap-2"
+            onClick={() => handleReviewRestaurant(restaurantRating, restaurantComment)}
+            disabled={isSubmitting}
+            className="w-full h-16 rounded-2xl bg-[var(--primary)] text-white text-xl uppercase font-anton font-semibold shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-5 h-5" />
-            COMPLETE REVIEW
+            {isSubmitting ? "ĐANG GỬI..." : "COMPLETE REVIEW"}
           </motion.button>
         </>
       ) : (
@@ -141,7 +126,7 @@ export default function OrderReviewTab({
           {/* Submitted Profile Card */}
           <div className="relative w-28 h-28 mb-3">
             <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-gray-50 border-4 border-white shadow-md">
-              <ImageWithFallback src={`https://ui-avatars.com/api/?name=${encodeURIComponent(restaurant.name)}&background=random&color=fff&size=512`} alt={restaurant.name} fill className="object-cover" />
+              <ImageWithFallback src={restaurant.imageUrl || ""} alt={restaurant.name} fill className="object-cover" />
             </div>
             <div className="absolute bottom-0 right-0 z-20 bg-[var(--primary)] text-white p-1.5 rounded-full shadow-md border-2 border-white">
               <Award className="w-4 h-4" />
@@ -163,10 +148,6 @@ export default function OrderReviewTab({
               &quot;{restaurantComment || "Không có nhận xét"}&quot;
             </p>
           </div>
-
-          <button className="text-gray-400 text-xs font-medium hover:text-gray-600 mt-6">
-            Chỉnh sửa đánh giá
-          </button>
         </motion.div>
       )}
     </div>
@@ -187,7 +168,7 @@ export default function OrderReviewTab({
           <div className="relative w-24 h-24 mb-4">
             <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-gray-50 border border-gray-100 shadow-sm">
               <ImageWithFallback
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(driver.name)}&background=random&color=fff`}
+                src={driver.avatarUrl || ""}
                 alt={driver.name}
                 fill
                 className="object-cover"
@@ -230,11 +211,12 @@ export default function OrderReviewTab({
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            onClick={handleSubmitDriver}
-            className="w-full h-16 rounded-2xl bg-[var(--primary)] text-white text-xl uppercase font-anton font-semibold shadow-sm flex items-center justify-center gap-2"
+            onClick={() => handleReviewDriver(driverRating, driverComment)}
+            disabled={isSubmitting}
+            className="w-full h-16 rounded-2xl bg-[var(--primary)] text-white text-xl uppercase font-anton font-semibold shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-5 h-5" />
-            COMPLETE REVIEW
+            {isSubmitting ? "ĐANG GỬI..." : "COMPLETE REVIEW"}
           </motion.button>
         </>
       ) : (
@@ -251,7 +233,7 @@ export default function OrderReviewTab({
           {/* Submitted Profile Card */}
           <div className="relative w-28 h-28 mb-3">
             <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-gray-50 border-4 border-white shadow-md">
-              <ImageWithFallback src={`https://ui-avatars.com/api/?name=${encodeURIComponent(driver.name)}&background=random&color=fff`} alt={driver.name} fill className="object-cover" />
+              <ImageWithFallback src={driver.avatarUrl || ""} alt={driver.name} fill className="object-cover" />
             </div>
             <div className="absolute bottom-0 right-0 z-20 bg-[#E31C5F] text-white p-1.5 rounded-full shadow-md border-2 border-white">
               <Star className="w-4 h-4 fill-white" />
@@ -273,10 +255,6 @@ export default function OrderReviewTab({
               &quot;{driverComment || "Không có nhận xét"}&quot;
             </p>
           </div>
-
-          <button className="text-gray-400 text-xs font-medium hover:text-gray-600 mt-6">
-            Chỉnh sửa đánh giá
-          </button>
         </motion.div>
       )}
     </div>
@@ -291,13 +269,13 @@ export default function OrderReviewTab({
       >
         <AnimatePresence mode="wait">
           <motion.div
-            key={isRestaurantSubmitted ? "submitted" : "form"}
+            key={isRestaurantReviewed ? "submitted" : "form"}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="h-full"
           >
-            {renderRestaurantCard(isRestaurantSubmitted)}
+            {renderRestaurantCard(isRestaurantReviewed)}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -312,17 +290,16 @@ export default function OrderReviewTab({
       >
         <AnimatePresence mode="wait">
           <motion.div
-            key={isDriverSubmitted ? "submitted" : "form"}
+            key={isDriverReviewed ? "submitted" : "form"}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="h-full"
           >
-            {renderDriverCard(isDriverSubmitted)}
+            {renderDriverCard(isDriverReviewed)}
           </motion.div>
         </AnimatePresence>
       </div>
     </div>
   );
 }
-

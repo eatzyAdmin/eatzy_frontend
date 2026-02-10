@@ -22,6 +22,13 @@ export interface ReviewReplyRequest {
   reply: string;
 }
 
+export interface CreateReviewRequest {
+  order: { id: number };
+  reviewTarget: 'restaurant' | 'driver';
+  rating: number;
+  comment: string;
+}
+
 // Display format for UI (renamed to avoid conflict with restaurant.Review)
 export interface ReviewDisplayItem {
   id: string;

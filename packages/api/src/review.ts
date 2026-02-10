@@ -1,33 +1,17 @@
 import { http } from "./http";
-import type { IBackendRes } from "../../types/src";
-
-// ======== Review Types ========
-
-export interface ReviewDTO {
-  id: number;
-  order: {
-    id: number;
-  };
-  customer: {
-    id: number;
-    name: string;
-  };
-  reviewTarget: 'restaurant' | 'driver';
-  targetName: string;
-  rating: number;
-  comment: string;
-  reply: string | null;
-  createdAt: string;
-}
-
-export interface ReviewReplyRequest {
-  id: number;
-  reply: string;
-}
+import type { IBackendRes, ReviewDTO, ReviewReplyRequest, CreateReviewRequest } from "../../types/src";
 
 // ======== Review API ========
 
 export const reviewApi = {
+  /**
+   * Create a new review (customer is auto-assigned from JWT token)
+   * POST /api/v1/reviews
+   */
+  createReview: (data: CreateReviewRequest) => {
+    return http.post<IBackendRes<ReviewDTO>>(`/api/v1/reviews`, data) as unknown as Promise<IBackendRes<ReviewDTO>>;
+  },
+
   /**
    * Get all reviews with pagination and filtering
    * GET /api/v1/reviews
@@ -58,7 +42,7 @@ export const reviewApi = {
    * GET /api/v1/reviews/{id}
    */
   getReviewById: (id: number) => {
-    return http.get<IBackendRes<ReviewDTO>>(`/api/v1/reviews/${id}`);
+    return http.get<IBackendRes<ReviewDTO>>(`/api/v1/reviews/${id}`) as unknown as Promise<IBackendRes<ReviewDTO>>;
   },
 
   /**
@@ -69,7 +53,7 @@ export const reviewApi = {
     return http.put<IBackendRes<ReviewDTO>>(`/api/v1/reviews`, {
       id: reviewId,
       reply
-    });
+    }) as unknown as Promise<IBackendRes<ReviewDTO>>;
   },
 
   /**
@@ -77,7 +61,7 @@ export const reviewApi = {
    * GET /api/v1/reviews/order/{orderId}
    */
   getReviewsByOrderId: (orderId: number) => {
-    return http.get<IBackendRes<ReviewDTO[]>>(`/api/v1/reviews/order/${orderId}`);
+    return http.get<IBackendRes<ReviewDTO[]>>(`/api/v1/reviews/order/${orderId}`) as unknown as Promise<IBackendRes<ReviewDTO[]>>;
   },
 
   /**
@@ -88,6 +72,6 @@ export const reviewApi = {
     const params = new URLSearchParams();
     params.append('reviewTarget', reviewTarget);
     params.append('targetName', targetName);
-    return http.get<IBackendRes<ReviewDTO[]>>(`/api/v1/reviews/target?${params.toString()}`);
+    return http.get<IBackendRes<ReviewDTO[]>>(`/api/v1/reviews/target?${params.toString()}`) as unknown as Promise<IBackendRes<ReviewDTO[]>>;
   }
 };

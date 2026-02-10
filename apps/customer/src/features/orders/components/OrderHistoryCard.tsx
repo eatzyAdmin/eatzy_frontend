@@ -59,7 +59,7 @@ export default function OrderHistoryCard({ order, onClick }: { order: OrderRespo
       {/* Restaurant Image */}
       <div className="relative w-32 flex-shrink-0 md:w-full md:aspect-[16/9] overflow-hidden bg-gray-100">
         <ImageWithFallback
-          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(order.restaurant.name)}&background=random&color=fff&size=512`}
+          src={order.restaurant.imageUrl || ""}
           alt={order.restaurant.name}
           fill
           className="object-cover"

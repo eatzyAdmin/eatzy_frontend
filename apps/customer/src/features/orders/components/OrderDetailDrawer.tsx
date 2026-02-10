@@ -149,7 +149,7 @@ export default function OrderDetailDrawer({
                               <div className="relative w-20 h-20 mb-3">
                                 <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-gray-50 border border-gray-100">
                                   <ImageWithFallback
-                                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(restaurant.name)}&background=random&color=fff&size=512`}
+                                    src={restaurant.imageUrl || ""}
                                     alt={restaurant.name}
                                     fill
                                     className="object-cover"
@@ -270,7 +270,7 @@ export default function OrderDetailDrawer({
                               {driver ? (
                                 <div className="w-full h-full rounded-full overflow-hidden relative z-10 border-[3px] border-white shadow-sm bg-gray-100 flex items-center justify-center">
                                   <ImageWithFallback
-                                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(driver.name)}&background=random&color=fff`}
+                                    src={driver.avatarUrl || ""}
                                     alt={driver.name}
                                     fill
                                     className="object-cover"
