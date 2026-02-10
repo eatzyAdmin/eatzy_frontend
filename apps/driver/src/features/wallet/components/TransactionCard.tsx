@@ -66,10 +66,10 @@ export default function TransactionCard({ transaction, onClick }: { transaction:
     <motion.div
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="bg-white p-4 rounded-2xl flex items-center justify-between shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 cursor-pointer"
+      className="bg-white p-4 rounded-3xl flex items-center justify-between shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 cursor-pointer"
     >
       <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getBgColor(transaction.type)}`}>
+        <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${getBgColor(transaction.type)}`}>
           {getIcon(transaction.type)}
         </div>
         <div>

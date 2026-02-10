@@ -44,11 +44,6 @@ export default function Page() {
             <LocateFixed className="w-6 h-6 text-[#1A1A1A]" />
           </motion.button>
         </div>
-        {!online && (
-          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="bg-white/80 border border-gray-200 text-xs text-gray-700 px-3 py-2 rounded-xl w-fit">
-            Bạn chưa bật kết nối
-          </motion.div>
-        )}
         {online && !activeOrder && (
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-white/85 backdrop-blur-xl border border-gray-200 shadow-[0_10px_40px_rgba(0,0,0,0.12)] p-4">
             <div className="flex items-center gap-2 text-gray-700">

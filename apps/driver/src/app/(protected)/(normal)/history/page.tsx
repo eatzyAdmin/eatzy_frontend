@@ -172,7 +172,7 @@ export default function HistoryPage() {
           className="overflow-hidden px-5"
         >
           {/* Add padding top only if visible to avoid jumpiness when animating height */}
-          <div className={`${isHeaderVisible ? "pt-5" : "pt-0"}`}>
+          <div className={`${isHeaderVisible ? "pt-2" : "pt-0"}`}>
             {/* <h1
               className="text-4xl font-bold font-anton text-[#1A1A1A] leading-tight mb-1"
               style={{ fontFamily: 'var(--font-anton), sans-serif', letterSpacing: '0.01em' }}
@@ -184,9 +184,9 @@ export default function HistoryPage() {
             {/* Stats */}
             <div className="mt-4">
               {isLoading ? (
-                <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="grid grid-cols-2 gap-3 mb-2">
                   {/* Income shimmer */}
-                  <div className="bg-[var(--primary)] rounded-[24px] p-4 text-white shadow-lg shadow-[var(--primary)]/30 relative overflow-hidden">
+                  <div className="bg-[var(--primary)] rounded-[24px] p-4 text-white shadow-md shadow-[var(--primary)]/30 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-3 opacity-20 rotate-12">
                       <Wallet className="w-16 h-16" />
                     </div>
@@ -238,13 +238,13 @@ export default function HistoryPage() {
       {/* Scrollable Content Area */}
       <div
         ref={containerRef}
-        className={`flex-1 px-5 pb-32 pt-2 scroll-smooth ${isHeaderVisible ? 'overflow-hidden' : 'overflow-y-auto'}`}
+        className={`flex-1 px-3 pb-32 pt-2 scroll-smooth ${isHeaderVisible ? 'overflow-hidden' : 'overflow-y-auto'}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onWheel={handleWheel}
       >
         {/* Orders List */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {isLoading ? (
             <HistoryCardShimmer cardCount={2} />
           ) : (

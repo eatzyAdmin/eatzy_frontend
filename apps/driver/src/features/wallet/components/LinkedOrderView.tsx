@@ -30,7 +30,7 @@ export default function LinkedOrderView({
             <X className="w-5 h-5 text-gray-700" />
           </button>
         </div>
-        <div className="p-6">
+        <div className="p-6 px-4">
           <DriverOrderDetailDrawerShimmer />
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function LinkedOrderView({
       </div>
 
       {/* Scrollable Content */}
-      <div className="overflow-y-auto p-6 px-5 space-y-8">
+      <div className="overflow-y-auto p-6 px-4 space-y-6">
         {/* Stats Row */}
         <div className="flex items-center justify-between bg-gray-900 p-5 rounded-[28px] shadow-xl shadow-black/5">
           <div className="text-center flex-1 border-r border-white/10 px-2">
@@ -138,29 +138,29 @@ export default function LinkedOrderView({
             </div>
           ))}
 
-          <div className="h-px bg-gray-200/70 my-2" />
+          <div className="h-px bg-gray-200/50 my-2" />
 
           <div className="space-y-2.5 pt-1">
-            <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-gray-500">
-              <span>Tạm tính</span>
+            <div className="flex justify-between items-center text-xs font-bold tracking-wider text-gray-500">
+              <span>ORDER SUBTOTAL</span>
               <span className="text-gray-600 text-sm font-bold">{formatVnd(order.subtotal)}</span>
             </div>
-            <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-gray-500">
-              <span>Phí giao hàng</span>
+            <div className="flex justify-between items-center text-xs font-bold tracking-wider text-gray-500">
+              <span>SHIPPING FEE</span>
               <span className="text-gray-600 text-sm font-bold">{formatVnd(order.fee)}</span>
             </div>
             {order.discount > 0 && (
-              <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                <span>Discount {order.voucherCode ? `(${order.voucherCode})` : ''}</span>
+              <div className="flex justify-between items-center text-xs font-bold tracking-wider text-[var(--primary)]">
+                <span>DISCOUNT {order.voucherCode ? `(${order.voucherCode})` : ''}</span>
                 <span className="text-sm font-bold">-{formatVnd(order.discount)}</span>
               </div>
             )}
           </div>
 
-          <div className="h-px bg-gray-200/70 my-2" />
+          <div className="h-px bg-gray-200/50 my-2" />
 
           <div className="flex justify-between items-center pt-1">
-            <span className="text-sm font-black text-[#1A1A1A] uppercase tracking-widest">Total Amount</span>
+            <span className="text-sm font-black text-[#1A1A1A] uppercase">Total Amount</span>
             <span className="text-2xl font-bold font-anton text-[var(--primary)] drop-shadow-sm">{formatVnd(order.total)}</span>
           </div>
         </div>

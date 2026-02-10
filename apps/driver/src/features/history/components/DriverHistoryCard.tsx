@@ -17,12 +17,12 @@ export default function DriverHistoryCard({ order, onClick }: { order: DriverHis
     <motion.div
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="bg-white rounded-[28px] p-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col relative overflow-hidden group hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300"
+      className="bg-white rounded-[30px] p-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col relative overflow-hidden group hover:shadow-[0_15px_40px_rgba(0,0,0,0.08)] transition-all duration-300"
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex gap-4 items-center">
-          <div className="w-12 h-12 rounded-2xl bg-[#F4F5F4] flex items-center justify-center shadow-sm border border-gray-100 text-[#1A1A1A]">
+          <div className="w-12 h-12 shrink-0 rounded-2xl bg-[#F4F5F4] flex items-center justify-center shadow-sm border border-gray-100 text-[#1A1A1A]">
             <Store className="w-6 h-6" />
           </div>
           <div>

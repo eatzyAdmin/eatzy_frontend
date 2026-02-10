@@ -148,9 +148,9 @@ export default function TransactionInfoView({
       </div>
 
       {/* Scrollable Content */}
-      <div className="overflow-y-auto p-6 space-y-8">
+      <div className="overflow-y-auto p-6 px-4 space-y-6">
         {/* Stats Row */}
-        <div className="flex items-center justify-between bg-gray-50 p-4 rounded-2xl">
+        <div className="flex items-center justify-between bg-gray-50 p-4 rounded-3xl">
           <div className="text-center flex-1 border-r border-gray-200 last:border-0 px-2">
             <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Giờ</div>
             <div className="text-base font-bold text-[#1A1A1A] font-anton">
@@ -172,19 +172,8 @@ export default function TransactionInfoView({
         </div>
 
         {/* Amount Section */}
-        <div className="bg-white rounded-[24px] p-5 shadow-sm border-2 border-gray-200 text-center relative overflow-hidden">
+        <div className="bg-white rounded-[32px] p-5 shadow-sm border-2 border-gray-200 text-center relative overflow-hidden">
           <div className="py-2">
-            <div className="mb-3">
-              {/* Debit transactions - show red arrow up */}
-              {isWalletDebitType(transaction.type) &&
-                <ArrowUpRight className="w-10 h-10 text-red-500 mx-auto bg-red-50 rounded-full p-2" />}
-              {/* Credit transactions - show green arrow down or dollar sign */}
-              {isWalletDepositType(transaction.type) || transaction.type === WalletTransactionType.REFUND ? (
-                <ArrowDownLeft className="w-10 h-10 text-green-500 mx-auto bg-green-50 rounded-full p-2" />
-              ) : null}
-              {isWalletEarningType(transaction.type) &&
-                <DollarSign className="w-10 h-10 text-[var(--primary)] mx-auto bg-yellow-50 rounded-full p-2" />}
-            </div>
 
             <p className={`text-4xl font-bold font-anton ${isPositive ? 'text-[var(--primary)]' : 'text-[#1A1A1A]'}`}>
               {isPositive ? '+' : '-'}{formatVnd(Math.abs(transaction.amount))}
@@ -203,7 +192,7 @@ export default function TransactionInfoView({
         {hasLinkedOrder && (
           <button
             onClick={() => onViewOrder(orderId!)}
-            className="w-full bg-[#1A1A1A] hover:bg-black text-white p-5 rounded-[24px] flex items-center justify-between group transition-all duration-300 shadow-xl shadow-black/10 active:scale-[0.98]"
+            className="w-full bg-[#1A1A1A] hover:bg-black text-white p-5 rounded-[28px] flex items-center justify-between group transition-all duration-300 shadow-xl shadow-black/10 active:scale-[0.98]"
           >
             <div className="flex items-center gap-4 text-left">
               <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
@@ -222,7 +211,7 @@ export default function TransactionInfoView({
 
         {/* Info Details */}
         {details.items.length > 0 && (
-          <div className="bg-white rounded-[24px] p-5 shadow-sm border-2 border-gray-200">
+          <div className="bg-white rounded-[32px] p-5 shadow-sm border-2 border-gray-200">
             <h3 className="text-lg font-bold font-anton text-[#1A1A1A] mb-4">DETAILS</h3>
             <div className="space-y-1">
               {details.items.map((item, idx) => (
@@ -236,7 +225,7 @@ export default function TransactionInfoView({
         )}
 
         {/* Description Box */}
-        <div className="bg-white rounded-[24px] p-5 shadow-sm border-2 border-gray-200">
+        <div className="bg-white rounded-[32px] p-5 shadow-sm border-2 border-gray-200">
           <h3 className="text-lg font-bold font-anton text-[#1A1A1A] mb-4">DESCRIPTION</h3>
           <p className="text-sm pl-2 font-medium text-gray-600 leading-relaxed">
             {transaction.description}.
@@ -247,7 +236,7 @@ export default function TransactionInfoView({
 
         {/* Footer Info */}
         <div className="text-center cursor-pointer" onClick={handleCopyId}>
-          <p className="text-xs text-gray-400">Transaction ID: <span className="font-mono text-gray-600">{transaction.id}</span></p>
+          <p className="text-xs text-gray-400">Transaction ID: <span className="text-gray-600">#{transaction.id}</span></p>
         </div>
       </div>
     </div>

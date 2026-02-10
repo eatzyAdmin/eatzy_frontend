@@ -56,7 +56,7 @@ export default function TransactionDetailDrawer({
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 20, stiffness: 120 }}
+            transition={{ type: "spring", damping: 18, stiffness: 100 }}
             className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-[40px] overflow-hidden h-[92vh] max-h-[92vh] flex flex-col shadow-2xl"
           >
             <div className="relative flex-1 overflow-hidden">

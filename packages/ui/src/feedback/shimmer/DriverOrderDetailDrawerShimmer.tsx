@@ -24,7 +24,7 @@ export default function DriverOrderDetailDrawerShimmer() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Stats Row - bg-gray-900 p-5 rounded-[28px] */}
       <div className="flex items-center justify-between bg-gray-900 p-5 rounded-[28px] shadow-xl shadow-black/5">
         <div className="text-center flex-1 border-r border-white/10 px-2">

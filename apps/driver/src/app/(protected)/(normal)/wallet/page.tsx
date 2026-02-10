@@ -272,12 +272,12 @@ export default function WalletPage() {
       {/* Transaction List */}
       <div
         ref={containerRef}
-        className={`flex-1 px-5 pb-32 pt-2 scroll-smooth ${isHeaderVisible ? 'overflow-hidden' : 'overflow-y-auto'}`}
+        className={`flex-1 px-3 pb-32 pt-2 scroll-smooth ${isHeaderVisible ? 'overflow-hidden' : 'overflow-y-auto'}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onWheel={handleWheel}
       >
-        <div className="space-y-3">
+        <div className="space-y-2">
           {isLoading ? (
             // Increased card count to prevent scroll jumping when filtering
             <TransactionCardShimmer cardCount={8} />
