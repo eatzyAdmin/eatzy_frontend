@@ -48,10 +48,12 @@ export default function RightSidebar({
             Checkout Process
           </span>
         </div>
-        <div className="text-3xl font-anton font-semibold text-[#1A1A1A] leading-tight">FINAL STEP</div>
-        {restaurantName && (
-          <div className="text-gray-500 font-medium mt-1">{restaurantName}</div>
-        )}
+        <div className="flex items-baseline gap-3">
+          <div className="text-3xl font-anton font-semibold text-[#1A1A1A] leading-tight">FINAL STEP</div>
+          {restaurantName && (
+            <div className="text-gray-500 font-medium truncate">{restaurantName}</div>
+          )}
+        </div>
       </div>
 
       <div className="hidden md:block">
@@ -60,20 +62,16 @@ export default function RightSidebar({
         </CheckoutMapSection>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-[60] md:sticky md:bottom-0 md:bg-[#F7F7F7] md:border-none md:shadow-none md:z-auto md:pb-4 md:mt-auto">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-[60] md:sticky md:bottom-0 md:bg-[#F7F7F7] md:border-none md:shadow-none md:z-auto md:pb-0 md:mt-auto">
         <div className="p-4 md:pt-4 md:px-0">
-          <div className="flex items-center justify-between mb-3 md:hidden">
-            <div className="text-sm font-semibold text-gray-600">Total Payment</div>
-            <div className="text-xl font-bold text-[var(--primary)]">{formatVnd(totalPayable)}</div>
-          </div>
           <motion.button
             whileHover={{ scale: isCreating ? 1 : 1.02 }}
             whileTap={{ scale: isCreating ? 1 : 0.98 }}
             onClick={handleCompleteOrder}
             disabled={isCreating}
             className={`w-full h-14 md:h-16 rounded-[20px] text-white text-xl font-semibold md:text-2xl uppercase font-anton shadow-lg transition-all flex items-center justify-center gap-2 ${isCreating
-                ? 'bg-gray-400 cursor-not-allowed shadow-gray-300/30'
-                : 'bg-[var(--primary)] shadow-lime-500/30 hover:shadow-lime-500/50'
+              ? 'bg-gray-400 cursor-not-allowed shadow-gray-300/30'
+              : 'bg-[var(--primary)] shadow-lime-500/30 hover:shadow-lime-500/50'
               }`}
           >
             {isCreating ? (

@@ -16,7 +16,7 @@ export default function OrderSummaryList() {
   if (isLoading) {
     return (
       <div className="bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
-        <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
+        <div className="px-4 md:px-6 py-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5 text-gray-400" />
             <h4 className="font-bold text-[#1A1A1A]">Order Items</h4>
@@ -28,8 +28,8 @@ export default function OrderSummaryList() {
   }
 
   return (
-    <div className="bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
-      <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
+    <div className="bg-white rounded-[32px] md:rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
+      <div className="px-4 md:px-6 py-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
         <div className="flex items-center gap-2">
           <Package className="w-5 h-5 text-gray-400" />
           <h4 className="font-bold text-[#1A1A1A]">Order Items</h4>
@@ -39,15 +39,15 @@ export default function OrderSummaryList() {
         </span>
       </div>
 
-      <div className="p-2">
+      <div className="p-2 pt-0 md:pt-2">
         {cartItems.length === 0 ? (
           <div className="p-6 text-center text-gray-400 font-medium">Your cart is empty</div>
         ) : (
           <div className="grid grid-cols-1 gap-1">
             {cartItems.map((item) => (
-              <div key={item.id} className="group flex items-center justify-between p-3 md:p-4 hover:bg-gray-50 rounded-[20px] transition-colors duration-200">
+              <div key={item.id} className="group flex items-center justify-between p-3 md:p-4 rounded-[20px] transition-colors duration-200">
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-10 h-10 rounded-[14px] bg-gray-100 text-[#1A1A1A] font-anton text-lg flex items-center justify-center shadow-sm group-hover:bg-white group-hover:scale-110 transition-all duration-300 flex-shrink-0">
+                  <div className="w-10 h-10 rounded-[14px] bg-gray-100 text-[#1A1A1A] font-anton font-bold text-lg flex items-center justify-center shadow-sm transition-all duration-300 flex-shrink-0">
                     {item.quantity}x
                   </div>
 
@@ -56,18 +56,21 @@ export default function OrderSummaryList() {
                   </div>
 
                   <div className="min-w-0">
-                    <div className="font-bold text-[#1A1A1A] text-sm group-hover:text-[var(--primary)] transition-colors line-clamp-1">{item.dish?.name}</div>
+                    <div className="font-bold text-[#1A1A1A] text-[15px] transition-colors line-clamp-1 leading-tight">{item.dish?.name}</div>
 
-                    {/* Options display */}
-                    <div className="flex flex-col gap-0.5">
+                    {/* Options display - Back to slice(0,2) as requested for simplicity */}
+                    <div className="mt-1 flex flex-col md:gap-0.5">
                       {item.cartItemOptions && item.cartItemOptions.length > 0 ? (
                         item.cartItemOptions.slice(0, 2).map((opt) => (
-                          <div key={opt.id} className="text-xs text-gray-400 font-medium line-clamp-1">
-                            {opt.menuOption?.name}
+                          <div key={opt.id} className="flex items-center gap-1 md:gap-1.5 opacity-80">
+                            <span className="text-gray-300 text-[10px] select-none">-</span>
+                            <div className="text-[11px] text-gray-400 font-bold line-clamp-1">
+                              {opt.menuOption?.name}
+                            </div>
                           </div>
                         ))
                       ) : (
-                        <div className="text-xs text-gray-400 font-medium">Standard option</div>
+                        <div className="text-[11px] text-gray-400 font-medium">Standard option</div>
                       )}
                     </div>
                   </div>
@@ -81,4 +84,3 @@ export default function OrderSummaryList() {
     </div>
   );
 }
-

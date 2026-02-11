@@ -10,25 +10,27 @@ import AddressForm from "@/features/checkout/components/AddressForm";
 import NotesInput from "@/features/checkout/components/NotesInput";
 import PaymentMethodSelector from "@/features/checkout/components/PaymentMethodSelector";
 import PromoVoucherCard from "@/features/checkout/components/PromoVoucherCard";
-import { Truck, Tag } from "@repo/ui/icons";
+import { Truck, Tag, ShoppingBag } from "@repo/ui/icons";
 import type { CreateOrderRequest } from "@repo/types";
 const CheckoutSummary = dynamic(() => import("@/features/checkout/components/CheckoutSummary"), { ssr: false });
 const RightSidebar = dynamic(() => import("@/features/checkout/components/RightSidebar"), { ssr: false });
 const OrderSummaryList = dynamic(() => import("@/features/checkout/components/OrderSummaryList"), { ssr: false });
 import CheckoutMapSection from "@/features/checkout/components/CheckoutMapSection";
+import LocationPickerModal from "@/features/location/components/LocationPickerModal";
+import PromoSelectionModal from "@/features/checkout/components/PromoSelectionModal";
+import PromoSummary from "@/features/checkout/components/PromoSummary";
+import { useDeliveryLocationStore } from "@/store/deliveryLocationStore";
+
 export default function CheckoutPage() {
   const { hide } = useLoading();
-  const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
+
   useEffect(() => {
-    // Keep global loading active until local loading finishes
-    const t = setTimeout(() => {
-      setIsLoading(false);
-      hide();
-    }, 1500);
-    return () => clearTimeout(t);
+    hide();
+    setMounted(true);
   }, [hide]);
-  useEffect(() => { setMounted(true); }, []);
 
   const {
     restaurant,
@@ -40,6 +42,8 @@ export default function CheckoutPage() {
     setSelectedDiscountVoucherId,
     selectedShippingVoucherId,
     setSelectedShippingVoucherId,
+    selectedDiscountVoucher,
+    selectedShippingVoucher,
     isVoucherEligible,
     paymentMethod,
     setPaymentMethod,
@@ -63,10 +67,10 @@ export default function CheckoutPage() {
   const { createOrder, isCreating } = useCreateOrder();
   const { showNotification } = useNotification();
   const { clearCart } = useRestaurantCart(restaurantId);
+  const setSelectedLocation = useDeliveryLocationStore(s => s.setSelectedLocation);
 
   const leftColumnRef = useRef<HTMLDivElement | null>(null);
   const mainScrollRef = useRef<HTMLDivElement | null>(null);
-  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [activeSection, setActiveSection] = useState<string | null>("address");
   const tabs = [
     { id: "address", name: "Address" },
@@ -90,20 +94,30 @@ export default function CheckoutPage() {
       { root: leftCol, rootMargin: "-120px 0px -60% 0px", threshold: 0.2 }
     );
     ["address", "notes", "summary", "method", "promo", "payment"].forEach(id => {
-      const node = sectionRefs.current[id];
-      if (node) obs.observe(node);
+      const nodeList = document.querySelectorAll(`[data-id="${id}"]`);
+      nodeList.forEach(node => obs.observe(node));
     });
     return () => obs.disconnect();
-  }, []);
+  }, [mounted]);
 
   const scrollToSection = (id: string) => {
-    const node = sectionRefs.current[id];
+    // Find correctly rendered section based on data-id
+    const nodes = document.querySelectorAll(`[data-id="${id}"]`);
+    let node: HTMLElement | null = null;
+
+    // Pick the one that is currently visible (to handle dual mobile/desktop layouts)
+    nodes.forEach(n => {
+      if ((n as HTMLElement).offsetParent !== null) {
+        node = n as HTMLElement;
+      }
+    });
+
     const leftCol = leftColumnRef.current;
     if (!node || !leftCol) return;
 
     if (window.innerWidth < 768 && mainScrollRef.current) {
       const container = mainScrollRef.current;
-      const nodeRect = node.getBoundingClientRect();
+      const nodeRect = (node as HTMLElement).getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
       const offset = 80;
       container.scrollTo({
@@ -112,7 +126,7 @@ export default function CheckoutPage() {
       });
     } else {
       const containerRect = leftCol.getBoundingClientRect();
-      const nodeRect = node.getBoundingClientRect();
+      const nodeRect = (node as HTMLElement).getBoundingClientRect();
       const offsetTop = nodeRect.top - containerRect.top + leftCol.scrollTop - 140;
       leftCol.scrollTo({ top: offsetTop, behavior: "smooth" });
     }
@@ -167,34 +181,32 @@ export default function CheckoutPage() {
       await clearCart();
     }
   }, [
-    user, restaurantId, cartItems, address, selectedLocation, notes, fee, paymentMethod,
+    user, restaurantId, cartItems, address, selectedLocation, notes, baseFee, fee, paymentMethod,
     selectedDiscountVoucherId, selectedShippingVoucherId, createOrder, showNotification, clearCart
   ]);
-
-  if (isLoading) {
-    return <CheckoutShimmer />;
-  }
 
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7]">
       <div ref={mainScrollRef} className="flex-1 overflow-y-auto md:overflow-hidden">
-        <div className="max-w-[1400px] mx-auto px-4 pt-4 md:pr-16 md:px-8 md:pt-12 h-full">
-          {/* Mobile Header: Last Step + Restaurant Name */}
-          <div className="md:hidden">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider">
-                Checkout
+        <div className="max-w-[1400px] mx-auto px-3 md:px-4 pt-4 md:pr-16 md:px-8 md:pt-4 h-full">
+          <div className="md:hidden mb-6">
+            <div className="flex flex-col gap-1">
+              <span className="px-3 py-1 rounded-full bg-lime-50/50 border border-lime-100 text-lime-600 text-[9px] font-black uppercase tracking-[0.15em] w-fit mb-2 shadow-sm shadow-lime-500/5">
+                Checkout Process
               </span>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-anton text-[#1A1A1A] uppercase leading-none">Final Step</h1>
+                <div className="w-[1px] h-6 bg-gray-200 rounded-full" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-bold text-gray-500 truncate">{restaurant?.name}</p>
+                </div>
+              </div>
             </div>
-            <div className="text-3xl font-anton text-[#1A1A1A] uppercase leading-none">Last Step</div>
-            {restaurant && (
-              <div className="text-[14px] text-[#555] mt-1 font-medium">{restaurant.name}</div>
-            )}
           </div>
 
           <div className="flex flex-col md:grid md:grid-cols-[65%_35%] gap-4 md:gap-8 md:h-full mt-4 md:mt-0">
             <div ref={leftColumnRef} className="relative h-auto md:h-full md:overflow-y-auto no-scrollbar md:pr-2 space-y-4 md:space-y-6 mb-6">
-              <div className="sticky top-0 z-40 bg-[#F7F7F7] pt-2 md:pt-2">
+              <div className="sticky top-0 z-40 bg-[#F7F7F7] md:pt-2">
                 <div ref={navContainerRef} className="relative bg-[#F7F7F7] border-b-2 border-gray-300">
                   <HoverHighlightOverlay rect={navRect} style={navStyle} />
                   <div className="overflow-x-auto no-scrollbar">
@@ -238,101 +250,151 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="space-y-6 md:pb-24">
-                <section ref={(el) => { sectionRefs.current["address"] = el; }} data-id="address">
-                  <AddressForm value={address} onChange={setAddress} />
-                  <div className="md:hidden mt-5">
-                    <CheckoutMapSection onAddressChange={setAddress} />
-                  </div>
+              <div className="space-y-3 md:space-y-6 md:pb-6">
+                {/* 1. Address Section */}
+                <section data-id="address">
+                  <AddressForm
+                    value={address}
+                    onChange={setAddress}
+                    onClick={() => {
+                      if (window.innerWidth < 768) setIsLocationModalOpen(true);
+                    }}
+                  />
                 </section>
-                <section ref={(el) => { sectionRefs.current["notes"] = el; }} data-id="notes">
+
+                {/* 2. Notes Section */}
+                <section data-id="notes">
                   <NotesInput value={notes} onChange={setNotes} />
                 </section>
-                <section ref={(el) => { sectionRefs.current["summary"] = el; }} data-id="summary">
+
+                {/* 3. Order Summary Section */}
+                <section data-id="summary">
                   {mounted && <OrderSummaryList />}
                 </section>
-                <section ref={(el) => { sectionRefs.current["method"] = el; }} data-id="method">
-                  <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
-                </section>
 
-                <div className="grid grid-cols-1 md:grid-cols-10 gap-6 items-start">
-                  <section className="col-span-1 md:col-span-6" ref={(el) => { sectionRefs.current["promo"] = el; }} data-id="promo">
-                    <div className="bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
-                      <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30">
-                        <Tag className="w-5 h-5 text-gray-400" />
-                        <h4 className="font-bold text-[#1A1A1A]">Promo & Vouchers</h4>
-                      </div>
+                {/* 4. Voucher & Payment Section - DUAL LAYOUT */}
 
-                      <div className="p-4 md:p-5">
-                        <div className="max-h-[500px] overflow-y-auto pr-2 space-y-6 custom-scrollbar">
-                          {/* Shipping Vouchers */}
-                          {shippingVouchers.length > 0 && (
-                            <div>
-                              <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2 sticky top-0 bg-white py-2 z-10 backdrop-blur-sm">
-                                <Truck className="w-3.5 h-3.5" /> Shipping Vouchers
-                                <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[10px]">({shippingVouchers.length})</span>
-                              </div>
-                              <div className="space-y-3 px-2">
-                                {mounted && shippingVouchers.map((v) => {
-                                  const eligible = isVoucherEligible(v);
-                                  return (
-                                    <PromoVoucherCard
-                                      key={v.id}
-                                      voucher={v}
-                                      selected={selectedShippingVoucherId === v.id}
-                                      onSelect={() => setSelectedShippingVoucherId(selectedShippingVoucherId === v.id ? null : v.id)}
-                                      disabled={!eligible}
-                                      reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
-                                      isBest={bestVoucherIds.shipping === v.id}
-                                    />
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
+                {/* MOBILE LAYOUT */}
+                <div className="md:hidden space-y-4">
+                  <section data-id="promo">
+                    <PromoSummary
+                      selectedDiscountValue={discount}
+                      selectedShippingValue={shippingDiscount}
+                      hasVoucher={!!(selectedDiscountVoucherId || selectedShippingVoucherId)}
+                      onClick={() => setIsPromoModalOpen(true)}
+                    />
+                  </section>
 
-                          {/* Discount Vouchers */}
-                          <div>
-                            <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2 sticky top-0 bg-white py-2 z-10 backdrop-blur-sm">
-                              <Tag className="w-3.5 h-3.5" /> Discount Vouchers
-                              <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[10px]">({discountVouchers.length})</span>
-                            </div>
-                            <div className="space-y-3 px-2">
-                              {isLoadingVouchers ? (
-                                <div className="text-center py-8 text-gray-400">
-                                  <div className="w-8 h-8 border-2 border-gray-300 border-t-[var(--primary)] rounded-full animate-spin mx-auto mb-2"></div>
-                                  Checking vouchers...
+                  <section data-id="method">
+                    <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
+                  </section>
+
+                  <section data-id="payment">
+                    <CheckoutSummary subtotal={subtotal} baseFee={baseFee} discount={discount} shippingDiscount={shippingDiscount} isLoadingFee={isLoadingFee} />
+                  </section>
+                </div>
+
+                {/* DESKTOP LAYOUT (Original Restore) */}
+                <div className="hidden md:block space-y-6">
+                  <section data-id="method">
+                    <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
+                  </section>
+
+                  <div className="grid grid-cols-1 md:grid-cols-10 gap-6 items-stretch">
+                    <section className="col-span-1 md:col-span-6" data-id="promo">
+                      <div className="bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 h-full flex flex-col">
+                        <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30">
+                          <Tag className="w-5 h-5 text-gray-400" />
+                          <h4 className="font-bold text-[#1A1A1A]">Promo & Vouchers</h4>
+                        </div>
+
+                        <div className="p-4 md:p-6 flex-1">
+                          <div className="max-h-[500px] overflow-y-auto pr-2 space-y-10 custom-scrollbar">
+                            {/* Shipping Vouchers */}
+                            {shippingVouchers.length > 0 && (
+                              <div className="space-y-5">
+                                <div className="flex items-center gap-3 px-1 sticky top-0 bg-white z-10 backdrop-blur-sm">
+                                  <div className="w-10 h-10 rounded-[18px] bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-sm flex-shrink-0">
+                                    <Truck size={20} strokeWidth={2.5} />
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="text-[15px] font-bold text-[#1A1A1A] leading-none">
+                                      Shipping Vouchers
+                                    </h4>
+                                  </div>
                                 </div>
-                              ) : discountVouchers.length === 0 ? (
-                                <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                  No vouchers available
+                                <div className="space-y-3 px-1">
+                                  {mounted && [...shippingVouchers]
+                                    .sort((a, b) => a.id === bestVoucherIds.shipping ? -1 : b.id === bestVoucherIds.shipping ? 1 : 0)
+                                    .map((v) => {
+                                      const eligible = isVoucherEligible(v);
+                                      return (
+                                        <PromoVoucherCard
+                                          key={v.id}
+                                          voucher={v}
+                                          selected={selectedShippingVoucherId === v.id}
+                                          onSelect={() => setSelectedShippingVoucherId(selectedShippingVoucherId === v.id ? null : v.id)}
+                                          disabled={!eligible}
+                                          reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
+                                          isBest={bestVoucherIds.shipping === v.id}
+                                        />
+                                      );
+                                    })}
                                 </div>
-                              ) : (
-                                mounted && discountVouchers.map((v) => {
-                                  const eligible = isVoucherEligible(v);
-                                  return (
-                                    <PromoVoucherCard
-                                      key={v.id}
-                                      voucher={v}
-                                      selected={selectedDiscountVoucherId === v.id}
-                                      onSelect={() => setSelectedDiscountVoucherId(selectedDiscountVoucherId === v.id ? null : v.id)}
-                                      disabled={!eligible}
-                                      reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
-                                      isBest={bestVoucherIds.discount === v.id}
-                                    />
-                                  );
-                                })
-                              )}
+                              </div>
+                            )}
+
+                            {/* Discount Vouchers */}
+                            <div className="space-y-5">
+                              <div className="flex items-center gap-3 px-1 sticky top-0 bg-white z-10 backdrop-blur-sm">
+                                <div className="w-10 h-10 rounded-[18px] bg-lime-50 text-lime-600 flex items-center justify-center border border-lime-100 shadow-sm flex-shrink-0">
+                                  <Tag size={20} strokeWidth={2.5} />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="text-[15px] font-bold text-[#1A1A1A] leading-none">
+                                    Discount Vouchers
+                                  </h4>
+                                </div>
+                              </div>
+                              <div className="space-y-3 px-1">
+                                {isLoadingVouchers ? (
+                                  <div className="text-center py-12 text-gray-400">
+                                    <div className="w-10 h-10 border-3 border-gray-100 border-t-lime-500 rounded-full animate-spin mx-auto mb-3" />
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-300">Checking offers...</p>
+                                  </div>
+                                ) : discountVouchers.length === 0 ? (
+                                  <div className="text-center py-12 text-gray-400 bg-gray-50/50 rounded-[32px] border border-dashed border-gray-200">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-300">No vouchers available</p>
+                                  </div>
+                                ) : (
+                                  mounted && [...discountVouchers]
+                                    .sort((a, b) => a.id === bestVoucherIds.discount ? -1 : b.id === bestVoucherIds.discount ? 1 : 0)
+                                    .map((v) => {
+                                      const eligible = isVoucherEligible(v);
+                                      return (
+                                        <PromoVoucherCard
+                                          key={v.id}
+                                          voucher={v}
+                                          selected={selectedDiscountVoucherId === v.id}
+                                          onSelect={() => setSelectedDiscountVoucherId(selectedDiscountVoucherId === v.id ? null : v.id)}
+                                          disabled={!eligible}
+                                          reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
+                                          isBest={bestVoucherIds.discount === v.id}
+                                        />
+                                      );
+                                    })
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </section>
+                    </section>
 
-                  <section ref={(el) => { sectionRefs.current["payment"] = el; }} data-id="payment" className="col-span-1 md:col-span-4 h-full">
-                    <CheckoutSummary subtotal={subtotal} baseFee={baseFee} discount={discount} shippingDiscount={shippingDiscount} isLoadingFee={isLoadingFee} />
-                  </section>
+                    <section className="col-span-1 md:col-span-4 h-full" data-id="payment">
+                      <CheckoutSummary subtotal={subtotal} baseFee={baseFee} discount={discount} shippingDiscount={shippingDiscount} isLoadingFee={isLoadingFee} />
+                    </section>
+                  </div>
                 </div>
               </div>
             </div>
@@ -347,6 +409,35 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* Modals for Mobile Experience */}
+      <LocationPickerModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        onSelectLocation={(loc) => {
+          setSelectedLocation(loc);
+          setAddress(loc.address);
+        }}
+        initialLocation={selectedLocation ? {
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude
+        } : undefined}
+        initialAddress={address}
+      />
+
+      <PromoSelectionModal
+        isOpen={isPromoModalOpen}
+        onClose={() => setIsPromoModalOpen(false)}
+        shippingVouchers={shippingVouchers}
+        discountVouchers={discountVouchers}
+        isVoucherEligible={isVoucherEligible}
+        selectedShippingVoucherId={selectedShippingVoucherId}
+        setSelectedShippingVoucherId={setSelectedShippingVoucherId}
+        selectedDiscountVoucherId={selectedDiscountVoucherId}
+        setSelectedDiscountVoucherId={setSelectedDiscountVoucherId}
+        bestVoucherIds={bestVoucherIds}
+        isLoadingVouchers={isLoadingVouchers}
+      />
     </div>
   );
 }

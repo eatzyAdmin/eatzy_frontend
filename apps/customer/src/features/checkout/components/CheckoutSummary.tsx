@@ -17,13 +17,13 @@ export default function CheckoutSummary({
   isLoadingFee?: boolean;
 }) {
   return (
-    <div className="bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 h-full flex flex-col">
-      <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30">
+    <div className="bg-white rounded-[32px] md:rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 h-full flex flex-col">
+      <div className="px-4 md:px-6 py-5 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30">
         <Banknote className="w-5 h-5 text-gray-400" />
         <h4 className="font-bold text-[#1A1A1A]">Payment Details</h4>
       </div>
 
-      <div className="p-6 space-y-4 flex-1">
+      <div className="p-4 pt-0 md:p-6 md:pt-6 space-y-2 md:space-y-4 flex-1">
         <div className="flex justify-between items-center text-sm">
           <span className="text-gray-500 font-medium">Subtotal</span>
           <span className="font-bold text-gray-900">{formatVnd(subtotal)}</span>

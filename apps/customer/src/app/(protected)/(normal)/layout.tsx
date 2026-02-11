@@ -30,8 +30,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isProfile = pathname?.startsWith("/profile") ?? false;
   const [isRecommendedMode, setIsRecommendedMode] = useState(false);
 
-  // Combine search mode and recommended mode for layout purposes
+  // Combine modes for layout and animation purposes
   const effectiveSearchMode = isSearchMode || isRecommendedMode;
+  const shouldSlideHeader = effectiveSearchMode || isOrderHistory || isFavorites;
   const isSearchBarCompact = !isHeaderVisible && effectiveSearchMode;
 
   useEffect(() => {
@@ -54,10 +55,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!effectiveSearchMode) {
+    if (!shouldSlideHeader && !isProfile) {
       setIsHeaderVisible(true);
     }
-  }, [effectiveSearchMode]);
+  }, [shouldSlideHeader, isProfile]);
 
   const handleSearch = (query: string, filters?: { minPrice?: number; maxPrice?: number; sort?: string; category?: string | null }) => {
     performSearch(query, filters);
@@ -69,26 +70,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <BottomNavProvider>
-      <div className="relative min-h-screen w-full overflow-x-hidden">
+      <div className={`relative w-full overflow-x-hidden ${(isOrderHistory || isFavorites) ? "h-screen overflow-y-hidden" : "min-h-screen"}`}>
         <AnimatePresence>
-          {((effectiveSearchMode || isOrderHistory || isFavorites || isProfile) && isHeaderVisible) && (
+          {((shouldSlideHeader || isProfile) && isHeaderVisible) && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="pointer-events-none fixed inset-x-0 top-0 h-20 z-[20] backdrop-blur-xl"
+              className={`pointer-events-none fixed inset-x-0 top-0 h-20 z-[20] ${(isOrderHistory || isFavorites) ? "bg-[#F7F7F7]/95 backdrop-blur-md" : "backdrop-blur-xl"
+                } ${(isRestaurantDetail || isOrderHistory || isFavorites) ? "hidden md:block" : ""}`}
             />
           )}
         </AnimatePresence>
         <AnimatePresence>
-          {((!effectiveSearchMode) || isHeaderVisible) && (
+          {(!shouldSlideHeader || isHeaderVisible) && (
             <motion.div
+              key="global-header"
               initial={{ y: 0, opacity: 1 }}
-              animate={{
-                y: effectiveSearchMode && !isHeaderVisible ? -100 : 0,
-                opacity: effectiveSearchMode && !isHeaderVisible ? 0 : 1,
-              }}
+              animate={{ y: 0, opacity: 1 }}
               exit={{ y: -100, opacity: 0 }}
               transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
               className={(isRestaurantDetail || isOrderHistory || isFavorites) ? "hidden md:block" : ""}
@@ -98,7 +98,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 onFavoritesClick={() => setOrdersOpen(true)}
                 onSearchClick={() => setSearchOpen(true)}
                 onCartClick={() => setCartOpen(true)}
-                hideSearchIcon={effectiveSearchMode || isRestaurantDetail || isOrderHistory || isFavorites || isProfile}
+                hideSearchIcon={shouldSlideHeader || isRestaurantDetail || isFavorites || isProfile}
                 hideCart={isRestaurantDetail}
                 onLogoClick={() => {
                   const next = new URLSearchParams(searchParams.toString());

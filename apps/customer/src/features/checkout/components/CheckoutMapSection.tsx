@@ -88,7 +88,7 @@ export default function CheckoutMapSection({ children, onAddressChange }: { chil
                   transition={{ duration: 0.2 }}
                   onClick={() => handleSelectPlace(idx, p)}
                   className={`
-                    relative p-4 mb-2 last:mb-0 rounded-[16px] cursor-pointer border transition-all duration-200 group
+                    relative p-4 mb-2 last:mb-0 rounded-[24px] cursor-pointer border transition-all duration-200 group
                     ${selected
                       ? 'bg-lime-50 border-lime-200 shadow-sm'
                       : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'
@@ -100,7 +100,7 @@ export default function CheckoutMapSection({ children, onAddressChange }: { chil
                       {selected ? <Hand className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className={`text-[14px] font-semibold truncate ${selected ? 'text-[#1A1A1A]' : 'text-gray-600'}`}>{p.text}</div>
+                      <div className={`text-[14px] font-bold truncate ${selected ? 'text-[#1A1A1A]' : 'text-gray-600'}`}>{p.text}</div>
                     </div>
                   </div>
                   {selected && (

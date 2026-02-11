@@ -25,7 +25,7 @@ const RestaurantCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
   const ShimmerCard = ({ index }: { index: number }) => {
     return (
       <motion.div
-        className="relative bg-white rounded-[24px] overflow-hidden shadow-sm border border-gray-100"
+        className="relative overflow-hidden rounded-[32px] md:rounded-[40px] shadow-sm aspect-[4/5] md:aspect-[7/8] bg-gray-100"
         variants={cardVariants}
         initial="initial"
         animate="animate"
@@ -37,9 +37,9 @@ const RestaurantCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
           stiffness: 100,
         }}
       >
-        {/* Image */}
+        {/* Full Bleed Background Shimmer */}
         <motion.div
-          className="relative aspect-[16/9] bg-gray-200"
+          className="absolute inset-0 z-0"
           variants={shimmerVariants}
           initial="initial"
           animate="animate"
@@ -47,107 +47,69 @@ const RestaurantCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
             background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
             backgroundSize: '200% 100%',
           }}
-        >
-          {/* Heart Badge (Top Right) */}
-          <div className="absolute top-2 right-2 md:top-3 md:right-3">
+        />
+
+        {/* Content Overlay */}
+        <div className="relative z-10 h-full p-4 flex flex-col justify-between">
+          {/* Top Row: Rating & Heart */}
+          <div className="flex justify-between items-start">
             <motion.div
-              className="w-8 h-8 md:w-10 md:h-10 bg-white/80 rounded-full"
+              className="h-7 md:h-9 w-12 md:w-16 bg-white/40 backdrop-blur-md rounded-[16px] md:rounded-[18px]"
               variants={shimmerVariants}
               initial="initial"
               animate="animate"
-              style={{
-                background: 'linear-gradient(90deg, rgba(255,255,255,0.9) 25%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.9) 75%)',
-                backgroundSize: '200% 100%',
-              }}
+              style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.4) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.4) 75%)', backgroundSize: '200% 100%' }}
             />
-          </div>
-
-          {/* Rating Badge (Bottom Left) */}
-          <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3">
             <motion.div
-              className="h-5 w-10 md:h-6 md:w-12 bg-white/80 rounded-full"
+              className="w-8 h-8 md:w-10 md:h-10 bg-black/20 backdrop-blur-md rounded-2xl"
               variants={shimmerVariants}
               initial="initial"
               animate="animate"
-              style={{
-                background: 'linear-gradient(90deg, rgba(255,255,255,0.9) 25%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.9) 75%)',
-                backgroundSize: '200% 100%',
-              }}
+              style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.2) 25%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.2) 75%)', backgroundSize: '200% 100%' }}
             />
           </div>
 
-        </motion.div>
-
-        {/* Content */}
-        <div className="p-3 md:p-5 space-y-2 md:space-y-3">
-          {/* Name */}
-          <motion.div
-            className="h-3 md:h-5 w-32 md:w-48 bg-gray-200 rounded"
-            variants={shimmerVariants}
-            initial="initial"
-            animate="animate"
-            style={{
-              background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
-              backgroundSize: '200% 100%',
-            }}
-          />
-
-          {/* Categories */}
-          <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
-            {[1, 2, 3].map((i) => (
+          {/* Bottom Info Section */}
+          <div className="space-y-3 md:space-y-4">
+            {/* Title & Address */}
+            <div className="space-y-2">
               <motion.div
-                key={i}
-                className="h-5 w-16 md:h-6 md:w-20 bg-gray-100 rounded-full"
+                className="h-6 md:h-8 w-3/4 bg-white/30 backdrop-blur-md rounded-lg"
                 variants={shimmerVariants}
                 initial="initial"
                 animate="animate"
-                style={{
-                  background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
-                  backgroundSize: '200% 100%',
-                }}
+                style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.3) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.3) 75%)', backgroundSize: '200% 100%' }}
               />
-            ))}
-          </div>
+              <motion.div
+                className="h-3 md:h-4 w-1/2 bg-white/10 backdrop-blur-md rounded-md"
+                variants={shimmerVariants}
+                initial="initial"
+                animate="animate"
+                style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.1) 75%)', backgroundSize: '200% 100%' }}
+              />
+            </div>
 
-          {/* Description */}
-          <div className="space-y-1 md:space-y-2">
-            <motion.div
-              className="h-2.5 md:h-3 w-full bg-gray-100 rounded"
-              variants={shimmerVariants}
-              initial="initial"
-              animate="animate"
-              style={{
-                background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
-                backgroundSize: '200% 100%',
-              }}
-            />
-            <motion.div
-              className="hidden md:block h-3 w-3/4 bg-gray-100 rounded"
-              variants={shimmerVariants}
-              initial="initial"
-              animate="animate"
-              style={{
-                background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
-                backgroundSize: '200% 100%',
-              }}
-            />
-          </div>
+            {/* Metrics Row */}
+            <div className="flex items-center gap-4">
+              <motion.div className="h-6 md:h-8 w-16 md:w-20 bg-white/20 rounded-md" variants={shimmerVariants} initial="initial" animate="animate" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.2) 75%)', backgroundSize: '200% 100%' }} />
+              <div className="w-px h-6 bg-white/10" />
+              <motion.div className="h-6 md:h-8 w-16 md:w-20 bg-white/20 rounded-md" variants={shimmerVariants} initial="initial" animate="animate" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.2) 75%)', backgroundSize: '200% 100%' }} />
+            </div>
 
-          {/* Address */}
-          <div className="flex items-center gap-1 md:gap-2">
-            <div className="w-3 h-3 md:w-4 md:h-4 rounded bg-gray-200" />
+            <div className="h-px bg-white/10 w-full" />
+
             <motion.div
-              className="h-2.5 md:h-3 flex-1 bg-gray-100 rounded"
+              className="h-4 md:h-5 w-32 bg-white/10 rounded-md"
               variants={shimmerVariants}
               initial="initial"
               animate="animate"
-              style={{
-                background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
-                backgroundSize: '200% 100%',
-              }}
+              style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.1) 75%)', backgroundSize: '200% 100%' }}
             />
           </div>
         </div>
+
+        {/* Glossy protector background gradient simulation */}
+        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
       </motion.div>
     );
   };

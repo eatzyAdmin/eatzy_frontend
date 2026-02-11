@@ -14,7 +14,7 @@ import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer"
 import { ReviewsModal } from "@/features/search/components/ReviewsModal";
 import FloatingRestaurantCart from "@/features/cart/components/FloatingRestaurantCart";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
-
+import DishCard from "@/features/restaurant/components/DishCard";
 
 export default function RestaurantDetailPage() {
   const params = useParams() as { slug: string };
@@ -76,7 +76,6 @@ export default function RestaurantDetailPage() {
     return cartItems.find((item) => String(item.dish.id) === dishId);
   };
   const { containerRef: catContainerRef, rect: catRect, style: catStyle, moveHighlight: catMove, clearHover: catClear } = useHoverHighlight<HTMLDivElement>();
-  const { containerRef: menuContainerRef, rect: menuRect, style: menuStyle, moveHighlight: menuMove, clearHover: menuClear } = useHoverHighlight<HTMLDivElement>();
   const { ghosts, fly } = useFlyToCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerDish, setDrawerDish] = useState<Dish | null>(null);
@@ -195,8 +194,6 @@ export default function RestaurantDetailPage() {
 
                     {/* Gradient for text blend */}
                     <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F7F7F7] via-[#F7F7F7]/80 to-transparent" />
-                    {/* Top gradient for header visibility */}
-                    <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent" />
 
                     <button
                       onClick={(e) => {
@@ -204,13 +201,13 @@ export default function RestaurantDetailPage() {
                         if (numericRestaurantId) toggleFavorite(numericRestaurantId);
                       }}
                       disabled={isMutating}
-                      className={`absolute top-4 right-4 backdrop-blur-md border px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-all active:scale-95 ${favorited ? 'bg-[#FFC107] border-yellow-200 text-white' : 'bg-white/20 border-white/30 text-white'
+                      className={`absolute top-4 right-4 backdrop-blur-md border px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-all active:scale-95 ${favorited ? 'bg-black/40 border-white/20 text-white' : 'bg-white/20 border-white/30 text-white'
                         }`}
                     >
                       {isMutating ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
-                        <Star className={`w-3.5 h-3.5 ${favorited ? 'fill-white' : 'fill-white/80'}`} />
+                        <Star className={`w-3.5 h-3.5 ${favorited ? 'text-red-500 fill-red-500' : 'fill-white/80'}`} />
                       )}
                       <span className="text-[12px] font-bold uppercase tracking-wide">
                         {favorited ? 'Saved' : 'Save'}
@@ -305,48 +302,52 @@ export default function RestaurantDetailPage() {
 
 
                 {/* Small illustration image - Desktop only */}
-                <div className="hidden md:block rounded-[24px] overflow-hidden">
+                <div className="hidden md:block group relative rounded-[32px] shadow-sm md:rounded-[36px] overflow-hidden cursor-pointer">
                   <div className="relative aspect-[16/11]">
                     <ImageWithFallback
                       src={detail?.avatarUrl || "https://placehold.co/600x400?text=Restaurant"}
                       alt={restaurant.name}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-700"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                   </div>
                 </div>
               </div>
 
               {/* Right Column - Main Image & Menu (Scrollable independently on desktop) */}
-              <div ref={rightColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pl-2 mb-12 shrink-0 px-4 md:px-0">
+              <div ref={rightColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pl-2 mb-12 shrink-0 px-3 md:px-0">
                 {/* Main Hero Image with Save Button - Desktop Only */}
-                <div className="hidden md:block relative mb-6">
-                  <div className="relative aspect-[16/8] rounded-[24px] overflow-hidden shadow-md bg-white">
+                <div className="hidden md:block relative mb-10">
+                  <div className="relative aspect-[16/8] rounded-[32px] shadow-sm md:rounded-[40px] overflow-hidden group">
                     <ImageWithFallback
                       src={detail?.coverImageUrl || "https://placehold.co/600x400?text=Restaurant"}
                       alt={restaurant.name}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-[1.5s]"
                     />
+                    {/* Glossy Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none" />
                   </div>
+
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       if (numericRestaurantId) toggleFavorite(numericRestaurantId);
                     }}
                     disabled={isMutating}
-                    className={`absolute top-4 right-4 z-20 px-4 py-2 rounded-[12px] shadow-lg border-2 flex items-center gap-2 transition-all active:scale-95 ${favorited
-                      ? 'bg-[#FFC107] hover:bg-[#FFB300] text-white border-yellow-200'
-                      : 'bg-[#28A745] hover:bg-[#218838] text-white border-white/80'
+                    className={`absolute bottom-6 right-8 z-20 px-6 py-3 rounded-[24px] backdrop-blur-xl border-2 shadow-2xl flex items-center gap-3 transition-all active:scale-95 group/save ${favorited
+                      ? 'bg-black/60 text-white border-white/20'
+                      : 'bg-black/40 text-white border-white/20 hover:bg-black/60'
                       }`}
                   >
                     {isMutating ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
-                      <Star className={`w-4 h-4 ${favorited ? 'fill-white' : 'fill-none'}`} />
+                      <Star className={`w-5 h-5 transition-transform group-hover/save:scale-125 ${favorited ? 'text-red-500 fill-red-500' : 'text-white'}`} />
                     )}
-                    <span className="text-[14px] font-medium uppercase tracking-wide">
-                      {favorited ? 'Saved to Favorites' : 'Save to Favorites'}
+                    <span className="text-[15px] font-anton font-bold uppercase tracking-widest">
+                      {favorited ? 'Saved' : 'Save Venue'}
                     </span>
                   </button>
                 </div>
@@ -443,7 +444,7 @@ export default function RestaurantDetailPage() {
                   </div>
                 </div>
 
-                <div ref={menuContainerRef} className="relative space-y-8 px-0 md:px-4">
+                <div className="relative space-y-12 px-0 md:px-4">
                   {categories.map((c) => {
                     const dishes: Dish[] = getDishesByCategoryId(c.id);
                     return (
@@ -452,141 +453,48 @@ export default function RestaurantDetailPage() {
                         ref={(el) => { sectionRefs.current[c.id] = el; }}
                         data-id={c.id}
                       >
-                        <div className="flex items-center justify-between mb-4">
-                          <h2 className="text-[20px] md:text-[24px] font-bold text-[#1A1A1A] uppercase tracking-wide">
+                        <div className="flex items-center justify-center gap-3 mb-6">
+                          <h2 className="text-[20px] md:text-[24px] font-bold text-[#1A1A1A] uppercase tracking-wide font-anton">
                             {c.name}
                           </h2>
-                          <div className="text-[12px] text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200 font-medium">
-                            {dishes.length} items
+                          <div className="text-[12px] font-black text-gray-400 bg-white px-4 py-1.5 rounded-full border border-gray-200 uppercase tracking-widest">
+                            {dishes.length} SELECTIONS
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
+                        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
                           {dishes.map((d) => {
                             const count = getDishCount(d.id);
                             const cartItem = getCartItemForDish(d.id);
-                            const variantGroup = (d.optionGroups ?? []).find((g) => String(g.title || '').toLowerCase().startsWith('variant')) || null;
-                            const minPrice = variantGroup && Array.isArray(variantGroup.options) && variantGroup.options.length > 0
-                              ? (Number(d.price || 0) + Math.min(...(variantGroup.options ?? []).map((v) => Number(v.price || 0))))
-                              : Number(d.price || 0);
                             return (
-                              <div
+                              <DishCard
                                 key={d.id}
-                                className="group relative bg-white rounded-[16px] md:rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer"
+                                dish={d}
+                                count={count}
+                                onAdd={() => {
+                                  setDrawerDish(d);
+                                  setDrawerOpen(true);
+                                }}
+                                onRemove={async () => {
+                                  if (cartItem) {
+                                    if (cartItem.quantity <= 1) {
+                                      await removeCartItem(cartItem.id);
+                                    } else {
+                                      await updateItemQuantity(cartItem.id, cartItem.quantity - 1);
+                                    }
+                                  }
+                                }}
                                 onClick={() => {
                                   setDrawerDish(d);
                                   setDrawerOpen(true);
                                 }}
-                                onMouseEnter={(e) =>
-                                  menuMove(e, {
-                                    borderRadius: 24,
-                                    backgroundColor: "rgba(0,0,0,0.04)",
-                                    opacity: 1,
-                                    scaleEnabled: true,
-                                    scale: 1.02,
-                                  })
-                                }
-                                onMouseMove={(e) =>
-                                  menuMove(e, {
-                                    borderRadius: 24,
-                                    backgroundColor: "rgba(0,0,0,0.04)",
-                                    opacity: 1,
-                                    scaleEnabled: true,
-                                    scale: 1.02,
-                                  })
-                                }
-                                onMouseLeave={menuClear}
-                              >
-                                <div className="relative aspect-[4/3] overflow-hidden">
-                                  <ImageWithFallback
-                                    src={d.imageUrl}
-                                    alt={d.name}
-                                    fill
-                                    className="object-cover group-hover:scale-110 transition-transform duration-700"
-                                  />
-                                  {d.isAvailable === false && (
-                                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center text-white text-sm font-bold uppercase tracking-widest">
-                                      Hết hàng
-                                    </div>
-                                  )}
-                                  <div className="absolute top-2 right-2 md:top-3 md:right-3 z-10">
-                                    {count > 0 ? (
-                                      <motion.div
-                                        layoutId={`item-${d.id}-btn`}
-                                        className="rounded-full bg-white/90 backdrop-blur text-[#1A1A1A] shadow-lg flex items-center gap-1 md:gap-2 px-1 py-1 h-8 md:h-10 border border-gray-100"
-                                      >
-                                        <button
-                                          onClick={async (e) => {
-                                            e.stopPropagation();
-                                            if (cartItem) {
-                                              if (cartItem.quantity <= 1) {
-                                                await removeCartItem(cartItem.id);
-                                              } else {
-                                                await updateItemQuantity(cartItem.id, cartItem.quantity - 1);
-                                              }
-                                            }
-                                          }}
-                                          className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-                                        >
-                                          <Minus className="w-3 h-3 md:w-4 md:h-4" />
-                                        </button>
-                                        <span className="text-xs md:text-sm font-bold min-w-[16px] md:min-w-[20px] text-center">
-                                          {count}
-                                        </span>
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setDrawerDish(d);
-                                            setDrawerOpen(true);
-                                          }}
-                                          className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[var(--primary)] text-white hover:brightness-110 flex items-center justify-center shadow-md shadow-[var(--primary)]/30 transition-all"
-                                        >
-                                          <Plus className="w-3 h-3 md:w-4 md:h-4" />
-                                        </button>
-                                      </motion.div>
-                                    ) : (
-                                      <motion.button
-                                        layoutId={`item-${d.id}-btn`}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setDrawerDish(d);
-                                          setDrawerOpen(true);
-                                        }}
-                                        className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white text-[#1A1A1A] shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group/btn"
-                                      >
-                                        <Plus className="w-4 h-4 md:w-5 md:h-5 group-hover/btn:text-[var(--primary)] transition-colors" />
-                                      </motion.button>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="p-3 md:p-5">
-                                  <div className="flex justify-between items-start gap-2 mb-1 md:mb-2">
-                                    <h3 className="font-bold text-[15px] md:text-[17px] text-[#1A1A1A] leading-snug line-clamp-2">
-                                      {d.name}
-                                    </h3>
-                                  </div>
-                                  <p className="text-[12px] md:text-[13px] text-gray-500 line-clamp-2 mb-2 md:mb-4 min-h-[2.5em] leading-relaxed">
-                                    {d.description}
-                                  </p>
-                                  <div className="flex items-center justify-between pt-2 md:pt-3 border-t border-gray-50">
-                                    <div className="flex items-baseline gap-1">
-                                      <span className="text-[16px] md:text-[18px] font-bold text-[var(--primary)]">
-                                        {formatVnd(minPrice)}
-                                      </span>
-                                    </div>
-                                    <div className="hidden md:block text-[12px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
-                                      Còn {d.availableQuantity}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
+                              />
                             );
                           })}
                         </div>
                       </section>
                     );
                   })}
-                  <HoverHighlightOverlay rect={menuRect} style={menuStyle} />
                 </div>
                 {/* End of list indicator */}
                 <div className="py-12 flex items-center justify-center gap-4 opacity-60">

@@ -24,7 +24,7 @@ export default function PromoVoucherCard({
 
   const getTitle = () => {
     if (voucher.description) return voucher.description;
-    if (voucher.title) return voucher.title;
+    if (voucher.code) return `Voucher: ${voucher.code}`;
     if (isFreeship) return 'Miễn phí giao hàng';
     return `Giảm ${formatVnd(voucher.discountValue)}`;
   };
@@ -65,75 +65,84 @@ export default function PromoVoucherCard({
     <div
       onClick={handleClick}
       className={`
-        relative overflow-hidden rounded-[20px] p-4 transition-all duration-300 border
+        relative w-full text-left p-3 rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-4
         ${disabled
           ? 'bg-gray-50 border-gray-100 opacity-60 cursor-not-allowed'
           : selected
-            ? 'bg-white border-lime-500 shadow-md ring-1 ring-lime-500 cursor-pointer'
-            : 'bg-white border-gray-100 shadow-sm hover:shadow-md hover:border-lime-200 cursor-pointer'
+            ? isFreeship
+              ? 'bg-blue-50 border-blue-100 shadow-sm cursor-pointer'
+              : 'bg-lime-50 border-lime-100 shadow-sm cursor-pointer'
+            : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50 cursor-pointer'
         }
       `}
     >
-      <div className="flex items-center gap-4">
-        {/* Left Icon Part */}
-        <div className={`
-          w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0
-          ${disabled
-            ? 'bg-gray-100 text-gray-400'
-            : isFreeship
-              ? 'bg-blue-50 text-blue-600'
-              : 'bg-lime-50 text-lime-600'
-          }
-        `}>
-          {isFreeship ? <Truck className="w-5 h-5" /> : <Tag className="w-5 h-5" />}
-        </div>
+      {/* Icon Box */}
+      <div className={`
+        w-11 h-11 rounded-[18px] flex items-center justify-center flex-shrink-0 transition-all duration-300
+        ${disabled
+          ? 'bg-gray-200 text-gray-400'
+          : selected
+            ? isFreeship
+              ? 'bg-blue-200 text-blue-700'
+              : 'bg-lime-200 text-lime-700'
+            : 'bg-gray-100 text-gray-400 group-hover:bg-white'
+        }
+      `}>
+        {isFreeship ? <Truck size={20} strokeWidth={2.5} /> : <Tag size={20} strokeWidth={2.5} />}
+      </div>
 
-        {/* Middle Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <h4 className={`text-sm font-bold truncate ${disabled ? 'text-gray-400' : 'text-[#1A1A1A]'}`}>
-              {getTitle()}
-            </h4>
-            {isBest && !disabled && (
-              <span className="bg-yellow-100 text-yellow-700 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide">
-                Best
-              </span>
-            )}
-          </div>
-
-          {/* Discount details */}
-          {discountInfo && (
-            <div className={`text-xs font-medium mb-1 line-clamp-1 ${disabled ? 'text-gray-400' : isFreeship ? 'text-blue-600' : 'text-[var(--primary)]'}`}>
-              {discountInfo}
-            </div>
-          )}
-
-          <div className="flex items-center gap-2">
-            {minText && (
-              <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-                {minText}
-              </span>
-            )}
-            <span className="text-[10px] font-medium text-gray-400">
-              {voucher.endDate ? `HSD: ${new Date(voucher.endDate).toLocaleDateString('vi-VN')}` : 'No expiry'}
+      {/* Middle Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <h4 className={`text-[15px] font-bold tracking-tight truncate transition-all ${disabled ? 'text-gray-400' : 'text-[#1A1A1A]'}`}>
+            {getTitle()}
+          </h4>
+          {isBest && !disabled && (
+            <span className="flex items-center gap-1 text-[9px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full border border-amber-200">
+              <div className="w-1 h-1 rounded-full bg-amber-600 animate-pulse"></div>
+              BEST
             </span>
-          </div>
-
-          {disabled && reason && (
-            <div className="text-[10px] font-bold text-[var(--danger)] mt-1">{reason}</div>
           )}
         </div>
 
-        {/* Right Selection */}
-        <div className={`
-          w-6 h-6 rounded-full border flex items-center justify-center transition-all flex-shrink-0
-          ${selected
-            ? 'bg-lime-500 border-lime-500 text-white'
-            : 'bg-transparent border-gray-300'
-          }
-        `}>
-          {selected && <Check className="w-3.5 h-3.5" />}
+        {/* Discount details */}
+        {discountInfo && (
+          <div className={`text-[12px] font-bold tracking-tight mb-1 line-clamp-1 transition-all ${disabled ? 'text-gray-400' : isFreeship ? 'text-blue-600' : 'text-lime-600'}`}>
+            {discountInfo}
+          </div>
+        )}
+
+        <div className="flex items-center gap-3">
+          {minText && (
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              {minText}
+            </span>
+          )}
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            {voucher.endDate ? `HSD: ${new Date(voucher.endDate).toLocaleDateString('vi-VN')}` : 'NO EXPIRY'}
+          </span>
         </div>
+
+        {disabled && reason && (
+          <div className="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-red-100 mt-2 w-fit">
+            {reason}
+          </div>
+        )}
+      </div>
+
+      {/* Checkmark Circle at the end */}
+      <div className={`
+        w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500
+        ${disabled
+          ? 'bg-gray-100 text-transparent scale-90'
+          : selected
+            ? isFreeship
+              ? 'bg-blue-500 text-white scale-100 shadow-md shadow-blue-500/30'
+              : 'bg-lime-500 text-white scale-100 shadow-md shadow-lime-500/30'
+            : 'bg-gray-100 text-transparent scale-90 group-hover:border-gray-200'
+        }
+      `}>
+        <Check size={16} strokeWidth={4} className={selected ? "opacity-100" : "opacity-0"} />
       </div>
     </div>
   );

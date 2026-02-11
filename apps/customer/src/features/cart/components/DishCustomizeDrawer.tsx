@@ -5,7 +5,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import type { Dish, DishVariant, OptionGroup, OptionChoice } from "@repo/types";
 import { formatVnd } from "@repo/lib";
 import { useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
-import { ChefHat, X, Loader2, Check } from "@repo/ui/icons";
+import { ChefHat, X, Loader2, Check, Plus, Sparkles, Utensils, AlertCircle } from "@repo/ui/icons";
 
 export default function DishCustomizeDrawer({
   open,
@@ -207,7 +207,7 @@ export default function DishCustomizeDrawer({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-center gap-8 md:gap-16 bg-gray-200 rounded-3xl px-4 py-3 md:px-6 md:py-4 mx-8 md:mx-28 mt-5 md:mt-6 mb-5 md:mb-6 shadow-sm">
+                <div className="flex items-center justify-center gap-8 md:gap-16 bg-gray-200 rounded-[32px] px-4 py-3 md:px-6 md:py-4 mx-8 md:mx-28 mt-5 md:mt-6 mb-5 md:mb-6 shadow-sm">
                   <motion.button
                     whileHover={{ scale: 1.06 }}
                     whileTap={{ scale: 0.92 }}
@@ -264,8 +264,8 @@ export default function DishCustomizeDrawer({
                   </motion.button>
                 </div>
 
-                <div className="hidden md:block mt-4 mx-0 md:mx-8 relative rounded-[20px] md:rounded-[30px] overflow-hidden bg-white shadow">
-                  <div className="relative aspect-[16/7]">
+                <div className="hidden md:block mt-4 mx-0 md:mx-6 relative rounded-[32px] md:rounded-[44px] overflow-hidden bg-white shadow">
+                  <div className="relative aspect-[16/12]">
                     <ImageWithFallback
                       src={dish.imageUrl}
                       alt={dish.name}
@@ -280,13 +280,20 @@ export default function DishCustomizeDrawer({
                     <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3">
                       {(variantGroup?.options ?? []).map((v: OptionChoice) => (
                         <motion.button
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                           key={v.id}
                           onClick={() => setSelectedVariantId(v.id)}
-                          className={`px-2 py-4 md:px-8 rounded-2xl text-md font-medium transition-all shadow-sm border flex flex-col items-center justify-center md:block text-center ${currentVariantId === v.id ? "bg-[var(--primary)] text-white border-[var(--primary)]" : "bg-gray-300 text-gray-400 border-gray-300 hover:bg-gray-100"} `}
+                          className={`
+                            px-5 py-3 md:px-6 md:py-4 rounded-[22px] border-2 transition-all duration-300 flex-1 md:flex-none min-w-[120px] text-center
+                            ${currentVariantId === v.id
+                              ? "bg-lime-500 text-white border-lime-400 shadow-lg shadow-lime-500/20 font-bold"
+                              : "bg-white text-gray-500 border-gray-100 hover:border-gray-200 hover:bg-gray-50 font-medium"
+                            }
+                          `}
                         >
-                          {v.name} • {formatVnd((dish?.price ?? 0) + Number(v.price || 0))}
+                          <div className="text-[13px] md:text-sm uppercase tracking-wider mb-0.5 opacity-80">{v.name}</div>
+                          <div className="text-sm md:text-base font-anton">{formatVnd((dish?.price ?? 0) + Number(v.price || 0))}</div>
                         </motion.button>
                       ))}
                     </div>
@@ -348,7 +355,7 @@ export default function DishCustomizeDrawer({
                   className="flex-1 md:overflow-y-auto px-5 md:px-12 py-6 pb-32 md:pb-32"
                 >
                   {nonVariantGroups && nonVariantGroups.length > 0 ? (
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                       {nonVariantGroups.map((g) => (
                         <section
                           key={g.id}
@@ -356,19 +363,19 @@ export default function DishCustomizeDrawer({
                             groupRefs.current[g.id] = el;
                           }}
                           data-id={g.id}
-                          className="bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 scroll-mt-36"
+                          className="bg-white rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 scroll-mt-36"
                         >
                           <div className="px-6 py-5 pb-0 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-lime-50 flex items-center justify-center text-lime-500">
-                                <ChefHat className="w-4 h-4" />
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-12 h-12 rounded-full bg-lime-100 flex items-center justify-center text-lime-600 flex-shrink-0">
+                                <ChefHat className="w-6 h-6" />
                               </div>
-                              <div>
-                                <h4 className="font-bold text-[#1A1A1A] text-lg leading-none">
+                              <div className="min-w-0">
+                                <h4 className="font-bold text-[#1A1A1A] text-lg leading-none truncate">
                                   {String(g.title || "")}
                                 </h4>
                                 {(typeof g.minSelect === "number" || typeof g.maxSelect === "number") && (
-                                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-1.5">
+                                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-1.5 truncate">
                                     {typeof g.minSelect === "number" ? `Min ${g.minSelect}` : "Optional"}
                                     {typeof g.maxSelect === "number" ? ` • Max ${g.maxSelect}` : ""}
                                   </div>
@@ -376,15 +383,83 @@ export default function DishCustomizeDrawer({
                               </div>
                             </div>
 
-                            {/* Optional: Checkmark if satisfied */}
+                            {/* Status Indicator: Morphing Badge - Adaptive for Mobile/Desktop */}
                             {(() => {
                               const set = selectedAddonIds[g.id] ?? new Set<string>();
                               const count = set.size;
                               const isSatisfied = (!g.required || count >= (g.minSelect ?? 1)) && (!g.maxSelect || count <= g.maxSelect);
-                              return isSatisfied && (
-                                <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                                  <Check className="w-3.5 h-3.5" />
-                                </div>
+                              const isRequired = g.required || (g.minSelect ?? 0) > 0;
+
+                              if (!isSatisfied && !isRequired) return null;
+
+                              return (
+                                <motion.div
+                                  layout
+                                  transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                                  className={`
+                                    relative flex items-center overflow-hidden border-2 flex-shrink-0 shadow-sm
+                                    ${isSatisfied
+                                      ? "px-1 md:px-1.5 py-1 md:py-1.5 rounded-full bg-lime-50 border-lime-100"
+                                      : "pl-1.5 pr-3 md:pr-4 py-1.5 rounded-full bg-red-50 border-red-100"
+                                    }
+                                  `}
+                                >
+                                  {/* Icon Box - Restored to TableFilterBadges style */}
+                                  <motion.div
+                                    layout
+                                    className={`
+                                      flex-shrink-0 items-center justify-center flex
+                                      ${isSatisfied
+                                        ? "w-5 h-5 md:w-7 md:h-7 rounded-full md:rounded-[12px] bg-lime-200 text-lime-700"
+                                        : "w-5 h-5 md:w-7 md:h-7 rounded-full md:rounded-[12px] bg-red-100 text-red-600"
+                                      }
+                                    `}
+                                  >
+                                    <AnimatePresence mode="wait" initial={false}>
+                                      {isSatisfied ? (
+                                        <motion.div
+                                          key="check"
+                                          initial={{ opacity: 0, scale: 0.5 }}
+                                          animate={{ opacity: 1, scale: 1 }}
+                                          exit={{ opacity: 0, scale: 0.5 }}
+                                        >
+                                          <Check size={13} strokeWidth={5} />
+                                        </motion.div>
+                                      ) : (
+                                        <motion.div
+                                          key="alert"
+                                          initial={{ opacity: 0, scale: 0.5 }}
+                                          animate={{ opacity: 1, scale: 1 }}
+                                          exit={{ opacity: 0, scale: 0.5 }}
+                                        >
+                                          <AlertCircle className="w-2.5 h-2.5 md:w-3.5 md:h-3.5 animate-pulse" strokeWidth={3} />
+                                        </motion.div>
+                                      )}
+                                    </AnimatePresence>
+                                  </motion.div>
+
+                                  {/* Text Section - Adaptive style with small gap for icon */}
+                                  <AnimatePresence mode="popLayout" initial={false}>
+                                    {!isSatisfied && (
+                                      <motion.div
+                                        key="text"
+                                        layout
+                                        initial={{ opacity: 0, width: 0, x: -5 }}
+                                        animate={{ opacity: 1, width: "auto", x: 0 }}
+                                        exit={{ opacity: 0, width: 0, x: -5 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="flex flex-col -space-y-0.5 ml-1.5 md:ml-2.5 pointer-events-none text-left overflow-hidden"
+                                      >
+                                        <span className="hidden md:block text-[9px] font-black uppercase tracking-widest text-red-600/60 transition-colors">
+                                          Selection
+                                        </span>
+                                        <span className="text-[9px] md:text-[12px] font-bold tracking-tight text-red-500 md:text-red-700 uppercase transition-colors">
+                                          Required
+                                        </span>
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
+                                </motion.div>
                               );
                             })()}
                           </div>
@@ -401,33 +476,47 @@ export default function DishCustomizeDrawer({
                                   onClick={() => toggleAddon(g.id, opt.id)}
                                   disabled={disable}
                                   className={`
-                                    relative w-full text-left p-3 md:p-4 rounded-[20px] border transition-all duration-200 group
+                                    relative w-full text-left p-2.5 rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-4
                                     ${active
-                                      ? "bg-lime-50 border-lime-200 shadow-sm"
-                                      : "bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm hover:bg-gray-50/50"
+                                      ? "bg-lime-50 border-lime-100 shadow-sm"
+                                      : "bg-white border-gray-50 hover:border-gray-100 hover:bg-gray-50/30"
                                     }
-                                    ${disable ? "opacity-50 pointer-events-none" : ""}
+                                    ${disable ? "opacity-40 pointer-events-none" : ""}
                                   `}
                                 >
-                                  <div className="flex items-center gap-3 md:gap-4">
-                                    <div className={`
-                                      w-5 h-5 md:w-6 md:h-6 rounded-full border flex items-center justify-center flex-shrink-0 transition-all
-                                      ${active
-                                        ? "bg-lime-500 border-lime-500 text-white"
-                                        : "bg-transparent border-gray-300 group-hover:border-gray-400"
-                                      }
-                                    `}>
-                                      {active && <Check className="w-3 md:w-3.5 h-3 md:h-3.5" />}
-                                    </div>
+                                  {/* Left Icon Box (Mimics the modal style) */}
+                                  <div className={`
+                                    w-11 h-11 rounded-[18px] flex items-center justify-center flex-shrink-0 transition-all duration-300
+                                    ${active
+                                      ? 'bg-lime-200 text-lime-700'
+                                      : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                                    }
+                                  `}>
+                                    <Utensils size={20} strokeWidth={2.2} />
+                                  </div>
 
-                                    <div className="flex-1 min-w-0">
-                                      <div className={`text-[14px] md:text-[15px] font-bold truncate ${active ? "text-[#1A1A1A]" : "text-gray-600"}`}>
-                                        {String(opt.name || "")}
-                                      </div>
-                                      <div className="text-xs md:text-sm font-medium text-gray-400">
-                                        {formatVnd(Number(opt.price || 0))}
-                                      </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className={`text-[15px] font-bold tracking-tight transition-all ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                                      {String(opt.name || "")}
                                     </div>
+                                    <div className={`text-xs md:text-sm font-semibold transition-all ${active ? "text-lime-600/80" : "text-gray-400"}`}>
+                                      {Number(opt.price || 0) === 0 ? (
+                                        <span className="text-[10px] md:text-[12px] font-semibold">Miễn phí</span>
+                                      ) : (
+                                        `+ ${formatVnd(Number(opt.price || 0))}`
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Right Checkmark Circle (Mimics the modal style) */}
+                                  <div className={`
+                                    w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500
+                                    ${active
+                                      ? "bg-lime-500 text-white scale-100 shadow-sm"
+                                      : "bg-gray-100 text-transparent scale-90"
+                                    }
+                                  `}>
+                                    <Check size={16} strokeWidth={4} className={active ? "opacity-100" : "opacity-0"} />
                                   </div>
                                 </button>
                               );
@@ -456,10 +545,10 @@ export default function DishCustomizeDrawer({
             </div>
 
             {/* Fixed Footer */}
-            <div className="fixed md:absolute bottom-0 left-0 right-0 p-4 md:py-4 md:p-8 bg-white border-t border-gray-100 z-[90] md:z-10 md:w-[60%] md:left-auto flex justify-center">
+            <div className="fixed md:absolute bottom-0 left-0 right-0 p-4 md:py-6 md:px-12 bg-white/80 backdrop-blur-xl border-t border-gray-100 z-[90] md:z-10 md:w-[60%] md:left-auto flex justify-center">
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={canConfirm && !isAdding ? { y: -2 } : {}}
+                whileTap={canConfirm && !isAdding ? { scale: 0.98 } : {}}
                 disabled={!canConfirm || isAdding}
                 ref={confirmRef}
                 onClick={async () => {
@@ -504,37 +593,37 @@ export default function DishCustomizeDrawer({
                     setIsAdding(false);
                   }
                 }}
-                className={`w-full max-w-sm h-16 rounded-2xl flex items-center justify-center gap-2 transition-all ${canConfirm && !isAdding ? "bg-[var(--primary)] text-white shadow-sm" : "bg-gray-200 text-gray-500"} font-semibold disabled:opacity-70`}
+                className={`group/btn relative w-full max-w-[420px] h-[72px] rounded-[32px] flex items-center justify-between px-8 transition-all duration-300 ${canConfirm && !isAdding
+                  ? "bg-lime-500 text-white hover:bg-lime-600"
+                  : "bg-gray-200 text-gray-400"
+                  } disabled:opacity-70 overflow-hidden`}
               >
-                {isAdding ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Đang thêm...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M7 4h-2l-1 2v2h2l2-4h9l1 4h-2l-1-2h-8"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M5 8h12l-1 7H7L5 8z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      />
-                      <circle cx="8" cy="20" r="2" fill="currentColor" />
-                      <circle cx="17" cy="20" r="2" fill="currentColor" />
-                    </svg>
-                    <span>Thêm vào giỏ - {formatVnd(totalPrice)}</span>
-                  </>
+                <div className="flex items-center gap-3 relative z-10">
+                  {isAdding ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : (
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${canConfirm ? "bg-white/20 group-hover/btn:bg-white/30" : "bg-black/5"}`}>
+                      <Plus className="w-5 h-5 text-white" strokeWidth={3} />
+                    </div>
+                  )}
+                  <span className="text-base font-bold tracking-tight">
+                    {isAdding ? "Đang thêm..." : "Thêm vào giỏ hàng"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 relative z-10">
+                  <div className="h-8 w-px bg-white/20 mx-1" />
+                  <div className="flex flex-col items-end">
+                    <span className="text-[10px] uppercase font-black tracking-[0.2em] opacity-70 leading-none mb-1 text-white">Total</span>
+                    <span className="text-[20px] font-anton leading-none">
+                      {formatVnd(totalPrice)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Glossy Overlay */}
+                {canConfirm && !isAdding && (
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none" />
                 )}
               </motion.button>
             </div>
@@ -544,3 +633,4 @@ export default function DishCustomizeDrawer({
     </AnimatePresence>
   );
 }
+

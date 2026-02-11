@@ -196,7 +196,7 @@ export default function RestaurantSlider({
                     >
                       <div className="flex flex-col items-center">
                         <div
-                          className="relative w-full rounded-xl overflow-hidden shadow-2xl"
+                          className="relative w-full rounded-[28px] md:rounded-[30px] overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.12)]"
                           style={{ height: `${imageHeight}px`, width: isCenter ? '100%' : (isMobile ? '0px' : '100%'), opacity: isCenter ? 1 : (isMobile ? 0 : 1) }}
                         >
                           {/* Side items hidden on mobile effectively via width 0 */}

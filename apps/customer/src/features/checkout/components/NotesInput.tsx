@@ -9,7 +9,7 @@ export default function NotesInput({ value, onChange }: { value: string; onChang
         <FileText className="w-5 h-5 text-gray-400" />
         <h4 className="font-bold text-[#1A1A1A]">Driver Notes</h4>
       </div>
-      <div className="p-5">
+      <div className="p-5 pt-0 md:pt-5">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0">
             <FileText className="w-5 h-5" />

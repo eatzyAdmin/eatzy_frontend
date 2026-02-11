@@ -35,7 +35,7 @@ export default function RestaurantDetailShimmer() {
             <div className="flex gap-4 items-start md:block">
               {/* Mobile Image Shimmer */}
               <motion.div
-                className="shrink-0 w-[120px] h-[120px] rounded-[20px] bg-gray-200 md:hidden"
+                className="shrink-0 w-[120px] h-[120px] rounded-[32px] bg-gray-200 md:hidden"
                 variants={shimmerVariants}
                 initial="initial"
                 animate="animate"
@@ -81,7 +81,7 @@ export default function RestaurantDetailShimmer() {
 
             {/* Small Illustration (Left) */}
             <motion.div
-              className="rounded-[24px] aspect-[16/11] bg-gray-200 w-full hidden md:block"
+              className="rounded-[32px] md:rounded-[40px] aspect-[16/11] bg-gray-200 w-full hidden md:block"
               variants={shimmerVariants}
               initial="initial"
               animate="animate"
@@ -102,9 +102,8 @@ export default function RestaurantDetailShimmer() {
 
           {/* Right Column Shimmer */}
           <div className="relative overflow-y-visible md:overflow-y-auto no-scrollbar pl-0 md:pl-2 mb-12 px-4 md:px-0">
-            {/* Main Hero Image Shimmer - Detailed - Desktop Only */}
             <div className="relative mb-6 hidden md:block">
-              <div className="aspect-[16/8] rounded-[24px] bg-gray-50 border border-gray-100 relative overflow-hidden flex items-center justify-center">
+              <div className="aspect-[16/8] rounded-[32px] md:rounded-[40px] bg-gray-50 border border-gray-100 relative overflow-hidden flex items-center justify-center">
                 <motion.div
                   className="absolute inset-0 z-0"
                   variants={shimmerVariants}
@@ -144,7 +143,7 @@ export default function RestaurantDetailShimmer() {
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
                 {[1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} className="bg-white rounded-[16px] md:rounded-[24px] overflow-hidden border border-gray-100 shadow-sm h-[260px] md:h-[320px] flex flex-col">
+                  <div key={i} className="bg-white rounded-[28px] md:rounded-[36px] overflow-hidden border border-gray-100 shadow-sm h-[260px] md:h-[320px] flex flex-col">
                     <motion.div
                       className="aspect-[4/3] bg-gray-200"
                       variants={shimmerVariants}

@@ -100,8 +100,8 @@ export default function HomeHeader({
               : 'bg-white/10 border-white/20 hover:bg-white/20'
               }`}
           >
-            <BookHeart className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
-            <span className={`text-sm font-medium ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
+            <BookHeart className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} strokeWidth={2.4} />
+            <span className={`text-md font-semibold font-anton uppercase ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
               Current Orders
             </span>
           </motion.button>
@@ -178,7 +178,7 @@ function CartButtonContent({ hideSearchIcon }: { hideSearchIcon: boolean }) {
         )}
       </motion.div>
       {totalItems > 0 && (
-        <div className={`hidden md:flex items-center text-sm font-semibold ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
+        <div className={`hidden md:flex items-center text-sm font-bold ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
           {new Intl.NumberFormat('vi-VN').format(totalPrice)} đ
         </div>
       )}
