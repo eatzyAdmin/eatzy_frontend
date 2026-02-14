@@ -54,7 +54,7 @@ export default function PaymentMethodDrawer({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 18, stiffness: 100 }}
-            className="relative bg-white w-full rounded-t-[40px] overflow-hidden flex flex-col h-[60vh] max-h-[60vh] shadow-2xl"
+            className="relative bg-white w-full rounded-t-[40px] overflow-hidden flex flex-col h-auto max-h-[85vh] shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-white">

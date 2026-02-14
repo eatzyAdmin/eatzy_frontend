@@ -156,11 +156,11 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-start mb-1">
-                            <h4 className="font-semibold text-[#1A1A1A] line-clamp-1 text-sm">{item.dish.name}</h4>
+                            <h4 className="font-bold text-[#1A1A1A] line-clamp-1 text-md">{item.dish.name}</h4>
                             <span className="font-bold text-[#1A1A1A] ml-2 text-sm">{formatVnd(item.dish.price)}</span>
                           </div>
                           {item.cartItemOptions && item.cartItemOptions.length > 0 && (
-                            <div className="text-xs text-gray-500 mb-2 line-clamp-1">
+                            <div className="text-xs text-gray-500 font-semibold mb-2 line-clamp-1">
                               {item.cartItemOptions.map(opt => opt.menuOption.name).join(', ')}
                             </div>
                           )}
@@ -170,7 +170,7 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                               disabled={isUpdating}
                               className="w-7 h-7 rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
                             >
-                              {item.quantity === 1 ? <Trash className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
+                              {item.quantity === 1 ? <Trash className="w-3.5 h-3.5" strokeWidth={3.2} /> : <Minus className="w-3.5 h-3.5" strokeWidth={3.2} />}
                             </button>
                             <span className="font-bold text-sm min-w-[20px] text-center">{item.quantity}</span>
                             <button
@@ -178,7 +178,7 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                               disabled={isUpdating}
                               className="w-7 h-7 rounded-xl bg-[var(--primary)] text-[#1A1A1A] flex items-center justify-center hover:brightness-110 active:scale-95 transition-all shadow-sm disabled:opacity-50"
                             >
-                              <Plus className="w-3.5 h-3.5 font-bold" />
+                              <Plus className="w-3.5 h-3.5 font-bold" strokeWidth={3.0} />
                             </button>
                           </div>
                         </div>
@@ -193,23 +193,32 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                       <span className="text-2xl font-bold text-[#1A1A1A]">{formatVnd(totalPrice)}</span>
                     </div>
                     <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={cartItems.length > 0 && !isUpdating ? { y: -2 } : {}}
+                      whileTap={cartItems.length > 0 && !isUpdating ? { scale: 0.98 } : {}}
                       onClick={handleCheckout}
                       disabled={cartItems.length === 0 || isUpdating}
-                      className="w-full py-4 bg-[var(--primary)] text-[#1A1A1A] rounded-2xl font-bold shadow-lg shadow-[var(--primary)]/20 flex items-center justify-center gap-2 text-lg disabled:opacity-70"
+                      className={`group/btn relative w-full h-[72px] rounded-[32px] flex items-center justify-between px-8 transition-all duration-300 ${cartItems.length > 0 && !isUpdating
+                        ? "bg-lime-500 text-white hover:bg-lime-600"
+                        : "bg-gray-200 text-gray-400"
+                        } disabled:opacity-70 overflow-hidden`}
                     >
-                      {isUpdating ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          <span>Đang cập nhật...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Xem đơn hàng</span>
-                          <ChevronRight className="w-5 h-5" />
-                        </>
-                      )}
+                      <div className="flex items-center gap-3 relative z-10">
+                        {isUpdating ? (
+                          <Loader2 className="w-6 h-6 animate-spin text-white" />
+                        ) : (
+                          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${cartItems.length > 0 ? "bg-white/20 group-hover/btn:bg-white/30" : "bg-black/5"}`}>
+                            <ShoppingBag className="w-5 h-5 text-white" strokeWidth={3} />
+                          </div>
+                        )}
+                        <span className="text-base font-bold tracking-tight uppercase">
+                          {isUpdating ? "Updating..." : "Checkout Now"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3 relative z-10">
+                        <div className="h-8 w-px bg-white/20 mx-1" />
+                        <ChevronRight className="w-5 h-5 text-white group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />
+                      </div>
                     </motion.button>
                   </div>
                 </motion.div>

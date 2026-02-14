@@ -168,12 +168,12 @@ export default function RestaurantDetailPage() {
     <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
       <FlyToCartLayer ghosts={ghosts} />
       {/* Back button - Fixed position */}
-      <button
+      {/* <button
         onClick={() => router.back()}
         className="fixed top-4 left-4 md:top-24 md:left-6 z-50 w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white hover:scale-110 transition-all flex items-center justify-center group"
       >
         <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
-      </button>
+      </button> */}
 
       {/* Main Content - Two Column Layout */}
       {isApiLoading ? (
@@ -266,10 +266,7 @@ export default function RestaurantDetailPage() {
                         )}
                       </div>
 
-                      {/* Desktop only Address/Rating placement fallback if needed, but we can share structure if careful. 
-                          For Desktop, we usually want these elements separate.
-                          Let's hide the mobile specific rating/address block above on desktop, and keep the original desktop structure below.
-                       */}
+                      {/* Desktop only Address/Rating placement fallback if needed */}
                       <div className="hidden md:block">
                         {restaurant.address && (
                           <div className="flex items-start gap-2 text-[13px] text-[#555555] mb-2">
@@ -282,19 +279,25 @@ export default function RestaurantDetailPage() {
                   </div>
                 </div>
 
-                {/* Rating - Desktop Position (Hidden on Mobile now) */}
+                {/* Rating - Desktop Position - Premium Badge Style */}
                 <div className="hidden md:flex items-center gap-10 relative z-10 mt-4 md:mt-0">
                   {restaurant.rating && (
                     <button
                       onClick={() => setIsReviewsOpen(true)}
-                      className="group bg-white border border-gray-200 shadow-sm rounded-full pl-2 pr-4 py-1.5 hover:shadow-md hover:border-gray-300 active:scale-95 transition-all duration-300 flex items-center gap-2"
+                      className="group bg-white border-2 border-gray-50 shadow-sm rounded-[24px] pl-2 pr-5 py-2 hover:shadow-lg hover:border-gray-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-98 transition-all duration-300 flex items-center gap-3"
                     >
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-50 group-hover:scale-110 transition-transform">
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#1A1A1A] shadow-lg shadow-black/10 group-hover:scale-105 transition-transform">
+                        <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                       </div>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-[16px] font-bold text-[#1A1A1A]">{restaurant.rating}</span>
-                        <span className="text-[13px] font-medium text-gray-500 group-hover:text-gray-900 transition-colors">Xem đánh giá</span>
+                      <div className="flex flex-col items-start -space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[20px] font-anton text-[#1A1A1A] leading-none tracking-tight">{restaurant.rating}</span>
+                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-1.5 py-0.5 rounded-md">Rating</span>
+                        </div>
+                        <span className="text-[13px] font-bold text-gray-400 group-hover:text-gray-900 transition-colors">Xem đánh giá quán</span>
+                      </div>
+                      <div className="ml-1 w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#1A1A1A] group-hover:text-white transition-all">
+                        <ChevronRight className="w-4 h-4" />
                       </div>
                     </button>
                   )}
