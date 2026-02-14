@@ -2,9 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 
+   - HỆ THỐNG PHẪU THUẬT FONT ĂN KHỚP (SURGICAL FONT MERGING)
+   - Áp dụng đồng bộ cho toàn bộ hệ sinh thái Eatzy.
+*/
+
+/* 1. NGUỒN VÁ: Big Shoulders Display */
+@font-face {
+  font-family: 'EatzyMixedFont';
+  src: url('/fonts/Patch/BigShoulders-ExtraBold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+  size-adjust: 107.8%;
+  ascent-override: 102%;
+  unicode-range: U+01A0-01A1, U+01AF-01B0, U+1EA0-1EA3, U+1EA8-1EA9, U+1EAC-1EAD, U+1EB2-1EB3, U+1EB6-1EBB, U+1EC2-1EC3, U+1EC6-1ECF, U+1ED4-1ED5, U+1ED8-1EF1, U+1EF4-1EF7;
+}
+
+@font-face {
+  font-family: 'EatzyMixedFont';
+  src: url('/fonts/Patch/BigShoulders-Bold.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+  size-adjust: 107.8%;
+  ascent-override: 102%;
+  unicode-range: U+01A0-01A1, U+01AF-01B0, U+1EA0-1EA3, U+1EA8-1EA9, U+1EAC-1EAD, U+1EB2-1EB3, U+1EB6-1EBB, U+1EC2-1EC3, U+1EC6-1ECF, U+1ED4-1ED5, U+1ED8-1EF1, U+1EF4-1EF7;
+}
+
+@font-face {
+  font-family: 'EatzyMixedFont';
+  src: url('/fonts/Patch/BigShoulders-SemiBold.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+  size-adjust: 107.8%;
+  ascent-override: 102%;
+  unicode-range: U+01A0-01A1, U+01AF-01B0, U+1EA0-1EA3, U+1EA8-1EA9, U+1EAC-1EAD, U+1EB2-1EB3, U+1EB6-1EBB, U+1EC2-1EC3, U+1EC6-1ECF, U+1ED4-1ED5, U+1ED8-1EF1, U+1EF4-1EF7;
+}
+
+/* 2. NGUỒN NỀN: Antonio */
+@font-face {
+  font-family: 'EatzyMixedFont';
+  src: url('/fonts/Antonio/Antonio-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'EatzyMixedFont';
+  src: url('/fonts/Antonio/Antonio-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'EatzyMixedFont';
+  src: url('/fonts/Antonio/Antonio-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'EatzyMixedFont';
+  src: url('/fonts/Antonio/Antonio-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'EatzyMixedFont';
+  src: url('/fonts/Antonio/Antonio-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-anton: 'EatzyMixedFont', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,16 +98,16 @@ body {
     text-wrap: balance;
   }
 
-  /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
-  /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
     -ms-overflow-style: none;
-    /* IE and Edge */
     scrollbar-width: none;
-    /* Firefox */
+  }
+
+  .font-anton {
+    font-family: 'EatzyMixedFont' !important;
   }
 }

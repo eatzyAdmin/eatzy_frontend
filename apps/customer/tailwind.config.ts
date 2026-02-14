@@ -14,11 +14,13 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-sans)"],
         anton: ["var(--font-anton)"],
+
         bebas: ["var(--font-bebas)"],
         oswald: ["var(--font-oswald)"],
         pathway: ["var(--font-pathway)"],
         fjalla: ["var(--font-fjalla)"],
       },
+
       colors: {
         primary: `rgb(${colorRgb.primary} / <alpha-value>)`,
         secondary: `rgb(${colorRgb.secondary} / <alpha-value>)`,

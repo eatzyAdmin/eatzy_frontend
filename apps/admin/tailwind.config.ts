@@ -12,6 +12,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-sans)"],
+        anton: ["var(--font-anton)"],
       },
       colors: {
         primary: `rgb(${colorRgb.primary} / <alpha-value>)`,
