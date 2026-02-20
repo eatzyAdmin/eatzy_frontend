@@ -66,10 +66,12 @@ export type OrderCustomer = {
 export type OrderRestaurant = {
   id: number;
   name: string;
+  slug?: string;
   address?: string;
   imageUrl?: string;
   latitude?: number;
   longitude?: number;
+  averageRating?: number;
 };
 
 export type OrderDriver = {

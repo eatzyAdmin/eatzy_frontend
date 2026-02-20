@@ -126,8 +126,8 @@ export default function OrderHistoryCard({ order, onClick }: { order: OrderRespo
           </motion.div>
 
           {/* Items Count Badge - Absolute on Mobile, part of flow on Desktop */}
-          <div className="absolute top-3 right-3 flex items-center justify-center md:relative md:top-0 md:right-0 bg-gray-100 md:bg-black/40 backdrop-blur-md px-3 py-2 md:px-3 md:py-2.5 rounded-[15px] md:rounded-2xl border border-white/10 z-30">
-            <span className="text-[12px] md:text-xs md:font-anton font-bold text-gray-400 md:text-white/95 tabular-nums md:uppercase">{totalItems} món</span>
+          <div className="absolute top-3 right-3 flex items-center justify-center md:relative md:top-0 md:right-0 bg-gray-100 md:bg-black/40 backdrop-blur-md px-2 py-1 md:px-3 md:py-2.5 rounded-xl md:rounded-2xl border border-white/10 z-30">
+            <span className="text-[10px] md:text-xs md:font-anton font-bold text-gray-400 md:text-white/95 tabular-nums md:uppercase">{totalItems} món</span>
           </div>
         </div>
 
@@ -143,11 +143,8 @@ export default function OrderHistoryCard({ order, onClick }: { order: OrderRespo
           </div>
           <div className="space-y-2 md:space-y-1">
             <div className="space-y-0.5">
-              <div className="flex items-center gap-1.5 group/restaurant cursor-pointer w-fit" onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/restaurants/${order.restaurant.slug || order.restaurant.id}`);
-              }}>
-                <span className="text-[14px] md:text-base font-semibold md:font-bold text-gray-800 md:text-white/90 leading-none group-hover/restaurant:text-[var(--primary)] md:group-hover/restaurant:text-white transition-colors">
+              <div className="flex items-center gap-1.5 w-fit">
+                <span className="text-[14px] md:text-base font-semibold md:font-bold text-gray-800 md:text-white/90 leading-none">
                   {order.restaurant.name}
                 </span>
               </div>

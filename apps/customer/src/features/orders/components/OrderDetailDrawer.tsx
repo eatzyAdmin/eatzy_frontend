@@ -1,21 +1,22 @@
-import { useMemo, useState, useEffect } from "react";
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { ImageWithFallback, OrderDetailDrawerShimmer } from "@repo/ui";
-import {
-  X,
-  MapPin,
-  Store,
-  Package,
-  Calendar,
-  CreditCard,
-  Star,
-  Award,
-  ShieldCheck,
-  User,
-} from "@repo/ui/icons";
-import { formatVnd } from "@repo/lib";
+import { OrderDetailDrawerShimmer } from "@repo/ui";
+import { X, ClipboardList } from "@repo/ui/icons";
 import type { OrderResponse } from "@repo/types";
+import {
+  CancellationAlert,
+  RestaurantCard,
+  DriverCard,
+  OrderItemsList,
+  LogisticsInfo,
+  PaymentSummary,
+  SafetyDisclaimer,
+  OrderNotes,
+} from "./order-detail";
+import { MobileCarousel } from "./MobileCarousel";
 
 const OrderReviewTab = dynamic(() => import("@/features/orders/components/OrderReviewTab"), { ssr: false });
 
@@ -28,15 +29,15 @@ export default function OrderDetailDrawer({
   onClose: () => void;
   order: OrderResponse | null;
 }) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"details" | "reviews">("details");
-
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (open) {
       setIsLoading(true);
       setActiveTab("details");
-      const timer = setTimeout(() => setIsLoading(false), 1000);
+      const timer = setTimeout(() => setIsLoading(false), 600);
       return () => clearTimeout(timer);
     }
   }, [open]);
@@ -45,6 +46,13 @@ export default function OrderDetailDrawer({
 
   const restaurant = order.restaurant;
   const driver = order.driver;
+
+  const tabs = [
+    { id: "details", name: "Chi tiết" },
+    { id: "reviews", name: "Đánh giá" },
+  ];
+
+  const isCancelled = order.orderStatus === 'CANCELLED';
 
   return (
     <>
@@ -69,58 +77,74 @@ export default function OrderDetailDrawer({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 100, damping: 18 }}
-            className="fixed z-[70] left-0 right-0 bottom-0 h-[92vh] rounded-t-[40px] bg-[#F7F7F7] border-t border-gray-200 overflow-hidden shadow-2xl flex flex-col"
+            className="fixed z-[70] left-0 right-0 bottom-0 h-[92vh] md:h-[90vh] rounded-t-[46px] md:rounded-t-[48px] bg-[#F8F9FA] border-t border-gray-100 overflow-hidden shadow-2xl flex flex-col isolate shadow-black/10"
+            style={{
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              maskImage: 'linear-gradient(white, white)'
+            }}
           >
             {/* Header */}
-            <div className="flex-none sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
-              <div className="flex items-center justify-between p-6">
+            <div className="bg-white px-6 py-5 md:px-8 md:py-6 md:border-b md:border-gray-100 flex items-center justify-between md:shadow-sm shrink-0 z-20">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-lime-50 border border-lime-100 flex items-center justify-center shrink-0">
+                  <ClipboardList className="w-6 h-6 text-lime-600" />
+                </div>
                 <div>
-                  <div className="text-2xl font-anton font-bold text-[#1A1A1A]">
-                    ORDER DETAIL
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Order ID: <span className="font-semibold text-[var(--primary)]">#{order.id}</span>
+                  <h3 className="text-xl md:text-2xl font-anton font-bold text-[#1A1A1A] leading-tight uppercase">ORDER DETAILS</h3>
+                  <div className="text-sm font-medium text-gray-500 mt-0.5 flex items-center gap-2">
+                    <span className="opacity-60 uppercase tracking-widest text-[10px] font-black">Order ID:</span>
+                    <span className="font-bold text-lime-600">#{order.id}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  {/* Tab Switcher - Only show if order is delivered */}
-                  {order.orderStatus === "DELIVERED" && (
-                    <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-2xl">
-                      <button
-                        onClick={() => setActiveTab("details")}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "details"
-                          ? "bg-white text-[#1A1A1A] shadow-sm"
-                          : "text-gray-600 hover:text-[#1A1A1A]"
-                          }`}
-                      >
-                        Chi tiết
-                      </button>
-                      <button
-                        onClick={() => setActiveTab("reviews")}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === "reviews"
-                          ? "bg-white text-[#1A1A1A] shadow-sm"
-                          : "text-gray-600 hover:text-[#1A1A1A]"
-                          }`}
-                      >
-                        Đánh giá
-                      </button>
-                    </div>
-                  )}
+              </div>
 
-                  <motion.button
-                    whileHover={{ scale: 1.06 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={onClose}
-                    className="hidden md:block p-4 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all"
-                  >
-                    <X className="w-5 h-5" />
-                  </motion.button>
-                </div>
+              <div className="flex items-center gap-4 md:gap-8">
+                {order.orderStatus === "DELIVERED" && (
+                  <div className="hidden lg:flex relative items-center p-1 bg-gray-100 rounded-[22px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] border border-gray-200/20">
+                    {tabs.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => setActiveTab(t.id as any)}
+                        className={`relative z-10 px-6 py-2 rounded-[18px] text-[16px] font-anton font-black uppercase transition-all duration-300 ${activeTab === t.id ? "bg-white text-[#1A1A1A] shadow-[0_4px_12px_rgba(0,0,0,0.08)] scale-[1.02]" : "text-gray-400 hover:text-gray-600 hover:bg-gray-200/50"}`}
+                      >
+                        {t.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <motion.button
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={onClose}
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-700 hover:bg-gray-200 transition-all duration-300"
+                >
+                  <X className="w-5 h-5" />
+                </motion.button>
               </div>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto">
+            {/* Mobile Tabs Switcher - Updated to sync with Desktop Style */}
+            {order.orderStatus === "DELIVERED" && (
+              <div className="md:hidden px-6 pt-1 shrink-0">
+                <div className="flex items-center p-1 bg-gray-100 rounded-[22px] w-full shadow-[inset_0_2px_6px_rgba(0,0,0,0.06)] border border-gray-200/10">
+                  {tabs.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => setActiveTab(t.id as any)}
+                      className={`flex-1 py-2.5 rounded-[18px] text-[15px] font-anton font-black uppercase tracking-wider transition-all duration-300 ${activeTab === t.id ? "bg-white text-[#1A1A1A] shadow-[0_10px_20px_rgba(0,0,0,0.06)] scale-[1.02]" : "text-gray-400 active:scale-95"}`}
+                    >
+                      {t.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Content Area */}
+            <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
               {isLoading ? (
                 <OrderDetailDrawerShimmer />
               ) : (
@@ -128,283 +152,68 @@ export default function OrderDetailDrawer({
                   {activeTab === "details" ? (
                     <motion.div
                       key="details"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.2 }}
-                      className="flex flex-col md:flex-row h-full items-start overflow-y-auto md:overflow-hidden pt-4 md:pt-8 custom-scrollbar"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex-1 min-h-0 flex flex-col overflow-hidden"
                     >
-                      {/* Left Column - Restaurant & Order Items */}
-                      <div
-                        className="w-full md:w-[65%] flex-shrink-0 space-y-6 h-auto md:h-full md:overflow-y-auto p-4 md:px-4 md:pl-16"
-                        style={{ scrollbarWidth: 'none' }}
-                      >
-                        {/* Restaurant & Order Items Combined Section */}
-                        <div className="flex flex-col md:flex-row gap-6 items-start">
-                          {/* Left Side: Restaurant Card + Safety */}
-                          <div className="flex flex-col gap-4 w-full md:w-[240px] flex-shrink-0">
-                            {/* Restaurant Card */}
-                            <div className="bg-white rounded-[32px] p-5 shadow-[0_6px_20px_rgba(0,0,0,0.06)] border border-gray-100 flex flex-col items-center text-center relative overflow-hidden">
-                              {/* Avatar */}
-                              <div className="relative w-20 h-20 mb-3">
-                                <div className="w-full h-full rounded-full overflow-hidden relative z-10 bg-gray-50 border border-gray-100">
-                                  <ImageWithFallback
-                                    src={restaurant.imageUrl || ""}
-                                    alt={restaurant.name}
-                                    fill
-                                    className="object-cover"
-                                  />
-                                </div>
-                                <div className="absolute bottom-0 right-0 z-20 bg-[#E31C5F] text-white p-1 rounded-full shadow-md border-2 border-white">
-                                  <ShieldCheck className="w-3 h-3 fill-white" />
-                                </div>
-                              </div>
+                      {/* Desktop Layout - Strictly Preserved */}
+                      <div className="hidden md:grid md:grid-cols-[62%_38%] h-full overflow-hidden">
+                        {/* Left Column (Independent scrolling) */}
+                        <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-6 p-5 md:py-6 md:pl-16 md:pr-5 min-h-0">
+                          {isCancelled && <CancellationAlert reason={order.cancellationReason} />}
 
-                              <h2 className="text-lg font-bold text-[#1A1A1A] mb-1 line-clamp-2 leading-tight">
-                                {restaurant.name}
-                              </h2>
-                              <div className="flex items-center justify-center gap-1.5 text-[11px] font-medium text-gray-500 mb-4">
-                                <Award className="w-3 h-3" />
-                                <span>Nhà hàng - Quán ăn</span>
-                              </div>
-
-                              {/* Stats */}
-                              <div className="w-full border-t border-gray-100 pt-3">
-                                <div className="grid grid-cols-2 gap-2 text-left">
-                                  <div>
-                                    <div className="text-lg font-bold text-[#1A1A1A] leading-none mb-1">1.2k</div>
-                                    <div className="text-[8px] uppercase font-bold text-gray-500 tracking-wide">Đánh giá</div>
-                                  </div>
-                                  <div className="pl-2 border-l border-gray-100">
-                                    <div className="flex items-center gap-0.5 text-lg font-bold text-[#1A1A1A] leading-none mb-1">
-                                      4.8 <Star className="w-3 h-3 text-[#1A1A1A] fill-[#1A1A1A]" />
-                                    </div>
-                                    <div className="text-[8px] uppercase font-bold text-gray-500 tracking-wide">Xếp hạng</div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Safety Disclaimer */}
-                            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                              <ShieldCheck className="w-4 h-4 text-[var(--primary)] flex-shrink-0 mt-0.5" />
-                              <p className="text-[11px] text-gray-500 leading-tight">
-                                Luôn đặt món qua Eatzy để được bảo vệ quyền lợi và đảm bảo an toàn giao dịch.
-                              </p>
-                            </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 shrink-0">
+                            <RestaurantCard restaurant={restaurant} />
+                            <DriverCard driver={driver} />
                           </div>
 
-                          {/* Right Side: Order Items */}
-                          <div className="w-full md:w-auto flex-1 rounded-[24px] p-8 border-2 border-gray-200">
-                            <div className="flex items-center gap-2 mb-4">
-                              <Package className="w-5 h-5 text-[var(--primary)]" />
-                              <h3 className="text-lg font-bold text-[#1A1A1A]">Món ăn</h3>
-                              <span className="ml-auto text-sm text-gray-600">
-                                {order.orderItems.length} món
-                              </span>
-                            </div>
+                          <OrderItemsList order={order} />
+                          <SafetyDisclaimer />
+                        </div>
 
-                            <div className="space-y-4">
-                              {order.orderItems.map((item) => (
-                                <div key={item.id} className="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0 last:pb-0">
-                                  <div className="w-8 h-8 rounded-full font-anton bg-[var(--primary)]/15 text-[var(--primary)] flex items-center justify-center font-bold text-lg flex-shrink-0">
-                                    {item.quantity}x
-                                  </div>
-
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div className="text-[#1A1A1A] font-medium line-clamp-1">{item.dish.name}</div>
-                                      <div className="text-[#1A1A1A] font-anton text-lg font-semibold whitespace-nowrap">
-                                        {formatVnd(item.priceAtPurchase)}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-
-                            {/* Price Summary */}
-                            <div className="mt-6 pt-4 border-t border-gray-200 space-y-2 text-sm">
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-600">Tạm tính</span>
-                                <span className="font-semibold">{formatVnd(order.subtotal)}</span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-600">Phí vận chuyển</span>
-                                <span className="font-semibold">{formatVnd(order.deliveryFee)}</span>
-                              </div>
-                              {order.discountAmount && order.discountAmount > 0 && (
-                                <div className="flex items-center justify-between">
-                                  <span className="text-gray-600">Giảm giá</span>
-                                  <span className="font-semibold text-green-600">
-                                    - {formatVnd(order.discountAmount)}
-                                  </span>
-                                </div>
-                              )}
-                              <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-2" />
-                              <div className="flex items-center justify-between text-lg">
-                                <span className="font-bold text-[#1A1A1A]">Tổng cộng</span>
-                                <span className="font-bold text-[var(--primary)] text-2xl font-anton">
-                                  {formatVnd(order.totalAmount)}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
+                        {/* Right Column (Independent scrolling) */}
+                        <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-6 p-5 md:py-6 md:pl-6 md:pr-16 bg-[#F8F9FA] min-h-0">
+                          <LogisticsInfo order={order} />
+                          <PaymentSummary order={order} />
+                          {order.specialInstructions && <OrderNotes notes={order.specialInstructions} />}
                         </div>
                       </div>
 
-                      {/* Sophisticated Vertical Divider */}
-                      <div className="hidden md:block w-[1px] h-[90%] my-auto bg-gradient-to-b from-transparent via-gray-300 to-transparent mx-2 opacity-60" />
+                      {/* Mobile Layout - Unified Scroll (Requested Order) */}
+                      <div className="md:hidden flex-1 overflow-y-auto no-scrollbar flex flex-col gap-4 p-3">
+                        {isCancelled && <CancellationAlert reason={order.cancellationReason} />}
 
-                      {/* Right Column - Status & Info */}
-                      <div
-                        className="w-full md:flex-1 space-y-6 h-auto md:h-full md:overflow-y-auto p-4 md:pl-4 md:pr-20"
-                        style={{ scrollbarWidth: 'none' }}
-                      >
-                        {/* Driver Info - Compact */}
-                        <div className="bg-white rounded-[32px] p-5 pr-6 shadow-[0_6px_20px_rgba(0,0,0,0.06)] border border-gray-100 flex items-center justify-between gap-4">
-                          {/* Left Side: Avatar + Name */}
-                          <div className="flex-1 flex flex-col items-center justify-center text-center">
-                            {/* Avatar */}
-                            <div className="relative w-20 h-20 mb-2">
-                              {driver ? (
-                                <div className="w-full h-full rounded-full overflow-hidden relative z-10 border-[3px] border-white shadow-sm bg-gray-100 flex items-center justify-center">
-                                  <ImageWithFallback
-                                    src={driver.avatarUrl || ""}
-                                    alt={driver.name}
-                                    fill
-                                    className="object-cover"
-                                  />
-                                </div>
-                              ) : (
-                                <div className="w-full h-full rounded-full overflow-hidden relative z-10 border-[3px] border-white shadow-sm bg-gray-100 flex items-center justify-center">
-                                  <User className="w-8 h-8 text-gray-300" />
-                                </div>
-                              )}
-                            </div>
+                        {/* 1. Swipeable Carousel for Restaurant & Driver */}
+                        <MobileCarousel singleFocus>
+                          <RestaurantCard restaurant={restaurant} />
+                          <DriverCard driver={driver} />
+                        </MobileCarousel>
 
-                            {/* Name & Role */}
-                            <div className="space-y-0.5">
-                              <h2 className="text-lg font-bold text-[#1A1A1A] leading-tight tracking-tight">
-                                {driver?.name || "Đang chờ tài xế"}
-                              </h2>
-                              <div className="flex items-center justify-center gap-1 text-xs text-[#5E5E5E] font-medium">
-                                <Award className="w-3 h-3 text-[#5E5E5E]" />
-                                <span>{driver?.vehicleLicensePlate || "N/A"}</span>
-                              </div>
-                            </div>
-                          </div>
+                        {/* 2. Order Items List */}
+                        <OrderItemsList order={order} />
 
-                          {/* Right Side: Stats List */}
-                          <div className="flex flex-col gap-3 py-1 min-w-[100px]">
-                            {/* Stat 1: Rating */}
-                            <div className="text-left">
-                              <div className="flex items-center gap-1 text-xl font-bold text-[#1A1A1A] leading-none mb-0.5">
-                                {driver?.averageRating || "5.0"} <Star className="w-3.5 h-3.5 fill-[#1A1A1A]" />
-                              </div>
-                              <div className="text-[10px] text-[#222222] font-medium leading-tight">Đánh giá</div>
-                            </div>
+                        {/* 3. Logistics info Route */}
+                        <LogisticsInfo order={order} />
 
-                            <div className="w-full h-[1px] bg-gray-100" />
+                        {/* 4. Payment Information */}
+                        <PaymentSummary order={order} />
 
-                            {/* Stat 2: Vehicle Type */}
-                            <div className="text-left">
-                              <div className="text-lg font-bold text-[#1A1A1A] leading-none mb-0.5 truncate">{driver?.vehicleType || "Xe máy"}</div>
-                              <div className="text-[10px] text-[#222222] font-medium leading-tight">Phương tiện</div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Delivery Route */}
-                        <div className="rounded-[24px] p-8 border-2 border-gray-200">
-                          <div className="space-y-3">
-                            {/* Pickup - Restaurant */}
-                            <div className="flex items-start gap-4">
-                              <div className="flex-shrink-0 mt-1">
-                                <div className="w-8 h-8 rounded-full bg-[var(--primary)] flex items-center justify-center shadow-md">
-                                  <div className="w-3 h-3 rounded-full bg-white" />
-                                </div>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="text-xs font-semibold text-[var(--primary)] uppercase tracking-wide mb-1">
-                                  Điểm lấy hàng
-                                </div>
-                                <div className="font-bold text-[#1A1A1A] text-lg mb-0.5 font-anton truncate">
-                                  {restaurant.name}
-                                </div>
-                                <div className="text-sm text-[#777] line-clamp-2">
-                                  {restaurant.address}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Connection Line */}
-                            <div className="ml-4 h-6 w-0.5 bg-gradient-to-b from-[var(--primary)] to-red-500" />
-
-                            {/* Dropoff - Customer */}
-                            <div className="flex items-start gap-4">
-                              <div className="flex-shrink-0 mt-1">
-                                <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center shadow-md">
-                                  <MapPin className="w-4 h-4 text-white fill-white" />
-                                </div>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-1">
-                                  Điểm giao hàng
-                                </div>
-                                <div className="font-bold text-[#1A1A1A] text-lg mb-0.5 font-anton">
-                                  Địa điểm nhận
-                                </div>
-                                <div className="text-sm text-[#777] leading-tight">
-                                  {order.deliveryAddress}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Order Info */}
-                        <div className="rounded-[24px] p-8 border-2 border-gray-200">
-                          <div className="flex items-center gap-2 mb-4">
-                            <Calendar className="w-5 h-5 text-[var(--primary)]" />
-                            <h3 className="text-lg font-bold text-[#1A1A1A]">Thông tin đơn hàng</h3>
-                          </div>
-
-                          <div className="space-y-3 text-sm">
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-600">Thời gian đặt</span>
-                              <span className="font-semibold">
-                                {order.createdAt
-                                  ? new Date(order.createdAt).toLocaleString("vi-VN")
-                                  : "N/A"}
-                              </span>
-                            </div>
-                            <div className="h-px bg-gray-100" />
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-600">Phương thức thanh toán</span>
-                              <div className="flex items-center gap-1.5">
-                                <CreditCard className="w-4 h-4 text-gray-600" />
-                                <span className="font-semibold">{order.paymentMethod}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-600">Trạng thái thanh toán</span>
-                              <span className={`font-semibold ${order.paymentStatus === 'PAID' ? 'text-green-600' : 'text-orange-600'}`}>
-                                {order.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}
-                              </span>
-                            </div>
-                          </div>
+                        {/* 5. Notes & Safety Section - Unified on Mobile */}
+                        <div className="flex flex-col gap-6 mb-10">
+                          {order.specialInstructions && <OrderNotes notes={order.specialInstructions} />}
+                          <SafetyDisclaimer />
                         </div>
                       </div>
                     </motion.div>
                   ) : (
                     <motion.div
                       key="reviews"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="h-full"
+                      className="flex-1 min-h-0 overflow-y-auto no-scrollbar p-5 md:py-6 md:px-16"
                     >
                       <OrderReviewTab
                         order={order}
@@ -416,10 +225,28 @@ export default function OrderDetailDrawer({
                 </AnimatePresence>
               )}
             </div>
+
+            {/* Micro-animations styles */}
+            <style jsx>{`
+              @keyframes pulseDot {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.6); opacity: 0.6; }
+                100% { transform: scale(1); opacity: 1; }
+              }
+              .pulsing-dot {
+                animation: pulseDot 2s infinite ease-in-out;
+              }
+              .no-scrollbar::-webkit-scrollbar {
+                display: none;
+              }
+              .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+            `}</style>
           </motion.div>
         )}
       </AnimatePresence>
     </>
   );
 }
-
