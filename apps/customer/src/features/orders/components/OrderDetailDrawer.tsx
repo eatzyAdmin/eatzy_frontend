@@ -77,7 +77,7 @@ export default function OrderDetailDrawer({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 100, damping: 18 }}
-            className="fixed z-[70] left-0 right-0 bottom-0 h-[92vh] md:h-[90vh] rounded-t-[46px] md:rounded-t-[48px] bg-[#F8F9FA] border-t border-gray-100 overflow-hidden shadow-2xl flex flex-col isolate shadow-black/10"
+            className="fixed z-[70] left-0 right-0 bottom-0 h-[92vh] md:h-[90vh] rounded-t-[40px] md:rounded-t-[48px] bg-[#F8F9FA] border-t border-gray-100 overflow-hidden shadow-2xl flex flex-col isolate shadow-black/10"
             style={{
               transform: 'translateZ(0)',
               backfaceVisibility: 'hidden',

@@ -5,7 +5,7 @@ import { ImageWithFallback } from "@repo/ui";
 export function DriverCard({ driver }: { driver: any }) {
   if (!driver) {
     return (
-      <div className="bg-white rounded-[40px] p-5 shadow-[0_4px_25px_rgba(0,0,0,0.04)] border border-gray-100/50 flex flex-col items-center justify-center min-h-[148px] h-full text-center">
+      <div className="bg-white rounded-[36px] md:rounded-[40px] p-5 shadow-[0_4px_25px_rgba(0,0,0,0.04)] border border-gray-100/50 flex flex-col items-center justify-center min-h-[148px] h-full text-center">
         <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-300 mb-3 border border-gray-100/50">
           <User className="w-6 h-6" />
         </div>

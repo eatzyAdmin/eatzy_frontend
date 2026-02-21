@@ -12,7 +12,7 @@ export function RestaurantCard({ restaurant }: { restaurant: any }) {
       whileHover={{ y: -5, scale: 1.01 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => router.push(`/restaurants/${restaurant.slug || restaurant.id}`)}
-      className="group relative bg-white rounded-[40px] shadow-[0_4px_25px_rgba(0,0,0,0.06)] border border-gray-100/50 overflow-hidden flex flex-col min-h-[160px] cursor-pointer h-full"
+      className="group relative bg-white rounded-[36px] md:rounded-[40px] shadow-[0_4px_25px_rgba(0,0,0,0.06)] border border-gray-100/50 overflow-hidden flex flex-col min-h-[160px] cursor-pointer h-full"
     >
       <div className="absolute inset-0 z-0">
         <ImageWithFallback

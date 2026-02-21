@@ -185,7 +185,7 @@ export default function RestaurantDetailPage() {
         <div className="flex-1 overflow-hidden">
           <div className="max-w-[1400px] mx-auto md:pr-16 md:px-8 px-0 pt-0 pb-0 md:pt-20 md:pb-0 h-full">
             <div className="flex flex-col md:grid md:grid-cols-[30%_70%] md:gap-8 h-full overflow-y-auto md:overflow-visible no-scrollbar md:pb-0" id="mobile-scroll-container">
-              <div ref={leftColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pr-2 space-y-6 mb-0 md:mb-12 shrink-0 px-4 pt-[60px] md:px-0 md:pt-0">
+              <div ref={leftColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pr-2 space-y-6 mb-0 md:mb-6 shrink-0 px-4 pt-[60px] md:px-0 md:pt-0">
 
                 {/* Mobile Hero Image - Artistic Blend */}
                 <div className="absolute top-0 left-0 w-full h-[160px] z-0 md:hidden border-none outline-none ring-0 -mb-1">
@@ -319,7 +319,7 @@ export default function RestaurantDetailPage() {
               </div>
 
               {/* Right Column - Main Image & Menu (Scrollable independently on desktop) */}
-              <div ref={rightColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pl-2 mb-12 shrink-0 px-3 md:px-0">
+              <div ref={rightColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pl-2 shrink-0 px-3 md:px-0">
                 {/* Main Hero Image with Save Button - Desktop Only */}
                 <div className="hidden md:block relative mb-10">
                   <div className="relative aspect-[16/8] rounded-[32px] shadow-sm md:rounded-[40px] overflow-hidden group">

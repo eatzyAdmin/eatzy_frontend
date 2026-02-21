@@ -13,71 +13,80 @@ export default function CartOverlayShimmer() {
     },
   };
 
+  const shimmerStyle = {
+    background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
+    backgroundSize: '200% 100%',
+  };
+
+  const primaryShimmerStyle = {
+    background: 'linear-gradient(90deg, #78C841 25%, rgba(255,255,255,0.8) 50%, #78C841 75%)',
+    backgroundSize: '200% 100%',
+    opacity: 0.1
+  };
+
+  const darkShimmerStyle = {
+    background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
+    backgroundSize: '200% 100%',
+  };
+
   return (
-    <div className="relative bg-white rounded-3xl p-4 shadow-sm border-4 border-gray-100">
-      <div className="flex items-center gap-4">
-        {/* Restaurant Image */}
-        <div className="relative flex-shrink-0">
-          <div className="relative w-20 h-20 rounded-3xl overflow-hidden bg-gray-100 border-4 border-gray-200">
+    <div className="relative w-full h-[150px] flex flex-row overflow-hidden rounded-[30px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] border-2 border-transparent bg-white">
+      {/* Left Shimmer: Image Section */}
+      <div className="relative w-32 md:w-36 h-full flex-shrink-0 bg-gray-50 overflow-hidden">
+        <motion.div
+          className="h-full w-full"
+          variants={shimmerVariants}
+          initial="initial"
+          animate="animate"
+          style={shimmerStyle}
+        />
+        {/* Floating badge shimmer */}
+        <div className="absolute top-3 left-3 w-10 h-4 bg-gray-200/50 rounded-lg backdrop-blur-md" />
+      </div>
+
+      {/* Right Shimmer: Content Section */}
+      <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
+        <div className="space-y-3">
+          <div className="flex items-start justify-between">
             <motion.div
-              className="h-full w-full bg-gray-200"
+              className="h-5 w-3/4 bg-gray-200 rounded"
               variants={shimmerVariants}
               initial="initial"
               animate="animate"
-              style={{
-                background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
-                backgroundSize: '200% 100%',
-              }}
+              style={darkShimmerStyle}
+            />
+          </div>
+          <div className="space-y-2">
+            <motion.div
+              className="h-3 w-full bg-gray-100 rounded"
+              variants={shimmerVariants}
+              initial="initial"
+              animate="animate"
+              style={shimmerStyle}
+            />
+            <motion.div
+              className="h-3 w-2/3 bg-gray-100 rounded"
+              variants={shimmerVariants}
+              initial="initial"
+              animate="animate"
+              style={shimmerStyle}
             />
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0 py-1 space-y-2">
-          <div className="flex items-start justify-between">
-            <motion.div
-              className="h-5 w-32 bg-gray-200 rounded"
-              variants={shimmerVariants}
-              initial="initial"
-              animate="animate"
-              style={{
-                background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
-                backgroundSize: '200% 100%',
-              }}
-            />
-          </div>
-
-          <motion.div
-            className="h-3 w-48 bg-gray-100 rounded"
-            variants={shimmerVariants}
-            initial="initial"
-            animate="animate"
-            style={{
-              background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
-              backgroundSize: '200% 100%',
-            }}
-          />
-          <div className="flex items-end justify-between pt-1">
-            <motion.div
-              className="h-6 w-16 bg-gray-100 rounded-lg"
-              variants={shimmerVariants}
-              initial="initial"
-              animate="animate"
-              style={{
-                background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
-                backgroundSize: '200% 100%',
-              }}
-            />
+        <div className="flex items-end justify-between border-t border-gray-50 pt-3">
+          <div className="space-y-1.5">
+            <div className="w-10 h-2 bg-gray-100 rounded" />
             <motion.div
               className="h-6 w-24 bg-gray-200 rounded"
               variants={shimmerVariants}
               initial="initial"
               animate="animate"
-              style={{
-                background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
-                backgroundSize: '200% 100%',
-              }}
+              style={darkShimmerStyle}
             />
+          </div>
+          <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center">
+            <div className="w-4 h-4 rounded-full bg-gray-100" />
           </div>
         </div>
       </div>
