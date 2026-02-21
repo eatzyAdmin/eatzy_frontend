@@ -80,7 +80,6 @@ export default function CartItemCard({
           src={previewImage}
           alt={cart.restaurant.name}
           fill
-          placeholderMode="vertical"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-black/5 transition-all duration-700 ease-out group-hover:bg-black/0" />

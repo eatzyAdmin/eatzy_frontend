@@ -190,7 +190,7 @@ export default function RestaurantDetailPage() {
                 {/* Mobile Hero Image - Artistic Blend */}
                 <div className="absolute top-0 left-0 w-full h-[160px] z-0 md:hidden border-none outline-none ring-0 -mb-1">
                   <div className="relative w-full h-full overflow-hidden">
-                    <ImageWithFallback src={detail?.coverImageUrl || "https://placehold.co/600x400?text=Restaurant"} alt={restaurant.name} fill placeholderMode="vertical" className="object-cover" />
+                    <ImageWithFallback src={detail?.coverImageUrl || "https://placehold.co/600x400?text=Restaurant"} alt={restaurant.name} fill placeholderMode="horizontal" className="object-cover" />
 
                     {/* Gradient for text blend */}
                     <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F7F7F7] via-[#F7F7F7]/80 to-transparent" />
@@ -328,7 +328,7 @@ export default function RestaurantDetailPage() {
                       src={detail?.coverImageUrl || "https://placehold.co/600x400?text=Restaurant"}
                       alt={restaurant.name}
                       fill
-                      placeholderMode="vertical"
+                      placeholderMode="horizontal"
                       className="object-cover transition-transform duration-[1.5s]"
                     />
                     {/* Glossy Overlay */}

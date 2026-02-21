@@ -39,7 +39,7 @@ export default function ImageWithFallback({ containerClassName, className, place
 
     if (placeholderMode === "vertical") {
       return (
-        <div className={containerClasses} style={!isFillMode ? { width: props.width, height: props.height } : undefined}>
+        <div key="vertical-placeholder" className={containerClasses} style={!isFillMode ? { width: props.width, height: props.height } : undefined}>
           <Image
             src={verticalPlaceholder}
             alt="Placeholder"
@@ -52,7 +52,7 @@ export default function ImageWithFallback({ containerClassName, className, place
 
     if (placeholderMode === "horizontal") {
       return (
-        <div className={containerClasses} style={!isFillMode ? { width: props.width, height: props.height } : undefined}>
+        <div key="horizontal-placeholder" className={containerClasses} style={!isFillMode ? { width: props.width, height: props.height } : undefined}>
           <Image
             src={horizontalPlaceholder}
             alt="Placeholder"
