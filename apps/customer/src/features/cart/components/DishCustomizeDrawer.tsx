@@ -270,6 +270,7 @@ export default function DishCustomizeDrawer({
                       src={dish.imageUrl}
                       alt={dish.name}
                       fill
+                      placeholderMode="horizontal"
                       className="object-cover"
                     />
                   </div>

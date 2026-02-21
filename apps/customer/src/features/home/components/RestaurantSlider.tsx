@@ -204,6 +204,7 @@ export default function RestaurantSlider({
                             src={restaurant.imageUrl ?? 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800'}
                             alt={restaurant.name}
                             fill
+                            placeholderMode="vertical"
                             className="object-cover"
                             sizes={isMobile ? "80vw" : "340px"}
                           />

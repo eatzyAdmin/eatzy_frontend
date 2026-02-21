@@ -63,6 +63,7 @@ export default function FavoriteRestaurantCard({
           src={restaurant.imageUrl || ""}
           alt={restaurant.name}
           fill
+          placeholderMode="vertical"
           className="object-cover transition-transform duration-700 ease-out"
         />
         {/* Gradients */}

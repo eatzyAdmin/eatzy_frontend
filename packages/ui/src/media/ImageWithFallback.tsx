@@ -3,11 +3,15 @@ import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 import { Utensils } from "lucide-react";
 
+import verticalPlaceholder from "../assets/placeholders/vertical_placeholder.jpg";
+import horizontalPlaceholder from "../assets/placeholders/horizontal_placeholder.jpg";
+
 type Props = Omit<ImageProps, "onError"> & {
   containerClassName?: string;
+  placeholderMode?: "vertical" | "horizontal";
 };
 
-export default function ImageWithFallback({ containerClassName, className, ...props }: Props) {
+export default function ImageWithFallback({ containerClassName, className, placeholderMode, ...props }: Props) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
   // Use state derivation to handle src changes safely without useEffect race conditions
   const [prevSrc, setPrevSrc] = useState(props.src);
@@ -30,21 +34,45 @@ export default function ImageWithFallback({ containerClassName, className, ...pr
 
   const hasSrc = isValidSrc(props.src);
 
+  const renderPlaceholder = (isFillMode: boolean) => {
+    const containerClasses = `flex items-center justify-center bg-zinc-900 ${containerClassName ?? ""} ${isFillMode ? "absolute inset-0" : "w-full h-full"}`;
+
+    if (placeholderMode === "vertical") {
+      return (
+        <div className={containerClasses} style={!isFillMode ? { width: props.width, height: props.height } : undefined}>
+          <Image
+            src={verticalPlaceholder}
+            alt="Placeholder"
+            fill
+            className="object-cover opacity-40"
+          />
+        </div>
+      );
+    }
+
+    if (placeholderMode === "horizontal") {
+      return (
+        <div className={containerClasses} style={!isFillMode ? { width: props.width, height: props.height } : undefined}>
+          <Image
+            src={horizontalPlaceholder}
+            alt="Placeholder"
+            fill
+            className="object-cover opacity-40"
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className={containerClasses} style={!isFillMode ? { width: props.width, height: props.height } : undefined}>
+        <Utensils className="w-1/3 h-1/3 text-gray-400" />
+      </div>
+    );
+  };
+
   // If no source, just return fallback
   if (!hasSrc) {
-    const Fallback = (
-      <div className={`flex items-center justify-center bg-gray-100 ${containerClassName ?? ""} ${isFill ? "absolute inset-0" : "w-full h-full"}`}>
-        <Utensils className="w-1/3 h-1/3 text-gray-400" />
-      </div>
-    );
-
-    if (isFill) return Fallback;
-    // For non-fill, we try to match the expected usage by returning a div
-    return (
-      <div className={`flex items-center justify-center bg-gray-100 ${containerClassName ?? ""}`} style={{ width: props.width, height: props.height }}>
-        <Utensils className="w-1/3 h-1/3 text-gray-400" />
-      </div>
-    );
+    return renderPlaceholder(isFill);
   }
 
   const renderContent = (applyContainerClassToFallback: boolean) => (
@@ -55,13 +83,7 @@ export default function ImageWithFallback({ containerClassName, className, ...pr
         onLoad={() => setStatus("loaded")}
         onError={() => setStatus("error")}
       />
-      {(status === "loading" || status === "error") && (
-        <div
-          className={`flex items-center justify-center bg-gray-100 border-[0.5px] border-gray-100 z-10 absolute inset-0 ${applyContainerClassToFallback ? (containerClassName ?? "") : ""}`}
-        >
-          <Utensils className="w-1/3 h-1/3 text-gray-400" />
-        </div>
-      )}
+      {(status === "loading" || status === "error") && renderPlaceholder(true)}
     </>
   );
 

@@ -19,6 +19,7 @@ export function RestaurantCard({ restaurant }: { restaurant: any }) {
           src={restaurant.imageUrl || ""}
           alt={restaurant.name}
           fill
+          placeholderMode="vertical"
           className="object-cover transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />

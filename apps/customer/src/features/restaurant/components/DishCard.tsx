@@ -67,6 +67,7 @@ export default function DishCard({ dish, count, onAdd, onRemove, onClick }: Dish
           src={dish.imageUrl || ""}
           alt={dish.name}
           fill
+          placeholderMode="vertical"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
         {/* Gradients */}

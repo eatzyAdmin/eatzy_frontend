@@ -42,6 +42,7 @@ export function RestaurantReviewCard({
               src={restaurant.imageUrl || ""}
               alt={restaurant.name}
               fill
+              placeholderMode="vertical"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
