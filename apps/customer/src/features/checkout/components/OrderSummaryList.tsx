@@ -51,24 +51,21 @@ export default function OrderSummaryList() {
                     {item.quantity}x
                   </div>
 
-                  <div className="hidden md:block relative w-12 h-12 rounded-xl overflow-hidden bg-white border border-gray-200 flex-shrink-0">
+                  <div className="hidden md:block relative w-14 h-14 rounded-2xl overflow-hidden bg-white border border-gray-100 flex-shrink-0 shadow-sm transition-transform group-hover:scale-105 duration-500">
                     <ImageWithFallback src={item.dish?.image ?? ""} alt={item.dish?.name ?? ""} fill className="object-cover" />
                   </div>
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="font-bold text-[#1A1A1A] text-[15px] transition-colors line-clamp-1 leading-tight">{item.dish?.name}</div>
 
-                    {/* Options display - Back to slice(0,2) as requested for simplicity */}
-                    <div className="mt-1 flex flex-col md:gap-0.5">
+                    {/* Options display - Synchronized with OrderDetailDrawer */}
+                    <div className="mt-0.5">
                       {item.cartItemOptions && item.cartItemOptions.length > 0 ? (
-                        item.cartItemOptions.slice(0, 2).map((opt) => (
-                          <div key={opt.id} className="flex items-center gap-1 md:gap-1.5 opacity-80">
-                            <span className="text-gray-300 text-[10px] select-none">-</span>
-                            <div className="text-[11px] text-gray-400 font-bold line-clamp-1">
-                              {opt.menuOption?.name}
-                            </div>
-                          </div>
-                        ))
+                        <div className="text-[11px] text-gray-400 font-medium line-clamp-2 leading-relaxed italic">
+                          {Array.from(new Map(item.cartItemOptions.map(opt => [opt.menuOption?.id || opt.id, opt])).values())
+                            .map((opt: any) => opt.menuOption?.name)
+                            .join(", ")}
+                        </div>
                       ) : (
                         <div className="text-[11px] text-gray-400 font-medium">Standard option</div>
                       )}

@@ -29,7 +29,7 @@ export default function RestaurantDetailShimmer() {
           }}
         />
 
-        <div className="flex flex-col md:grid md:grid-cols-[30%_70%] gap-8 h-full bg-white md:bg-transparent pb-32 md:pb-0">
+        <div className="flex flex-col md:grid md:grid-cols-[30%_70%] md:gap-8 h-full bg-white md:bg-transparent pb-32 md:pb-0">
           {/* Left Column Shimmer */}
           <div className="relative md:overflow-y-auto no-scrollbar md:pr-2 space-y-6 mb-0 md:mb-12 shrink-0 px-4 pt-[60px] md:px-0 md:pt-0">
             <div className="flex gap-4 items-start md:block">
@@ -101,7 +101,7 @@ export default function RestaurantDetailShimmer() {
           </div>
 
           {/* Right Column Shimmer */}
-          <div className="relative overflow-y-visible md:overflow-y-auto no-scrollbar pl-0 md:pl-2 mb-12 px-4 md:px-0">
+          <div className="relative overflow-y-visible md:overflow-y-auto no-scrollbar md:pl-2 mb-12 px-4 md:px-0">
             <div className="relative mb-6 hidden md:block">
               <div className="aspect-[16/8] rounded-[32px] md:rounded-[40px] bg-gray-50 border border-gray-100 relative overflow-hidden flex items-center justify-center">
                 <motion.div

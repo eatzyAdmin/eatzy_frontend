@@ -10,7 +10,7 @@ import AddressForm from "@/features/checkout/components/AddressForm";
 import NotesInput from "@/features/checkout/components/NotesInput";
 import PaymentMethodSelector from "@/features/checkout/components/PaymentMethodSelector";
 import PromoVoucherCard from "@/features/checkout/components/PromoVoucherCard";
-import { Truck, Tag, ShoppingBag } from "@repo/ui/icons";
+import { Truck, Tag, ShoppingBag, ChevronLeft } from "@repo/ui/icons";
 import type { CreateOrderRequest } from "@repo/types";
 const CheckoutSummary = dynamic(() => import("@/features/checkout/components/CheckoutSummary"), { ssr: false });
 const RightSidebar = dynamic(() => import("@/features/checkout/components/RightSidebar"), { ssr: false });
@@ -20,6 +20,7 @@ import LocationPickerModal from "@/features/location/components/LocationPickerMo
 import PromoSelectionModal from "@/features/checkout/components/PromoSelectionModal";
 import PromoSummary from "@/features/checkout/components/PromoSummary";
 import { useDeliveryLocationStore } from "@/store/deliveryLocationStore";
+import router from "next/router";
 
 export default function CheckoutPage() {
   const { hide } = useLoading();
@@ -308,8 +309,8 @@ export default function CheckoutPage() {
                           <h4 className="font-bold text-[#1A1A1A]">Promo & Vouchers</h4>
                         </div>
 
-                        <div className="p-4 md:p-6 flex-1">
-                          <div className="max-h-[500px] overflow-y-auto pr-2 space-y-10 custom-scrollbar">
+                        <div className="p-2 md:p-4 flex-1">
+                          <div className="max-h-[500px] overflow-y-auto overflow-x-hidden space-y-10 custom-scrollbar">
                             {/* Shipping Vouchers */}
                             {shippingVouchers.length > 0 && (
                               <div className="space-y-5">
@@ -323,7 +324,7 @@ export default function CheckoutPage() {
                                     </h4>
                                   </div>
                                 </div>
-                                <div className="space-y-3 px-1">
+                                <div className="space-y-3 pr-2">
                                   {mounted && [...shippingVouchers]
                                     .sort((a, b) => a.id === bestVoucherIds.shipping ? -1 : b.id === bestVoucherIds.shipping ? 1 : 0)
                                     .map((v) => {
@@ -356,7 +357,7 @@ export default function CheckoutPage() {
                                   </h4>
                                 </div>
                               </div>
-                              <div className="space-y-3 px-1">
+                              <div className="space-y-3 pr-2">
                                 {isLoadingVouchers ? (
                                   <div className="text-center py-12 text-gray-400">
                                     <div className="w-10 h-10 border-3 border-gray-100 border-t-lime-500 rounded-full animate-spin mx-auto mb-3" />

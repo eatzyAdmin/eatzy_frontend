@@ -15,6 +15,7 @@ export interface Voucher {
   minOrderValue: number;
   maxDiscountAmount: number;
   usageLimitPerUser: number;
+  remainingUsage?: number;
   startDate: string;
   endDate: string;
   totalQuantity: number;

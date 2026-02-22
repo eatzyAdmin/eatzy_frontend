@@ -8,8 +8,9 @@ import { voucherApi, restaurantDetailApi, orderApi } from "@repo/api";
 import { useDeliveryLocationStore } from "@/store/deliveryLocationStore";
 
 // Voucher types - using backend values: PERCENTAGE, FIXED, FREESHIP
-type DiscountVoucher = Voucher & { discountType: 'PERCENTAGE' | 'FIXED' };
-type ShippingVoucher = Voucher & { discountType: 'FREESHIP' };
+import { DiscountType } from "@repo/types";
+type DiscountVoucher = Voucher & { discountType: DiscountType.PERCENTAGE | DiscountType.FIXED };
+type ShippingVoucher = Voucher & { discountType: DiscountType.FREESHIP };
 
 export function useCheckout() {
   // Get restaurantId from cart store (set when navigating to checkout)
@@ -281,5 +282,7 @@ function isVoucherEligible(voucher: Voucher, orderTotal: number, now: Date): boo
   if (voucher.endDate && new Date(voucher.endDate) < now) return false;
   // Check minimum order value
   if (typeof voucher.minOrderValue === 'number' && orderTotal < voucher.minOrderValue) return false;
+  // Check remaining usage
+  if (typeof voucher.remainingUsage === 'number' && voucher.remainingUsage <= 0) return false;
   return true;
 }

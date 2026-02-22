@@ -31,11 +31,11 @@ export default function RestaurantDetailPage() {
     detail,
   } = useRestaurantWithMenu(params.slug);
 
-  // Sort categories by displayOrder
-  const categories: MenuCategory[] = useMemo(() =>
-    [...(apiCategories || [])].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)),
-    [apiCategories]
-  );
+  // Sort categories by displayOrder and filter out empty ones
+  const categories: MenuCategory[] = useMemo(() => {
+    const sorted = [...(apiCategories || [])].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+    return sorted.filter(cat => apiDishes?.some(dish => dish.menuCategoryId === cat.id));
+  }, [apiCategories, apiDishes]);
 
   // Get dishes for a specific category
   const getDishesByCategoryId = (categoryId: string): Dish[] => {
@@ -49,7 +49,14 @@ export default function RestaurantDetailPage() {
     }
   }, [hide, isApiLoading]);
 
-  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(categories[0]?.id ?? null);
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+
+  // Sync active category when data loads
+  useEffect(() => {
+    if (!activeCategoryId && categories.length > 0) {
+      setActiveCategoryId(categories[0].id);
+    }
+  }, [categories, activeCategoryId]);
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
@@ -168,12 +175,13 @@ export default function RestaurantDetailPage() {
     <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
       <FlyToCartLayer ghosts={ghosts} />
       {/* Back button - Fixed position */}
-      {/* <button
+      {/* Mobile Back Button - Strictly md:hidden */}
+      <button
         onClick={() => router.back()}
-        className="fixed top-4 left-4 md:top-24 md:left-6 z-50 w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm shadow-lg border border-gray-200 hover:bg-white hover:scale-110 transition-all flex items-center justify-center group"
+        className="fixed top-4 left-4 z-40 w-10 h-10 rounded-full bg-white/80 backdrop-blur-xl shadow-md border border-gray-100 md:hidden flex items-center justify-center group active:scale-95 transition-all"
       >
-        <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
-      </button> */}
+        <ChevronLeft className="w-6 h-6 text-[#1A1A1A]" />
+      </button>
 
       {/* Main Content - Two Column Layout */}
       {isApiLoading ? (
@@ -195,21 +203,24 @@ export default function RestaurantDetailPage() {
                     {/* Gradient for text blend */}
                     <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F7F7F7] via-[#F7F7F7]/80 to-transparent" />
 
+                    {/* Save Button for Mobile */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         if (numericRestaurantId) toggleFavorite(numericRestaurantId);
                       }}
                       disabled={isMutating}
-                      className={`absolute top-4 right-4 backdrop-blur-md border px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 transition-all active:scale-95 ${favorited ? 'bg-black/40 border-white/20 text-white' : 'bg-white/20 border-white/30 text-white'
+                      className={`absolute top-4 right-4 z-10 backdrop-blur-xl border-2 px-4 py-2 rounded-[20px] shadow-2xl flex items-center gap-2 transition-all active:scale-95 ${favorited
+                        ? 'bg-[#1A1A1A] border-white/10 text-white'
+                        : 'bg-black/30 border-white/30 text-white shadow-black/20'
                         }`}
                     >
                       {isMutating ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
-                        <Star className={`w-3.5 h-3.5 ${favorited ? 'text-red-500 fill-red-500' : 'fill-white/80'}`} />
+                        <Star className={`w-4 h-4 transition-transform ${favorited ? 'text-amber-400 fill-amber-400' : 'text-white'}`} />
                       )}
-                      <span className="text-[12px] font-bold uppercase tracking-wide">
+                      <span className="text-[11px] font-anton uppercase tracking-widest pt-0.5">
                         {favorited ? 'Saved' : 'Save'}
                       </span>
                     </button>
@@ -218,10 +229,12 @@ export default function RestaurantDetailPage() {
 
                 {/* Restaurant Title & Info */}
                 <div className="relative z-10">
-                  <div className="flex gap-4 items-start md:block">
-                    {/* Small Image - Mobile Only */}
-                    <div className="shrink-0 w-[120px] h-[120px] rounded-[20px] overflow-hidden shadow-lg border-2 border-gray-200 md:hidden relative bg-gray-100">
-                      <ImageWithFallback src={detail?.avatarUrl || "https://placehold.co/400x400?text=Restaurant"} alt={restaurant.name} fill placeholderMode="vertical" className="object-cover" />
+                  <div className="flex gap-4 items-start md:block pb-2">
+                    {/* Small Image - Mobile Only - Fixed clipping */}
+                    <div className="shrink-0 w-[120px] h-[120px] rounded-[30px] shadow-md border-4 border-white md:hidden relative bg-white overflow-visible">
+                      <div className="absolute inset-0 rounded-[28px] overflow-hidden">
+                        <ImageWithFallback src={detail?.avatarUrl} alt={restaurant.name} fill placeholderMode="vertical" className="object-cover" />
+                      </div>
                     </div>
 
 
@@ -251,11 +264,15 @@ export default function RestaurantDetailPage() {
                         {restaurant.rating && (
                           <button
                             onClick={() => setIsReviewsOpen(true)}
-                            className="flex items-center gap-0.5 bg-yellow-50 pl-2 pr-1.5 py-1 rounded-lg border border-yellow-100 active:scale-95 transition-transform"
+                            className="flex items-center bg-lime-50 border border-lime-100 shadow-sm rounded-[14px] pl-1 pr-2 py-1 gap-2 active:scale-95 transition-transform"
                           >
-                            <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500 mr-1" />
-                            <span className="text-[13px] font-bold text-[#1A1A1A]">{restaurant.rating}</span>
-                            <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+                            <div className="w-6 h-6 rounded-[10px] bg-[#1A1A1A] flex items-center justify-center shadow-sm">
+                              <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[15px] font-anton text-[#1A1A1A] leading-none pt-0.5">{restaurant.rating}</span>
+                              <ChevronRight className="w-3 h-3 text-gray-300" />
+                            </div>
                           </button>
                         )}
                         {restaurant.address && (
@@ -426,26 +443,6 @@ export default function RestaurantDetailPage() {
                         </motion.button>
                       )}
                     </AnimatePresence>
-                    <AnimatePresence>
-                      {canRight && (
-                        <motion.button
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() =>
-                            tabsRef.current?.scrollBy({
-                              left: 240,
-                              behavior: "smooth",
-                            })
-                          }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hidden md:flex"
-                        >
-                          <ChevronRight className="w-4 h-4 text-gray-700" />
-                        </motion.button>
-                      )}
-                    </AnimatePresence>
                   </div>
                 </div>
 
@@ -462,9 +459,6 @@ export default function RestaurantDetailPage() {
                           <h2 className="text-[20px] md:text-[24px] font-bold text-[#1A1A1A] uppercase tracking-wide font-anton">
                             {c.name}
                           </h2>
-                          <div className="text-[12px] font-black text-gray-400 bg-white px-4 py-1.5 rounded-full border border-gray-200 uppercase tracking-widest">
-                            {dishes.length} SELECTIONS
-                          </div>
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
