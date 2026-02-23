@@ -45,7 +45,10 @@ export default function RestaurantDetailPage() {
   // Hide global loader when finished
   useEffect(() => {
     if (!isApiLoading) {
-      hide();
+      const timer = setTimeout(() => {
+        hide();
+      }, 1000);
+      return () => clearTimeout(timer);
     }
   }, [hide, isApiLoading]);
 

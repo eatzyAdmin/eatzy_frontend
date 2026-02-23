@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { useLoading, useHoverHighlight, HoverHighlightOverlay, CheckoutShimmer, useNotification } from "@repo/ui";
+import { useRouter } from "next/navigation";
+import { useLoading, useHoverHighlight, HoverHighlightOverlay, useNotification } from "@repo/ui";
 import { useCheckout } from "@/features/checkout/hooks/useCheckout";
 import { useCreateOrder } from "@/features/checkout/hooks/useCreateOrder";
 import { useRestaurantCart } from "@/features/cart/hooks/useCart";
@@ -10,7 +11,7 @@ import AddressForm from "@/features/checkout/components/AddressForm";
 import NotesInput from "@/features/checkout/components/NotesInput";
 import PaymentMethodSelector from "@/features/checkout/components/PaymentMethodSelector";
 import PromoVoucherCard from "@/features/checkout/components/PromoVoucherCard";
-import { Truck, Tag, ShoppingBag, ChevronLeft } from "@repo/ui/icons";
+import { Truck, Tag, ShoppingBag, ChevronLeft, Store } from "@repo/ui/icons";
 import type { CreateOrderRequest } from "@repo/types";
 const CheckoutSummary = dynamic(() => import("@/features/checkout/components/CheckoutSummary"), { ssr: false });
 const RightSidebar = dynamic(() => import("@/features/checkout/components/RightSidebar"), { ssr: false });
@@ -20,10 +21,10 @@ import LocationPickerModal from "@/features/location/components/LocationPickerMo
 import PromoSelectionModal from "@/features/checkout/components/PromoSelectionModal";
 import PromoSummary from "@/features/checkout/components/PromoSummary";
 import { useDeliveryLocationStore } from "@/store/deliveryLocationStore";
-import router from "next/router";
 
 export default function CheckoutPage() {
-  const { hide } = useLoading();
+  const router = useRouter();
+  const { show, hide } = useLoading();
   const [mounted, setMounted] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
@@ -191,15 +192,35 @@ export default function CheckoutPage() {
       <div ref={mainScrollRef} className="flex-1 overflow-y-auto md:overflow-hidden">
         <div className="max-w-[1400px] mx-auto px-3 md:px-4 pt-4 md:pr-16 md:px-8 md:pt-4 h-full">
           <div className="md:hidden mb-6">
-            <div className="flex flex-col gap-1">
-              <span className="px-3 py-1 rounded-full bg-lime-50/50 border border-lime-100 text-lime-600 text-[9px] font-black uppercase tracking-[0.15em] w-fit mb-2 shadow-sm shadow-lime-500/5">
-                Checkout Process
-              </span>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
+                  <ShoppingBag size={12} />
+                  Checkout Process
+                </span>
+              </div>
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-anton text-[#1A1A1A] uppercase leading-none">Final Step</h1>
                 <div className="w-[1px] h-6 bg-gray-200 rounded-full" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-bold text-gray-500 truncate">{restaurant?.name}</p>
+                  <button
+                    onClick={() => {
+                      router.push(`/restaurants/${restaurant?.slug || restaurantId}`);
+                    }}
+                    className="group relative flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-[var(--primary)] text-white shadow-md shadow-lime-500/20 hover:bg-lime-600 active:scale-95 transition-all w-fit max-w-full overflow-hidden"
+                  >
+                    {/* Glossy Overlay like DishCustomizeDrawer */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none" />
+
+                    {/* Icon Box from DishCustomizeDrawer style */}
+                    <div className="w-6 h-6 rounded-lg bg-white/25 flex items-center justify-center shrink-0 relative z-10 transition-colors group-hover:bg-white/40">
+                      <Store size={13} strokeWidth={2.5} className="text-white" />
+                    </div>
+
+                    <p className="text-[12px] font-semibold tracking-tight text-white truncate relative z-10">{restaurant?.name}</p>
+
+                    <ChevronLeft size={12} strokeWidth={3} className="text-white/60 group-hover:text-white transition-colors rotate-180 relative z-10" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -402,6 +423,9 @@ export default function CheckoutPage() {
 
             <RightSidebar
               restaurantName={restaurant?.name}
+              restaurantId={restaurantId}
+              restaurantSlug={restaurant?.slug}
+              restaurantAvatar={restaurant?.avatarUrl}
               totalPayable={totalPayable}
               onAddressChange={(addr) => setAddress(addr)}
               onPlaceOrder={handlePlaceOrder}

@@ -1,12 +1,17 @@
 "use client";
 import { motion } from "@repo/ui/motion";
-import { useSwipeConfirmation } from "@repo/ui";
+import { useLoading, useSwipeConfirmation } from "@repo/ui";
 import CheckoutMapSection from "@/features/checkout/components/CheckoutMapSection";
 import { formatVnd } from "@repo/lib";
-import { ShoppingBag, Loader2 } from "@repo/ui/icons";
+import { useRouter } from "next/navigation";
+import { ImageWithFallback } from "@repo/ui";
+import { ShoppingBag, Loader2, ChevronLeft, Store } from "@repo/ui/icons";
 
 interface RightSidebarProps {
   restaurantName?: string;
+  restaurantId?: number | null;
+  restaurantSlug?: string | null;
+  restaurantAvatar?: string | null;
   totalPayable: number;
   onAddressChange?: (addr: string) => void;
   onPlaceOrder?: () => Promise<void>;
@@ -16,12 +21,16 @@ interface RightSidebarProps {
 
 export default function RightSidebar({
   restaurantName,
+  restaurantId,
+  restaurantSlug,
+  restaurantAvatar,
   totalPayable,
   onAddressChange,
   onPlaceOrder,
   isCreating = false,
   children,
 }: RightSidebarProps) {
+  const router = useRouter();
   const { confirm } = useSwipeConfirmation();
 
   const handleCompleteOrder = () => {
@@ -48,10 +57,27 @@ export default function RightSidebar({
             Checkout Process
           </span>
         </div>
-        <div className="flex items-baseline gap-3">
+        <div className="flex items-center gap-4">
           <div className="text-3xl font-anton font-semibold text-[#1A1A1A] leading-tight">FINAL STEP</div>
           {restaurantName && (
-            <div className="text-gray-500 font-medium truncate">{restaurantName}</div>
+            <button
+              onClick={() => {
+                router.push(`/restaurants/${restaurantSlug || restaurantId}`);
+              }}
+              className="group relative flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-[var(--primary)] text-white shadow-lg hover:bg-lime-600 active:scale-95 transition-all w-fit max-w-[240px] mt-0.5 overflow-hidden"
+            >
+              {/* Glossy Overlay like DishCustomizeDrawer */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none" />
+
+              {/* Icon Box from DishCustomizeDrawer style */}
+              <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center shrink-0 relative z-10 transition-colors group-hover:bg-white/40">
+                <Store size={16} strokeWidth={2.5} className="text-white" />
+              </div>
+
+              <p className="text-[14px] font-bold tracking-tight text-white truncate relative z-10">{restaurantName}</p>
+
+              <ChevronLeft size={14} strokeWidth={3} className="text-white/60 group-hover:text-white transition-colors rotate-180 relative z-10" />
+            </button>
           )}
         </div>
       </div>
