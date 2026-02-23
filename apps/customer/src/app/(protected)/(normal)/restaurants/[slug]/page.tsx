@@ -70,7 +70,7 @@ export default function RestaurantDetailPage() {
   const [isTabsSticky, setIsTabsSticky] = useState(false);
   // Cart API hook - will be initialized after restaurant data loads
   const numericRestaurantId = restaurant ? Number(restaurant.id) : null;
-  const { addToCart, cartItems, updateItemQuantity, removeItem: removeCartItem, isAddingToCart } = useRestaurantCart(numericRestaurantId);
+  const { addToCart, cartItems, updateItemQuantity, removeItem: removeCartItem, isAddingToCart, isUpdating } = useRestaurantCart(numericRestaurantId);
   const { isFavorite, toggleFavorite, isMutating } = useFavorites();
   const favorited = numericRestaurantId ? isFavorite(numericRestaurantId) : false;
 
@@ -472,6 +472,7 @@ export default function RestaurantDetailPage() {
                                 key={d.id}
                                 dish={d}
                                 count={count}
+                                isLoading={isUpdating}
                                 onAdd={() => {
                                   setDrawerDish(d);
                                   setDrawerOpen(true);
