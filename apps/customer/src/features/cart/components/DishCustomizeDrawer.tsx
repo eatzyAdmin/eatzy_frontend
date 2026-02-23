@@ -113,8 +113,18 @@ export default function DishCustomizeDrawer({
     setSelectedAddonIds((prev) => {
       const next = { ...prev };
       const set = new Set(next[groupId] ?? new Set<string>());
-      if (set.has(optionId)) set.delete(optionId);
-      else set.add(optionId);
+
+      const group = nonVariantGroups.find(g => g.id === groupId);
+      const isSingleSelect = group?.maxSelect === 1;
+
+      if (set.has(optionId)) {
+        set.delete(optionId);
+      } else {
+        if (isSingleSelect) {
+          set.clear();
+        }
+        set.add(optionId);
+      }
       next[groupId] = set;
       return next;
     });
@@ -286,14 +296,14 @@ export default function DishCustomizeDrawer({
                           key={v.id}
                           onClick={() => setSelectedVariantId(v.id)}
                           className={`
-                            px-5 py-3 md:px-6 md:py-4 rounded-[22px] border-2 transition-all duration-300 flex-1 md:flex-none min-w-[120px] text-center
+                            px-4 py-2.5 md:px-6 md:py-4 rounded-[18px] md:rounded-[22px] border-2 transition-all duration-300 flex-1 md:flex-none min-w-[100px] md:min-w-[120px] text-center
                             ${currentVariantId === v.id
                               ? "bg-lime-500 text-white border-lime-400 shadow-lg shadow-lime-500/20 font-bold"
                               : "bg-white text-gray-500 border-gray-100 hover:border-gray-200 hover:bg-gray-50 font-medium"
                             }
                           `}
                         >
-                          <div className="text-[13px] md:text-sm uppercase tracking-wider mb-0.5 opacity-80">{v.name}</div>
+                          <div className="text-[12px] md:text-sm uppercase tracking-wider mb-0.5 opacity-80">{v.name}</div>
                           <div className="text-sm md:text-base font-anton">{formatVnd((dish?.price ?? 0) + Number(v.price || 0))}</div>
                         </motion.button>
                       ))}
@@ -340,7 +350,7 @@ export default function DishCustomizeDrawer({
                               >
                                 {String(g.title || "").toUpperCase()}
                                 {unmet && (
-                                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
+                                  <span className="absolute top-0.5 -right-0.5 w-[12px] h-[12px] rounded-full bg-red-500 shadow-sm border border-white" />
                                 )}
                               </button>
                             );
@@ -353,7 +363,7 @@ export default function DishCustomizeDrawer({
 
                 <div
                   ref={rightColRef}
-                  className="flex-1 md:overflow-y-auto px-5 md:px-12 py-6 pb-32 md:pb-32"
+                  className="flex-1 md:overflow-y-auto px-4 md:px-12 py-5 pb-32 md:pb-32"
                 >
                   {nonVariantGroups && nonVariantGroups.length > 0 ? (
                     <div className="space-y-5">
@@ -366,17 +376,17 @@ export default function DishCustomizeDrawer({
                           data-id={g.id}
                           className="bg-white rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 scroll-mt-36"
                         >
-                          <div className="px-6 py-5 pb-0 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
+                          <div className="px-6 py-4 md:py-5 pb-0 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-12 h-12 rounded-full bg-lime-100 flex items-center justify-center text-lime-600 flex-shrink-0">
-                                <ChefHat className="w-6 h-6" />
+                              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-lime-100 flex items-center justify-center text-lime-600 flex-shrink-0">
+                                <ChefHat className="w-5 h-5 md:w-6 md:h-6" />
                               </div>
                               <div className="min-w-0">
-                                <h4 className="font-bold text-[#1A1A1A] text-lg leading-none truncate">
+                                <h4 className="font-bold text-[#1A1A1A] text-base md:text-lg leading-none truncate">
                                   {String(g.title || "")}
                                 </h4>
                                 {(typeof g.minSelect === "number" || typeof g.maxSelect === "number") && (
-                                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-1.5 truncate">
+                                  <div className="text-[10px] md:text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-1 md:mt-1.5 truncate">
                                     {typeof g.minSelect === "number" ? `Min ${g.minSelect}` : "Optional"}
                                     {typeof g.maxSelect === "number" ? ` • Max ${g.maxSelect}` : ""}
                                   </div>
@@ -469,7 +479,9 @@ export default function DishCustomizeDrawer({
                             {(g.options ?? []).map((opt) => {
                               const set = selectedAddonIds[g.id] ?? new Set<string>();
                               const active = set.has(opt.id);
-                              const disable = !active && typeof g.maxSelect === "number" && set.size >= (g.maxSelect ?? 0);
+                              // Only disable if it's a multi-select group (max > 1) and limit is reached.
+                              // For single-select (max === 1), we allow clicking to swap options.
+                              const disable = !active && typeof g.maxSelect === "number" && g.maxSelect > 1 && set.size >= g.maxSelect;
 
                               return (
                                 <button
@@ -477,7 +489,7 @@ export default function DishCustomizeDrawer({
                                   onClick={() => toggleAddon(g.id, opt.id)}
                                   disabled={disable}
                                   className={`
-                                    relative w-full text-left p-2.5 rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-4
+                                    relative w-full text-left p-2 md:p-2.5 rounded-[24px] md:rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-3 md:gap-4
                                     ${active
                                       ? "bg-lime-50 border-lime-100 shadow-sm"
                                       : "bg-white border-gray-50 hover:border-gray-100 hover:bg-gray-50/30"
@@ -487,22 +499,22 @@ export default function DishCustomizeDrawer({
                                 >
                                   {/* Left Icon Box (Mimics the modal style) */}
                                   <div className={`
-                                    w-11 h-11 rounded-[18px] flex items-center justify-center flex-shrink-0 transition-all duration-300
+                                    w-9 h-9 md:w-11 md:h-11 rounded-[14px] md:rounded-[18px] flex items-center justify-center flex-shrink-0 transition-all duration-300
                                     ${active
                                       ? 'bg-lime-200 text-lime-700'
                                       : 'bg-gray-50 text-gray-400 group-hover:bg-white'
                                     }
                                   `}>
-                                    <Utensils size={20} strokeWidth={2.2} />
+                                    <Utensils className="w-[18px] h-[18px] md:w-5 md:h-5" strokeWidth={2.2} />
                                   </div>
 
                                   <div className="flex-1 min-w-0">
-                                    <div className={`text-[15px] font-bold tracking-tight transition-all ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                                    <div className={`text-sm md:text-[15px] font-bold tracking-tight transition-all ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
                                       {String(opt.name || "")}
                                     </div>
-                                    <div className={`text-xs md:text-sm font-semibold transition-all ${active ? "text-lime-600/80" : "text-gray-400"}`}>
+                                    <div className={`text-[11px] md:text-sm font-semibold transition-all ${active ? "text-lime-600/80" : "text-gray-400"}`}>
                                       {Number(opt.price || 0) === 0 ? (
-                                        <span className="text-[10px] md:text-[12px] font-semibold">Miễn phí</span>
+                                        <span className="text-[9px] md:text-[12px] font-semibold">Miễn phí</span>
                                       ) : (
                                         `+ ${formatVnd(Number(opt.price || 0))}`
                                       )}
@@ -511,13 +523,13 @@ export default function DishCustomizeDrawer({
 
                                   {/* Right Checkmark Circle (Mimics the modal style) */}
                                   <div className={`
-                                    w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500
+                                    w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500
                                     ${active
                                       ? "bg-lime-500 text-white scale-100 shadow-sm"
                                       : "bg-gray-100 text-transparent scale-90"
                                     }
                                   `}>
-                                    <Check size={16} strokeWidth={4} className={active ? "opacity-100" : "opacity-0"} />
+                                    <Check className={`w-[14px] h-[14px] md:w-4 md:h-4 ${active ? "opacity-100" : "opacity-0"}`} strokeWidth={4} />
                                   </div>
                                 </button>
                               );
@@ -594,7 +606,7 @@ export default function DishCustomizeDrawer({
                     setIsAdding(false);
                   }
                 }}
-                className={`group/btn relative w-full max-w-[420px] h-[72px] rounded-[32px] flex items-center justify-between px-8 transition-all duration-300 ${canConfirm && !isAdding
+                className={`group/btn relative w-full max-w-[420px] h-[72px] rounded-[32px] flex items-center justify-between px-4 md:px-8 transition-all duration-300 ${canConfirm && !isAdding
                   ? "bg-lime-500 text-white hover:bg-lime-600"
                   : "bg-gray-200 text-gray-400"
                   } disabled:opacity-70 overflow-hidden`}
@@ -616,7 +628,7 @@ export default function DishCustomizeDrawer({
                   <div className="h-8 w-px bg-white/20 mx-1" />
                   <div className="flex flex-col items-end">
                     <span className="text-[10px] uppercase font-black tracking-[0.2em] opacity-70 leading-none mb-1 text-white">Total</span>
-                    <span className="text-[20px] font-anton leading-none">
+                    <span className="text-[20px] font-anton leading-none whitespace-nowrap">
                       {formatVnd(totalPrice)}
                     </span>
                   </div>

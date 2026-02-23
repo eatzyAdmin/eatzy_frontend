@@ -110,7 +110,7 @@ export default function DishCard({ dish, count, onAdd, onRemove, onClick }: Dish
             </p>
           </div>
 
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-1 md:gap-2">
             <div className="bg-white/95 backdrop-blur-md px-2.5 py-1 md:px-3 md:py-1.5 rounded-[14px] md:rounded-[16px] shadow-sm border border-white/20 shrink-0">
               <span className="text-[13px] md:text-lg font-black font-anton uppercase text-[var(--primary)]">
                 {formatVnd(minPrice)}

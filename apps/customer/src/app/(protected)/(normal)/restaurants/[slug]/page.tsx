@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ImageWithFallback, RestaurantDetailShimmer, FloatingRestaurantCartShimmer } from "@repo/ui";
-import { ChevronLeft, ChevronRight, Star, MapPin, ArrowLeft, Plus, Minus, CheckCircle2, Loader2 } from "@repo/ui/icons";
+import { ChevronLeft, ChevronRight, Star, MapPin, ArrowLeft, Plus, Minus, CheckCircle2, Loader2, Tag } from "@repo/ui/icons";
+import { RestaurantVouchers, MobileRestaurantVouchers } from "@/features/restaurant/components/RestaurantVouchers";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useLoading, useHoverHighlight, HoverHighlightOverlay, useFlyToCart, FlyToCartLayer } from "@repo/ui";
 import type { Restaurant, Dish, MenuCategory } from "@repo/types";
@@ -232,7 +233,7 @@ export default function RestaurantDetailPage() {
 
                 {/* Restaurant Title & Info */}
                 <div className="relative z-10">
-                  <div className="flex gap-4 items-start md:block pb-2">
+                  <div className="flex gap-4 items-start md:block">
                     {/* Small Image - Mobile Only - Fixed clipping */}
                     <div className="shrink-0 w-[120px] h-[120px] rounded-[30px] shadow-md border-4 border-white md:hidden relative bg-white overflow-visible">
                       <div className="absolute inset-0 rounded-[28px] overflow-hidden">
@@ -259,7 +260,14 @@ export default function RestaurantDetailPage() {
                       )}
 
                       {restaurant.description && (
-                        <p className="md:hidden text-[13px] text-[#555555] leading-snug line-clamp-2 mb-2">{restaurant.description}</p>
+                        <p className="md:hidden text-[13px] text-[#555555] leading-snug line-clamp-2">{restaurant.description}</p>
+                      )}
+
+                      {restaurant.address && (
+                        <div className="flex md:hidden items-start gap-1.5 text-[12px] text-[#555555] leading-tight">
+                          <MapPin size={14} className="shrink-0 mt-0.5" />
+                          <span className="line-clamp-2">{restaurant.address}</span>
+                        </div>
                       )}
 
                       {/* Rating Component - Moved Inside for Mobile */}
@@ -278,24 +286,13 @@ export default function RestaurantDetailPage() {
                             </div>
                           </button>
                         )}
-                        {restaurant.address && (
-                          <div className="flex items-center gap-1 text-[12px] text-[#555555] line-clamp-1">
-                            <MapPin className="w-3.5 h-3.5 shrink-0" />
-                            <span className="truncate">{restaurant.address}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Desktop only Address/Rating placement fallback if needed */}
-                      <div className="hidden md:block">
-                        {restaurant.address && (
-                          <div className="flex items-start gap-2 text-[13px] text-[#555555] mb-2">
-                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                            <span>{restaurant.address}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Mobile Vouchers List */}
+                  <div className="md:hidden mt-3 -mx-4 overflow-hidden">
+                    <MobileRestaurantVouchers restaurantId={numericRestaurantId} />
                   </div>
                 </div>
 
@@ -353,6 +350,9 @@ export default function RestaurantDetailPage() {
                     />
                     {/* Glossy Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none" />
+
+                    {/* Restaurant Vouchers - Absolute on image */}
+                    <RestaurantVouchers restaurantId={numericRestaurantId} />
                   </div>
 
                   <button
@@ -379,13 +379,12 @@ export default function RestaurantDetailPage() {
 
                 {/* Category tabs - positioned here, sticky on scroll */}
                 <div
-                  className={`sticky top-0 z-40 bg-[#F7F7F7] mb-6 transition-all pt-6 md:pt-0 ${isTabsSticky ? "md:pt-4 md:-mt-4" : ""
-                    }`}
+                  className={`sticky top-0 z-40 bg-[#F7F7F7] mb-6 transition-all pt-0 md:pt-0 ${isTabsSticky ? "md:pt-4 md:-mt-4" : ""}`}
                 >
                   <div ref={catContainerRef} className="relative bg-[#F7F7F7] border-b-2 border-gray-300">
                     <HoverHighlightOverlay rect={catRect} style={catStyle} />
                     <div ref={tabsRef} className="overflow-x-auto no-scrollbar">
-                      <div className="inline-flex items-center gap-8 px-6 py-4 min-w-full justify-start relative z-10">
+                      <div className="inline-flex items-center gap-6 md:gap-8 px-6 py-4 min-w-full justify-start relative z-10">
                         {categories.map((c) => (
                           <button
                             key={c.id}
@@ -512,9 +511,9 @@ export default function RestaurantDetailPage() {
               </div>
             </div>
           </div>
-        </div >
-      )
-      }
+        </div>
+      )}
+
       <DishCustomizeDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
@@ -570,6 +569,6 @@ export default function RestaurantDetailPage() {
       />
       <ReviewsModal restaurant={restaurant} isOpen={isReviewsOpen} onClose={() => setIsReviewsOpen(false)} />
       {!isApiLoading && restaurant && <FloatingRestaurantCart restaurantId={restaurant.id} restaurantName={restaurant.name} />}
-    </div >
+    </div>
   );
 }
