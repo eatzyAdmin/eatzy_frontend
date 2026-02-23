@@ -112,8 +112,8 @@ export const MobileRestaurantVouchers: React.FC<RestaurantVouchersProps> = ({ re
   const displayVouchers = vouchers.slice(0, 6);
 
   return (
-    <div className="w-full overflow-x-auto no-scrollbar py-1">
-      <div className="flex gap-2 px-2 pb-4 min-w-full">
+    <div className="w-full overflow-x-auto no-scrollbar">
+      <div className="flex gap-2 px-2 pb-5 pt-2 min-w-full">
         <AnimatePresence>
           {displayVouchers.map((voucher, index) => (
             <motion.div

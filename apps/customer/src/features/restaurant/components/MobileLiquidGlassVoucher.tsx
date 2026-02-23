@@ -22,7 +22,7 @@ export const MobileLiquidGlassVoucher: React.FC<MobileLiquidGlassVoucherProps> =
   const minText = minOrderValue > 0 ? `Min ${formatVnd(minOrderValue)}` : "No Min";
 
   return (
-    <div className="relative overflow-hidden rounded-[18px] border border-gray-100 bg-white/70 backdrop-blur-md shadow-[0_4px_12px_rgba(0,0,0,0.04),0_2px_6px_rgba(0,0,0,0.02)] px-2 py-1.5 flex items-center gap-2 min-w-[140px]">
+    <div className={`relative overflow-hidden rounded-[22px] bg-white shadow-[0_0_10px_rgba(0,0,0,0.05),0_0_4px_rgba(0,0,0,0.02)] px-3 py-3 flex items-center gap-3 min-w-[140px]`}>
       <div className={`
         w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
         ${isFreeship ? 'text-blue-600 bg-blue-100' : 'text-lime-700 bg-lime-100'}

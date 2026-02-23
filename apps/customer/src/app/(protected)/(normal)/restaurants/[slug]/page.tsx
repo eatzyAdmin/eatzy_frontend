@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ImageWithFallback, RestaurantDetailShimmer, FloatingRestaurantCartShimmer } from "@repo/ui";
-import { ChevronLeft, ChevronRight, Star, MapPin, ArrowLeft, Plus, Minus, CheckCircle2, Loader2, Tag } from "@repo/ui/icons";
+import { ChevronLeft, ChevronRight, Star, MapPin, ArrowLeft, Plus, Minus, CheckCircle2, Loader2, Tag, Navigation, Truck, Clock } from "@repo/ui/icons";
 import { RestaurantVouchers, MobileRestaurantVouchers } from "@/features/restaurant/components/RestaurantVouchers";
+import { useRestaurantShippingInfo } from "@/features/restaurant/hooks/useRestaurantShippingInfo";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useLoading, useHoverHighlight, HoverHighlightOverlay, useFlyToCart, FlyToCartLayer } from "@repo/ui";
 import type { Restaurant, Dish, MenuCategory } from "@repo/types";
@@ -73,6 +74,16 @@ export default function RestaurantDetailPage() {
   const { addToCart, cartItems, updateItemQuantity, removeItem: removeCartItem, isAddingToCart, isUpdating } = useRestaurantCart(numericRestaurantId);
   const { isFavorite, toggleFavorite, isMutating } = useFavorites();
   const favorited = numericRestaurantId ? isFavorite(numericRestaurantId) : false;
+
+  // Shipping info hook
+  const {
+    baseFee,
+    finalFee,
+    distance,
+    minOrderForDiscount,
+    hasFreeship,
+    isLoading: isLoadingShipping
+  } = useRestaurantShippingInfo(numericRestaurantId);
 
 
   // Helper to get count of a dish in cart
@@ -197,7 +208,7 @@ export default function RestaurantDetailPage() {
         <div className="flex-1 overflow-hidden">
           <div className="max-w-[1400px] mx-auto md:pr-16 md:px-8 px-0 pt-0 pb-0 md:pt-20 md:pb-0 h-full">
             <div className="flex flex-col md:grid md:grid-cols-[30%_70%] md:gap-8 h-full overflow-y-auto md:overflow-visible no-scrollbar md:pb-0" id="mobile-scroll-container">
-              <div ref={leftColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pr-2 space-y-6 mb-0 md:mb-6 shrink-0 px-4 pt-[60px] md:px-0 md:pt-0">
+              <div ref={leftColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pr-2 space-y-6 mb-0 shrink-0 px-4 pt-[60px] md:px-0 md:pt-0">
 
                 {/* Mobile Hero Image - Artistic Blend */}
                 <div className="absolute top-0 left-0 w-full h-[160px] z-0 md:hidden border-none outline-none ring-0 -mb-1">
@@ -259,6 +270,16 @@ export default function RestaurantDetailPage() {
                         <p className="hidden md:block text-[14px] text-[#555555] leading-relaxed mb-4">{restaurant.description}</p>
                       )}
 
+                      {/* Desktop Address */}
+                      <div className="hidden md:block">
+                        {restaurant.address && (
+                          <div className="flex items-start gap-2 text-[13px] text-[#555555] mb-4">
+                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                            <span>{restaurant.address}</span>
+                          </div>
+                        )}
+                      </div>
+
                       {restaurant.description && (
                         <p className="md:hidden text-[13px] text-[#555555] leading-snug line-clamp-2">{restaurant.description}</p>
                       )}
@@ -271,11 +292,11 @@ export default function RestaurantDetailPage() {
                       )}
 
                       {/* Rating Component - Moved Inside for Mobile */}
-                      <div className="flex items-center gap-2 mt-1 md:hidden">
+                      <div className="flex items-center gap-2 mt-1 md:hidden flex-nowrap overflow-x-auto no-scrollbar">
                         {restaurant.rating && (
                           <button
                             onClick={() => setIsReviewsOpen(true)}
-                            className="flex items-center bg-lime-50 border border-lime-100 shadow-sm rounded-[14px] pl-1 pr-2 py-1 gap-2 active:scale-95 transition-transform"
+                            className="flex items-center bg-lime-50 border border-lime-100 shadow-sm rounded-[14px] px-1 py-1 gap-2 active:scale-95 transition-transform whitespace-nowrap flex-shrink-0"
                           >
                             <div className="w-6 h-6 rounded-[10px] bg-[#1A1A1A] flex items-center justify-center shadow-sm">
                               <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
@@ -286,7 +307,55 @@ export default function RestaurantDetailPage() {
                             </div>
                           </button>
                         )}
+
+                        {!isLoadingShipping && distance > 0 && (
+                          <div className="flex items-center gap-1.5 ml-1 pt-0.5 whitespace-nowrap flex-shrink-0">
+                            <Navigation size={12} className="text-[#1A1A1A]" />
+                            <div className="flex items-baseline gap-1.5">
+                              {hasFreeship && finalFee < baseFee ? (
+                                <>
+                                  <span className="text-[14px] font-anton text-[#1A1A1A] tracking-tight">{formatVnd(finalFee)}</span>
+                                  <span className="text-[10px] text-gray-300 line-through font-bold">{formatVnd(baseFee)}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="text-[14px] font-anton text-[#1A1A1A] tracking-tight">{formatVnd(baseFee)}</span>
+                                  <span className="text-[10px] font-bold text-gray-400">({distance.toFixed(1)} km)</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
+
+                      {/* Shipping & Distance Info - Ultra Minimalist (Desktop) */}
+                      {!isLoadingShipping && distance > 0 && (
+                        <div className="hidden md:block mt-2 mb-6">
+                          {/* Desktop Style */}
+                          <div className="hidden md:flex items-center justify-around py-2 pb-0">
+                            <div className="flex-1 flex flex-col items-center justify-center">
+                              <Navigation size={22} className="text-[#1A1A1A] mb-2" />
+                              <span className="text-[18px] font-anton text-[#1A1A1A] tracking-tight">{distance.toFixed(1)} km</span>
+                            </div>
+
+                            <div className="w-[1px] h-10 bg-gray-200" />
+
+                            <div className="flex-1 flex flex-col items-center justify-center">
+                              <Truck size={22} className="text-[#1A1A1A] mb-2" />
+                              <div className="flex flex-col items-center">
+                                {hasFreeship && finalFee < baseFee ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[13px] text-gray-300 line-through font-bold">{formatVnd(baseFee)}</span>
+                                    <span className="text-[18px] font-anton text-[#1A1A1A] tracking-tight">{formatVnd(finalFee)}</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-[18px] font-anton text-[#1A1A1A] tracking-tight">{formatVnd(baseFee)}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -296,33 +365,10 @@ export default function RestaurantDetailPage() {
                   </div>
                 </div>
 
-                {/* Rating - Desktop Position - Premium Badge Style */}
-                <div className="hidden md:flex items-center gap-10 relative z-10 mt-4 md:mt-0">
-                  {restaurant.rating && (
-                    <button
-                      onClick={() => setIsReviewsOpen(true)}
-                      className="group bg-white border-2 border-gray-50 shadow-sm rounded-[24px] pl-2 pr-5 py-2 hover:shadow-lg hover:border-gray-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-98 transition-all duration-300 flex items-center gap-3"
-                    >
-                      <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[#1A1A1A] shadow-lg shadow-black/10 group-hover:scale-105 transition-transform">
-                        <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                      </div>
-                      <div className="flex flex-col items-start -space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[20px] font-anton text-[#1A1A1A] leading-none tracking-tight">{restaurant.rating}</span>
-                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-1.5 py-0.5 rounded-md">Rating</span>
-                        </div>
-                        <span className="text-[13px] font-bold text-gray-400 group-hover:text-gray-900 transition-colors">Xem đánh giá quán</span>
-                      </div>
-                      <div className="ml-1 w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#1A1A1A] group-hover:text-white transition-all">
-                        <ChevronRight className="w-4 h-4" />
-                      </div>
-                    </button>
-                  )}
-                </div>
-
-
-                {/* Small illustration image - Desktop only */}
-                <div className="hidden md:block group relative rounded-[32px] shadow-sm md:rounded-[36px] overflow-hidden cursor-pointer">
+                <div
+                  onClick={() => setIsReviewsOpen(true)}
+                  className="hidden md:block group relative rounded-[32px] shadow-lg md:rounded-[36px] overflow-hidden cursor-pointer"
+                >
                   <div className="relative aspect-[16/11]">
                     <ImageWithFallback
                       src={detail?.avatarUrl || "https://placehold.co/600x400?text=Restaurant"}
@@ -331,7 +377,42 @@ export default function RestaurantDetailPage() {
                       placeholderMode="vertical"
                       className="object-cover transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                    {/* Glassmorphism Rating Badge - Embedded in Image */}
+                    {restaurant.rating && (
+                      <div className="absolute inset-x-0 bottom-0 p-0 flex justify-center">
+                        <motion.div
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          className="bg-white/40 backdrop-blur-xl border border-white/30 rounded-full w-full px-8 py-3 shadow-2xl flex items-center justify-center gap-4 transition-all group-hover:bg-white/60"
+                        >
+                          <div className="flex flex-col items-center">
+                            <div className="flex items-center gap-2">
+                              <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
+                              <span className="text-[28px] font-anton text-[#1A1A1A] leading-none pt-1">{restaurant.rating}</span>
+                            </div>
+                          </div>
+                          <div className="h-8 w-[1px] bg-[#1A1A1A]/10 mx-1" />
+                          <div className="flex flex-col items-center">
+                            <span className="text-[12px] font-bold text-[#1A1A1A] group-hover:text-black transition-colors">Xem đánh giá</span>
+                            <div className="flex items-center gap-0.5 mt-0.5">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  size={8}
+                                  className={i < Math.floor(Number(restaurant.rating)) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <div className="ml-2 w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                            <ChevronRight size={16} />
+                          </div>
+                        </motion.div>
+                      </div>
+                    )}
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
                   </div>
                 </div>
               </div>
