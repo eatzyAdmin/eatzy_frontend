@@ -7,9 +7,10 @@ import type { Voucher } from '@repo/types';
 
 interface LiquidGlassVoucherProps {
   voucher: Voucher;
+  className?: string;
 }
 
-export const LiquidGlassVoucher: React.FC<LiquidGlassVoucherProps> = ({ voucher }) => {
+export const LiquidGlassVoucher: React.FC<LiquidGlassVoucherProps> = ({ voucher, className }) => {
   const isFreeship = voucher.discountType === 'FREESHIP';
 
   const getTitle = () => {
@@ -30,7 +31,7 @@ export const LiquidGlassVoucher: React.FC<LiquidGlassVoucherProps> = ({ voucher 
   const minText = `MIN. ${formatVnd(minOrderValue)}`;
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/60 bg-white/60 backdrop-blur-sm shadow-[0_8px_32px_rgba(0,0,0,0.04)] p-4 md:p-4.5 flex flex-col w-full transition-all duration-300 hover:bg-white/80 hover:shadow-xl hover:-translate-y-1">
+    <div className={`relative overflow-hidden rounded-[28px] border border-white/60 bg-white/60 backdrop-blur-sm shadow-[0_8px_32px_rgba(0,0,0,0.04)] p-4 md:p-4.5 flex flex-col w-full transition-all duration-300 hover:bg-white/80 hover:shadow-xl hover:-translate-y-1 ${className || ""}`}>
       {/* Glossy Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent pointer-events-none" />
 

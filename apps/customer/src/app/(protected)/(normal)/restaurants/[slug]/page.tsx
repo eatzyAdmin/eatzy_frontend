@@ -3,20 +3,27 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ImageWithFallback, RestaurantDetailShimmer, FloatingRestaurantCartShimmer } from "@repo/ui";
-import { ChevronLeft, ChevronRight, Star, MapPin, ArrowLeft, Plus, Minus, CheckCircle2, Loader2, Tag, Navigation, Truck, Clock } from "@repo/ui/icons";
+import { ChevronLeft, ChevronRight, Star, MapPin, Loader2 } from "@repo/ui/icons";
 import { RestaurantVouchers, MobileRestaurantVouchers } from "@/features/restaurant/components/RestaurantVouchers";
 import { useRestaurantShippingInfo } from "@/features/restaurant/hooks/useRestaurantShippingInfo";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { useLoading, useHoverHighlight, HoverHighlightOverlay, useFlyToCart, FlyToCartLayer } from "@repo/ui";
+import { useLoading, useHoverHighlight, useFlyToCart, FlyToCartLayer } from "@repo/ui";
 import type { Restaurant, Dish, MenuCategory } from "@repo/types";
 import { useRestaurantCart } from "@/features/cart/hooks/useCart";
-import { formatVnd } from "@repo/lib";
 import { useRestaurantWithMenu } from "@/features/restaurant";
 import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer";
 import { ReviewsModal } from "@/features/search/components/ReviewsModal";
 import FloatingRestaurantCart from "@/features/cart/components/FloatingRestaurantCart";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
-import DishCard from "@/features/restaurant/components/DishCard";
+import { RestaurantHeader } from "@/features/restaurant/components/RestaurantHeader";
+import { RestaurantShipping } from "@/features/restaurant/components/RestaurantShipping";
+import { RestaurantRating } from "@/features/restaurant/components/RestaurantRating";
+import { RestaurantIllustration } from "@/features/restaurant/components/RestaurantIllustration";
+import { RestaurantHero } from "@/features/restaurant/components/RestaurantHero";
+import { RestaurantMenu } from "@/features/restaurant/components/RestaurantMenu";
+import { RestaurantCategoryTabs } from "@/features/restaurant/components/RestaurantCategoryTabs";
+import { MobileRestaurantHero } from "@/features/restaurant/components/MobileRestaurantHero";
+import { MobileRestaurantAvatar } from "@/features/restaurant/components/MobileRestaurantAvatar";
 
 export default function RestaurantDetailPage() {
   const params = useParams() as { slug: string };
@@ -62,13 +69,11 @@ export default function RestaurantDetailPage() {
       setActiveCategoryId(categories[0].id);
     }
   }, [categories, activeCategoryId]);
-  const tabsRef = useRef<HTMLDivElement | null>(null);
-  const [canLeft, setCanLeft] = useState(false);
-  const [canRight, setCanRight] = useState(false);
+
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const rightColumnRef = useRef<HTMLDivElement | null>(null);
   const leftColumnRef = useRef<HTMLDivElement | null>(null);
-  const [isTabsSticky, setIsTabsSticky] = useState(false);
+
   // Cart API hook - will be initialized after restaurant data loads
   const numericRestaurantId = restaurant ? Number(restaurant.id) : null;
   const { addToCart, cartItems, updateItemQuantity, removeItem: removeCartItem, isAddingToCart, isUpdating } = useRestaurantCart(numericRestaurantId);
@@ -86,34 +91,10 @@ export default function RestaurantDetailPage() {
   } = useRestaurantShippingInfo(numericRestaurantId);
 
 
-  // Helper to get count of a dish in cart
-  const getDishCount = (dishId: string): number => {
-    return cartItems
-      .filter((item) => String(item.dish.id) === dishId)
-      .reduce((sum: number, item) => sum + item.quantity, 0);
-  };
-
-  // Helper to get cart item for a dish
-  const getCartItemForDish = (dishId: string) => {
-    return cartItems.find((item) => String(item.dish.id) === dishId);
-  };
-  const { containerRef: catContainerRef, rect: catRect, style: catStyle, moveHighlight: catMove, clearHover: catClear } = useHoverHighlight<HTMLDivElement>();
   const { ghosts, fly } = useFlyToCart();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerDish, setDrawerDish] = useState<Dish | null>(null);
   const [isReviewsOpen, setIsReviewsOpen] = useState(false);
-
-  useEffect(() => {
-    const el = tabsRef.current;
-    if (!el) return;
-    const update = () => {
-      setCanLeft(el.scrollLeft > 4);
-      setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-    };
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    return () => el.removeEventListener("scroll", update);
-  }, [categories.length]);
 
   useEffect(() => {
     const rightCol = rightColumnRef.current;
@@ -142,19 +123,6 @@ export default function RestaurantDetailPage() {
     return () => obs.disconnect();
   }, [categories]);
 
-  useEffect(() => {
-    const rightCol = rightColumnRef.current;
-    if (!rightCol) return;
-
-    const handleScroll = () => {
-      setIsTabsSticky(rightCol.scrollTop > 400);
-    };
-
-    rightCol.addEventListener('scroll', handleScroll, { passive: true });
-    return () => rightCol.removeEventListener('scroll', handleScroll);
-  }, []);
-
-
 
   // Show loading shimmer while fetching
   if (isApiLoading) {
@@ -168,23 +136,6 @@ export default function RestaurantDetailPage() {
       </div>
     );
   }
-
-  const scrollToCategory = (id: string) => {
-    const node = sectionRefs.current[id];
-    const rightCol = rightColumnRef.current;
-    const mobileContainer = document.getElementById("mobile-scroll-container");
-    const isMobile = window.innerWidth < 768;
-    const container = isMobile ? mobileContainer : rightCol;
-
-    if (!node || !container) return;
-
-    const containerRect = container.getBoundingClientRect();
-    const nodeRect = node.getBoundingClientRect();
-    // 180 = Header offset + Tabs height approx
-    const offsetTop = nodeRect.top - containerRect.top + container.scrollTop - (isMobile ? 180 : 140);
-
-    container.scrollTo({ top: offsetTop, behavior: "smooth" });
-  };
 
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
@@ -211,152 +162,51 @@ export default function RestaurantDetailPage() {
               <div ref={leftColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pr-2 space-y-6 mb-0 shrink-0 px-4 pt-[60px] md:px-0 md:pt-0">
 
                 {/* Mobile Hero Image - Artistic Blend */}
-                <div className="absolute top-0 left-0 w-full h-[160px] z-0 md:hidden border-none outline-none ring-0 -mb-1">
-                  <div className="relative w-full h-full overflow-hidden">
-                    <ImageWithFallback src={detail?.coverImageUrl || "https://placehold.co/600x400?text=Restaurant"} alt={restaurant.name} fill placeholderMode="horizontal" className="object-cover" />
-
-                    {/* Gradient for text blend */}
-                    <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F7F7F7] via-[#F7F7F7]/80 to-transparent" />
-
-                    {/* Save Button for Mobile */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (numericRestaurantId) toggleFavorite(numericRestaurantId);
-                      }}
-                      disabled={isMutating}
-                      className={`absolute top-4 right-4 z-10 backdrop-blur-xl border-2 px-4 py-2 rounded-[20px] shadow-2xl flex items-center gap-2 transition-all active:scale-95 ${favorited
-                        ? 'bg-[#1A1A1A] border-white/10 text-white'
-                        : 'bg-black/30 border-white/30 text-white shadow-black/20'
-                        }`}
-                    >
-                      {isMutating ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Star className={`w-4 h-4 transition-transform ${favorited ? 'text-amber-400 fill-amber-400' : 'text-white'}`} />
-                      )}
-                      <span className="text-[11px] font-anton uppercase tracking-widest pt-0.5">
-                        {favorited ? 'Saved' : 'Save'}
-                      </span>
-                    </button>
-                  </div>
-                </div>
+                <MobileRestaurantHero
+                  coverImageUrl={detail?.coverImageUrl}
+                  restaurantName={restaurant.name}
+                  numericRestaurantId={numericRestaurantId}
+                  favorited={favorited}
+                  isMutating={isMutating}
+                  onToggleFavorite={toggleFavorite}
+                />
 
                 {/* Restaurant Title & Info */}
                 <div className="relative z-10">
                   <div className="flex gap-4 items-start md:block">
-                    {/* Small Image - Mobile Only - Fixed clipping */}
-                    <div className="shrink-0 w-[120px] h-[120px] rounded-[30px] shadow-md border-4 border-white md:hidden relative bg-white overflow-visible">
-                      <div className="absolute inset-0 rounded-[28px] overflow-hidden">
-                        <ImageWithFallback src={detail?.avatarUrl} alt={restaurant.name} fill placeholderMode="vertical" className="object-cover" />
+                    <MobileRestaurantAvatar
+                      avatarUrl={detail?.avatarUrl}
+                      restaurantName={restaurant.name}
+                    />
+
+                    <RestaurantHeader restaurant={restaurant}>
+                      {/* Mobile Rating & Shipping - Nested inside to maintain correct column layout */}
+                      <div className="flex items-center gap-2 mt-1 flex-nowrap overflow-x-auto no-scrollbar">
+                        <RestaurantRating
+                          rating={restaurant.rating}
+                          variant="mobile-badge"
+                          onClick={() => setIsReviewsOpen(true)}
+                        />
+
+                        <RestaurantShipping
+                          isLoading={isLoadingShipping}
+                          distance={distance}
+                          baseFee={baseFee}
+                          finalFee={finalFee}
+                          hasFreeship={hasFreeship}
+                          variant="mobile"
+                        />
                       </div>
-                    </div>
+                    </RestaurantHeader>
 
-
-                    {/* Text Content */}
-                    <div className="flex-1 min-w-0 flex flex-col gap-2 md:gap-0">
-                      <h1
-                        className="text-[24px] md:text-[62px] font-bold leading-[1.1] text-[#1A1A1A] md:mb-3 md:drop-shadow-none"
-                        style={{
-                          fontStretch: "condensed",
-                          letterSpacing: "-0.01em",
-                          fontFamily: "var(--font-anton), var(--font-sans)",
-                        }}
-                      >
-                        {restaurant.name.toUpperCase()}
-                      </h1>
-
-                      {restaurant.description && (
-                        <p className="hidden md:block text-[14px] text-[#555555] leading-relaxed mb-4">{restaurant.description}</p>
-                      )}
-
-                      {/* Desktop Address */}
-                      <div className="hidden md:block">
-                        {restaurant.address && (
-                          <div className="flex items-start gap-2 text-[13px] text-[#555555] mb-4">
-                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                            <span>{restaurant.address}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {restaurant.description && (
-                        <p className="md:hidden text-[13px] text-[#555555] leading-snug line-clamp-2">{restaurant.description}</p>
-                      )}
-
-                      {restaurant.address && (
-                        <div className="flex md:hidden items-start gap-1.5 text-[12px] text-[#555555] leading-tight">
-                          <MapPin size={14} className="shrink-0 mt-0.5" />
-                          <span className="line-clamp-2">{restaurant.address}</span>
-                        </div>
-                      )}
-
-                      {/* Rating Component - Moved Inside for Mobile */}
-                      <div className="flex items-center gap-2 mt-1 md:hidden flex-nowrap overflow-x-auto no-scrollbar">
-                        {restaurant.rating && (
-                          <button
-                            onClick={() => setIsReviewsOpen(true)}
-                            className="flex items-center bg-lime-50 border border-lime-100 shadow-sm rounded-[14px] px-1 py-1 gap-2 active:scale-95 transition-transform whitespace-nowrap flex-shrink-0"
-                          >
-                            <div className="w-6 h-6 rounded-[10px] bg-[#1A1A1A] flex items-center justify-center shadow-sm">
-                              <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span className="text-[15px] font-anton text-[#1A1A1A] leading-none pt-0.5">{restaurant.rating}</span>
-                              <ChevronRight className="w-3 h-3 text-gray-300" />
-                            </div>
-                          </button>
-                        )}
-
-                        {!isLoadingShipping && distance > 0 && (
-                          <div className="flex items-center gap-1.5 ml-1 pt-0.5 whitespace-nowrap flex-shrink-0">
-                            <Navigation size={12} className="text-[#1A1A1A]" />
-                            <div className="flex items-baseline gap-1.5">
-                              {hasFreeship && finalFee < baseFee ? (
-                                <>
-                                  <span className="text-[14px] font-anton text-[#1A1A1A] tracking-tight">{formatVnd(finalFee)}</span>
-                                  <span className="text-[10px] text-gray-300 line-through font-bold">{formatVnd(baseFee)}</span>
-                                </>
-                              ) : (
-                                <>
-                                  <span className="text-[14px] font-anton text-[#1A1A1A] tracking-tight">{formatVnd(baseFee)}</span>
-                                  <span className="text-[10px] font-bold text-gray-400">({distance.toFixed(1)} km)</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Shipping & Distance Info - Ultra Minimalist (Desktop) */}
-                      {!isLoadingShipping && distance > 0 && (
-                        <div className="hidden md:block mt-2 mb-6">
-                          {/* Desktop Style */}
-                          <div className="hidden md:flex items-center justify-around py-2 pb-0">
-                            <div className="flex-1 flex flex-col items-center justify-center">
-                              <Navigation size={22} className="text-[#1A1A1A] mb-2" />
-                              <span className="text-[18px] font-anton text-[#1A1A1A] tracking-tight">{distance.toFixed(1)} km</span>
-                            </div>
-
-                            <div className="w-[1px] h-10 bg-gray-200" />
-
-                            <div className="flex-1 flex flex-col items-center justify-center">
-                              <Truck size={22} className="text-[#1A1A1A] mb-2" />
-                              <div className="flex flex-col items-center">
-                                {hasFreeship && finalFee < baseFee ? (
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-[13px] text-gray-300 line-through font-bold">{formatVnd(baseFee)}</span>
-                                    <span className="text-[18px] font-anton text-[#1A1A1A] tracking-tight">{formatVnd(finalFee)}</span>
-                                  </div>
-                                ) : (
-                                  <span className="text-[18px] font-anton text-[#1A1A1A] tracking-tight">{formatVnd(baseFee)}</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <RestaurantShipping
+                      isLoading={isLoadingShipping}
+                      distance={distance}
+                      baseFee={baseFee}
+                      finalFee={finalFee}
+                      hasFreeship={hasFreeship}
+                      variant="desktop"
+                    />
                   </div>
 
                   {/* Mobile Vouchers List */}
@@ -365,231 +215,45 @@ export default function RestaurantDetailPage() {
                   </div>
                 </div>
 
-                <div
-                  onClick={() => setIsReviewsOpen(true)}
-                  className="hidden md:block group relative rounded-[32px] shadow-lg md:rounded-[36px] overflow-hidden cursor-pointer"
-                >
-                  <div className="relative aspect-[16/11]">
-                    <ImageWithFallback
-                      src={detail?.avatarUrl || "https://placehold.co/600x400?text=Restaurant"}
-                      alt={restaurant.name}
-                      fill
-                      placeholderMode="vertical"
-                      className="object-cover transition-transform duration-700"
-                    />
-
-                    {/* Glassmorphism Rating Badge - Embedded in Image */}
-                    {restaurant.rating && (
-                      <div className="absolute inset-x-0 bottom-0 p-0 flex justify-center">
-                        <motion.div
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          className="bg-white/40 backdrop-blur-xl border border-white/30 rounded-full w-full px-8 py-3 shadow-2xl flex items-center justify-center gap-4 transition-all group-hover:bg-white/60"
-                        >
-                          <div className="flex flex-col items-center">
-                            <div className="flex items-center gap-2">
-                              <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
-                              <span className="text-[28px] font-anton text-[#1A1A1A] leading-none pt-1">{restaurant.rating}</span>
-                            </div>
-                          </div>
-                          <div className="h-8 w-[1px] bg-[#1A1A1A]/10 mx-1" />
-                          <div className="flex flex-col items-center">
-                            <span className="text-[12px] font-bold text-[#1A1A1A] group-hover:text-black transition-colors">Xem đánh giá</span>
-                            <div className="flex items-center gap-0.5 mt-0.5">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  size={8}
-                                  className={i < Math.floor(Number(restaurant.rating)) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <div className="ml-2 w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
-                            <ChevronRight size={16} />
-                          </div>
-                        </motion.div>
-                      </div>
-                    )}
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
-                  </div>
-                </div>
+                <RestaurantIllustration
+                  restaurant={restaurant}
+                  avatarUrl={detail?.avatarUrl}
+                  onRatingClick={() => setIsReviewsOpen(true)}
+                />
               </div>
 
               {/* Right Column - Main Image & Menu (Scrollable independently on desktop) */}
               <div ref={rightColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pl-2 shrink-0 px-3 md:px-0">
                 {/* Main Hero Image with Save Button - Desktop Only */}
-                <div className="hidden md:block relative mb-10">
-                  <div className="relative aspect-[16/8] rounded-[32px] shadow-sm md:rounded-[40px] overflow-hidden group">
-                    <ImageWithFallback
-                      src={detail?.coverImageUrl || "https://placehold.co/600x400?text=Restaurant"}
-                      alt={restaurant.name}
-                      fill
-                      placeholderMode="horizontal"
-                      className="object-cover transition-transform duration-[1.5s]"
-                    />
-                    {/* Glossy Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none" />
-
-                    {/* Restaurant Vouchers - Absolute on image */}
-                    <RestaurantVouchers restaurantId={numericRestaurantId} />
-                  </div>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (numericRestaurantId) toggleFavorite(numericRestaurantId);
-                    }}
-                    disabled={isMutating}
-                    className={`absolute bottom-6 right-8 z-20 px-6 py-3 rounded-[24px] backdrop-blur-xl border-2 shadow-2xl flex items-center gap-3 transition-all active:scale-95 group/save ${favorited
-                      ? 'bg-black/60 text-white border-white/20'
-                      : 'bg-black/40 text-white border-white/20 hover:bg-black/60'
-                      }`}
-                  >
-                    {isMutating ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Star className={`w-5 h-5 transition-transform group-hover/save:scale-125 ${favorited ? 'text-red-500 fill-red-500' : 'text-white'}`} />
-                    )}
-                    <span className="text-[15px] font-anton font-bold uppercase tracking-widest">
-                      {favorited ? 'Saved' : 'Save Venue'}
-                    </span>
-                  </button>
-                </div>
+                <RestaurantHero
+                  restaurant={restaurant}
+                  coverImageUrl={detail?.coverImageUrl}
+                  favorited={favorited}
+                  isMutating={isMutating}
+                  onToggleFavorite={toggleFavorite}
+                />
 
                 {/* Category tabs - positioned here, sticky on scroll */}
-                <div
-                  className={`sticky top-0 z-40 bg-[#F7F7F7] mb-6 transition-all pt-0 md:pt-0 ${isTabsSticky ? "md:pt-4 md:-mt-4" : ""}`}
-                >
-                  <div ref={catContainerRef} className="relative bg-[#F7F7F7] border-b-2 border-gray-300">
-                    <HoverHighlightOverlay rect={catRect} style={catStyle} />
-                    <div ref={tabsRef} className="overflow-x-auto no-scrollbar">
-                      <div className="inline-flex items-center gap-6 md:gap-8 px-6 py-4 min-w-full justify-start relative z-10">
-                        {categories.map((c) => (
-                          <button
-                            key={c.id}
-                            onClick={() => scrollToCategory(c.id)}
-                            className={`text-[20px] md:text-[28px] font-bold uppercase tracking-wide transition-all relative pb-1 whitespace-nowrap ${activeCategoryId === c.id
-                              ? "text-[#1A1A1A]"
-                              : "text-gray-400"
-                              }`}
-                            style={{
-                              fontStretch: "condensed",
-                              letterSpacing: "-0.01em",
-                              fontFamily: "var(--font-anton), var(--font-sans)",
-                            }}
-                            onMouseEnter={(e) =>
-                              catMove(e, {
-                                borderRadius: 12,
-                                backgroundColor: "rgba(0,0,0,0.06)",
-                                opacity: 1,
-                                scaleEnabled: true,
-                                scale: 1.1,
-                              })
-                            }
-                            onMouseMove={(e) =>
-                              catMove(e, {
-                                borderRadius: 12,
-                                backgroundColor: "rgba(0,0,0,0.06)",
-                                opacity: 1,
-                                scaleEnabled: true,
-                                scale: 1.1,
-                              })
-                            }
-                            onMouseLeave={catClear}
-                          >
-                            {c.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                <RestaurantCategoryTabs
+                  categories={categories}
+                  activeCategoryId={activeCategoryId}
+                  sectionRefs={sectionRefs}
+                  scrollContainerRef={rightColumnRef}
+                />
 
-                    {/* Scroll indicators */}
-                    <AnimatePresence>
-                      {canLeft && (
-                        <motion.button
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() =>
-                            tabsRef.current?.scrollBy({
-                              left: -240,
-                              behavior: "smooth",
-                            })
-                          }
-                          className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hidden md:flex"
-                        >
-                          <ChevronLeft className="w-4 h-4 text-gray-700" />
-                        </motion.button>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-
-                <div className="relative space-y-12 px-0 md:px-4">
-                  {categories.map((c) => {
-                    const dishes: Dish[] = getDishesByCategoryId(c.id);
-                    return (
-                      <section
-                        key={c.id}
-                        ref={(el) => { sectionRefs.current[c.id] = el; }}
-                        data-id={c.id}
-                      >
-                        <div className="flex items-center justify-center gap-3 mb-6">
-                          <h2 className="text-[20px] md:text-[24px] font-bold text-[#1A1A1A] uppercase tracking-wide font-anton">
-                            {c.name}
-                          </h2>
-                        </div>
-
-                        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
-                          {dishes.map((d) => {
-                            const count = getDishCount(d.id);
-                            const cartItem = getCartItemForDish(d.id);
-                            return (
-                              <DishCard
-                                key={d.id}
-                                dish={d}
-                                count={count}
-                                isLoading={isUpdating}
-                                onAdd={() => {
-                                  setDrawerDish(d);
-                                  setDrawerOpen(true);
-                                }}
-                                onRemove={async () => {
-                                  if (cartItem) {
-                                    if (cartItem.quantity <= 1) {
-                                      await removeCartItem(cartItem.id);
-                                    } else {
-                                      await updateItemQuantity(cartItem.id, cartItem.quantity - 1);
-                                    }
-                                  }
-                                }}
-                                onClick={() => {
-                                  setDrawerDish(d);
-                                  setDrawerOpen(true);
-                                }}
-                              />
-                            );
-                          })}
-                        </div>
-                      </section>
-                    );
-                  })}
-                </div>
-                {/* End of list indicator */}
-                <div className="py-12 flex items-center justify-center gap-4 opacity-60">
-                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
-                    </div>
-                    <span className="text-[14px] font-bold text-gray-400 uppercase font-anton">End of list</span>
-                  </div>
-                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
-                </div>
+                <RestaurantMenu
+                  categories={categories}
+                  allDishes={apiDishes}
+                  cartItems={cartItems}
+                  isUpdating={isUpdating}
+                  sectionRefs={sectionRefs}
+                  onDishClick={(d) => {
+                    setDrawerDish(d);
+                    setDrawerOpen(true);
+                  }}
+                  updateItemQuantity={updateItemQuantity}
+                  removeItem={removeCartItem}
+                />
               </div>
             </div>
           </div>
