@@ -3,7 +3,19 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { formatVnd } from "@repo/lib";
 import { AnimatePresence, motion } from "@repo/ui/motion";
-import { ShoppingBag, Minus, Plus, Trash, X, ChevronRight, Loader2 } from "@repo/ui/icons";
+import {
+  ShoppingBag,
+  Minus,
+  Plus,
+  Trash,
+  Loader2,
+  ChevronLeft,
+  Lock,
+  Zap,
+  ChevronRight,
+  Store,
+  X
+} from "@repo/ui/icons";
 import { ImageWithFallback } from "@repo/ui";
 import { useLoading } from "@repo/ui";
 import { useRouter } from "next/navigation";
@@ -16,7 +28,6 @@ interface FloatingRestaurantCartProps {
 }
 
 export default function FloatingRestaurantCart({ restaurantId, restaurantName }: FloatingRestaurantCartProps) {
-  // Convert to number for API
   const numericRestaurantId = typeof restaurantId === 'string' ? Number(restaurantId) : restaurantId;
 
   const {
@@ -40,9 +51,8 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
   }, []);
 
   const handleCheckout = () => {
-    show("Đang chuyển đến Checkout...");
+    show("Đang chuẩn bị đơn hàng...");
     setIsOpen(false);
-    // Set active restaurant in cart store before navigating
     setActiveRestaurant(String(restaurantId));
     setTimeout(() => {
       router.push('/checkout');
@@ -65,10 +75,7 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
 
   const layoutId = `cart-container-${restaurantId}`;
 
-  // Show loading indicator while fetching
-  if (isLoading) {
-    return null;
-  }
+  if (isLoading) return null;
 
   return (
     <>
@@ -128,57 +135,72 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                   layoutId={layoutId}
                   onClick={(e) => e.stopPropagation()}
                   transition={{ type: "spring", stiffness: 120, damping: 19 }}
-                  className="w-full max-w-md bg-white rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[80vh]"
+                  className="w-full max-w-[460px] bg-white rounded-[40px] shadow-[0_-40px_80px_rgba(0,0,0,0.25),0_32px_80px_rgba(0,0,0,0.3)] flex flex-col max-h-[95vh] relative overflow-visible pointer-events-auto"
                 >
-                  {/* Header */}
-                  <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white flex-shrink-0">
-                    <div>
-                      <h3 className="text-xl font-bold text-[#1A1A1A]">Giỏ hàng của bạn</h3>
-                      {restaurantName && <p className="text-sm text-gray-500 line-clamp-1">{restaurantName}</p>}
+                  {/* CART OVERLAY STYLE HEADER */}
+                  <div className="flex items-center justify-between px-7 py-7 pb-5 text-[#1A1A1A] bg-[#E4F8D5] flex-shrink-0 rounded-[40px] rounded-b-[50px] shadow-sm">
+                    <div className="flex flex-col gap-1.5">
+                      <div className="text-3xl font-anton font-bold uppercase tracking-tight text-[#154D1B] leading-none">
+                        {restaurantName || "MY CART"}
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <div className="px-2 py-0.5 bg-[#154D1B] rounded-xl shadow-sm">
+                          <span className="text-[10px] font-black font-anton text-white uppercase tabular-nums">
+                            {cartItems.length} ITEMS
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-[#154D1B]/50 font-bold uppercase tracking-widest leading-none mt-0.5">• CHECKOUT NOW</div>
+                      </div>
                     </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
-                      className="p-4 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.06 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setIsOpen(false)}
+                        className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#154D1B] hover:shadow-md transition-all duration-300 shadow-sm"
+                      >
+                        <X size={22} strokeWidth={3} />
+                      </motion.button>
+                    </div>
                   </div>
 
-                  {/* Body */}
-                  <div className="overflow-y-auto p-6 flex-1 bg-white divide-y divide-gray-200 relative">
+                  {/* REDESIGNED CART ITEMS LIST */}
+                  <div className="flex-1 overflow-y-auto px-3 md:px-7 py-6 no-scrollbar scroll-smooth bg-white divide-y divide-gray-100">
                     {cartItems.map(item => (
                       <div
                         key={item.id}
-                        className="flex gap-4 py-4 first:pt-0 last:pb-0"
+                        className="flex gap-5 py-5 first:pt-0 last:pb-0"
                       >
-                        <div className="relative w-20 h-20 rounded-3xl overflow-hidden bg-gray-100 flex-shrink-0 border-4 border-gray-200">
+                        <div className="relative w-24 h-24 rounded-[32px] overflow-hidden bg-gray-50 flex-shrink-0 border-4 border-gray-100 shadow-sm">
                           <ImageWithFallback src={item.dish.image || ""} alt={item.dish.name} fill className="object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start mb-1">
-                            <h4 className="font-bold text-[#1A1A1A] line-clamp-1 text-md">{item.dish.name}</h4>
-                            <span className="font-bold text-[#1A1A1A] ml-2 text-sm">{formatVnd(item.dish.price)}</span>
+                          <div className="flex justify-between items-start mb-1.5">
+                            <h4 className="font-bold text-[#1A1A1A] text-[18px] leading-tight tracking-tight truncate">{item.dish.name}</h4>
+                            <span className="font-black text-[#154D1B] ml-2 text-md leading-none tracking-tight pt-0.5">{formatVnd(item.dish.price)}</span>
                           </div>
+
                           {item.cartItemOptions && item.cartItemOptions.length > 0 && (
-                            <div className="text-xs text-gray-500 font-semibold mb-2 line-clamp-1">
-                              {item.cartItemOptions.map(opt => opt.menuOption.name).join(', ')}
+                            <div className="text-[12px] text-gray-400 font-semibold tracking-tight mb-3 line-clamp-2 border-l-2 border-gray-100 pl-2">
+                              {Array.from(new Set(item.cartItemOptions.map(opt => opt.menuOption.name))).join(', ')}
                             </div>
                           )}
+
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => handleDecrement(item.id, item.quantity)}
                               disabled={isUpdating}
-                              className="w-7 h-7 rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                              className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all active:scale-90 disabled:opacity-50"
                             >
-                              {item.quantity === 1 ? <Trash className="w-3.5 h-3.5" strokeWidth={3.2} /> : <Minus className="w-3.5 h-3.5" strokeWidth={3.2} />}
+                              {item.quantity === 1 ? <Trash className="w-4 h-4" strokeWidth={2.5} /> : <Minus className="w-4 h-4" strokeWidth={3} />}
                             </button>
-                            <span className="font-bold text-sm min-w-[20px] text-center">{item.quantity}</span>
+                            <span className="font-anton font-semibold text-md min-w-[24px] text-center pt-0.5">{item.quantity}</span>
                             <button
                               onClick={() => handleIncrement(item.id, item.quantity)}
                               disabled={isUpdating}
-                              className="w-7 h-7 rounded-xl bg-[var(--primary)] text-[#1A1A1A] flex items-center justify-center hover:brightness-110 active:scale-95 transition-all shadow-sm disabled:opacity-50"
+                              className="w-8 h-8 rounded-xl bg-[var(--primary)] text-[#154D1B] flex items-center justify-center shadow-sm transition-all hover:scale-105 active:scale-90 disabled:opacity-50"
                             >
-                              <Plus className="w-3.5 h-3.5 font-bold" strokeWidth={3.0} />
+                              <Plus className="w-4 h-4" strokeWidth={3} />
                             </button>
                           </div>
                         </div>
@@ -186,40 +208,39 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                     ))}
                   </div>
 
-                  {/* Footer */}
-                  <div className="p-6 border-t border-gray-100 bg-gray-50 flex-shrink-0">
-                    <div className="flex justify-between mb-4 items-end">
-                      <span className="text-gray-500 font-medium">Tổng tạm tính</span>
-                      <span className="text-2xl font-bold text-[#1A1A1A]">{formatVnd(totalPrice)}</span>
-                    </div>
-                    <motion.button
-                      whileHover={cartItems.length > 0 && !isUpdating ? { y: -2 } : {}}
-                      whileTap={cartItems.length > 0 && !isUpdating ? { scale: 0.98 } : {}}
-                      onClick={handleCheckout}
-                      disabled={cartItems.length === 0 || isUpdating}
-                      className={`group/btn relative w-full h-[72px] rounded-[32px] flex items-center justify-between px-8 transition-all duration-300 ${cartItems.length > 0 && !isUpdating
-                        ? "bg-lime-500 text-white hover:bg-lime-600"
-                        : "bg-gray-200 text-gray-400"
-                        } disabled:opacity-70 overflow-hidden`}
-                    >
-                      <div className="flex items-center gap-3 relative z-10">
-                        {isUpdating ? (
-                          <Loader2 className="w-6 h-6 animate-spin text-white" />
-                        ) : (
-                          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${cartItems.length > 0 ? "bg-white/20 group-hover/btn:bg-white/30" : "bg-black/5"}`}>
-                            <ShoppingBag className="w-5 h-5 text-white" strokeWidth={3} />
-                          </div>
-                        )}
-                        <span className="text-base font-bold tracking-tight uppercase">
-                          {isUpdating ? "Updating..." : "Checkout Now"}
-                        </span>
+                  {/* BOTTOM FOOTER SECTION (The Lime Box) */}
+                  <div className="p-1">
+                    <div className="bg-[#E4F8D5] rounded-[35px] p-1">
+                      <div className="flex items-center justify-between px-4 py-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[18px] font-bold text-[#154D1B] tracking-tight">Subtotal</span>
+                        </div>
+                        <div className="flex items-baseline gap-0.5">
+                          <span className="font-anton text-[40px] leading-none tracking-tighter text-[#154D1B]">
+                            {Math.floor(totalPrice / 1000)}<span className="text-[20px] opacity-30">.000</span>
+                          </span>
+                          <span className="font-anton text-[16px] text-[#154D1B] ml-1 opacity-60">VNĐ</span>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-3 relative z-10">
-                        <div className="h-8 w-px bg-white/20 mx-1" />
-                        <ChevronRight className="w-5 h-5 text-white group-hover/btn:translate-x-1 transition-transform" strokeWidth={3} />
-                      </div>
-                    </motion.button>
+                      <motion.button
+                        whileHover={cartItems.length > 0 && !isUpdating ? { y: -2 } : {}}
+                        whileTap={cartItems.length > 0 && !isUpdating ? { scale: 0.98 } : {}}
+                        onClick={handleCheckout}
+                        disabled={cartItems.length === 0 || isUpdating}
+                        className="group/btn relative w-full h-[68px] bg-[var(--primary)] text-[#154D1B] rounded-full flex items-center justify-center px-8 shadow-[0_12px_30px_rgba(0,0,0,0.15)] disabled:opacity-60 transition-all duration-300 overflow-hidden"
+                      >
+                        <div className="flex items-center gap-3 relative z-10 transition-all">
+                          {isUpdating && <Loader2 className="w-6 h-6 animate-spin" />}
+                          <span className="text-2xl font-anton font-black tracking-tight uppercase">
+                            {isUpdating ? "Updating..." : "Checkout"}
+                          </span>
+                          {!isUpdating && (
+                            <ChevronRight className="w-6 h-6 group-hover/btn:translate-x-1.5 transition-transform duration-300" strokeWidth={3} />
+                          )}
+                        </div>
+                      </motion.button>
+                    </div>
                   </div>
                 </motion.div>
               </motion.div>

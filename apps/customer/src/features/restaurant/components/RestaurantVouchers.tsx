@@ -33,10 +33,10 @@ export const RestaurantVouchers: React.FC<RestaurantVouchersProps> = ({ restaura
 
     if (directionRef.current === 1) {
       if (el.scrollLeft >= maxScroll - 1) directionRef.current = -1;
-      else el.scrollLeft += 0.6;
+      else el.scrollLeft += 0.85; // Slightly faster for better dynamics
     } else {
       if (el.scrollLeft <= 1) directionRef.current = 1;
-      else el.scrollLeft -= 0.6;
+      else el.scrollLeft -= 0.85;
     }
     requestRef.current = requestAnimationFrame(animateScroll);
   };
@@ -69,8 +69,10 @@ export const RestaurantVouchers: React.FC<RestaurantVouchersProps> = ({ restaura
       }}
     >
       <motion.div
-        initial={false}
+        initial={{ y: 60, opacity: 0 }}
         animate={{
+          y: 0,
+          opacity: 1,
           width: isHovered ? '100.2%' : `${COLLAPSED_WIDTH}px`,
           height: isHovered ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT,
           borderTopLeftRadius: '48px',
@@ -78,12 +80,14 @@ export const RestaurantVouchers: React.FC<RestaurantVouchersProps> = ({ restaura
           backgroundColor: isHovered ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.28)',
         }}
         transition={{
-          type: "spring",
-          damping: 35, // Softer settling
-          stiffness: 220,
-          mass: 1
+          y: { type: "spring", stiffness: 100, damping: 20, mass: 1, delay: 0.1 },
+          opacity: { duration: 0.5, delay: 0.1 },
+          width: { type: "spring", stiffness: 220, damping: 32, mass: 0.8 },
+          height: { type: "spring", stiffness: 220, damping: 32, mass: 0.8 },
+          borderTopRightRadius: { duration: 0.4 },
+          backgroundColor: { duration: 0.4 }
         }}
-        className="backdrop-blur-3xl border-t border-l border-white/30 shadow-[-20px_-10px_60px_rgba(0,0,0,0.15)] flex items-center relative overflow-hidden will-change-[width,height]"
+        className="backdrop-blur-3xl border-t border-l border-white/30 shadow-[-20px_-10px_60px_rgba(0,0,0,0.15)] flex items-center relative overflow-hidden will-change-[width,height] bottom-[-0.5px]"
       >
         {/* WE USE A DUAL-LAYER OVERLAY APPROACH FOR MAXIMUM SMOOTHNESS */}
         <div className="absolute inset-0 w-full h-full relative">
@@ -112,8 +116,8 @@ export const RestaurantVouchers: React.FC<RestaurantVouchersProps> = ({ restaura
 
             {/* Preview Vouchers */}
             <div className="flex flex-row-reverse items-center gap-10 flex-1 px-4 overflow-hidden">
-              {displayVouchers.slice(0, 3).map((voucher) => (
-                <VoucherCompactBar key={voucher.id} voucher={voucher} />
+              {displayVouchers.slice(0, 3).map((voucher, index) => (
+                <VoucherCompactBar key={voucher.id} voucher={voucher} index={index} />
               ))}
             </div>
 
@@ -145,7 +149,7 @@ export const RestaurantVouchers: React.FC<RestaurantVouchersProps> = ({ restaura
                   onTouchStart={() => setIsInteracting(true)}
                   onTouchEnd={() => setIsInteracting(false)}
                   className={`
-                    flex items-center gap-8 overflow-x-auto no-scrollbar py-10 w-full h-full scroll-smooth
+                    flex items-center gap-4 overflow-x-auto no-scrollbar py-10 w-full h-full scroll-smooth
                     ${vouchers.length <= 3 ? 'justify-center' : ''}
                   `}
                 >
@@ -163,19 +167,24 @@ export const RestaurantVouchers: React.FC<RestaurantVouchersProps> = ({ restaura
   );
 };
 
-const VoucherCompactBar = ({ voucher }: { voucher: Voucher }) => {
+const VoucherCompactBar = ({ voucher, index }: { voucher: Voucher, index: number }) => {
   const isFreeship = voucher.discountType === 'FREESHIP';
   const val = isFreeship ? "FREE SHIP" : voucher.discountType === 'PERCENTAGE' ? `-${voucher.discountValue}%` : `-${formatVnd(voucher.discountValue || 0)}`;
 
   return (
-    <div className="flex flex-col items-end whitespace-nowrap">
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
+      className="flex flex-col items-end whitespace-nowrap"
+    >
       <span className={`text-[22px] font-anton leading-none tracking-tight ${isFreeship ? 'text-blue-600' : 'text-[#1A1A1A]'}`}>
         {val}
       </span>
       <span className="text-[10px] font-bold text-black/40 uppercase mt-0.5">
         Min {formatVnd(voucher.minOrderValue || 0)}
       </span>
-    </div>
+    </motion.div>
   );
 };
 
@@ -185,9 +194,14 @@ const DetailedVoucherCard = ({ voucher, index }: { voucher: Voucher, index: numb
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 + index * 0.04 }}
+      transition={{
+        type: "spring",
+        stiffness: 150,
+        damping: 20,
+        delay: 0.05 + index * 0.05
+      }}
       className="flex flex-col items-center justify-center min-w-[260px] h-full whitespace-nowrap"
     >
       <div className={`

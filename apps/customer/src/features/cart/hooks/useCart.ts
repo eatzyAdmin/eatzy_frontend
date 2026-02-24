@@ -135,7 +135,7 @@ export function useRestaurantCart(restaurantId: number | null): UseRestaurantCar
   }, [cartItems]);
 
   const totalPrice = useMemo(() => {
-    return cartItems.reduce((sum, item) => sum + item.totalPrice * item.quantity, 0);
+    return cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
   }, [cartItems]);
 
   // Add to cart mutation

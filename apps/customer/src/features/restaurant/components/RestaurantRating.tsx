@@ -37,9 +37,16 @@ export const RestaurantRating: React.FC<RestaurantRatingProps> = ({
   return (
     <div className="absolute inset-x-0 bottom-0 p-0 flex justify-center">
       <motion.div
-        initial={{ y: 20, opacity: 0 }}
+        initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="bg-white/40 backdrop-blur-xl border border-white/30 rounded-full w-full px-8 py-3 shadow-2xl flex items-center justify-center gap-4 transition-all group-hover:bg-white/60"
+        transition={{
+          type: "spring",
+          stiffness: 120,
+          damping: 24,
+          mass: 0.8
+        }}
+        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+        className="bg-white/40 backdrop-blur-xl border border-white/30 rounded-full w-full px-8 py-3 shadow-2xl flex items-center justify-center gap-4 transition-colors duration-300"
       >
         <div className="flex flex-col items-center">
           <div className="flex items-center gap-2">
