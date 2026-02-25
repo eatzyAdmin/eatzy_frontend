@@ -72,7 +72,7 @@ export default function OrderSummaryList() {
                     </div>
                   </div>
                 </div>
-                <span className="font-bold text-[#1A1A1A] text-sm whitespace-nowrap ml-2">{formatVnd(item.totalPrice * item.quantity)}</span>
+                <span className="font-bold text-[#1A1A1A] text-sm whitespace-nowrap ml-2">{formatVnd(item.dish?.price ?? 0)}</span>
               </div>
             ))}
           </div>
