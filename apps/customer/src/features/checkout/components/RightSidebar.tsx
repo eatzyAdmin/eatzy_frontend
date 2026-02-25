@@ -49,7 +49,7 @@ export default function RightSidebar({
   };
 
   return (
-    <div className="relative h-auto md:h-full md:overflow-y-auto no-scrollbar md:pl-2 pb-24 md:pb-0 flex flex-col">
+    <div className="relative h-auto md:h-screen md:sticky md:top-0 md:overflow-hidden md:px-2 pb-24 md:pb-6 flex flex-col">
       <div className="hidden md:block mb-4">
         <div className="flex items-center gap-2 mb-2">
           <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
@@ -82,14 +82,14 @@ export default function RightSidebar({
         </div>
       </div>
 
-      <div className="hidden md:block">
+      <div className="hidden md:flex flex-1 min-h-0 mb-3">
         <CheckoutMapSection onAddressChange={onAddressChange}>
           {children}
         </CheckoutMapSection>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-[60] md:sticky md:bottom-0 md:bg-[#F7F7F7] md:border-none md:shadow-none md:z-auto md:pb-0 md:mt-auto">
-        <div className="p-4 md:pt-4 md:px-0">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-[60] md:relative md:bg-transparent md:border-none md:shadow-none md:z-auto md:pb-0">
+        <div className="p-4 md:p-0">
           <motion.button
             whileHover={{ scale: isCreating ? 1 : 1.02 }}
             whileTap={{ scale: isCreating ? 1 : 0.98 }}
