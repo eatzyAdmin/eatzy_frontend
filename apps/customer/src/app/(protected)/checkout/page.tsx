@@ -11,7 +11,8 @@ import AddressForm from "@/features/checkout/components/AddressForm";
 import NotesInput from "@/features/checkout/components/NotesInput";
 import PaymentMethodSelector from "@/features/checkout/components/PaymentMethodSelector";
 import PromoVoucherCard from "@/features/checkout/components/PromoVoucherCard";
-import { Truck, Tag, ShoppingBag, ChevronLeft, Store } from "@repo/ui/icons";
+import { AnimatePresence, motion } from "@repo/ui/motion";
+import { Truck, Tag, ShoppingBag, ChevronLeft, Store, ChevronUp, ChevronDown } from "@repo/ui/icons";
 import type { CreateOrderRequest } from "@repo/types";
 const CheckoutSummary = dynamic(() => import("@/features/checkout/components/CheckoutSummary"), { ssr: false });
 const RightSidebar = dynamic(() => import("@/features/checkout/components/RightSidebar"), { ssr: false });
@@ -70,6 +71,44 @@ export default function CheckoutPage() {
   const { showNotification } = useNotification();
   const { clearCart } = useRestaurantCart(restaurantId);
   const setSelectedLocation = useDeliveryLocationStore(s => s.setSelectedLocation);
+
+  // Scroll logic for Promo & Vouchers
+  const promoScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = promoScrollRef.current;
+    if (el) {
+      setCanScrollUp(el.scrollTop > 10);
+      setCanScrollDown(el.scrollTop + el.clientHeight < el.scrollHeight - 10);
+    }
+  }, []);
+
+  useEffect(() => {
+    const el = promoScrollRef.current;
+    if (el) {
+      el.addEventListener('scroll', checkScroll);
+      // Also check on mount and whenever vouchers might change
+      setTimeout(checkScroll, 500);
+      window.addEventListener('resize', checkScroll);
+      return () => {
+        el.removeEventListener('scroll', checkScroll);
+        window.removeEventListener('resize', checkScroll);
+      };
+    }
+  }, [checkScroll, discountVouchers, shippingVouchers]);
+
+  const scrollPromo = (direction: 'up' | 'down') => {
+    const el = promoScrollRef.current;
+    if (el) {
+      const scrollAmount = 250;
+      el.scrollBy({
+        top: direction === 'up' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   const leftColumnRef = useRef<HTMLDivElement | null>(null);
   const mainScrollRef = useRef<HTMLDivElement | null>(null);
@@ -316,7 +355,7 @@ export default function CheckoutPage() {
                   </section>
                 </div>
 
-                {/* DESKTOP LAYOUT (Original Restore) */}
+                {/* DESKTOP LAYOUT */}
                 <div className="hidden md:block space-y-6">
                   <section data-id="method">
                     <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
@@ -330,12 +369,44 @@ export default function CheckoutPage() {
                           <h4 className="font-bold text-[#1A1A1A]">Promo & Vouchers</h4>
                         </div>
 
-                        <div className="p-2 md:p-4 flex-1">
-                          <div className="max-h-[500px] overflow-y-auto overflow-x-hidden space-y-10 custom-scrollbar">
+                        <div className="p-2 md:p-4 flex-1 relative group/promo">
+                          {/* Scroll Indicators */}
+                          <AnimatePresence>
+                            {canScrollUp && (
+                              <motion.button
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                onClick={() => scrollPromo('up')}
+                                className="absolute top-6 left-1/2 -translate-x-1/2 z-40 w-10 h-10 rounded-full bg-white shadow-xl border border-gray-100 grid place-items-center p-0 leading-none text-gray-400 hover:text-[var(--primary)] hover:scale-110 active:scale-95 transition-all"
+                              >
+                                <ChevronUp size={20} strokeWidth={3} />
+                              </motion.button>
+                            )}
+                          </AnimatePresence>
+
+                          <AnimatePresence>
+                            {canScrollDown && (
+                              <motion.button
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                onClick={() => scrollPromo('down')}
+                                className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-10 h-10 rounded-full bg-white shadow-xl border border-gray-100 grid place-items-center p-0 leading-none text-gray-400 hover:text-[var(--primary)] hover:scale-110 active:scale-95 transition-all"
+                              >
+                                <ChevronDown size={20} strokeWidth={3} />
+                              </motion.button>
+                            )}
+                          </AnimatePresence>
+
+                          <div
+                            ref={promoScrollRef}
+                            className="max-h-[500px] overflow-y-auto overflow-x-hidden space-y-10 no-scrollbar"
+                          >
                             {/* Shipping Vouchers */}
                             {shippingVouchers.length > 0 && (
                               <div className="space-y-5">
-                                <div className="flex items-center gap-3 px-1 sticky top-0 bg-white z-10 backdrop-blur-sm">
+                                <div className="flex items-center gap-3 px-1 sticky top-0 bg-white z-30 backdrop-blur-sm">
                                   <div className="w-10 h-10 rounded-[18px] bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-sm flex-shrink-0">
                                     <Truck size={20} strokeWidth={2.5} />
                                   </div>
@@ -345,7 +416,7 @@ export default function CheckoutPage() {
                                     </h4>
                                   </div>
                                 </div>
-                                <div className="space-y-3 pr-2">
+                                <div className="space-y-3 px-2">
                                   {mounted && [...shippingVouchers]
                                     .sort((a, b) => a.id === bestVoucherIds.shipping ? -1 : b.id === bestVoucherIds.shipping ? 1 : 0)
                                     .map((v) => {
@@ -359,6 +430,8 @@ export default function CheckoutPage() {
                                           disabled={!eligible}
                                           reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
                                           isBest={bestVoucherIds.shipping === v.id}
+                                          currentOrderValue={subtotal}
+                                          restaurantSlug={restaurant?.slug}
                                         />
                                       );
                                     })}
@@ -368,7 +441,7 @@ export default function CheckoutPage() {
 
                             {/* Discount Vouchers */}
                             <div className="space-y-5">
-                              <div className="flex items-center gap-3 px-1 sticky top-0 bg-white z-10 backdrop-blur-sm">
+                              <div className="flex items-center gap-3 px-1 sticky top-0 bg-white z-30 backdrop-blur-sm">
                                 <div className="w-10 h-10 rounded-[18px] bg-lime-50 text-lime-600 flex items-center justify-center border border-lime-100 shadow-sm flex-shrink-0">
                                   <Tag size={20} strokeWidth={2.5} />
                                 </div>
@@ -378,7 +451,7 @@ export default function CheckoutPage() {
                                   </h4>
                                 </div>
                               </div>
-                              <div className="space-y-3 pr-2">
+                              <div className="space-y-3 px-2">
                                 {isLoadingVouchers ? (
                                   <div className="text-center py-12 text-gray-400">
                                     <div className="w-10 h-10 border-3 border-gray-100 border-t-lime-500 rounded-full animate-spin mx-auto mb-3" />
@@ -402,6 +475,8 @@ export default function CheckoutPage() {
                                           disabled={!eligible}
                                           reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
                                           isBest={bestVoucherIds.discount === v.id}
+                                          currentOrderValue={subtotal}
+                                          restaurantSlug={restaurant?.slug}
                                         />
                                       );
                                     })
@@ -462,6 +537,8 @@ export default function CheckoutPage() {
         setSelectedDiscountVoucherId={setSelectedDiscountVoucherId}
         bestVoucherIds={bestVoucherIds}
         isLoadingVouchers={isLoadingVouchers}
+        currentOrderValue={subtotal}
+        restaurant={restaurant}
       />
     </div>
   );

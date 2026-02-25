@@ -1,7 +1,8 @@
 "use client";
 import type { Voucher } from "@repo/types";
-import { Tag, Percent, Truck, Check, Star } from "@repo/ui/icons";
+import { Tag, Percent, Truck, Check, Star, ChevronRight, Store } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
+import Link from "next/link";
 
 interface PromoVoucherCardProps {
   voucher: Voucher;
@@ -10,6 +11,8 @@ interface PromoVoucherCardProps {
   disabled?: boolean;
   reason?: string;
   isBest?: boolean;
+  currentOrderValue?: number;
+  restaurantSlug?: string;
 }
 
 export default function PromoVoucherCard({
@@ -19,178 +22,220 @@ export default function PromoVoucherCard({
   disabled = false,
   reason,
   isBest = false,
+  currentOrderValue,
+  restaurantSlug,
 }: PromoVoucherCardProps) {
   const isFreeship = voucher.discountType === 'FREESHIP';
 
-  const getTitle = () => {
-    if (voucher.description) return voucher.description;
-    if (voucher.code) return `Voucher: ${voucher.code}`;
-    if (isFreeship) return 'Miễn phí giao hàng';
-    return `Giảm ${formatVnd(voucher.discountValue)}`;
-  };
-
-  // Get discount info text (shows discount value and max)
-  const getDiscountInfo = () => {
+  const getIneligibleBenefitText = () => {
     if (isFreeship) {
-      if (voucher.maxDiscountAmount) {
-        return `Tiết kiệm đến ${formatVnd(voucher.maxDiscountAmount)}`;
-      }
-      return 'Miễn phí vận chuyển đơn hàng';
+      return `giảm đến ${formatVnd(voucher.maxDiscountAmount || 0)} phí ship`;
     }
-
     if (voucher.discountType === 'PERCENTAGE') {
-      if (voucher.maxDiscountAmount) {
-        return `Giảm ${voucher.discountValue}% • Tối đa ${formatVnd(voucher.maxDiscountAmount)}`;
-      }
-      return `Giảm ${voucher.discountValue}%`;
+      return `giảm ${voucher.discountValue}% giá món`;
     }
-
-    if (voucher.discountType === 'FIXED' && voucher.discountValue) {
-      return `Giảm ${formatVnd(voucher.discountValue)}`;
-    }
-
-    return null;
+    return `giảm ${formatVnd(voucher.discountValue)} giá món`;
   };
 
-  const discountInfo = getDiscountInfo();
-  const minText = typeof voucher.minOrderValue === 'number' && voucher.minOrderValue > 0
-    ? `Đơn từ ${formatVnd(voucher.minOrderValue)}`
-    : undefined;
+  const missingAmount = (typeof currentOrderValue === 'number' && typeof voucher.minOrderValue === 'number')
+    ? Math.max(0, voucher.minOrderValue - currentOrderValue)
+    : null;
+
+  const getTitle = () => {
+    if (voucher.description) return voucher.description.toUpperCase();
+    if (voucher.code) return `CODE: ${voucher.code}`;
+    return isFreeship ? 'DELIVERY DISCOUNT' : 'ORDER DISCOUNT';
+  };
 
   const handleClick = () => {
     if (!disabled) onSelect();
   };
 
+  const primaryValue = isFreeship && voucher.maxDiscountAmount
+    ? formatVnd(voucher.maxDiscountAmount)
+    : isFreeship ? 'FREE SHIP' :
+      voucher.discountType === 'PERCENTAGE' ? `${voucher.discountValue}%` :
+        formatVnd(voucher.discountValue);
+
+  const subValueInfo = isFreeship
+    ? (voucher.maxDiscountAmount ? 'OFF SHIPPING' : null)
+    : (voucher.discountType === 'PERCENTAGE' && voucher.maxDiscountAmount)
+      ? `OFF FOOD, Up to ${formatVnd(voucher.maxDiscountAmount)}`
+      : 'OFF FOOD';
+
+  const minOrderText = typeof voucher.minOrderValue === 'number' && voucher.minOrderValue > 0
+    ? `Min. Order ${formatVnd(voucher.minOrderValue)}`
+    : 'No Min. Order';
+
+  const showBestPanel = isBest && !disabled;
+  const showReasonPanel = disabled && reason;
+
   return (
-    <div
-      onClick={handleClick}
-      className={`
-        relative w-full text-left p-3 md:p-4 rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-4
-        ${disabled
-          ? 'bg-gray-50 border-gray-100 opacity-60 cursor-not-allowed'
-          : selected
-            ? isFreeship
-              ? 'bg-blue-50 border-blue-100 shadow-sm cursor-pointer'
-              : 'bg-lime-50 border-lime-100 shadow-sm cursor-pointer'
-            : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50 cursor-pointer'
-        }
-      `}
-    >
-      {/* Best Choice Badge (EXACT miniaturized SwipeToConfirm Loading UI - Gold Edition) */}
+    <div className={`
+      w-full group/voucher relative transition-all duration-500 mb-4
+      ${showReasonPanel ? 'rounded-[28px] md:rounded-[32px] p-0' : ''}
+    `}>
+      {/* Best Match Badge - Back to original corner pill design */}
       {isBest && !disabled && (
-        <div className="absolute -top-3 md:-top-2 left-4">
+        <div className="absolute -top-3 left-6 z-20">
           <div
-            className="relative flex items-center rounded-xl h-[22px] px-3 select-none overflow-hidden shadow-sm"
+            className="flex items-center justify-center rounded-full h-[22px] px-3 select-none overflow-hidden shadow-md relative"
             style={{
-              background: 'linear-gradient(to right, #FBBF24, #FDE047)', // Brighter, fresher gold matching the primary blue's vibrancy
+              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
             }}
           >
-            {/* Native Shimmer Overlay Effect from SwipeToConfirm */}
             <div
-              className="absolute inset-0 z-0"
+              className="absolute inset-0 z-0 opacity-40 pointer-events-none"
               style={{
-                background: 'linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%)',
+                background: 'linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%)',
                 backgroundSize: '200% 100%',
-                animation: 'shimmer-swipe 3s infinite linear'
+                animation: 'shimmer-swipe 2s infinite linear'
               }}
             />
-
-            <div className="relative flex items-center gap-1.5">
-              {/* Spinner exactly from SwipeToConfirm UI package but scaled down */}
-              <span className="text-[8px] md:text-[10px] font-bold text-white uppercase tracking-wider whitespace-nowrap">
-                Best choice
+            <div className="relative flex items-center gap-1.5 h-full">
+              <Star size={11} className="text-white fill-current flex-shrink-0" />
+              <span className="text-[10px] font-bold text-white uppercase tracking-tight leading-none translate-y-[0.5px]">
+                Best Match
               </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* usage multiplier badge (shopee-style - floating on edge) */}
-      {typeof voucher.remainingUsage === 'number' && (
-        <div className="absolute -top-1 -right-2">
-          <div className="bg-[#FFF1F1] text-[#EE4D2D] text-[12px] font-anton font-bold px-2 py-0.5 rounded-lg border border-[#FFDADA] shadow-md flex items-center justify-center min-w-[32px] transform rotate-[10deg] hover:rotate-0 transition-transform duration-300">
-            x{voucher.remainingUsage}
+      {/* Main Card Component */}
+      <div
+        onClick={handleClick}
+        className={`
+          relative w-full text-left p-3.5 md:p-4 rounded-[28px] md:rounded-[32px] border-[3px] transition-all duration-500 group flex items-stretch gap-4 z-10 shadow-[0_0_15px_rgba(0,0,0,0.06)]
+          ${disabled
+            ? 'bg-gray-50 border-gray-100 cursor-not-allowed peer/inner'
+            : selected
+              ? isFreeship
+                ? 'bg-blue-50 border-blue-400 cursor-pointer'
+                : 'bg-lime-50 border-[var(--primary)] cursor-pointer'
+              : 'bg-white border-gray-100 hover:border-gray-300 hover:bg-gray-50 cursor-pointer'
+          }
+        `}
+      >
+        {/* Usage Multiplier - Positioned relative to the inner card corner */}
+        {typeof voucher.remainingUsage === 'number' && (
+          <div className={`absolute -top-2 -right-1 z-10 transition-opacity duration-500 ${disabled ? 'opacity-50' : 'opacity-100'}`}>
+            <div className="bg-black text-white font-anton font-bold text-[12px] px-2.5 py-0.5 rounded-xl border-2 border-black shadow-lg flex items-center justify-center">
+              x{voucher.remainingUsage}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Icon Box */}
-      <div className={`
-        w-11 h-11 rounded-[18px] flex items-center justify-center flex-shrink-0 transition-all duration-300
-        ${disabled
-          ? 'bg-gray-200 text-gray-400'
-          : selected
-            ? isFreeship
-              ? 'bg-blue-200 text-blue-700'
-              : 'bg-lime-200 text-lime-700'
-            : 'bg-gray-100 text-gray-400 group-hover:bg-white'
-        }
-      `}>
-        {isFreeship ? <Truck size={20} strokeWidth={2.5} /> : <Tag size={20} strokeWidth={2.5} />}
-      </div>
-
-      {/* Middle Content */}
-      <div className="flex-1 min-w-0">
-        {/* Primary Info: Discount Amount/Value */}
-        {discountInfo ? (
-          <div className="flex items-center gap-2 mb-0.5">
-            <h4 className={`text-[17px] font-bold tracking-tight transition-all leading-tight ${disabled
-              ? 'text-gray-400'
-              : isFreeship ? 'text-blue-600' : 'text-[var(--primary)]'
-              }`}>
-              {discountInfo}
-            </h4>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 mb-0.5">
-            <h4 className={`text-[15px] font-bold tracking-tight truncate transition-all ${disabled ? 'text-gray-400' : 'text-[#1A1A1A]'}`}>
+        {/* Main Content Area - WISE Layout */}
+        {/* Main Content Area - WISE Layout */}
+        <div className="flex-1 flex flex-col justify-center min-w-0">
+          <div className="flex items-center gap-2.5 mb-1">
+            <div className={`
+              w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0
+              ${selected
+                ? isFreeship ? 'bg-blue-200 text-blue-700' : 'bg-lime-200 text-lime-800'
+                : 'bg-gray-100 text-gray-400'}
+              transition-colors duration-500
+            `}>
+              {isFreeship ? <Truck size={16} strokeWidth={3} /> : <Tag size={16} strokeWidth={3} />}
+            </div>
+            <span className={`text-[10px] font-extrabold uppercase tracking-[0.05em] ${disabled ? 'text-gray-400 opacity-60' : 'text-gray-400'}`}>
               {getTitle()}
-            </h4>
-          </div>
-        )}
-
-        {/* Secondary Info: Description/Code */}
-        {discountInfo && (
-          <div className={`text-[12px] font-medium text-gray-500 mb-1 line-clamp-1 transition-all ${disabled ? 'opacity-50' : ''}`}>
-            {getTitle()}
-          </div>
-        )}
-
-        <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">
-          {minText && (
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">
-              {minText}
             </span>
-          )}
-          {minText && <div className="w-[3px] h-[3px] rounded-full bg-gray-300 flex-shrink-0" />}
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">
-            {voucher.endDate ? `HSD: ${new Date(voucher.endDate).toLocaleDateString('vi-VN')}` : 'NO EXPIRY'}
-          </span>
+          </div>
+
+          <div className="flex items-baseline gap-2">
+            <h4 className={`
+              font-anton font-normal text-2xl md:text-3xl leading-none tracking-tight transition-all
+              ${isFreeship ? 'text-blue-600' : 'text-[var(--primary)]'} ${disabled ? 'opacity-40' : 'opacity-100'}
+            `}>
+              {primaryValue}
+            </h4>
+            {subValueInfo && (
+              <span className={`text-[13px] font-extrabold ${isFreeship ? 'text-blue-300' : 'text-[var(--primary)]'} ${disabled ? 'opacity-30' : 'opacity-70'}
+                `}>
+                {subValueInfo}
+              </span>
+            )}
+          </div>
+
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
+            <span className={`text-[11px] font-bold ${selected ? 'text-gray-600' : 'text-gray-400'}`}>
+              {minOrderText}
+            </span>
+            <div className="w-1 h-1 rounded-full bg-gray-200" />
+            <span className={`text-[11px] font-bold ${selected ? 'text-gray-600' : 'text-gray-400 opacity-60'}`}>
+              {voucher.endDate ? `Valid until ${new Date(voucher.endDate).toLocaleDateString('en-GB')}` : 'No Expiry'}
+            </span>
+          </div>
         </div>
 
-        {disabled && reason && (
-          <div className="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-red-100 mt-2 w-fit">
-            {reason}
+        {/* Side Action Area */}
+        {!disabled && (
+          <div className="flex flex-col items-center justify-center pl-3 md:pl-4">
+            <div className={`
+              w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-500
+              ${selected
+                ? isFreeship ? 'bg-blue-500 text-white' : 'bg-lime-500 text-white'
+                : 'bg-gray-100 text-transparent scale-90'}
+              shadow-sm
+            `}>
+              <Check size={selected ? 16 : 10} strokeWidth={6} className="transition-all duration-500" />
+            </div>
           </div>
         )}
       </div>
 
-      {/* Checkmark Circle at the end */}
-      <div className={`
-        w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500
-        ${disabled
-          ? 'bg-gray-100 text-transparent scale-90'
-          : selected
-            ? isFreeship
-              ? 'bg-blue-500 text-white scale-100 shadow-md shadow-blue-500/30'
-              : 'bg-lime-500 text-white scale-100 shadow-md shadow-lime-500/30'
-            : 'bg-gray-100 text-transparent scale-90 group-hover:border-gray-200'
-        }
-      `}>
-        <Check size={16} strokeWidth={4} className={selected ? "opacity-100" : "opacity-0"} />
-      </div>
+      {/* REASON PANEL - "Peeking out" below the card - Interactive Shop Link */}
+      {showReasonPanel && (
+        <>
+          <Link
+            href={restaurantSlug ? `/restaurants/${restaurantSlug}` : '#'}
+            className="relative z-10 px-3.5 md:px-5 py-2.5 md:py-3.5 flex items-center justify-between group/reason transition-colors cursor-pointer peer/bottom"
+          >
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white flex items-center justify-center text-gray-400 group-hover/reason:text-[var(--primary)] transition-colors shadow-sm">
+                <Store size={12} />
+              </div>
+              <div className="flex flex-col">
+                {missingAmount !== null && missingAmount > 0 ? (
+                  <div className="flex items-baseline gap-1 md:gap-1.5 text-[10px] md:text-[11px] font-bold text-gray-500 uppercase tracking-tight">
+                    <span className="translate-y-[-0.5px]">Mua thêm</span>
+                    <span className="font-anton text-[13px] md:text-[15px] text-black tracking-normal leading-none translate-y-[1px]">{formatVnd(missingAmount)}</span>
+                    <span className="translate-y-[-0.5px]">để nhận {getIneligibleBenefitText()}</span>
+                  </div>
+                ) : (
+                  <span className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+                    {reason}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-white flex items-center justify-center text-gray-300 group-hover/reason:text-gray-600 transition-all group-hover/reason:translate-x-1 shadow-sm">
+              <ChevronRight size={16} strokeWidth={3} />
+            </div>
+          </Link>
+
+          {/* This background div reacts ONLY when the peeking parts are hovered. It must come AFTER the peers in the DOM. */}
+          <div className="absolute inset-0 z-0 bg-gray-100 transition-colors peer-hover/top:bg-gray-200/90 peer-hover/bottom:bg-gray-200/90 rounded-[28px] md:rounded-[32px] pointer-events-none" />
+        </>
+      )}
     </div>
   );
+}
+
+// Add global styles for animations
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.innerHTML = `
+    @keyframes shimmer-swipe {
+      0% { transform: translateX(-150%); }
+      100% { transform: translateX(150%); }
+    }
+    .font-anton { font-family: var(--font-anton), var(--font-sans); }
+  `;
+  document.head.appendChild(style);
 }
 
 // Add global styles for shimmer

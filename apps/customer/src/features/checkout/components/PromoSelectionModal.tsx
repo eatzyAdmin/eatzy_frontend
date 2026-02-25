@@ -17,6 +17,8 @@ interface PromoSelectionModalProps {
   setSelectedDiscountVoucherId: (id: number | null) => void;
   bestVoucherIds: { shipping: number | null; discount: number | null };
   isLoadingVouchers?: boolean;
+  currentOrderValue?: number;
+  restaurant?: any;
 }
 
 export default function PromoSelectionModal({
@@ -31,6 +33,8 @@ export default function PromoSelectionModal({
   setSelectedDiscountVoucherId,
   bestVoucherIds,
   isLoadingVouchers = false,
+  currentOrderValue,
+  restaurant,
 }: PromoSelectionModalProps) {
   return (
     <AnimatePresence>
@@ -106,6 +110,8 @@ export default function PromoSelectionModal({
                                 disabled={!eligible}
                                 reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
                                 isBest={bestVoucherIds.shipping === v.id}
+                                currentOrderValue={currentOrderValue}
+                                restaurantSlug={restaurant?.slug}
                               />
                             );
                           })}
@@ -142,6 +148,8 @@ export default function PromoSelectionModal({
                                 disabled={!eligible}
                                 reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
                                 isBest={bestVoucherIds.discount === v.id}
+                                currentOrderValue={currentOrderValue}
+                                restaurantSlug={restaurant?.slug}
                               />
                             );
                           })
