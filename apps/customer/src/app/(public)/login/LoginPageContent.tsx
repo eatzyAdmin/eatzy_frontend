@@ -1,7 +1,8 @@
 "use client";
 
-import { LoginForm, useLoading, useNotification } from "@repo/ui";
+import { LoginForm, useLoading } from "@repo/ui";
 import { useRouter } from "next/navigation";
+import { sileo } from "@/components/DynamicIslandToast";
 import { useZodForm, loginSchema, type LoginFormData } from "@repo/lib";
 import { motion } from "@repo/ui/motion";
 import { useLogin } from "@/features/auth/hooks/useLogin";
@@ -18,7 +19,6 @@ export default function LoginPageContent() {
   });
 
   const { show } = useLoading();
-  const { showNotification } = useNotification();
 
   const handleRegisterClick = () => {
     router.push("/register");
@@ -28,11 +28,10 @@ export default function LoginPageContent() {
     const success = await handleLogin(data);
 
     if (success) {
-      showNotification({
-        message: "Đăng nhập thành công!",
-        type: "success",
-        format: "Đăng nhập thành công",
-        autoHideDuration: 3000
+      sileo.success({
+        title: "Đăng nhập thành công!",
+        description: "Đang chuyển hướng về trang chủ...",
+        duration: 3000
       });
       show("Đang chuyển hướng về trang chủ...");
       router.push("/home");

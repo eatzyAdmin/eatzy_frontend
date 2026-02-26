@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { restaurantApi } from "@repo/api";
 import type { RestaurantMagazine, NearbyRestaurantsParams } from "@repo/types";
-import { useNotification } from "@repo/ui";
+import { sileo } from "@/components/DynamicIslandToast";
 import { useEffect, useMemo } from "react";
 
 // ======== Types ========
@@ -67,7 +67,6 @@ export function useSearchRestaurants(
   options: UseSearchRestaurantsOptions = {}
 ) {
   const { enabled = true, showErrorNotification = true } = options;
-  const { showNotification } = useNotification();
 
   // Validate params - check if we have valid location
   const hasValidLocation = params?.latitude !== undefined &&
@@ -129,13 +128,13 @@ export function useSearchRestaurants(
         ? query.error.message
         : "Đã có lỗi xảy ra khi tìm kiếm nhà hàng";
 
-      showNotification({
-        message: errorMessage,
-        type: "error",
-        autoHideDuration: 5000,
+      sileo.error({
+        title: "Lỗi tìm kiếm",
+        description: errorMessage,
+        duration: 5000,
       });
     }
-  }, [query.isError, query.error, showErrorNotification, showNotification]);
+  }, [query.isError, query.error, showErrorNotification]);
 
   // Flatten all pages into a single array
   const restaurants = useMemo(() => {

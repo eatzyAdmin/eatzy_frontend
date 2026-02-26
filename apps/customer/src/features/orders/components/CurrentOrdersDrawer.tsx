@@ -9,7 +9,8 @@ import {
 import { formatVnd } from "@repo/lib";
 import type { OrderResponse, OrderItemResponse } from "@repo/types";
 import { useCurrentOrders } from "@/features/orders/hooks/useCurrentOrders";
-import { useSwipeConfirmation, useNotification, useLoading, CurrentOrdersDrawerShimmer } from "@repo/ui";
+import { useSwipeConfirmation, useLoading, CurrentOrdersDrawerShimmer } from "@repo/ui";
+import { sileo } from "@/components/DynamicIslandToast";
 import { orderApi } from "@repo/api";
 
 const OrderMapView = dynamic(() => import("@/features/orders/components/OrderMapView"), { ssr: false });
@@ -23,7 +24,6 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
   const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
   const activeOrder = orders.find((o) => o.id === activeOrderId) ?? orders[0] ?? null;
   const { confirm } = useSwipeConfirmation();
-  const { showNotification } = useNotification();
   const { hide: hideLoading } = useLoading();
 
   // Set first order as active when orders load
@@ -84,10 +84,9 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
         try {
           await orderApi.cancelOrder(activeOrder.id, reason);
           hideLoading();
-          showNotification({
-            type: "success",
-            message: "Đã hủy đơn hàng",
-            format: `Đơn hàng #${activeOrder.id} đã được hủy thành công`
+          sileo.success({
+            title: "Đã hủy đơn hàng",
+            description: `Đơn hàng #${activeOrder.id} đã được hủy thành công`,
           });
           setShowCancelReasons(false);
           refetch();
@@ -95,7 +94,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
             setTimeout(() => onClose(), 500);
           }
         } catch (error) {
-          showNotification({ type: "error", message: "Không thể hủy đơn hàng" });
+          sileo.error({ title: "Lỗi", description: "Không thể hủy đơn hàng" });
         }
       }
     });

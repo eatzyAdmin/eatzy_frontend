@@ -3,13 +3,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { favoriteApi } from "@repo/api";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useNotification } from "@repo/ui";
 import { useCallback } from "react";
+import { sileo } from "@/components/DynamicIslandToast";
 
 export function useFavorites() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { showNotification } = useNotification();
   const isLoggedIn = !!user?.id;
 
   // Fetch all favorites for current user (uses backend auth context)
@@ -44,17 +43,15 @@ export function useFavorites() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["favorites", "my"] });
-      showNotification({
-        message: "Đã thêm vào yêu thích",
-        type: "success",
-        format: "Dữ liệu đã cập nhật thành công."
+      sileo.success({
+        title: "Đã thêm vào yêu thích",
+        description: "Dữ liệu đã cập nhật thành công.",
       });
     },
     onError: (error) => {
-      showNotification({
-        message: "Không thể thêm vào yêu thích",
-        type: "error",
-        format: `${error.message}`
+      sileo.error({
+        title: "Không thể thêm vào yêu thích",
+        description: `${error.message}`
       });
     },
   });
@@ -64,17 +61,15 @@ export function useFavorites() {
     mutationFn: (favoriteId: number) => favoriteApi.removeFavorite(favoriteId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["favorites", "my"] });
-      showNotification({
-        message: "Đã xóa khỏi yêu thích",
-        type: "success",
-        format: "Dữ liệu đã cập nhật thành công."
+      sileo.success({
+        title: "Đã xóa khỏi yêu thích",
+        description: "Dữ liệu đã cập nhật thành công.",
       });
     },
     onError: (error) => {
-      showNotification({
-        message: "Không thể xóa khỏi yêu thích",
-        type: "error",
-        format: `${error.message}`
+      sileo.error({
+        title: "Không thể xóa khỏi yêu thích",
+        description: `${error.message}`
       });
     },
   });
@@ -82,9 +77,9 @@ export function useFavorites() {
   const toggleFavorite = useCallback(
     async (restaurantId: number) => {
       if (!isLoggedIn) {
-        showNotification({
-          message: "Vui lòng đăng nhập để thực hiện chức năng này",
-          type: "error",
+        sileo.error({
+          title: "Lỗi",
+          description: "Vui lòng đăng nhập để thực hiện chức năng này",
         });
         return;
       }
@@ -97,7 +92,7 @@ export function useFavorites() {
         await addMutation.mutateAsync(restaurantId);
       }
     },
-    [isLoggedIn, getFavoriteId, removeMutation, addMutation, showNotification]
+    [isLoggedIn, getFavoriteId, removeMutation, addMutation]
   );
 
   const isRestaurantMutating = useCallback(

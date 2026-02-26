@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { ArrowLeft, Heart, Search, X, Store } from "@repo/ui/icons";
-import { useLoading, useNotification, RestaurantCardShimmer } from "@repo/ui";
+import { useLoading, RestaurantCardShimmer } from "@repo/ui";
 import type { Restaurant, FavoriteResponse } from "@repo/types";
 import FavoriteRestaurantCard from "@/features/favorites/components/FavoriteRestaurantCard";
 import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
@@ -13,7 +13,6 @@ import { useFavorites } from "@/features/favorites/hooks/useFavorites";
 export default function FavoritesPage() {
   const router = useRouter();
   const { hide, show } = useLoading();
-  const { showNotification } = useNotification();
   const [searchInputValue, setSearchInputValue] = useState("");
   const [actualSearchQuery, setActualSearchQuery] = useState("");
   const { favorites, isLoading: isFavoritesLoading, toggleFavorite, isRestaurantMutating } = useFavorites();

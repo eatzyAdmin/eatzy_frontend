@@ -2,8 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '@repo/api';
 import type { Cart, CartItem, AddToCartRequest } from '@repo/types';
 import { useMemo, useCallback } from 'react';
-import { useNotification } from '@repo/ui';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { sileo } from "@/components/DynamicIslandToast";
 
 // ======== Query Keys ========
 
@@ -107,7 +107,6 @@ export function useCart(): UseCartResult {
 export function useRestaurantCart(restaurantId: number | null): UseRestaurantCartResult {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { showNotification } = useNotification();
 
   const isValidId = restaurantId !== null && restaurantId > 0;
 
@@ -187,10 +186,10 @@ export function useRestaurantCart(restaurantId: number | null): UseRestaurantCar
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
-      showNotification({ message: 'Đã thêm vào giỏ hàng!', type: 'success', format: "Thêm vào giỏ hàng thành công" });
+      sileo.success({ title: 'Đã thêm vào giỏ hàng!', description: "Thêm vào giỏ hàng thành công" });
     },
     onError: (error: Error) => {
-      showNotification({ message: error.message, type: 'error', format: `${error.message}` });
+      sileo.error({ title: "Lỗi", description: `${error.message}` });
     },
   });
 
@@ -227,7 +226,7 @@ export function useRestaurantCart(restaurantId: number | null): UseRestaurantCar
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
     onError: (error: Error) => {
-      showNotification({ message: error.message, type: 'error' });
+      sileo.error({ title: "Lỗi", description: error.message });
     },
   });
 
@@ -244,7 +243,7 @@ export function useRestaurantCart(restaurantId: number | null): UseRestaurantCar
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
     onError: (error: Error) => {
-      showNotification({ message: error.message, type: 'error', format: `${error.message}` });
+      sileo.error({ title: "Lỗi", description: `${error.message}` });
     },
   });
 

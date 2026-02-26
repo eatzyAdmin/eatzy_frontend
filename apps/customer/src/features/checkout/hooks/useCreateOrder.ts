@@ -1,7 +1,7 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { orderApi } from "@repo/api";
-import { useNotification } from "@repo/ui";
+import { sileo } from "@/components/DynamicIslandToast";
 import { useRouter } from "next/navigation";
 import type { CreateOrderRequest, OrderResponse } from "@repo/types";
 
@@ -12,7 +12,6 @@ interface UseCreateOrderOptions {
 
 export function useCreateOrder(options: UseCreateOrderOptions = {}) {
   const queryClient = useQueryClient();
-  const { showNotification } = useNotification();
   const router = useRouter();
 
   const mutation = useMutation({
@@ -27,10 +26,9 @@ export function useCreateOrder(options: UseCreateOrderOptions = {}) {
       // Invalidate cart queries since cart items become order
       queryClient.invalidateQueries({ queryKey: ["carts"] });
 
-      showNotification({
-        message: "Đặt hàng thành công!",
-        type: "success",
-        format: "Đơn hàng của bạn đang được xử lý",
+      sileo.success({
+        title: "Đặt hàng thành công!",
+        description: "Đơn hàng của bạn đang được xử lý",
       });
 
       // If VNPAY payment, redirect to payment URL
@@ -45,9 +43,9 @@ export function useCreateOrder(options: UseCreateOrderOptions = {}) {
       options.onSuccess?.(data!);
     },
     onError: (error: Error) => {
-      showNotification({
-        message: error.message || "Có lỗi xảy ra khi đặt hàng",
-        type: "error",
+      sileo.error({
+        title: "Lỗi",
+        description: error.message || "Có lỗi xảy ra khi đặt hàng",
       });
       options.onError?.(error);
     },

@@ -2,7 +2,8 @@
 import { useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { reviewApi } from "@repo/api";
-import { useSwipeConfirmation, useNotification } from "@repo/ui";
+import { useSwipeConfirmation } from "@repo/ui";
+import { sileo } from "@/components/DynamicIslandToast";
 import type { CreateReviewRequest, ReviewDTO } from "@repo/types";
 
 // ======== Query Keys ========
@@ -40,7 +41,6 @@ export interface UseReviewResult {
  */
 export function useReview(orderId: number): UseReviewResult {
   const queryClient = useQueryClient();
-  const { showNotification } = useNotification();
   const { confirm } = useSwipeConfirmation();
 
   // Fetch existing reviews for this order
@@ -69,19 +69,17 @@ export function useReview(orderId: number): UseReviewResult {
     mutationFn: (data: CreateReviewRequest) => reviewApi.createReview(data),
     onSuccess: (_, variables: CreateReviewRequest) => {
       const target = variables.reviewTarget === "restaurant" ? "nhà hàng" : "tài xế";
-      showNotification({
-        type: "success",
-        message: `Đánh giá ${target} thành công!`,
-        format: "Đánh giá đã được ghi nhận thành công!",
+      sileo.success({
+        title: `Đánh giá ${target} thành công!`,
+        description: "Đánh giá đã được ghi nhận thành công!",
       });
       queryClient.invalidateQueries({ queryKey: reviewKeys.byOrder(orderId) });
     },
     onError: (error: any) => {
       const message = error?.message || "Có lỗi xảy ra khi gửi đánh giá";
-      showNotification({
-        type: "error",
-        message,
-        format: "Vui lòng thử lại sau!",
+      sileo.error({
+        title: message,
+        description: "Vui lòng thử lại sau!",
       });
     },
   });
@@ -89,10 +87,9 @@ export function useReview(orderId: number): UseReviewResult {
   const handleReviewRestaurant = useCallback(
     (rating: number, comment: string) => {
       if (rating === 0 || !comment.trim()) {
-        showNotification({
-          type: "error",
-          message: "Vui lòng chọn số sao và viết nhận xét!",
-          format: "Điền đầy đủ thông tin trước khi gửi đánh giá nhé!",
+        sileo.error({
+          title: "Vui lòng chọn số sao và viết nhận xét!",
+          description: "Điền đầy đủ thông tin trước khi gửi đánh giá nhé!",
         });
         return;
       }
@@ -111,16 +108,15 @@ export function useReview(orderId: number): UseReviewResult {
         },
       });
     },
-    [orderId, createMutation, confirm, showNotification]
+    [orderId, createMutation, confirm]
   );
 
   const handleReviewDriver = useCallback(
     (rating: number, comment: string) => {
       if (rating === 0 || !comment.trim()) {
-        showNotification({
-          type: "error",
-          message: "Vui lòng chọn số sao và viết nhận xét!",
-          format: "Điền đầy đủ thông tin trước khi gửi đánh giá nhé!",
+        sileo.error({
+          title: "Vui lòng chọn số sao và viết nhận xét!",
+          description: "Điền đầy đủ thông tin trước khi gửi đánh giá nhé!",
         });
         return;
       }
@@ -139,7 +135,7 @@ export function useReview(orderId: number): UseReviewResult {
         },
       });
     },
-    [orderId, createMutation, confirm, showNotification]
+    [orderId, createMutation, confirm]
   );
 
   return {

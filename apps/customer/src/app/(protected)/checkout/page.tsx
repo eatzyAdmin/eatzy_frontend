@@ -2,7 +2,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useLoading, useHoverHighlight, HoverHighlightOverlay, useNotification } from "@repo/ui";
+import { useLoading, useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
+import { sileo } from "@/components/DynamicIslandToast";
 import { useCheckout } from "@/features/checkout/hooks/useCheckout";
 import { useCreateOrder } from "@/features/checkout/hooks/useCreateOrder";
 import { useRestaurantCart } from "@/features/cart/hooks/useCart";
@@ -68,7 +69,6 @@ export default function CheckoutPage() {
 
   const { user } = useAuth();
   const { createOrder, isCreating } = useCreateOrder();
-  const { showNotification } = useNotification();
   const { clearCart } = useRestaurantCart(restaurantId);
   const setSelectedLocation = useDeliveryLocationStore(s => s.setSelectedLocation);
 
@@ -177,19 +177,19 @@ export default function CheckoutPage() {
   const handlePlaceOrder = useCallback(async () => {
     // Validation
     if (!user?.id) {
-      showNotification({ message: "Vui lòng đăng nhập để đặt hàng", type: "error" });
+      sileo.error({ title: "Lỗi", description: "Vui lòng đăng nhập để đặt hàng" });
       return;
     }
     if (!restaurantId) {
-      showNotification({ message: "Không tìm thấy thông tin nhà hàng", type: "error" });
+      sileo.error({ title: "Lỗi", description: "Không tìm thấy thông tin nhà hàng" });
       return;
     }
     if (!cartItems || cartItems.length === 0) {
-      showNotification({ message: "Giỏ hàng trống", type: "error" });
+      sileo.error({ title: "Lỗi", description: "Giỏ hàng trống" });
       return;
     }
     if (!address || !selectedLocation?.latitude || !selectedLocation?.longitude) {
-      showNotification({ message: "Vui lòng nhập địa chỉ giao hàng", type: "error" });
+      sileo.error({ title: "Lỗi", description: "Vui lòng nhập địa chỉ giao hàng" });
       return;
     }
 
@@ -223,7 +223,7 @@ export default function CheckoutPage() {
     }
   }, [
     user, restaurantId, cartItems, address, selectedLocation, notes, baseFee, fee, paymentMethod,
-    selectedDiscountVoucherId, selectedShippingVoucherId, createOrder, showNotification, clearCart
+    selectedDiscountVoucherId, selectedShippingVoucherId, createOrder, clearCart
   ]);
 
   return (
