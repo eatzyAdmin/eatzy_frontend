@@ -7,13 +7,19 @@ import { Heart, HeartOff, AlertCircle, CheckCircle2, ChevronRight } from "lucide
 
 // Mở rộng Options để hỗ trợ Action Type đặc thù
 interface ExtendedToastOptions extends SileoOptions {
-  actionType?: "favorite_add" | "favorite_remove" | "favorite_error";
+  actionType?: "favorite_add" | "favorite_remove" | "favorite_error" | "review_validation";
 }
 
 const WrappedSileo = {
   ...originalSileo,
   success: (opts: ExtendedToastOptions) => {
     return originalSileo.success({
+      ...opts,
+      description: renderCustomDescription(opts) || opts.description,
+    });
+  },
+  warning: (opts: ExtendedToastOptions) => {
+    return originalSileo.warning({
       ...opts,
       description: renderCustomDescription(opts) || opts.description,
     });
@@ -98,22 +104,43 @@ function renderCustomDescription(opts: ExtendedToastOptions) {
         </div>
       );
 
+    case "review_validation":
+      return (
+        <div className="flex items-center gap-4 py-1">
+          <motion.div
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 0.5, repeat: 1 }}
+            className="w-10 h-10 bg-warning/20 rounded-2xl flex items-center justify-center border border-warning/30"
+          >
+            <AlertCircle className="w-6 h-6 text-warning" />
+          </motion.div>
+          <div className="flex flex-col flex-1 text-left">
+            <span className="font-bold text-[15px] leading-tight text-warning">
+              Thông tin còn thiếu
+            </span>
+            <span className="text-white/40 text-[12px] line-clamp-1">
+              {String(opts.title)}
+            </span>
+          </div>
+        </div>
+      );
+
     case "favorite_error":
       return (
         <div className="flex items-center gap-4 py-1">
           <motion.div
             animate={{ x: [-4, 4, -4, 4, 0] }}
             transition={{ duration: 0.4 }}
-            className="w-10 h-10 bg-[var(--danger)] opacity-20 rounded-2xl flex items-center justify-center"
+            className="w-10 h-10 bg-danger/20 rounded-2xl flex items-center justify-center border border-danger/30"
           >
-            <AlertCircle className="w-6 h-6 text-[var(--danger)]" />
+            <AlertCircle className="w-6 h-6 text-danger" />
           </motion.div>
           <div className="flex flex-col flex-1 text-left">
-            <span className="font-bold text-[15px] leading-tight" style={{ color: 'var(--danger)' }}>
-              {opts.title}
+            <span className="font-bold text-[15px] leading-tight text-danger">
+              Lỗi hệ thống
             </span>
             <span className="text-white/40 text-[12px] line-clamp-1">
-              {String(opts.description)}
+              {String(opts.title)}
             </span>
           </div>
         </div>

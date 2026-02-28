@@ -87,10 +87,10 @@ export function useReview(orderId: number): UseReviewResult {
   const handleReviewRestaurant = useCallback(
     (rating: number, comment: string) => {
       if (rating === 0 || !comment.trim()) {
-        sileo.error({
-          title: "Vui lòng chọn số sao và viết nhận xét!",
-          description: "Điền đầy đủ thông tin trước khi gửi đánh giá nhé!",
-        });
+        sileo.warning({
+          title: "Vui lòng chọn sao & nhận xét",
+          actionType: "review_validation"
+        } as any);
         return;
       }
 
@@ -114,10 +114,10 @@ export function useReview(orderId: number): UseReviewResult {
   const handleReviewDriver = useCallback(
     (rating: number, comment: string) => {
       if (rating === 0 || !comment.trim()) {
-        sileo.error({
-          title: "Vui lòng chọn số sao và viết nhận xét!",
-          description: "Điền đầy đủ thông tin trước khi gửi đánh giá nhé!",
-        });
+        sileo.warning({
+          title: "Vui lòng chọn sao & nhận xét",
+          actionType: "review_validation"
+        } as any);
         return;
       }
 
