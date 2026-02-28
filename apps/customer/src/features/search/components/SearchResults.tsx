@@ -14,6 +14,7 @@ import MagazineLayout7 from './layouts/MagazineLayout7';
 import MagazineLayout8 from './layouts/MagazineLayout8';
 import MagazineLayout9 from './layouts/MagazineLayout9';
 import MagazineLayout10 from './layouts/MagazineLayout10';
+import MagazineLayout11 from './layouts/MagazineLayout11';
 
 interface Props {
   results: RestaurantWithMenu[];
@@ -124,6 +125,7 @@ export default function SearchResults({
       case 8: return <MagazineLayout8 key={restaurant.id} {...props} />;
       case 9: return <MagazineLayout9 key={restaurant.id} {...props} />;
       case 10: return <MagazineLayout10 key={restaurant.id} {...props} />;
+      case 11: return <MagazineLayout11 key={restaurant.id} {...props} />;
       default: return <MagazineLayout1 key={restaurant.id} {...props} />;
     }
   }, []);
@@ -132,22 +134,28 @@ export default function SearchResults({
 
   // Empty state component
   const EmptyState = (
-    <div className="bg-white rounded-2xl shadow p-6 md:p-12">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-        <div className="col-span-1 md:col-span-2">
-          <h2 className="text-3xl md:text-5xl font-black" style={{ fontFamily: 'serif' }}>
-            Không tìm thấy kết quả
+    <div className="bg-[#fafafa] rounded-[40px] border border-gray-100 p-8 md:p-20 overflow-hidden relative group">
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-amber-500/5 to-transparent pointer-events-none" />
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-1 bg-black" />
+            <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Search Advisory</span>
+          </div>
+          <h2 className="text-5xl md:text-8xl font-anton font-bold text-black uppercase tracking-tighter leading-[0.85] mb-8">
+            NO RESULTS<br />FOUND
           </h2>
-          <p className="mt-4 text-gray-600">
-            Thử từ khóa khác hoặc khám phá các gợi ý bên dưới.
+          <p className="text-xl md:text-2xl text-gray-400 font-medium italic leading-relaxed">
+            We couldn&apos;t match your inquiry. <br />
+            Explore our curated suggestions or refine your terms.
           </p>
         </div>
-        <div className="bg-amber-50 p-6 rounded-xl">
-          <div className="text-xs uppercase tracking-widest text-amber-600 font-bold mb-3">
-            Gợi ý
+        <div className="bg-black text-white p-10 rounded-[40px] shadow-2xl transform group-hover:scale-[1.02] transition-transform">
+          <div className="text-[10px] font-anton font-bold text-amber-400 uppercase tracking-[0.4em] mb-6">
+            Pro Tip
           </div>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            Khám phá các món ăn thịnh hành và đặc sản theo mùa.
+          <p className="text-lg font-medium leading-relaxed italic text-gray-300">
+            Consider exploring trending cuisines or seasonal specialties for an alternative dining experience.
           </p>
         </div>
       </div>
@@ -159,7 +167,7 @@ export default function SearchResults({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.4, delay: 1.0 }}
+      transition={{ duration: 0.4, delay: 0.2 }}
       className="min-h-screen bg-white pt-28 md:pt-32 pb-20 px-4 md:px-6 magazine-scroll"
     >
       <div className="max-w-7xl mx-auto">
@@ -168,19 +176,23 @@ export default function SearchResults({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mb-8 md:mb-12"
+          className="mb-12 md:mb-20"
         >
-          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-3">
-            Kết quả tìm kiếm
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-1 bg-black" />
+            <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Dispatch Selection</span>
+          </div>
+          <h1 className="text-5xl md:text-8xl font-anton font-bold text-black mb-4 uppercase tracking-tighter leading-[0.85]">
+            CURATED<br />DISCOVERIES
           </h1>
           {!isLoading ? (
-            <p className="text-base md:text-xl text-gray-600">
-              Tìm thấy <span className="font-bold text-amber-600">{displayCount}</span> quán
-              phù hợp với <span className="font-bold text-gray-900">&quot;{searchQuery}&quot;</span>
+            <p className="text-xl md:text-2xl text-gray-500 font-medium italic">
+              Found <span className="font-anton text-black not-italic px-2 bg-amber-400 rounded-lg">{displayCount}</span> venues
+              matching <span className="text-black font-bold">&quot;{searchQuery}&quot;</span>
             </p>
           ) : (
-            <p className="text-base md:text-xl text-gray-600">
-              Đang tìm kiếm &quot;<span className="font-bold text-gray-900">{searchQuery}</span>&quot;...
+            <p className="text-xl md:text-2xl text-gray-500 font-medium italic">
+              Locating matches for <span className="text-black font-bold animate-pulse">&quot;{searchQuery}&quot;</span>...
             </p>
           )}
         </motion.div>

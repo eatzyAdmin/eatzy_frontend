@@ -14,6 +14,7 @@ import MagazineLayout7 from '@/features/search/components/layouts/MagazineLayout
 import MagazineLayout8 from '@/features/search/components/layouts/MagazineLayout8';
 import MagazineLayout9 from '@/features/search/components/layouts/MagazineLayout9';
 import MagazineLayout10 from '@/features/search/components/layouts/MagazineLayout10';
+import MagazineLayout11 from '@/features/search/components/layouts/MagazineLayout11';
 
 interface Props {
   results: RestaurantWithMenu[];
@@ -70,7 +71,7 @@ export default function RecommendedSection({
         if (now - lastTime > 1000) {
           accumulatedDelta = 0;
         }
-        
+
         accumulatedDelta += Math.abs(e.deltaY);
         lastTime = now;
 
@@ -167,6 +168,8 @@ export default function RecommendedSection({
         return <MagazineLayout9 key={restaurant.id} {...props} />;
       case 10:
         return <MagazineLayout10 key={restaurant.id} {...props} />;
+      case 11:
+        return <MagazineLayout11 key={restaurant.id} {...props} />;
       default:
         return <MagazineLayout1 key={restaurant.id} {...props} />;
     }
@@ -187,13 +190,17 @@ export default function RecommendedSection({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-8 md:mb-12"
+          className="mb-12 md:mb-20"
         >
-          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-2 md:mb-3">
-            Dining Recommendations
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-1 bg-black" />
+            <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Curated For You</span>
+          </div>
+          <h1 className="text-5xl md:text-8xl font-anton font-bold text-black mb-4 uppercase tracking-tighter leading-[0.85]">
+            DINING<br />RECOMMENDATIONS
           </h1>
-          <p className="text-lg md:text-xl text-gray-600">
-            Curated selections <span className="font-bold text-amber-600">near you</span>
+          <p className="text-xl md:text-2xl text-gray-500 font-medium italic">
+            Elite selections <span className="font-anton text-black not-italic px-2 bg-amber-400 rounded-lg">near your location</span>
           </p>
         </motion.div>
 

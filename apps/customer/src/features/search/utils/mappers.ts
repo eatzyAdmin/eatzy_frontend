@@ -52,7 +52,7 @@ export function mapMagazineToRestaurantWithMenu(
   }
 
   const restaurant: Restaurant = {
-    id: String(magazine.id),
+    id: magazine.id,
     name: magazine.name,
     slug: magazine.slug,
     categories: [],
@@ -68,11 +68,16 @@ export function mapMagazineToRestaurantWithMenu(
       (magazine.fiveStarCount || 0),
   };
 
+  // Stable pseudo-random layout selection (1-14) based on restaurant name/id
+  // This ensures the layout is "random" but stays the same for a specific restaurant
+  const nameHash = magazine.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const stableLayoutType = ((nameHash + (layoutIndex * 7)) % 11) + 1;
+
   return {
     restaurant,
     dishes,
     menuCategories,
-    layoutType: (layoutIndex % 10) + 1,
+    layoutType: stableLayoutType,
     distance: magazine.distance,
     finalScore: magazine.finalScore,
   };

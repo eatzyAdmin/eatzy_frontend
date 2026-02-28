@@ -5,6 +5,8 @@ import { useHoverHighlight, HoverHighlightOverlay, useTapRipple, TapRippleOverla
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 
+import { Star } from '@repo/ui/icons';
+
 export default function MagazineLayout9({ restaurant, dishes, menuCategories }: { restaurant: Restaurant; dishes: Dish[]; menuCategories: MenuCategory[]; }) {
   const lead = dishes[0];
   const others = dishes.slice(1, 4);
@@ -17,10 +19,11 @@ export default function MagazineLayout9({ restaurant, dishes, menuCategories }: 
 
   return (
     <motion.section
-      className="relative mb-16 overflow-hidden flex flex-col md:block h-auto md:h-[700px]"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      className="relative mb-16 md:mb-24 overflow-hidden rounded-[40px] shadow-2xl bg-white border border-gray-100 h-auto md:h-[800px]"
+      initial={{ opacity: 0, x: 30 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
     >
       <div
         ref={setRefs}
@@ -32,59 +35,79 @@ export default function MagazineLayout9({ restaurant, dishes, menuCategories }: 
         <TapRippleOverlay ripple={ripple} />
       </div>
 
-      {/* Image Section */}
-      <div className="relative md:absolute inset-0 w-full h-[250px] md:h-full rounded-2xl md:rounded-none overflow-hidden" style={{ clipPath: 'none' }}>
-        <div className="absolute inset-0 md:clip-path-[polygon(22%_0,100%_0,100%_100%,0_100%)] w-full h-full">
+      {/* Image Section - Diagonal Split */}
+      <div className="relative md:absolute inset-0 w-full h-[300px] md:h-full overflow-hidden">
+        <div className="absolute inset-0 md:clip-path-[polygon(30%_0,100%_0,100%_100%,0_100%)] w-full h-full bg-gray-100">
           <ImageWithFallback
             src={lead?.imageUrl || ''}
             alt={lead?.name || ''}
             fill
-            className="object-cover"
+            placeholderMode="horizontal"
+            className="object-cover transition-transform duration-[3s] group-hover:scale-110"
           />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent hidden md:block" />
         </div>
       </div>
 
-      {/* Green decorative strip - Desktop only */}
+      {/* Luxury Decorative Block - Emerald/Gold */}
       <div
         className="hidden md:block absolute left-0 top-0 bottom-0"
-        style={{ width: '140px', backgroundColor: '#B4BE3F', clipPath: 'polygon(0 0, 100% 0, 70% 100%, 0 100%)' }}
-      />
-
-      {/* Content Section */}
-      <div
-        onMouseEnter={(e) => moveHighlight(e, { borderRadius: 12, backgroundColor: '#ffffff', opacity: 1, scaleEnabled: true, scale: 1.12 })}
-        className="relative md:absolute md:top-8 md:bottom-8 md:left-[140px] bg-white shadow-none md:shadow-xl p-6 md:p-8 cursor-pointer z-10 w-full md:w-[42%]"
-        style={{
-          clipPath: 'none'
-        }}
+        style={{ width: '180px', background: 'linear-gradient(135deg, #064e3b 0%, #065f46 100%)', clipPath: 'polygon(0 0, 100% 0, 75% 100%, 0 100%)' }}
       >
-        {/* Desktop clip-path applied via inner div or conditional style to avoid messing up mobile layout? 
-            Actually, we can just apply the style conditionally using a class or just inline style with media query? 
-            Inline styles don't support media queries. 
-            We can use a separate div for desktop styling or just accept that on mobile it's a block.
-            Let's keep simpler structure.
-        */}
-        <div className="hidden md:block absolute inset-0 bg-white" style={{ clipPath: 'polygon(0 0, 100% 0, 86% 100%, 0 100%)', borderRadius: '12px', zIndex: -1 }}></div>
-
-        <h2 className="text-[22px] font-bold text-[#222] leading-tight relative">{restaurant.name}</h2>
-        <div className="mt-2 flex items-center gap-3 text-[12px] text-[#555] relative">
-          {restaurant.address && <span>{restaurant.address}</span>}
-          {typeof restaurant.rating === 'number' && (
-            <span className="text-amber-600 font-semibold">{restaurant.rating.toFixed(1)}★</span>
-          )}
+        <div className="flex flex-col h-full items-center justify-center p-8">
+          <div className="text-[10px] font-anton font-bold text-amber-500 uppercase tracking-[0.5em] rotate-180 mb-12" style={{ writingMode: 'vertical-rl' }}>
+            Premium Tasting Series
+          </div>
+          <div className="w-px h-24 bg-amber-500/30 mb-8" />
+          <div className="bg-amber-500 text-black font-anton text-2xl p-4 rounded-2xl shadow-2xl">
+            {restaurant.rating}
+          </div>
         </div>
+      </div>
+
+      {/* Content Section - High End Floating Card */}
+      <div
+        className="relative md:absolute md:top-12 md:bottom-12 md:left-[180px] bg-white/95 backdrop-blur-xl md:shadow-2xl p-8 md:p-14 z-10 w-full md:w-[450px] lg:w-[45%] md:rounded-[40px] border-y md:border border-gray-100 flex flex-col"
+      >
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-1 bg-black" />
+            <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.3em]">Restaurant Feature</span>
+          </div>
+          <h2 className="text-4xl md:text-6xl font-anton font-bold text-black leading-none uppercase tracking-tighter mb-4">{restaurant.name}</h2>
+          <div className="flex items-center gap-6 text-sm font-medium text-gray-500 italic pb-4 border-b border-gray-100">
+            {restaurant.address && <span className="flex-1 line-clamp-1">{restaurant.address}</span>}
+          </div>
+        </div>
+
         {restaurant.description && (
-          <p className="mt-3 text-[13px] text-[#4A4A4A] leading-relaxed relative">{restaurant.description}</p>
+          <p className="mb-8 text-lg text-gray-400 font-medium leading-relaxed italic line-clamp-2">
+            &quot;{restaurant.description}&quot;
+          </p>
         )}
-        <div className="mt-6 space-y-4 relative">
-          {others.map((d) => (
-            <div key={d.id} onMouseEnter={(e) => moveHighlight(e, { borderRadius: 8, backgroundColor: '#f7f7f7', opacity: 1, scaleEnabled: true, scale: 1.12 })} className="flex items-start justify-between relative z-10 cursor-pointer">
-              <div>
-                <h3 className="text-[16px] font-semibold text-[#222]">{d.name}</h3>
-                <p className="text-[13px] text-[#666] leading-relaxed line-clamp-2">{d.description}</p>
-                <div className="text-[12px] text-[#888] mt-1">{catMap[d.menuCategoryId]}</div>
+
+        <div className="space-y-10 flex-1">
+          {others.map((d, idx) => (
+            <div key={d.id} onMouseEnter={(e) => moveHighlight(e, { borderRadius: 24, backgroundColor: 'rgba(0,0,0,0.06)', opacity: 1, scaleEnabled: true, scale: 1.05 })} className="flex items-start gap-4 md:gap-6 relative z-10 cursor-pointer group/item">
+              <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0 overflow-hidden rounded-[24px] shadow-sm border border-gray-100 bg-gray-50 mt-1">
+                <ImageWithFallback
+                  src={d.imageUrl}
+                  alt={d.name}
+                  fill
+                  placeholderMode="horizontal"
+                  className="object-cover transition-transform duration-700 group-hover/item:scale-110"
+                />
               </div>
-              <div className="text-amber-600 font-bold">{(d.price / 1000).toFixed(0)}K</div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-xl md:text-2xl font-anton font-bold text-black uppercase tracking-tight group-hover/item:text-amber-600 transition-colors leading-none">{d.name}</h3>
+                </div>
+                <p className="text-sm text-gray-500 font-medium leading-relaxed line-clamp-2 md:max-w-[280px]">
+                  {d.description}
+                </p>
+                <div className="text-[10px] text-gray-400 font-anton uppercase tracking-widest mt-2">{catMap[d.menuCategoryId] || 'Main Plate'}</div>
+              </div>
+              <div className="text-2xl font-anton font-bold text-black ml-4">{(d.price / 1000).toFixed(0)}K</div>
             </div>
           ))}
         </div>
