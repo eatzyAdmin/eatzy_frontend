@@ -53,9 +53,10 @@ export default function OrderReviewTab({
   }
 
   return (
-    <div className="pb-12 w-full max-w-7xl mx-auto">
+    <div className="pb-12 w-full max-w-7xl mx-auto px-4 relative overflow-hidden">
+
       {/* Desktop Layout - 2 Columns */}
-      <div className="hidden md:flex flex-row items-stretch justify-center gap-8 md:gap-12">
+      <div className="hidden md:flex flex-row items-stretch justify-center gap-8 md:gap-12 relative z-10">
         <div className="w-full max-w-[440px] shrink-0">
           <RestaurantReviewCard
             restaurant={restaurant}

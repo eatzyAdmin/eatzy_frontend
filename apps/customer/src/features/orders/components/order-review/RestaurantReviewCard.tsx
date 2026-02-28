@@ -36,93 +36,130 @@ export function RestaurantReviewCard({
         exit={{ opacity: 0, y: -20 }}
         className="h-full"
       >
-        <div className="bg-white rounded-[40px] shadow-[0_4px_25px_rgba(0,0,0,0.04)] border border-gray-100/50 flex flex-col h-full overflow-hidden" style={{ transform: 'translateZ(0)' }}>
-          <div className="relative h-40 md:h-44 shrink-0">
+        <div className={`${isReviewed ? "bg-white/95" : "bg-white/40"} backdrop-blur-xl rounded-[44px] shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-full overflow-hidden relative group`} style={{ transform: 'translateZ(0)' }}>
+          {/* subtle pattern overlay */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none grayscale mix-blend-multiply">
+            <ImageWithFallback src="" alt="Texture" placeholderMode="horizontal" fill className="object-cover" />
+          </div>
+
+          <div className="relative h-44 md:h-52 shrink-0 overflow-hidden">
             <ImageWithFallback
               src={restaurant.imageUrl || ""}
               alt={restaurant.name}
               fill
               placeholderMode="horizontal"
-              className="object-cover"
+              className="object-cover scale-110 group-hover:scale-100 transition-transform duration-[2s]"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
-            <div className="relative z-10 h-full p-8 flex flex-col justify-end">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-lg">
-                  <Store className="w-4 h-4" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
+
+            <div className="relative z-10 h-full p-8 flex flex-col justify-between">
+              <div className="flex justify-between items-start">
+                <div className="px-3 py-1 bg-lime-500/90 backdrop-blur-md rounded-full flex items-center gap-2">
+                  <Store className="w-3 h-3 text-black" />
+                  <span className="text-[9px] font-anton text-black uppercase tracking-widest">Restaurant</span>
                 </div>
-                <span className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em] drop-shadow-sm">Đánh giá cửa hàng</span>
+                <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white/50">
+                  <Quote className="w-5 h-5" />
+                </div>
               </div>
-              <h3 className="font-anton text-2xl text-white uppercase leading-tight drop-shadow-xl">{restaurant.name}</h3>
+
+              <div>
+                <span className="text-[10px] font-anton text-lime-400 uppercase tracking-[0.4em] mb-1 block">Series / Review</span>
+                <h3 className="font-anton text-4xl text-white uppercase leading-none truncate">{restaurant.name}</h3>
+              </div>
             </div>
           </div>
 
-          <div className="p-8 flex-1 flex flex-col">
+          <div className="p-8 flex-1 flex flex-col relative z-20">
             {!isReviewed ? (
               <>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.15em] mb-6 text-center">Bạn thấy món ăn thế nào?</p>
-                <div className="flex items-center gap-3 mb-8 justify-center">
+                <div className="mb-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="w-8 h-px bg-black" />
+                    <span className="text-[10px] font-anton text-gray-400 uppercase tracking-[0.3em]">Crating Flavor</span>
+                  </div>
+                  <h4 className="font-anton text-2xl text-black uppercase leading-tight mb-2">How was the meal?</h4>
+                  <p className="text-[11px] text-gray-400 font-medium italic">Your feedback helps us refine the culinary series.</p>
+                </div>
+
+                <div className="flex items-center gap-2 mb-10 p-4 bg-black/5 rounded-[32px] justify-center relative">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <motion.button
                       key={star}
-                      whileHover={{ scale: 1.2, rotate: 5 }}
+                      whileHover={{ scale: 1.15, rotate: 5 }}
                       whileTap={{ scale: 0.9 }}
-                      className="focus:outline-none"
+                      className="focus:outline-none p-2 relative z-10"
                       onMouseEnter={() => setHoveredRating(star)}
                       onMouseLeave={() => setHoveredRating(0)}
                       onClick={() => setRating(star)}
                     >
                       <Star
-                        className={`w-11 h-11 transition-all duration-300 ${star <= (hoveredRating || rating)
-                          ? "fill-amber-400 text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.5)]"
-                          : "text-gray-100"
+                        className={`w-10 h-10 transition-all duration-500 ease-out ${star <= (hoveredRating || rating)
+                          ? "fill-lime-500 text-lime-500 drop-shadow-[0_0_15px_rgba(163,230,53,0.6)]"
+                          : "text-white fill-white/20"
                           }`}
-                        strokeWidth={1.5}
+                        strokeWidth={2}
                       />
                     </motion.button>
                   ))}
                 </div>
 
-                <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Chia sẻ cảm nhận của bạn về món ăn..."
-                  className="w-full bg-gray-50/50 border-2 border-transparent rounded-[32px] p-6 text-sm text-[#1A1A1A] placeholder:text-gray-400 focus:outline-none focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 focus:bg-white transition-all resize-none mb-10 min-h-[120px] shadow-inner"
-                />
+                <div className="relative mb-8">
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Describe your dining experience..."
+                    className="w-full bg-white/60 backdrop-blur-md border border-white/50 rounded-[32px] p-6 text-sm text-black placeholder:text-gray-300 focus:outline-none focus:border-lime-500/50 focus:bg-white/90 transition-all resize-none min-h-[140px] shadow-[0_10px_30px_rgba(0,0,0,0.02)]"
+                  />
+                  <div className="absolute top-4 right-6 text-[10px] font-anton text-gray-200 uppercase">Text / Feed</div>
+                </div>
 
                 <motion.button
-                  whileHover={{ scale: 1.02, y: -4 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => onSubmit(rating, comment)}
                   disabled={isSubmitting || rating === 0}
-                  className="w-full h-16 rounded-[24px] bg-[var(--primary)] text-white text-xl uppercase font-anton tracking-wider shadow-xl shadow-[var(--primary)]/20 flex items-center justify-center gap-3 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed group mt-auto"
+                  className="w-full h-16 rounded-[24px] bg-lime-500 text-black text-base uppercase font-anton font-bold tracking-[0.2em] shadow-2xl shadow-lime-500/20 flex items-center justify-center gap-3 disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed transition-all duration-500"
                 >
-                  <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                  {isSubmitting ? "ĐANG GỬI..." : "GỬI ĐÁNH GIÁ"}
+                  <Send className="w-5 h-5" />
+                  {isSubmitting ? "SENDING..." : "SUBMIT REVIEW"}
                 </motion.button>
               </>
             ) : (
-              <div className="flex flex-col h-full bg-gray-50/40 rounded-[36px] p-8 border border-gray-100/50 relative">
-                <div className="absolute -top-3 left-8 bg-black text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl">
-                  <ShieldCheck className="w-4 h-4 text-lime-400" />
-                  Đã đánh giá
+              <div className="flex flex-col h-full relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-lime-500/10 rounded-full -mr-16 -mt-16 blur-3xl opacity-50" />
+
+                <div className="flex items-center gap-3 mb-10">
+                  <div className="w-12 h-12 rounded-2xl bg-black flex items-center justify-center text-lime-500 shadow-xl">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-anton text-gray-400 uppercase tracking-[0.3em] block">Status</span>
+                    <span className="text-xs font-anton text-black uppercase tracking-widest">VERIFIED REVIEW</span>
+                  </div>
                 </div>
 
-                <div className="flex justify-between items-end mb-8 pt-4">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Mức độ hài lòng</span>
-                    <div className="flex items-center gap-3">
-                      <span className="font-anton text-[48px] text-[#1A1A1A] leading-none">{rating}.0</span>
-                      <Star className="w-7 h-7 fill-amber-400 text-amber-400 shadow-amber-400/20" />
+                <div className="mb-10 text-center md:text-left">
+                  <span className="text-[10px] font-anton text-gray-400 uppercase tracking-[0.4em] mb-4 block">Satisfaction Level</span>
+                  <div className="flex items-center justify-center md:justify-start gap-4">
+                    <span className="font-anton text-[80px] text-black leading-none tracking-tighter shadow-sm">{rating}.0</span>
+                    <div className="flex flex-col">
+                      <div className="flex gap-1.5 mb-1.5">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <Star key={i} className={`w-4 h-4 ${i <= rating ? "fill-lime-500 text-lime-500" : "text-gray-200"}`} />
+                        ))}
+                      </div>
+                      <span className="text-[10px] font-anton text-lime-600 uppercase tracking-widest">Gourmet Series Score</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="relative flex-1 bg-white rounded-[28px] p-6 shadow-sm border border-gray-100 italic min-h-[100px]">
-                  <Quote className="w-10 h-10 text-gray-100 absolute -top-4 -left-2 fill-gray-100/30" />
-                  <p className="text-[#1A1A1A] text-sm leading-relaxed z-10 relative">
-                    &quot;{comment || "Cảm ơn vì món ăn ngon!"}&quot;
+                <div className="relative flex-1 flex items-center justify-center text-center px-4">
+                  <Quote className="w-16 h-16 text-black/5 absolute top-0 left-0 -translate-x-4 -translate-y-4" />
+                  <p className="text-black text-lg font-medium leading-relaxed relative z-10 font-serif italic max-w-sm">
+                    &quot;{comment || "An exceptional dining series. Highly recommended."}&quot;
                   </p>
+                  <Quote className="w-16 h-16 text-black/5 absolute bottom-0 right-0 translate-x-4 translate-y-4 rotate-180" />
                 </div>
               </div>
             )}
