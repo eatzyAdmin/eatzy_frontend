@@ -11,7 +11,7 @@ interface MobileRestaurantHeroProps {
   numericRestaurantId: number | null;
   favorited: boolean;
   isMutating: boolean;
-  onToggleFavorite: (id: number) => void;
+  onToggleFavorite: (id: number, name: string) => void;
 }
 
 export const MobileRestaurantHero: React.FC<MobileRestaurantHeroProps> = ({
@@ -40,7 +40,7 @@ export const MobileRestaurantHero: React.FC<MobileRestaurantHeroProps> = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            if (numericRestaurantId) onToggleFavorite(numericRestaurantId);
+            if (numericRestaurantId) onToggleFavorite(numericRestaurantId, restaurantName);
           }}
           disabled={isMutating}
           className={`absolute top-4 right-4 z-10 backdrop-blur-xl border-2 px-4 py-2 rounded-[20px] shadow-2xl flex items-center gap-2 transition-all active:scale-95 ${favorited

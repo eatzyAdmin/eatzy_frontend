@@ -37,45 +37,49 @@ export function useFavorites() {
 
   // Mutation to add favorite
   const addMutation = useMutation({
-    mutationFn: (restaurantId: number) =>
+    mutationFn: (vars: { id: number; name: string }) =>
       favoriteApi.addFavorite({
-        restaurant: { id: restaurantId },
+        restaurant: { id: vars.id },
       }),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["favorites", "my"] });
       sileo.success({
-        title: "Đã thêm vào yêu thích",
-        description: "Dữ liệu đã cập nhật thành công.",
-      });
+        title: "Đã thêm vào danh sách yêu thích",
+        description: variables.name,
+        actionType: "favorite_add"
+      } as any);
     },
     onError: (error) => {
       sileo.error({
-        title: "Không thể thêm vào yêu thích",
-        description: `${error.message}`
-      });
+        title: "Lỗi",
+        description: error.message,
+        actionType: "favorite_error"
+      } as any);
     },
   });
 
   // Mutation to remove favorite
   const removeMutation = useMutation({
-    mutationFn: (favoriteId: number) => favoriteApi.removeFavorite(favoriteId),
-    onSuccess: () => {
+    mutationFn: (vars: { id: number; name: string }) => favoriteApi.removeFavorite(vars.id),
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["favorites", "my"] });
       sileo.success({
-        title: "Đã xóa khỏi yêu thích",
-        description: "Dữ liệu đã cập nhật thành công.",
-      });
+        title: "Đã xóa khỏi danh sách yêu thích",
+        description: variables.name,
+        actionType: "favorite_remove"
+      } as any);
     },
     onError: (error) => {
       sileo.error({
-        title: "Không thể xóa khỏi yêu thích",
-        description: `${error.message}`
-      });
+        title: "Lỗi",
+        description: error.message,
+        actionType: "favorite_error"
+      } as any);
     },
   });
 
   const toggleFavorite = useCallback(
-    async (restaurantId: number) => {
+    async (restaurantId: number, restaurantName: string = "Nhà hàng") => {
       if (!isLoggedIn) {
         sileo.error({
           title: "Lỗi",
@@ -87,9 +91,9 @@ export function useFavorites() {
       const existingFavoriteId = getFavoriteId(restaurantId);
 
       if (existingFavoriteId) {
-        await removeMutation.mutateAsync(existingFavoriteId);
+        await removeMutation.mutateAsync({ id: existingFavoriteId, name: restaurantName });
       } else {
-        await addMutation.mutateAsync(restaurantId);
+        await addMutation.mutateAsync({ id: restaurantId, name: restaurantName });
       }
     },
     [isLoggedIn, getFavoriteId, removeMutation, addMutation]
@@ -99,8 +103,8 @@ export function useFavorites() {
     (restaurantId: number) => {
       const favoriteId = getFavoriteId(restaurantId);
       return (
-        (addMutation.isPending && addMutation.variables === restaurantId) ||
-        (removeMutation.isPending && removeMutation.variables === favoriteId)
+        (addMutation.isPending && addMutation.variables?.id === restaurantId) ||
+        (removeMutation.isPending && removeMutation.variables?.id === favoriteId)
       );
     },
     [addMutation.isPending, addMutation.variables, removeMutation.isPending, removeMutation.variables, getFavoriteId]

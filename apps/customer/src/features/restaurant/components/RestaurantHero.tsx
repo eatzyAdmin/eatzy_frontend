@@ -11,7 +11,7 @@ interface RestaurantHeroProps {
   coverImageUrl?: string;
   favorited: boolean;
   isMutating: boolean;
-  onToggleFavorite: (id: number) => void;
+  onToggleFavorite: (id: number, name: string) => void;
 }
 
 export const RestaurantHero: React.FC<RestaurantHeroProps> = ({
@@ -43,7 +43,7 @@ export const RestaurantHero: React.FC<RestaurantHeroProps> = ({
       <button
         onClick={(e) => {
           e.stopPropagation();
-          onToggleFavorite(numericRestaurantId);
+          onToggleFavorite(numericRestaurantId, restaurant.name);
         }}
         disabled={isMutating}
         className={`absolute top-6 right-8 z-20 px-6 py-3 rounded-[24px] backdrop-blur-xl border-2 shadow-2xl flex items-center gap-3 transition-all active:scale-95 group/save ${favorited
