@@ -32,32 +32,32 @@ const FloatingLabelInput = forwardRef<HTMLInputElement, FloatingLabelInputProps>
     };
 
     return (
-      <div className="relative w-full">
+      <div className="relative w-full group">
         <div className="relative">
           <input
             ref={inputRef}
             type={inputType}
             value={value}
-            className={`w-full pt-6 pb-2 px-0 bg-transparent border-0 border-b-2 text-gray-900 ${error
-              ? 'border-[var(--danger)]'
+            className={`w-full pt-6 pb-2 px-0 bg-transparent border-0 border-b-2 text-black font-semibold placeholder:opacity-0 ${error
+              ? 'border-red-500'
               : isActive
-                ? 'border-[var(--primary)]'
-                : 'border-gray-300'
-              } focus:outline-none focus:ring-0 transition-all duration-300 ${className}`}
+                ? 'border-lime-500'
+                : 'border-gray-200 group-hover:border-black'
+              } focus:outline-none focus:ring-0 transition-all duration-500 ${className}`}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             onChange={handleChange}
             {...props}
           />
           <label
-            className={`absolute left-0 transition-all duration-300 ease-out pointer-events-none ${isActive
-              ? 'top-0 text-[10px] font-bold uppercase tracking-wider'
-              : 'top-1/2 -translate-y-1/2 text-sm font-medium'
+            className={`absolute left-0 transition-all duration-500 ease-[0.16,1,0.3,1] pointer-events-none ${isActive
+              ? 'top-0 text-[10px] font-anton font-bold uppercase tracking-[0.2em]'
+              : 'top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400'
               } ${error
-                ? 'text-[var(--danger)]'
+                ? 'text-red-500'
                 : isActive
-                  ? 'text-[var(--primary)]'
-                  : 'text-gray-400'
+                  ? 'text-lime-600'
+                  : ''
               }`}
           >
             {label}
@@ -66,15 +66,15 @@ const FloatingLabelInput = forwardRef<HTMLInputElement, FloatingLabelInputProps>
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-[var(--primary)] transition-colors duration-200"
+              className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-gray-300 hover:text-black transition-colors duration-300"
               tabIndex={-1}
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           )}
         </div>
         {error && (
-          <p className="mt-1 text-xs text-[var(--danger)] animate-fade-in-up">
+          <p className="mt-1 text-[10px] font-anton uppercase tracking-widest text-red-500 animate-in fade-in slide-in-from-top-1 duration-300">
             {error}
           </p>
         )}

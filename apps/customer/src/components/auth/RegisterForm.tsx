@@ -103,30 +103,30 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-emerald-50 via-white to-lime-50 flex flex-col">
+    <div className="w-full h-full flex flex-col pt-4">
       {/* Header with back button */}
       {currentStep !== "success" && (
-        <div className="w-full px-6 py-6">
+        <div className="w-full pb-4">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-gray-600 hover:text-[var(--primary)] transition-colors duration-200 group"
+            className="flex items-center gap-2 text-gray-400 hover:text-black transition-colors duration-200 group uppercase font-anton text-[10px] tracking-widest"
           >
-            <ArrowLeft size={20} className="transition-transform group-hover:-translate-x-1 duration-200" />
-            <span className="font-medium">Quay lại</span>
+            <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1 duration-200" />
+            <span>Quay lại</span>
           </button>
         </div>
       )}
 
       {/* Progress Bar */}
       {currentStep !== "success" && (
-        <div className="px-6 py-4">
+        <div className="py-2">
           <ProgressBar currentStep={getStepNumber()} totalSteps={2} steps={["Xác thực Email", "Thông tin cá nhân"]} />
         </div>
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-6 py-8">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center py-4">
+        <div className="w-full">
           <AnimatePresence mode="wait">
             {/* Step 1: Email Input */}
             {currentStep === "email" && (
@@ -137,22 +137,21 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="text-center mb-8">
+                <div className="text-center mb-10">
                   <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                    className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] rounded-2xl flex items-center justify-center"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="w-20 h-20 mx-auto mb-6 bg-lime-500 rounded-[32px] flex items-center justify-center shadow-[0_20px_40px_rgba(163,230,53,0.2)]"
                   >
-                    <Mail size={32} className="text-white" />
+                    <Mail size={32} className="text-black" />
                   </motion.div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Đăng ký tài khoản</h2>
-                  <p className="text-gray-600">Nhập email của bạn để bắt đầu</p>
+                  <h2 className="text-4xl font-anton text-black uppercase tracking-tight mb-2">Registration</h2>
+                  <p className="text-gray-400 font-medium italic">Enter your professional email to begin.</p>
                 </div>
 
-                <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="space-y-6">
+                <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="space-y-8">
                   <FloatingLabelInput
-                    label="Email"
+                    label="Business Email"
                     type="email"
                     value={emailForm.watch("email")}
                     error={emailForm.formState.errors.email?.message}
@@ -162,15 +161,15 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-14 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white font-semibold rounded-full hover:shadow-lg active:scale-[0.98] transition-all duration-200 disabled:opacity-50"
+                    className="w-full h-16 bg-black text-white font-anton text-base font-bold rounded-2xl hover:bg-gray-800 active:scale-[0.98] transition-all duration-500 disabled:opacity-50 uppercase tracking-[0.2em]"
                   >
                     {isLoading ? (
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center justify-center gap-3">
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span>Đang gửi OTP...</span>
+                        <span>Processing...</span>
                       </div>
                     ) : (
-                      "Tiếp tục"
+                      "Continue"
                     )}
                   </button>
                 </form>
@@ -181,57 +180,55 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
             {currentStep === "otp" && (
               <motion.div
                 key="otp"
-                initial={{ opacity: 0, x: 50 }}
+                initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.5 }}
               >
-                <div className="text-center mb-8">
+                <div className="text-center mb-10">
                   <motion.div
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                    className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] rounded-2xl flex items-center justify-center"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="w-20 h-20 mx-auto mb-6 bg-black rounded-[32px] flex items-center justify-center shadow-2xl"
                   >
-                    <Mail size={32} className="text-white" />
+                    <Mail size={32} className="text-lime-500" />
                   </motion.div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Xác thực Email</h2>
-                  <p className="text-gray-600">
-                    Mã OTP đã được gửi đến <span className="font-semibold text-[var(--primary)]">{email}</span>
+                  <h2 className="text-4xl font-anton text-black uppercase tracking-tight mb-2">Verification</h2>
+                  <p className="text-gray-400 font-medium italic">
+                    Sent to <span className="text-black not-italic font-bold">{email}</span>
                   </p>
                   <button
                     onClick={() => setCurrentStep("email")}
-                    className="mt-2 text-sm text-gray-500 hover:text-[var(--primary)] transition-colors"
+                    className="mt-4 text-[10px] font-anton text-gray-300 hover:text-black uppercase tracking-widest border-b border-transparent hover:border-black transition-all"
                   >
-                    Thay đổi email
+                    Change Email
                   </button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-10">
                   <OTPInput length={6} value={otp} onChange={setOtp} error={otpError} />
 
-                  <div className="text-center text-sm text-gray-600">
-                    Không nhận được mã?{" "}
-                    <button className="text-[var(--primary)] font-semibold hover:underline">Gửi lại</button>
+                  <div className="text-center text-[10px] font-anton text-gray-300 uppercase tracking-widest">
+                    No code?{" "}
+                    <button className="text-black hover:text-lime-600 transition-colors ml-2 font-bold">Resend</button>
                   </div>
 
                   <button
                     onClick={handleOTPVerify}
                     disabled={isLoading || otp.length !== 6}
-                    className="w-full h-14 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white font-semibold rounded-full hover:shadow-lg active:scale-[0.98] transition-all duration-200 disabled:opacity-50"
+                    className="w-full h-16 bg-lime-500 text-black font-anton text-base font-bold rounded-2xl hover:bg-lime-400 active:scale-[0.98] transition-all duration-500 disabled:opacity-50 uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(163,230,53,0.2)]"
                   >
                     {isLoading ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span>Đang xác thực...</span>
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                        <span>Verifying...</span>
                       </div>
                     ) : (
-                      "Xác nhận"
+                      "Confirm Code"
                     )}
                   </button>
+                  <p className="text-center text-[8px] font-anton text-gray-200 uppercase tracking-[0.3em]">Demo code is 123456</p>
                 </div>
-
-                <p className="mt-6 text-center text-xs text-gray-500">Mã OTP test: 123456</p>
               </motion.div>
             )}
 
@@ -239,27 +236,26 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
             {currentStep === "info" && (
               <motion.div
                 key="info"
-                initial={{ opacity: 0, x: 50 }}
+                initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.5 }}
               >
-                <div className="text-center mb-8">
+                <div className="text-center mb-10">
                   <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                    className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] rounded-2xl flex items-center justify-center"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="w-20 h-20 mx-auto mb-6 bg-lime-500 rounded-[32px] flex items-center justify-center shadow-xl"
                   >
-                    <User size={32} className="text-white" />
+                    <User size={32} className="text-black" />
                   </motion.div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Thông tin cá nhân</h2>
-                  <p className="text-gray-600">Hoàn tất thông tin để tạo tài khoản</p>
+                  <h2 className="text-4xl font-anton text-black uppercase tracking-tight mb-2">Profile Details</h2>
+                  <p className="text-gray-400 font-medium italic">Complete your culinary identity.</p>
                 </div>
 
-                <form onSubmit={infoForm.handleSubmit(handleInfoSubmit)} className="space-y-5">
+                <form onSubmit={infoForm.handleSubmit(handleInfoSubmit)} className="space-y-6">
                   <FloatingLabelInput
-                    label="Họ và tên"
+                    label="Full Name"
                     type="text"
                     value={infoForm.watch("fullName")}
                     error={infoForm.formState.errors.fullName?.message}
@@ -267,7 +263,7 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
                   />
 
                   <CalendarDatePicker
-                    label="Ngày sinh"
+                    label="Birth Date"
                     value={infoForm.watch("dateOfBirth")}
                     onChange={(date) => infoForm.setValue("dateOfBirth", date as string, { shouldValidate: true })}
                     error={infoForm.formState.errors.dateOfBirth?.message}
@@ -277,7 +273,7 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
                   />
 
                   <FloatingLabelInput
-                    label="Số điện thoại"
+                    label="Phone Number"
                     type="tel"
                     value={infoForm.watch("phoneNumber")}
                     error={infoForm.formState.errors.phoneNumber?.message}
@@ -285,7 +281,7 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
                   />
 
                   <FloatingLabelInput
-                    label="Mật khẩu"
+                    label="Create Password"
                     type="password"
                     value={infoForm.watch("password")}
                     error={infoForm.formState.errors.password?.message}
@@ -293,7 +289,7 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
                   />
 
                   <FloatingLabelInput
-                    label="Xác nhận mật khẩu"
+                    label="Verify Password"
                     type="password"
                     value={infoForm.watch("confirmPassword")}
                     error={infoForm.formState.errors.confirmPassword?.message}
@@ -303,15 +299,15 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-14 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white font-semibold rounded-full hover:shadow-lg active:scale-[0.98] transition-all duration-200 disabled:opacity-50 mt-6"
+                    className="w-full h-16 bg-black text-white font-anton text-base font-bold rounded-2xl hover:bg-gray-800 active:scale-[0.98] transition-all duration-500 disabled:opacity-50 mt-10 uppercase tracking-[0.2em]"
                   >
                     {isLoading ? (
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center justify-center gap-3">
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span>Đang tạo tài khoản...</span>
+                        <span>Processing...</span>
                       </div>
                     ) : (
-                      "Hoàn tất đăng ký"
+                      "Complete Account"
                     )}
                   </button>
                 </form>
@@ -322,46 +318,33 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
             {currentStep === "success" && (
               <motion.div
                 key="success"
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, type: "spring" }}
-                className="text-center"
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="text-center py-10"
               >
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                  className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] rounded-full flex items-center justify-center"
+                  initial={{ rotate: -45, scale: 0.8 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring" }}
+                  className="w-32 h-32 mx-auto mb-10 bg-lime-500 rounded-[48px] flex items-center justify-center shadow-[0_30px_60px_rgba(163,230,53,0.3)]"
                 >
-                  <CheckCircle size={48} className="text-white" strokeWidth={2.5} />
+                  <CheckCircle size={64} className="text-black" strokeWidth={1.5} />
                 </motion.div>
 
-                <motion.h2
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-4xl font-bold text-gray-900 mb-3"
-                >
-                  Chúc mừng!
-                </motion.h2>
+                <h2 className="text-6xl font-anton text-black uppercase tracking-tighter mb-4 leading-none">WELCOME<br /><span className="text-gray-200">ABOARD</span></h2>
 
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="text-lg text-gray-600 mb-8"
-                >
-                  Tài khoản của bạn đã được tạo thành công
-                </motion.p>
+                <p className="text-gray-400 font-medium italic text-lg mb-12">
+                  Your journey through the world of Eatzy begins now.
+                </p>
 
                 <motion.button
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={onSuccess}
-                  className="px-8 py-4 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white font-semibold rounded-full hover:shadow-lg active:scale-[0.98] transition-all duration-200"
+                  className="px-12 h-16 bg-black text-white font-anton text-base font-bold rounded-2xl hover:bg-gray-800 transition-all uppercase tracking-[0.2em] shadow-2xl"
                 >
-                  Đăng nhập ngay
+                  Enter Gateway
                 </motion.button>
               </motion.div>
             )}

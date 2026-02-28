@@ -17,7 +17,7 @@ export default function OTPInput({ length = 6, value, onChange, error }: OTPInpu
   const handleChange = (index: number, val: string) => {
     // Only allow digits
     const digit = val.replace(/[^0-9]/g, "");
-    
+
     if (digit.length === 0) {
       // Handle delete
       const newValue = value.split("");
@@ -72,9 +72,9 @@ export default function OTPInput({ length = 6, value, onChange, error }: OTPInpu
           return (
             <motion.div
               key={index}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
               <input
                 ref={(el) => {
@@ -89,15 +89,15 @@ export default function OTPInput({ length = 6, value, onChange, error }: OTPInpu
                 onPaste={handlePaste}
                 onFocus={() => setFocusedIndex(index)}
                 onBlur={() => setFocusedIndex(null)}
-                className={`w-12 h-14 md:w-14 md:h-16 text-center text-2xl font-bold rounded-xl border-2 transition-all duration-300 ${
-                  error
-                    ? "border-[var(--danger)] bg-red-50"
-                    : isFocused
-                      ? "border-[var(--primary)] bg-[var(--primary)]/5 scale-105 shadow-lg"
-                      : isFilled
-                        ? "border-[var(--primary)]/50 bg-white"
-                        : "border-gray-300 bg-white hover:border-gray-400"
-                } focus:outline-none`}
+                className={`w-12 h-16 md:w-16 md:h-20 text-center text-4xl font-anton border-0 border-b-4 transition-all duration-500 ${error
+                  ? "border-red-500 text-red-500 bg-red-50/30"
+                  : isFocused
+                    ? "border-lime-500 bg-lime-50/30 scale-105"
+                    : isFilled
+                      ? "border-black bg-white"
+                      : "border-gray-100 bg-transparent hover:border-gray-300 placeholder:text-gray-200"
+                  } focus:outline-none focus:ring-0`}
+                placeholder="0"
               />
             </motion.div>
           );
