@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, AlertTriangle, Check, PiggyBank, Unlock as UnlockIcon, FilePen, FilePlus } from "lucide-react";
 import SwipeToConfirm from "../primitives/SwipeToConfirm";
 import LoadingSpinner from "../feedback/LoadingSpinner";
+import { colors } from "../tokens/colors";
 
 type ModalType = "warning" | "success" | "danger" | "info" | "update" | "add" | "unlock" | "pink" | "withdrawal";
 
@@ -62,11 +63,11 @@ export function SwipeConfirmationModal({
   const theme = useMemo(() => {
     switch (type) {
       case "warning":
-        return { accent: "from-amber-400/20 to-orange-500/20", accentSolid: "text-amber-500", glow: "shadow-amber-500/20", border: "border-amber-200/30", bg: "bg-amber-50/10" };
+        return { accent: "from-warning/20 to-warning/10", accentSolid: "text-warning", glow: "shadow-warning/20", border: "border-warning/30", bg: "bg-warning/5" };
       case "danger":
         return { accent: "from-red-400/20 to-pink-500/20", accentSolid: "text-red-500", glow: "shadow-red-500/20", border: "border-red-200/30", bg: "bg-red-50/10" };
       case "success":
-        return { accent: "from-emerald-400/20 to-green-500/20", accentSolid: "text-emerald-500", glow: "shadow-emerald-500/20", border: "border-emerald-200/30", bg: "bg-emerald-50/10" };
+        return { accent: "from-primary/20 to-primary/10", accentSolid: "text-primary", glow: "shadow-primary/20", border: "border-primary/30", bg: "bg-primary/5" };
       case "pink":
         return { accent: "from-pink-400/20 to-rose-500/20", accentSolid: "text-pink-500", glow: "shadow-pink-500/20", border: "border-pink-200/30", bg: "bg-pink-50/10" };
       case "unlock":
@@ -104,11 +105,11 @@ export function SwipeConfirmationModal({
   const getBackgroundIconColor = () => {
     switch (type) {
       case "warning":
-        return "#F59E0B";
+        return colors.warning;
       case "danger":
         return "#EF4444";
       case "success":
-        return "#10B981";
+        return colors.primary;
       case "pink":
         return "#EC4899";
       case "unlock":
@@ -165,7 +166,7 @@ export function SwipeConfirmationModal({
           onClick={onClose}
         >
           <motion.div
-            className={`relative w-full max-w-md mx-2 sm:mx-0 bg-white/50 backdrop-blur-xl shadow-[inset_0_0_16px_8px_rgba(255,255,255,0.3)] border-0 ${theme.border} rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:${theme.accent} before:opacity-60 before:pointer-events-none`}
+            className={`relative w-full max-w-md mx-2 sm:mx-0 bg-white/50 backdrop-blur-xl shadow-[inset_0_0_16px_8px_rgba(255,255,255,0.3)] border-0 ${theme.border} rounded-t-[36px] sm:rounded-[42px] shadow-2xl overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:${theme.accent} before:opacity-60 before:pointer-events-none`}
             initial={{ y: '100%', scale: 0.9, opacity: 0, rotateX: 10 }}
             animate={{ y: 0, scale: 1, opacity: 1, rotateX: 0 }}
             exit={{ y: '100%', scale: 0.95, opacity: 0, rotateX: -5 }}
@@ -187,14 +188,14 @@ export function SwipeConfirmationModal({
                 </motion.div>
               </div>
             )}
-            <motion.div className="p-6 border-b border-white/30 flex items-center justify-between relative z-10" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
+            <motion.div className="p-6 border-b border-white/10 flex items-center justify-between relative z-10" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
               <div className="flex items-center gap-3">
                 <motion.div className={`mr-4 p-3 rounded-2xl shadow-[inset_0_0_10px_6px_rgba(255,255,255,0.2)] bg-white/10 border border-white/20 ${theme.bg}`} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
-                  {icon ?? <IconComponent className={`${theme.accentSolid} drop-shadow-sm`} size={24} />}
+                  {icon ?? <IconComponent className={`${theme.accentSolid} drop-shadow-sm`} size={24} strokeWidth={3.8} />}
                 </motion.div>
-                <h3 className="text-lg font-semibold text-gray-800 tracking-wide drop-shadow-sm">{title}</h3>
+                <h3 className="text-xl font-bold text-gray-800 tracking-tight drop-shadow-sm">{title}</h3>
               </div>
-              <motion.button onClick={onClose} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.4)] transition-all duration-300 group" disabled={isCompleted || isProcessing} whileHover={{ scale: 1.05, rotate: 90 }} whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+              <motion.button onClick={onClose} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.4)] transition-all duration-300 group" disabled={isCompleted || isProcessing} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
                 <X size={18} className="text-gray-600 group-hover:text-gray-800 transition-colors" />
               </motion.button>
             </motion.div>
@@ -202,7 +203,17 @@ export function SwipeConfirmationModal({
             <motion.div className="relative z-10">
               {shouldShowProcessing ? (
                 <motion.div className="p-10 flex flex-col items-center justify-center" initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}>
-                  <motion.div className="p-4 rounded-2xl mb-6 bg-white/5 backdrop-blur-sm border border-white/10" animate={{ boxShadow: ["0 0 20px #3B82F620", "0 0 30px #3B82F630", "0 0 20px #3B82F620"] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}>
+                  <motion.div
+                    className="p-4 rounded-2xl mb-6 bg-white/5 backdrop-blur-sm border border-white/10"
+                    animate={{
+                      boxShadow: [
+                        `0 0 20px ${getBackgroundIconColor()}20`,
+                        `0 0 30px ${getBackgroundIconColor()}30`,
+                        `0 0 20px ${getBackgroundIconColor()}20`
+                      ]
+                    }}
+                    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                  >
                     <LoadingSpinner size={56} color={getBackgroundIconColor()} />
                   </motion.div>
                   <motion.p className="text-gray-700 text-center font-medium tracking-wide drop-shadow-sm" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }}>

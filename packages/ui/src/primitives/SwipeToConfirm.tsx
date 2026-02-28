@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ChevronsRight } from 'lucide-react';
+import { colors } from '../tokens/colors';
 import styles from './SwipeToConfirm.module.css';
 
 type SwipeType = "primary" | "success" | "warning" | "danger" | "info" | "pink" | "withdrawal" | "deposit" | "unlock" | "update" | "add";
@@ -94,26 +95,25 @@ export function SwipeToConfirm({
   const theme = (() => {
     switch (type) {
       case "success":
-        return { start: "#16a34a", end: "#22c55e" };
+      case "primary":
+        return { start: colors.primary, end: colors.primary };
       case "warning":
-        return { start: "#d97706", end: "#f59e0b" };
+        return { start: colors.warning, end: colors.warning };
       case "danger":
         return { start: "#ef4444", end: "#dc2626" };
       case "info":
-        return { start: "#0ea5e9", end: "#38bdf8" };
+        return { start: "#3B82F6", end: "#60A5FA" };
       case "pink":
         return { start: "#db2777", end: "#ec4899" };
       case "unlock":
       case "update":
       case "add":
       case "withdrawal":
-        return { start: "#0ea5e9", end: "#38bdf8" };
+        return { start: "#3B82F6", end: "#60A5FA" };
       case "deposit":
-        return { start: "#0ea5e9", end: "#38bdf8" };
-      case "primary":
-        return { start: "#0ea5e9", end: "#38bdf8" };
+        return { start: "#3B82F6", end: "#60A5FA" };
       default:
-        return { start: "#0ea5e9", end: "#38bdf8" };
+        return { start: colors.primary, end: colors.secondary || colors.primary };
     }
   })();
 
