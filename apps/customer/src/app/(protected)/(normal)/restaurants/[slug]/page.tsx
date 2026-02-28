@@ -24,6 +24,7 @@ import { RestaurantMenu } from "@/features/restaurant/components/RestaurantMenu"
 import { RestaurantCategoryTabs } from "@/features/restaurant/components/RestaurantCategoryTabs";
 import { MobileRestaurantHero } from "@/features/restaurant/components/MobileRestaurantHero";
 import { MobileRestaurantAvatar } from "@/features/restaurant/components/MobileRestaurantAvatar";
+import { sileo } from "@/components/DynamicIslandToast";
 
 export default function RestaurantDetailPage() {
   const params = useParams() as { slug: string };
@@ -295,6 +296,16 @@ export default function RestaurantDetailPage() {
           );
 
           if (success) {
+            sileo.success({
+              actionType: "cart_add",
+              avatarUrl: drawerDish.imageUrl,
+              description: drawerDish.name,
+              dishOptions: [
+                ...(payload.variant ? [payload.variant.name] : []),
+                ...payload.addons.map(a => a.name)
+              ]
+            } as any);
+
             // Only after success, we start the drawer closing and then the animation
             setDrawerOpen(false);
 

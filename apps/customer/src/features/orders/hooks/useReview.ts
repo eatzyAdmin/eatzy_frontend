@@ -39,7 +39,11 @@ export interface UseReviewResult {
  * - Tự fetch danh sách reviews hiện có theo orderId
  * - Quản lý việc gửi đánh giá, bao gồm cả thông báo và xác nhận vuốt.
  */
-export function useReview(orderId: number): UseReviewResult {
+export function useReview(
+  orderId: number, 
+  restaurantAvatar?: string, 
+  driverAvatar?: string
+): UseReviewResult {
   const queryClient = useQueryClient();
   const { confirm } = useSwipeConfirmation();
 
@@ -68,19 +72,27 @@ export function useReview(orderId: number): UseReviewResult {
   const createMutation = useMutation({
     mutationFn: (data: CreateReviewRequest) => reviewApi.createReview(data),
     onSuccess: (_, variables: CreateReviewRequest) => {
-      const target = variables.reviewTarget === "restaurant" ? "nhà hàng" : "tài xế";
+      const isRestaurant = variables.reviewTarget === "restaurant";
+      const target = isRestaurant ? "nhà hàng" : "tài xế";
+      const actionType = isRestaurant ? "review_restaurant_success" : "review_driver_success";
+      const avatarUrl = isRestaurant ? restaurantAvatar : driverAvatar;
+      
       sileo.success({
-        title: `Đánh giá ${target} thành công!`,
-        description: "Đánh giá đã được ghi nhận thành công!",
-      });
+        title: `Đánh giá ${target} thành công`,
+        description: "Review đã được ghi nhận. Cảm ơn bạn nhé!",
+        actionType,
+        avatarUrl,
+      } as any);
       queryClient.invalidateQueries({ queryKey: reviewKeys.byOrder(orderId) });
     },
-    onError: (error: any) => {
+    onError: (error: any, variables: CreateReviewRequest) => {
       const message = error?.message || "Có lỗi xảy ra khi gửi đánh giá";
+      const actionType = variables.reviewTarget === "restaurant" ? "review_restaurant_error" : "review_driver_error";
       sileo.error({
-        title: message,
-        description: "Vui lòng thử lại sau!",
-      });
+        title: "Opps, đã có lỗi xảy ra!",
+        description: message,
+        actionType,
+      } as any);
     },
   });
 

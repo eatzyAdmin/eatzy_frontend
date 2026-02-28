@@ -48,9 +48,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     window.addEventListener('searchHeaderVisibility', handleHeaderVisibility);
     window.addEventListener('recommendedModeChange', handleRecommendedMode);
+
+    // Custom event to open orders drawer from anywhere (e.g. from toast)
+    const handleOpenOrders = () => setOrdersOpen(true);
+    window.addEventListener('openOrdersDrawer', handleOpenOrders);
+
     return () => {
       window.removeEventListener('searchHeaderVisibility', handleHeaderVisibility);
       window.removeEventListener('recommendedModeChange', handleRecommendedMode);
+      window.removeEventListener('openOrdersDrawer', handleOpenOrders);
     };
   }, []);
 

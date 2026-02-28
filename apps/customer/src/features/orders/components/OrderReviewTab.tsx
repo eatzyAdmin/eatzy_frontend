@@ -26,7 +26,7 @@ export default function OrderReviewTab({
     handleReviewRestaurant,
     handleReviewDriver,
     isSubmitting,
-  } = useReview(order.id);
+  } = useReview(order.id, restaurant.imageUrl, driver?.avatarUrl);
 
   const [restaurantRating, setRestaurantRating] = useState(0);
   const [restaurantComment, setRestaurantComment] = useState("");

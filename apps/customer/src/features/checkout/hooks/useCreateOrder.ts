@@ -8,6 +8,8 @@ import type { CreateOrderRequest, OrderResponse } from "@repo/types";
 interface UseCreateOrderOptions {
   onSuccess?: (order: OrderResponse) => void;
   onError?: (error: Error) => void;
+  restaurantName?: string;
+  avatarUrl?: string;
 }
 
 export function useCreateOrder(options: UseCreateOrderOptions = {}) {
@@ -27,9 +29,14 @@ export function useCreateOrder(options: UseCreateOrderOptions = {}) {
       queryClient.invalidateQueries({ queryKey: ["carts"] });
 
       sileo.success({
-        title: "Đặt hàng thành công!",
-        description: "Đơn hàng của bạn đang được xử lý",
-      });
+        title: options.restaurantName || "Đặt hàng thành công",
+        description: `Mã đơn hàng: #ORD-${data?.id || "001"}`,
+        actionType: "order_place",
+        avatarUrl: options.avatarUrl,
+        onViewOrder: () => {
+          window.dispatchEvent(new CustomEvent("openOrdersDrawer"));
+        },
+      } as any);
 
       // If VNPAY payment, redirect to payment URL
       if (data?.vnpayPaymentUrl) {

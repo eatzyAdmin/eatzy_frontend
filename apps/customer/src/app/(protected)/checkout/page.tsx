@@ -68,7 +68,10 @@ export default function CheckoutPage() {
   } = useCheckout();
 
   const { user } = useAuth();
-  const { createOrder, isCreating } = useCreateOrder();
+  const { createOrder, isCreating } = useCreateOrder({
+    restaurantName: restaurant?.name,
+    avatarUrl: restaurant?.avatarUrl
+  });
   const { clearCart } = useRestaurantCart(restaurantId);
   const setSelectedLocation = useDeliveryLocationStore(s => s.setSelectedLocation);
 

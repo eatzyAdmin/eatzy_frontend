@@ -85,9 +85,10 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
           await orderApi.cancelOrder(activeOrder.id, reason);
           hideLoading();
           sileo.success({
-            title: "Đã hủy đơn hàng",
-            description: `Đơn hàng #${activeOrder.id} đã được hủy thành công`,
-          });
+            title: `Đơn hàng tại ${activeOrder.restaurant?.name} đã được hủy`,
+            description: `Hủy đơn hàng #${activeOrder.id}`,
+            actionType: "order_cancel",
+          } as any);
           setShowCancelReasons(false);
           refetch();
           if (orders.length <= 1) {

@@ -2,19 +2,19 @@
 
 import { useEffect } from "react";
 import { sileo as originalSileo, Toaster as OriginalToaster, SileoOptions } from "sileo";
-import { motion } from "@repo/ui/motion";
-import { Heart, HeartOff, AlertCircle, CheckCircle2, ChevronRight } from "lucide-react";
-
-// Mở rộng Options để hỗ trợ Action Type đặc thù
-interface ExtendedToastOptions extends SileoOptions {
-  actionType?: "favorite_add" | "favorite_remove" | "favorite_error" | "review_validation";
-}
+import { renderCustomDescription, ExtendedToastOptions } from "./toasts/ToastRenderer";
 
 const WrappedSileo = {
   ...originalSileo,
   success: (opts: ExtendedToastOptions) => {
+    let fixedTitle = opts.title;
+    if (opts.actionType === "order_cancel") fixedTitle = "Đơn Hàng Đã Được Hủy";
+    if (opts.actionType === "order_place") fixedTitle = "Đặt hàng thành công";
+    if (opts.actionType === "cart_add") fixedTitle = "Đã thêm vào giỏ hàng";
+
     return originalSileo.success({
       ...opts,
+      title: fixedTitle,
       description: renderCustomDescription(opts) || opts.description,
     });
   },
@@ -29,127 +29,41 @@ const WrappedSileo = {
       ...opts,
       description: renderCustomDescription(opts) || opts.description,
     });
+  },
+  promise: <T,>(
+    promise: Promise<T>,
+    opts: {
+      loading: ExtendedToastOptions;
+      success: (data: T) => ExtendedToastOptions;
+      error: (error: any) => ExtendedToastOptions;
+    }
+  ) => {
+    return originalSileo.promise(promise, {
+      loading: {
+        ...opts.loading,
+        title: opts.loading.actionType === "order_place" ? "Đang xử lý đơn hàng..." : opts.loading.title,
+        description: renderCustomDescription(opts.loading) || opts.loading.description,
+      },
+      success: (data: T) => {
+        const successOpts = opts.success(data);
+        return {
+          ...successOpts,
+          title: successOpts.actionType === "order_place" ? "Đặt hàng thành công" : successOpts.title,
+          description: renderCustomDescription(successOpts) || successOpts.description,
+        };
+      },
+      error: (err: any) => {
+        const errorOpts = opts.error(err);
+        return {
+          ...errorOpts,
+          description: renderCustomDescription(errorOpts) || errorOpts.description,
+        };
+      },
+    });
   }
 };
 
 export const sileo = WrappedSileo;
-
-function renderCustomDescription(opts: ExtendedToastOptions) {
-  if (!opts.actionType) return null;
-
-  switch (opts.actionType) {
-    case "favorite_add":
-      return (
-        <div className="flex items-center justify-between w-full py-1">
-          <div className="flex items-center gap-4">
-            <motion.div
-              initial={{ scale: 0, rotate: -30 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="relative flex items-center justify-center"
-            >
-              <div className="absolute inset-0 bg-rose-500/20 opacity-20 blur-xl rounded-full" />
-              <div className="relative w-10 h-10 bg-rose-500 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-500/30">
-                <Heart className="w-6 h-6 text-black fill-black" />
-              </div>
-            </motion.div>
-
-            <div className="flex flex-col text-left">
-              <motion.span
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-white font-anton font-bold text-[17px] leading-tight uppercase tracking-wide"
-              >
-                {String(opts.description)}
-              </motion.span>
-              <motion.span
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 0.5, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-white text-[12px]"
-              >
-                {opts.title}
-              </motion.span>
-            </div>
-          </div>
-        </div>
-      );
-
-    case "favorite_remove":
-      return (
-        <div className="flex items-center justify-between w-full py-1">
-          <div className="flex items-center gap-4">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5"
-            >
-              <HeartOff className="w-5 h-5 text-white/40" />
-            </motion.div>
-
-            <div className="flex flex-col text-left">
-              <span className="text-white/90 font-anton font-bold text-[17px] leading-tight uppercase tracking-wide">
-                {String(opts.description)}
-              </span>
-              <span className="text-white/40 text-[12px]">
-                {opts.title}
-              </span>
-            </div>
-          </div>
-
-          <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center opacity-40">
-            <ChevronRight className="w-4 h-4 text-white" />
-          </div>
-        </div>
-      );
-
-    case "review_validation":
-      return (
-        <div className="flex items-center gap-4 py-1">
-          <motion.div
-            animate={{ y: [0, -5, 0] }}
-            transition={{ duration: 0.5, repeat: 1 }}
-            className="w-10 h-10 bg-warning/20 rounded-2xl flex items-center justify-center border border-warning/30"
-          >
-            <AlertCircle className="w-6 h-6 text-warning" />
-          </motion.div>
-          <div className="flex flex-col flex-1 text-left">
-            <span className="font-bold text-[15px] leading-tight text-warning">
-              Thông tin còn thiếu
-            </span>
-            <span className="text-white/40 text-[12px] line-clamp-1">
-              {String(opts.title)}
-            </span>
-          </div>
-        </div>
-      );
-
-    case "favorite_error":
-      return (
-        <div className="flex items-center gap-4 py-1">
-          <motion.div
-            animate={{ x: [-4, 4, -4, 4, 0] }}
-            transition={{ duration: 0.4 }}
-            className="w-10 h-10 bg-danger/20 rounded-2xl flex items-center justify-center border border-danger/30"
-          >
-            <AlertCircle className="w-6 h-6 text-danger" />
-          </motion.div>
-          <div className="flex flex-col flex-1 text-left">
-            <span className="font-bold text-[15px] leading-tight text-danger">
-              Lỗi hệ thống
-            </span>
-            <span className="text-white/40 text-[12px] line-clamp-1">
-              {String(opts.title)}
-            </span>
-          </div>
-        </div>
-      );
-
-    default:
-      return null;
-  }
-}
 
 export function Toaster() {
   useEffect(() => {

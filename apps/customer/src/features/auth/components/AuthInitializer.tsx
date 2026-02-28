@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../hooks/useAuth";
 import { sileo } from "@/components/DynamicIslandToast";
 
-const PUBLIC_PATHS = ["/login", "/register", "/forgot-password"];
+const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/test-notification"];
 
 export const AuthInitializer = () => {
   const { isError, isLoading } = useAuth();
