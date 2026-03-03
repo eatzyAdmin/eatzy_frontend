@@ -125,7 +125,7 @@ export function renderCustomDescription(opts: ExtendedToastOptions) {
     case "review_driver_error":
     case "profile_update_error":
       return (
-        <div className="flex items-start gap-4 py-1 pr-6">
+        <div className="flex items-start gap-4 py-1">
           <motion.div
             animate={{ x: [-4, 4, -4, 4, 0] }}
             transition={{ duration: 0.4 }}
@@ -146,7 +146,7 @@ export function renderCustomDescription(opts: ExtendedToastOptions) {
 
     case "order_place":
       return (
-        <div className="flex flex-col w-full py-2 pr-6 gap-5">
+        <div className="flex flex-col w-full py-2 gap-5">
           <div className="flex items-center gap-4">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
@@ -190,7 +190,7 @@ export function renderCustomDescription(opts: ExtendedToastOptions) {
 
     case "order_cancel":
       return (
-        <div className="flex items-center justify-between w-full py-1 pr-6">
+        <div className="flex items-center justify-between w-full py-1">
           <div className="flex items-center gap-4">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
@@ -218,7 +218,7 @@ export function renderCustomDescription(opts: ExtendedToastOptions) {
 
     case "cart_add":
       return (
-        <div className="flex items-center gap-3 py-1 pr-4">
+        <div className="flex items-center gap-3 py-1">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -286,7 +286,7 @@ export function renderCustomDescription(opts: ExtendedToastOptions) {
 
     case "profile_update_success":
       return (
-        <div className="flex items-center gap-4 py-1 pr-4">
+        <div className="flex items-center gap-4 py-1">
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

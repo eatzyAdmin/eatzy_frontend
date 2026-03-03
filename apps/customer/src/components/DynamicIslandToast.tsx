@@ -115,11 +115,16 @@ export function Toaster() {
             0.993 74.9%,
             1
           ) !important;
-          --sileo-width: 380px !important;
+          --sileo-width: 350px !important;
         }
 
         [data-sileo-viewport] {
           z-index: 99999 !important;
+          left: 50% !important;
+          transform: translateX(-50%) !important;
+          width: var(--sileo-width) !important;
+          display: flex !important;
+          justify-content: center !important;
         }
 
         /* 
