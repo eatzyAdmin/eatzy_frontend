@@ -1,25 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { IAddress } from "@repo/types";
 import { sileo } from "@/components/DynamicIslandToast";
-import { mockAddresses } from "../data/mockProfileData";
+import { addressApi } from "@repo/api";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export const useCustomerAddresses = () => {
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["customer", "addresses", "me"],
     queryFn: async () => {
-      // Temporarily use mock data with artificial delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return mockAddresses as any[];
+      const res = await addressApi.getMyAddresses();
+      return res.data || [];
     },
+    enabled: isAuthenticated,
   });
 
   const createAddressMutation = useMutation({
-    mutationFn: async (newAddress: IAddress) => {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      return { ...newAddress, id: Math.random() };
-    },
+    mutationFn: (newAddress: IAddress) => addressApi.createAddress(newAddress),
     onSuccess: () => {
       sileo.success({
         title: "Thêm địa chỉ thành công",
@@ -30,10 +29,7 @@ export const useCustomerAddresses = () => {
   });
 
   const updateAddressMutation = useMutation({
-    mutationFn: async (updatedAddress: IAddress) => {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      return updatedAddress;
-    },
+    mutationFn: (updatedAddress: IAddress) => addressApi.updateAddress(updatedAddress),
     onSuccess: () => {
       sileo.success({
         title: "Cập nhật thành công",
@@ -44,10 +40,7 @@ export const useCustomerAddresses = () => {
   });
 
   const deleteAddressMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      return id;
-    },
+    mutationFn: (id: number) => addressApi.deleteAddress(id),
     onSuccess: () => {
       sileo.success({
         title: "Đã xóa địa chỉ",

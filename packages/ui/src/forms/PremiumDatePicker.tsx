@@ -14,6 +14,7 @@ interface PremiumDatePickerProps {
   required?: boolean;
   error?: string;
   disabled?: boolean;
+  triggerClassName?: string;
 }
 
 export default function PremiumDatePicker({
@@ -25,7 +26,8 @@ export default function PremiumDatePicker({
   placeholder = "Select date...",
   required,
   error,
-  disabled
+  disabled,
+  triggerClassName
 }: PremiumDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<'calendar' | 'month' | 'year'>('calendar');
@@ -240,7 +242,7 @@ export default function PremiumDatePicker({
                 disabled={isDisabled}
                 onClick={(e) => { e.stopPropagation(); handleDateClick(day); }}
                 className={`
-                  aspect-square rounded-xl text-xs font-bold flex items-center justify-center transition-all
+                  aspect-square rounded-3xl text-xs font-bold flex items-center justify-center transition-all
                   ${isSelected ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'hover:bg-primary/10 text-gray-600'}
                   ${isToday && !isSelected ? 'text-primary border border-primary/20' : ''}
                   ${isDisabled ? 'opacity-20 cursor-not-allowed' : ''}
@@ -274,8 +276,9 @@ export default function PremiumDatePicker({
         <div
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={`
-            w-full bg-gray-50 border-2 rounded-[20px] pl-12 pr-6 py-4 text-gray-900 font-bold cursor-pointer
-            flex items-center justify-between border-transparent transition-all duration-300
+            w-full cursor-pointer
+            flex items-center justify-between transition-all duration-300
+            ${triggerClassName ? triggerClassName : 'bg-gray-50 border-2 rounded-[20px] pl-12 pr-6 py-4 text-gray-900 border-transparent'}
             ${isOpen ? 'bg-white border-primary/30 ring-4 ring-primary/5 shadow-xl shadow-black/5' : 'hover:bg-gray-100/50'}
             ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
             ${error ? 'border-red-500/50' : ''}

@@ -2,12 +2,13 @@ import { useState } from "react";
 import { motion } from "@repo/ui/motion";
 import { MapPin, Plus, Trash2, Home, Briefcase, Map, ChevronRight, Check, Edit3 } from "@repo/ui/icons";
 import { useCustomerAddresses } from "../../hooks/useCustomerAddresses";
-import { SavedAddressesShimmer } from "@repo/ui";
+import { SavedAddressesShimmer, useSwipeConfirmation } from "@repo/ui";
 import { IAddress } from "@repo/types";
 import AddressFormModal from "../modals/AddressFormModal";
 
 export default function SavedAddressesSection() {
   const { addresses, isLoading, createAddress, updateAddress, deleteAddress, isCreating, isUpdating, isDeleting } = useCustomerAddresses();
+  const { confirm } = useSwipeConfirmation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<IAddress | null>(null);
 
@@ -21,6 +22,20 @@ export default function SavedAddressesSection() {
   const handleOpenEdit = (addr: IAddress) => {
     setEditingAddress(addr);
     setIsModalOpen(true);
+  };
+
+  const handleDelete = (addr: IAddress) => {
+    if (!addr.id) return;
+
+    confirm({
+      title: "Xóa địa chỉ",
+      description: `Bạn có chắc chắn muốn xóa "${addr.label}"? Hành động này không thể hoàn tác.`,
+      confirmText: "Trượt để xóa",
+      type: "danger",
+      onConfirm: async () => {
+        deleteAddress(addr.id!);
+      }
+    });
   };
 
   const handleConfirm = (data: IAddress) => {
@@ -103,7 +118,7 @@ export default function SavedAddressesSection() {
                     </h3>
                     <div className="flex items-baseline gap-2">
                       <p className="text-gray-500 font-medium text-sm truncate pr-8">
-                        {addr.addressLine}
+                        {addr.address_line || addr.addressLine}
                       </p>
                     </div>
                   </div>
@@ -122,7 +137,7 @@ export default function SavedAddressesSection() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        addr.id && deleteAddress(addr.id);
+                        handleDelete(addr);
                       }}
                       disabled={isDeleting}
                       className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-red-500 shadow-sm hover:shadow-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all duration-300"

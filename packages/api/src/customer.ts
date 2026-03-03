@@ -21,9 +21,9 @@ export const customerApi = {
     return http.delete<IBackendRes<void>>(`/api/v1/customer-profiles/${id}`) as unknown as Promise<IBackendRes<void>>;
   },
   getMyProfile: () => {
-    return http.get<IBackendRes<ResCustomerProfileDTO>>("/api/v1/customer-profiles/me") as unknown as Promise<IBackendRes<ResCustomerProfileDTO>>;
+    return http.get<IBackendRes<ResCustomerProfileDTO>>("/api/v1/customer-profile/me") as unknown as Promise<IBackendRes<ResCustomerProfileDTO>>;
   },
   updateMyProfile: (data: Partial<ResCustomerProfileDTO>) => {
-    return http.put<IBackendRes<ResCustomerProfileDTO>>("/api/v1/customer-profiles/me", data) as unknown as Promise<IBackendRes<ResCustomerProfileDTO>>;
+    return http.put<IBackendRes<ResCustomerProfileDTO>>("/api/v1/customer-profile/me", data) as unknown as Promise<IBackendRes<ResCustomerProfileDTO>>;
   }
 };

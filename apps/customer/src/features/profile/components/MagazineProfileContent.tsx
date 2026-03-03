@@ -11,6 +11,7 @@ import { ImageWithFallback, useHoverHighlight, HoverHighlightOverlay } from "@re
 import { ICustomerProfileDisplay } from "@repo/types";
 import { mockCustomerProfile } from "../data/mockProfileData";
 import { useCustomerProfile } from "../hooks/useCustomerProfile";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ProfileAvatarCardShimmer, PersonalInfoShimmer } from "@repo/ui";
 
 // Import dynamic sections
@@ -23,22 +24,23 @@ import HelpCenterSection from "./sections/HelpCenterSection";
 
 export default function MagazineProfileContent({ onLogout }: { onLogout: () => void }) {
   const [activeId, setActiveId] = useState("01");
+  const { user } = useAuth();
   const { profile, isLoading } = useCustomerProfile();
   const { containerRef, rect, style, moveHighlight, clearHover } = useHoverHighlight<HTMLDivElement>();
 
   // Fallback to mock data if loading or error for display consistency, but we prefer real data
-  const profileData: ICustomerProfileDisplay = profile ? {
-    name: profile.user?.name || "Khách",
-    email: profile.user?.email || "",
-    phone: profile.user?.phoneNumber || "",
-    profilePhoto: profile.user?.avatar || mockCustomerProfile.profilePhoto,
-    membershipTier: "Standard", // Could be calculated from backend data if available
-    dateOfBirth: profile.date_of_birth,
-    hometown: profile.hometown,
-    address: profile.user?.address,
-    gender: profile.user?.gender,
-    age: profile.user?.age
-  } : mockCustomerProfile;
+  const profileData: ICustomerProfileDisplay = {
+    ...mockCustomerProfile,
+    name: user?.name || profile?.user?.name || mockCustomerProfile.name,
+    email: user?.email || profile?.user?.email || mockCustomerProfile.email,
+    phone: user?.phone || profile?.user?.phoneNumber || mockCustomerProfile.phone,
+    profilePhoto: profile?.user?.avatar || mockCustomerProfile.profilePhoto,
+    dateOfBirth: profile?.date_of_birth,
+    hometown: profile?.hometown,
+    address: profile?.user?.address,
+    gender: profile?.user?.gender,
+    age: profile?.user?.age,
+  };
 
   const menuSections = [
     {
@@ -101,9 +103,13 @@ export default function MagazineProfileContent({ onLogout }: { onLogout: () => v
             </div>
 
             <div className="text-left relative z-10 min-w-0 flex-1">
-              <h2 className="text-xl font-anton font-bold text-[#1A1A1A] leading-tight mb-1 truncate">{profileData.name}</h2>
+              <h2 className="text-xl font-anton font-bold text-[#1A1A1A] leading-tight mb-1 truncate">
+                {profileData.name}
+              </h2>
               <div className="flex items-center gap-1.5 text-gray-400">
-                <span className="text-[13px] font-medium truncate opacity-80">{profileData.email}</span>
+                <span className="text-[13px] font-medium truncate opacity-80">
+                  {profileData.email || "Chưa cập nhật email"}
+                </span>
               </div>
             </div>
           </div>

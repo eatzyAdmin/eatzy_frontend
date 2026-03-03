@@ -14,6 +14,7 @@ import ProfileMenuItem from "@/features/profile/components/ProfileMenuItem";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
+import { useCustomerProfile } from "@/features/profile/hooks/useCustomerProfile";
 
 import MagazineProfileContent from "@/features/profile/components/MagazineProfileContent";
 import PersonalInfoSection from "@/features/profile/components/sections/PersonalInfoSection";
@@ -26,6 +27,7 @@ export default function ProfilePage() {
   const { confirm } = useSwipeConfirmation();
   const { show, hide } = useLoading();
   const { user } = useAuth();
+  const { profile, isLoading: isProfileLoading } = useCustomerProfile();
   const { handleLogout: performLogout } = useLogout();
   const { setIsVisible: setBottomNavVisible } = useBottomNav();
 
@@ -74,9 +76,15 @@ export default function ProfilePage() {
   // Merge real user data with mock profile structure
   const displayProfile = {
     ...mockCustomerProfile,
-    name: user?.name || mockCustomerProfile.name,
-    phone: user?.phone || mockCustomerProfile.phone,
-    email: user?.email || mockCustomerProfile.email,
+    name: user?.name || profile?.user?.name || mockCustomerProfile.name,
+    email: user?.email || profile?.user?.email || mockCustomerProfile.email,
+    phone: user?.phone || profile?.user?.phoneNumber || mockCustomerProfile.phone,
+    profilePhoto: profile?.user?.avatar || mockCustomerProfile.profilePhoto,
+    dateOfBirth: profile?.date_of_birth,
+    hometown: profile?.hometown,
+    address: profile?.user?.address,
+    gender: profile?.user?.gender,
+    age: profile?.user?.age,
   };
 
   const renderSubPage = () => {

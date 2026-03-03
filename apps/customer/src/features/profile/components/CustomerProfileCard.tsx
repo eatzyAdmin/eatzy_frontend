@@ -1,8 +1,14 @@
 import { ImageWithFallback } from "@repo/ui";
 import { ShieldCheck } from "@repo/ui/icons";
 import { ICustomerProfileDisplay } from "@repo/types";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export default function CustomerProfileCard({ profile }: { profile: ICustomerProfileDisplay }) {
+  const { user } = useAuth();
+
+  const displayName = user?.name || profile.name;
+  const displayEmail = user?.email || profile.email;
+
   return (
     <div className="bg-white rounded-[32px] p-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex items-center gap-5 relative overflow-hidden group">
       {/* Abstract Background Accents */}
@@ -26,11 +32,11 @@ export default function CustomerProfileCard({ profile }: { profile: ICustomerPro
       {/* Name & Info */}
       <div className="text-left relative z-10 min-w-0 flex-1">
         <h2 className="text-xl font-anton font-bold text-[#1A1A1A] leading-tight mb-1 truncate">
-          {profile.name}
+          {displayName}
         </h2>
         <div className="flex items-center gap-1.5 text-gray-400">
           <span className="text-[13px] font-medium truncate opacity-80">
-            {profile.email || "Chưa cập nhật email"}
+            {displayEmail || "Chưa cập nhật email"}
           </span>
         </div>
       </div>
