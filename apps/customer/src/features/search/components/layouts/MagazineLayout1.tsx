@@ -152,7 +152,7 @@ export default function MagazineLayout1({ restaurant, dishes, distance }: Props)
                         {dish.description}
                       </p>
                       <div className="mt-0.5 md:mt-1 flex items-center justify-between md:justify-start gap-2">
-                        <span className="font-anton text-base md:text-lg text-amber-600">
+                        <span className="font-anton font-semibold text-base md:text-lg text-amber-600">
                           {(dish.price / 1000).toFixed(0)}K
                         </span>
                         {dish.rating && (

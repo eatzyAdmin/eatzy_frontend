@@ -31,7 +31,7 @@ export default function MagazineLayout11({ restaurant, dishes }: { restaurant: R
         <div className="flex flex-col md:flex-row items-baseline justify-between gap-4 mb-20 border-b border-[#D4A574]/30 pb-8">
           <div className="flex flex-col">
             <span className="text-[10px] font-anton font-bold text-[#8B7355] uppercase tracking-[0.5em] mb-4">Curated Selection</span>
-            <h1 className="text-5xl md:text-8xl font-anton font-bold tracking-tighter uppercase leading-[0.85] text-[#2C2416]">
+            <h1 className="text-5xl md:text-8xl font-anton font-bold tracking-tighter uppercase leading-none md:leading-tight text-[#2C2416]">
               {restaurant.name}
             </h1>
           </div>
@@ -79,11 +79,11 @@ export default function MagazineLayout11({ restaurant, dishes }: { restaurant: R
               {/* Text Content */}
               <div className="flex-1 px-1 md:px-4">
                 <div className="text-[8px] md:text-[10px] font-anton font-bold text-[#8B7355] uppercase tracking-widest mb-1 md:mb-2">Plate 0{index + 1}</div>
-                <h3 className="text-base md:text-5xl font-anton font-bold mb-1 md:mb-4 uppercase tracking-tighter text-[#2C2416] group-hover:text-[#8B7355] transition-colors line-clamp-1">
+                <h3 className="text-base md:text-5xl font-anton font-bold mb-1 md:mb-4 uppercase tracking-tighter text-[#2C2416] group-hover:text-[#8B7355] transition-colors line-clamp-1 leading-tight py-1">
                   {dish.name}
                 </h3>
                 <p className="hidden md:block text-[#5A4A3A] text-sm md:text-lg font-medium leading-relaxed italic max-w-sm">
-                  &quot;{dish.description}&quot;
+                  {dish.description}
                 </p>
               </div>
             </motion.div>

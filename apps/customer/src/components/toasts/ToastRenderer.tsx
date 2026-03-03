@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "@repo/ui";
 import { motion } from "@repo/ui/motion";
 import { Heart, HeartOff, AlertCircle, Store, Bike, ChevronRight, Trash2 } from "lucide-react";
 import { SileoOptions } from "sileo";
@@ -15,7 +16,10 @@ export type ToastActionType =
   | "review_driver_error"
   | "order_cancel"
   | "order_place"
-  | "cart_add";
+  | "cart_add"
+  | "profile_update_success"
+  | "profile_update_error"
+  | "error";
 
 export interface ExtendedToastOptions extends SileoOptions {
   actionType?: ToastActionType;
@@ -115,9 +119,11 @@ export function renderCustomDescription(opts: ExtendedToastOptions) {
         </div>
       );
 
+    case "error":
     case "favorite_error":
     case "review_restaurant_error":
     case "review_driver_error":
+    case "profile_update_error":
       return (
         <div className="flex items-start gap-4 py-1 pr-6">
           <motion.div
@@ -274,6 +280,40 @@ export function renderCustomDescription(opts: ExtendedToastOptions) {
             <span className="text-white/40 text-[12px] line-clamp-1">
               {String(opts.description)}
             </span>
+          </div>
+        </div>
+      );
+
+    case "profile_update_success":
+      return (
+        <div className="flex items-center gap-4 py-1 pr-4">
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative w-12 h-12 shrink-0 shadow-xl shadow-lime-500/20"
+          >
+            <div className="absolute inset-x-0 bottom-0 top-1/2 bg-lime-500/10 blur-xl rounded-full" />
+            <img
+              src={opts.avatarUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop"}
+              alt="Avatar"
+              className="relative w-full h-full object-cover rounded-2xl border-2 border-white"
+            />
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 400 }}
+              className="absolute -bottom-1 -right-1 w-5 h-5 bg-lime-500 text-black rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg"
+            >
+              <Check size={10} strokeWidth={4} />
+            </motion.div>
+          </motion.div>
+          <div className="flex flex-col text-left gap-1">
+            <h4 className="text-white font-semibold text-[15px] leading-tight">
+              {opts.title || "Cập nhật thành công"}
+            </h4>
+            <p className="text-white/50 text-[12px] font-medium leading-snug">
+              {String(opts.description || "Thông tin của bạn đã được lưu lại")}
+            </p>
           </div>
         </div>
       );

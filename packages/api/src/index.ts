@@ -10,6 +10,7 @@ export { systemConfigApi } from "./system-config";
 export { fileApi } from "./file";
 export { userApi } from "./user";
 export { customerApi } from "./customer";
+export { addressApi } from "./address";
 export { reviewApi, type ReviewDTO } from "./review";
 
 // Restaurant module exports

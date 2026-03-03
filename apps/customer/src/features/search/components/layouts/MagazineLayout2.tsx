@@ -110,7 +110,7 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] md:text-xs font-anton font-bold text-gray-300">#{String(originalIdx + 1).padStart(2, '0')}</span>
                       </div>
-                      <div className="font-anton text-lg md:text-2xl text-amber-600">
+                      <div className="font-anton font-semibold text-lg md:text-2xl text-amber-600">
                         {(dish.price / 1000).toFixed(0)}K
                       </div>
                     </div>
@@ -148,7 +148,7 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] md:text-xs font-anton font-bold text-gray-300">#{String(originalIdx + 1).padStart(2, '0')}</span>
                       </div>
-                      <div className="font-anton text-lg md:text-2xl text-amber-600">
+                      <div className="font-anton font-semibold text-lg md:text-2xl text-amber-600">
                         {(dish.price / 1000).toFixed(0)}K
                       </div>
                     </div>
@@ -186,7 +186,7 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-anton font-bold text-gray-300">#{String(originalIdx + 1).padStart(2, '0')}</span>
                       </div>
-                      <div className="font-anton text-xl md:text-2xl text-amber-600">
+                      <div className="font-anton font-semibold text-xl md:text-2xl text-amber-600">
                         {(dish.price / 1000).toFixed(0)}K
                       </div>
                     </div>

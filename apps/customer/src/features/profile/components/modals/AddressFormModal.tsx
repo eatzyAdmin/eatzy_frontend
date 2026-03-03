@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { X, MapPin, Search, LocateFixed, Navigation, Check, Loader2, Hand, Store } from "@repo/ui/icons";
+import { X, MapPin, Search, LocateFixed, Navigation, Check, Loader2, Store, Hand } from "@repo/ui/icons";
 import dynamic from "next/dynamic";
-import { ImageWithFallback } from "@repo/ui";
+import { IAddress } from "@repo/types";
 
 // Dynamic import MapView to avoid SSR issues
 const MapViewForPicker = dynamic(
@@ -21,20 +22,12 @@ interface PlaceSuggestion {
   center: [number, number];
 }
 
-interface LocationPickerModalProps {
+interface AddressFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectLocation: (location: {
-    latitude: number;
-    longitude: number;
-    address: string;
-    placeName?: string;
-  }) => void;
-  initialLocation?: {
-    latitude: number;
-    longitude: number;
-  };
-  initialAddress?: string;
+  onConfirm: (address: IAddress) => void;
+  initialData?: IAddress | null;
+  isProcessing?: boolean;
 }
 
 // ======== Constants ========
@@ -44,46 +37,52 @@ const MAPBOX_TOKEN = typeof window !== 'undefined' ? atob(_X_T) : Buffer.from(_X
 
 // ======== Component ========
 
-export default function LocationPickerModal({
+export default function AddressFormModal({
   isOpen,
   onClose,
-  onSelectLocation,
-  initialLocation,
-  initialAddress,
-}: LocationPickerModalProps) {
+  onConfirm,
+  initialData,
+  isProcessing = false,
+}: AddressFormModalProps) {
   // State
+  const [label, setLabel] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<PlaceSuggestion | null>(null);
-  const [mapPosition, setMapPosition] = useState<{ lng: number; lat: number } | undefined>(
-    initialLocation ? { lng: initialLocation.longitude, lat: initialLocation.latitude } : undefined
-  );
-  const [currentAddress, setCurrentAddress] = useState(initialAddress || "");
+  const [mapPosition, setMapPosition] = useState<{ lng: number; lat: number } | undefined>(undefined);
+  const [currentAddress, setCurrentAddress] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const [flyVersion, setFlyVersion] = useState(0);
   const [nearbyPlaces, setNearbyPlaces] = useState<PlaceSuggestion[]>([]);
   const [selectedNearbyIndex, setSelectedNearbyIndex] = useState<number | null>(0);
+  const [mounted, setMounted] = useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Ref to track if a suggestion was just selected
   const justSelectedSuggestionRef = useRef(false);
 
-  // Reset state when modal opens
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Reset/Sync state when modal opens or initialData changes
   useEffect(() => {
     if (isOpen) {
+      setLabel(initialData?.label || "");
+      setCurrentAddress(initialData?.addressLine || "");
       setSearchQuery("");
       setSuggestions([]);
       setSelectedPlace(null);
-      if (initialLocation) {
-        setMapPosition({ lng: initialLocation.longitude, lat: initialLocation.latitude });
-      }
-      if (initialAddress) {
-        setCurrentAddress(initialAddress);
+      if (initialData?.longitude && initialData?.latitude) {
+        setMapPosition({ lng: initialData.longitude, lat: initialData.latitude });
+        setFlyVersion((v) => v + 1);
+      } else {
+        setMapPosition(undefined);
       }
     }
-  }, [isOpen, initialLocation, initialAddress]);
+  }, [isOpen, initialData]);
 
   // Search for places using Mapbox Geocoding API
   const searchPlaces = useCallback(async (query: string) => {
@@ -100,7 +99,7 @@ export default function LocationPickerModal({
       const res = await fetch(url);
       const json = await res.json();
 
-      const items: PlaceSuggestion[] = (json.features || []).map((f: { id: string; text: string; place_name: string; center: [number, number] }) => ({
+      const items: PlaceSuggestion[] = (json.features || []).map((f: any) => ({
         id: f.id,
         text: f.text,
         place_name: f.place_name,
@@ -185,14 +184,8 @@ export default function LocationPickerModal({
   // Handle nearby places from map
   const handleNearbyPlacesChange = (places: PlaceSuggestion[]) => {
     setNearbyPlaces(places);
-    // If no address yet and we got places, use the first one
     if (!currentAddress && places.length > 0) {
       setCurrentAddress(places[0].place_name);
-    }
-    // Auto select first nearby place if we aren't explicitly searching
-    if (places.length > 0 && !justSelectedSuggestionRef.current) {
-      // Optional: logic to sync selected index
-      // setSelectedNearbyIndex(0);
     }
   };
 
@@ -239,27 +232,28 @@ export default function LocationPickerModal({
 
   // Handle confirm selection
   const handleConfirm = () => {
-    if (!mapPosition) return;
+    if (!mapPosition || !currentAddress || !label.trim()) return;
 
-    onSelectLocation({
+    onConfirm({
+      ...initialData,
+      label: label.trim(),
+      addressLine: currentAddress,
       latitude: mapPosition.lat,
       longitude: mapPosition.lng,
-      address: currentAddress,
-      placeName: selectedPlace?.text || nearbyPlaces[selectedNearbyIndex || 0]?.text,
     });
-
-    onClose();
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[200]"
+      className="fixed inset-0 z-[1000]"
       style={{ pointerEvents: isOpen ? 'auto' : 'none' }}
     >
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 flex items-center justify-center"
+            className="fixed inset-0 flex items-center justify-center p-0 md:p-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -278,26 +272,53 @@ export default function LocationPickerModal({
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-[#F8F9FA] w-full max-w-full md:max-w-6xl h-[100vh] md:h-[90vh] max-h-full md:max-h-[800px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20"
+              className="relative bg-[#F8F9FA] w-full max-w-full md:max-w-6xl h-full md:h-[90vh] max-h-full md:max-h-[800px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20"
             >
               {/* Header */}
               <div className="bg-white px-4 md:px-8 py-4 md:py-6 border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 shadow-sm/50">
-                <div>
-                  <h3 className="text-2xl font-anton font-bold text-[#1A1A1A]">BAN MUỐN GIAO ĐẾN ĐÂU?</h3>
-                  <div className="text-sm font-medium text-gray-500 mt-1">
-                    Kéo thả ghim hoặc tìm kiếm địa chỉ của bạn
+                <div className="flex items-center gap-8 flex-1">
+                  <div>
+                    <h3 className="text-2xl font-anton font-bold text-[#1A1A1A] uppercase tracking-tight">
+                      {initialData ? "CẬP NHẬT ĐỊA CHỈ" : "THÊM ĐỊA CHỈ MỚI"}
+                    </h3>
+                    <div className="text-sm font-medium text-gray-500 mt-1">
+                      Kéo thả ghim hoặc tìm địa chỉ của bạn
+                    </div>
+                  </div>
+
+                  {/* Label Input Integrated in Header */}
+                  <div className="hidden md:flex flex-col gap-1 flex-1 max-w-xs">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">TÊN GỢI NHỚ</label>
+                    <input
+                      type="text"
+                      value={label}
+                      onChange={(e) => setLabel(e.target.value)}
+                      placeholder="Ví dụ: Nhà riêng, Công ty..."
+                      className="h-11 px-4 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 focus:border-solid focus:border-lime-500 focus:bg-white text-[#1A1A1A] font-bold outline-none transition-all text-sm placeholder:text-gray-400 hover:border-slate-300"
+                    />
                   </div>
                 </div>
 
                 <button
                   onClick={onClose}
-                  className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-700 hover:bg-gray-200 transition-all duration-300"
+                  className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-700 hover:bg-gray-200 transition-all duration-300 ml-4"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Body Layout */}
+              {/* Mobile Label Input (visible only on small screens) */}
+              <div className="md:hidden bg-white px-4 py-3 border-b border-gray-50">
+                <input
+                  type="text"
+                  value={label}
+                  onChange={(e) => setLabel(e.target.value)}
+                  placeholder="Tên gợi nhớ: Nhà riêng, Công ty..."
+                  className="w-full h-11 px-4 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 focus:border-solid focus:border-lime-500 focus:bg-white text-[#1A1A1A] font-bold outline-none transition-all text-sm hover:border-slate-300"
+                />
+              </div>
+
+              {/* Body Layout - 100% matched from LocationPickerModal */}
               <div className="flex-1 overflow-y-auto md:overflow-hidden grid grid-cols-1 md:grid-cols-[60%_40%] pl-4 md:pl-8 py-4 md:pb-8 pr-4 md:pr-14 gap-4 md:gap-6">
 
                 {/* Left Column: Search & Map */}
@@ -377,9 +398,9 @@ export default function LocationPickerModal({
                   </div>
                 </div>
 
-                {/* Right Column: Nearby Places & Confirm (Swapped) */}
+                {/* Right Column: Nearby Places & Confirm */}
                 <div className="flex flex-col h-full min-h-0 space-y-5">
-                  {/* Nearby Places List (Now First) */}
+                  {/* Nearby Places List */}
                   <div className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col order-1 md:order-none">
                     <div className="px-6 py-4 pb-0 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30 shrink-0">
                       <Store className="w-5 h-5 text-gray-400" />
@@ -425,7 +446,7 @@ export default function LocationPickerModal({
                     </div>
                   </div>
 
-                  {/* Current Selection Card (Now Second) */}
+                  {/* Current Selection Card */}
                   <div className="bg-white rounded-[28px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col gap-4 shrink-0 order-2 md:order-none">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-2xl bg-lime-50 border border-lime-100 flex items-center justify-center flex-shrink-0">
@@ -443,11 +464,15 @@ export default function LocationPickerModal({
 
                     <button
                       onClick={handleConfirm}
-                      disabled={!mapPosition || !currentAddress}
-                      className="w-full h-12 rounded-[16px] bg-[#1A1A1A] text-white font-bold text-base flex items-center justify-center gap-2 hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-black/10"
+                      disabled={!mapPosition || !currentAddress || !label.trim() || isProcessing}
+                      className="w-full h-12 rounded-[16px] bg-[#1A1A1A] text-white font-bold text-base flex items-center justify-center gap-2 hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-black/10 active:scale-[0.98]"
                     >
-                      <Check className="w-5 h-5" />
-                      Xác nhận địa điểm
+                      {isProcessing ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Check className="w-5 h-5" />
+                      )}
+                      {initialData ? "Lưu thay đổi" : "Thêm địa chỉ mới"}
                     </button>
                   </div>
                 </div>
@@ -456,6 +481,7 @@ export default function LocationPickerModal({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </div>,
+    document.body
   );
 }

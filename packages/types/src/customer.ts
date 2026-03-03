@@ -15,6 +15,22 @@ export interface UserCustomer {
   email?: string;
   isActive: boolean;
   avatar?: string;
+  address?: string | null;
+  gender?: string | null;
+  age?: number | null;
+}
+
+export interface ICustomerProfileDisplay {
+  name: string;
+  email: string;
+  phone: string;
+  profilePhoto: string;
+  membershipTier: string;
+  dateOfBirth?: string | null;
+  hometown?: string | null;
+  address?: string | null;
+  gender?: string | null;
+  age?: number | null;
 }
 
 export type CustomerStatus = 'active' | 'disabled';

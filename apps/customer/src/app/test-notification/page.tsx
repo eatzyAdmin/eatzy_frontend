@@ -2,7 +2,7 @@
 
 import { sileo } from "@/components/DynamicIslandToast";
 import { motion } from "@repo/ui/motion";
-import { Heart, Store, Bike, AlertCircle, Trash2, ArrowLeft, Zap, ShoppingBag } from "lucide-react";
+import { Heart, Store, Bike, AlertCircle, Trash2, ArrowLeft, Zap, ShoppingBag, User, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function TestNotificationPage() {
@@ -141,16 +141,34 @@ export default function TestNotificationPage() {
       ]
     },
     {
-      group: "Giỏ hàng (Cart)",
+      group: "Hồ sơ (Profile)",
       items: [
         {
-          label: "Thêm vào giỏ hàng",
-          icon: <ShoppingBag className="w-4 h-4" />,
+          label: "Cập nhật thành công",
+          icon: <User className="w-4 h-4 text-lime-600" />,
           onClick: () => sileo.success({
-            description: "Pizza Seafood Special",
-            actionType: "cart_add",
-            avatarUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&h=500&fit=crop",
-            dishOptions: ["Size L", "Đế dày", "Thêm phô mai"]
+            title: "Cập nhật thành công",
+            description: "Thông tin cá nhân của bạn đã được lưu lại.",
+            actionType: "profile_update_success",
+            avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop"
+          } as any)
+        },
+        {
+          label: "Cập nhật thất bại",
+          icon: <ShieldAlert className="w-4 h-4 text-red-500" />,
+          onClick: () => sileo.error({
+            title: "Cập nhật thất bại",
+            description: "Đã có lỗi xảy ra khi kết nối máy chủ. Vui lòng thử lại.",
+            actionType: "profile_update_error"
+          } as any)
+        },
+        {
+          label: "Không có thay đổi (Warning)",
+          icon: <AlertCircle className="w-4 h-4 text-orange-500" />,
+          onClick: () => sileo.warning({
+            title: "Không có thay đổi",
+            description: "Bạn chưa chỉnh sửa thông tin nào để lưu.",
+            actionType: "review_validation" // Reuse for warning style
           } as any)
         }
       ]

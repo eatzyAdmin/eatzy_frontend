@@ -1,6 +1,6 @@
 "use client";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { History, Home, Heart, LogOut } from "@repo/ui/icons";
+import { History, Home, Heart, LogOut, User as UserIcon, ChevronRight } from "@repo/ui/icons";
 import { NavItem, NavItemShimmer, ProfileShimmer, useLoading, useSwipeConfirmation } from "@repo/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../auth/hooks/useAuth";
@@ -31,6 +31,12 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
   const handleFavoritesClick = () => {
     show("Đang tải trang yêu thích...");
     router.push(`/favorites`);
+    onClose();
+  };
+
+  const handleAccountClick = () => {
+    show("Đang tải cài đặt tài khoản...");
+    router.push(`/profile`);
     onClose();
   };
 
@@ -79,16 +85,20 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
             {isLoading ? (
               <ProfileShimmer expanded={true} />
             ) : (
-              <div className="relative flex items-center p-6 border-b border-white/10 text-white/90">
-                <div className="relative h-12 w-12 rounded-2xl flex items-center justify-center shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.2)] bg-white/10 border border-white/20">
+              <div
+                className="relative flex items-center p-6 border-b border-white/10 text-white/90 cursor-pointer transition-all duration-300 hover:bg-white/10 hover:shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.2)] group"
+                onClick={handleAccountClick}
+              >
+                <div className="relative h-12 w-12 rounded-2xl flex items-center justify-center shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.2)] bg-white/10 border border-white/20 transition-transform group-hover:scale-105">
                   <span className="text-xl font-bold text-white/90">
                     {user?.name?.charAt(0).toUpperCase() || "C"}
                   </span>
                 </div>
-                <div className="ml-4 overflow-hidden">
+                <div className="ml-4 flex-1 overflow-hidden">
                   <p className="font-semibold text-sm truncate max-w-[140px] text-white/90">{user?.name || "Khách"}</p>
                   <p className="text-xs text-white/70 truncate max-w-[140px]">{user?.email || "Chưa đăng nhập"}</p>
                 </div>
+                <ChevronRight size={16} className="text-white/30 group-hover:text-white/60 group-hover:translate-x-1 transition-all" />
               </div>
             )}
 

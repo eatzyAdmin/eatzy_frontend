@@ -73,3 +73,7 @@ export { SearchPopup } from "./search/SearchPopup";
 export { PremiumDateRangePicker } from "./filters/PremiumDateRangePicker";
 export { PremiumPriceRangeFilter } from "./filters/PremiumPriceRangeFilter";
 export { default as OrderReviewTabShimmer } from "./feedback/shimmer/OrderReviewTabShimmer";
+export { default as ProfileAvatarCardShimmer } from "./feedback/shimmer/ProfileAvatarCardShimmer";
+export { default as PersonalInfoShimmer } from "./feedback/shimmer/PersonalInfoShimmer";
+export { default as SavedAddressesShimmer } from "./feedback/shimmer/SavedAddressesShimmer";
+export { default as WalletTransactionsShimmer } from "./feedback/shimmer/WalletTransactionsShimmer";
