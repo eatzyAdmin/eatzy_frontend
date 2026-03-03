@@ -1,5 +1,6 @@
 import { http } from "./http";
 import type { IBackendRes, ReviewDTO, ReviewReplyRequest, CreateReviewRequest } from "../../types/src";
+export type { ReviewDTO };
 
 // ======== Review API ========
 

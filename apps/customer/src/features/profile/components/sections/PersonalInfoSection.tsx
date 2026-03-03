@@ -74,36 +74,45 @@ export default function PersonalInfoSection({ profile }: { profile: ICustomerPro
     >
       {/* Header & Avatar Row */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div className="flex flex-col gap-2">
+        <div className="hidden md:flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
               <User size={12} />
               Hồ sơ cá nhân
             </span>
           </div>
-          <h2 className="text-[56px] font-bold leading-none text-[#1A1A1A] uppercase" style={{ fontFamily: "var(--font-anton), var(--font-sans)" }}>
+          <h2 className="text-4xl md:text-[56px] font-bold leading-none text-[#1A1A1A] uppercase" style={{ fontFamily: "var(--font-anton), var(--font-sans)" }}>
             BIOGRAPHY
           </h2>
           <p className="text-gray-500 font-medium">Cập nhật và quản lý thông tin tài khoản của bạn</p>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="relative group/avatar">
-            <div className="w-24 h-24 rounded-[32px] overflow-hidden border-4 border-white shadow-xl relative z-10 transition-transform group-hover/avatar:scale-105 duration-500">
-              <img src={profile.profilePhoto} alt={profile.name} className="w-full h-full object-cover" />
+        <div className="flex flex-col md:flex-row md:items-center gap-6">
+          <div className="flex items-center gap-6">
+            <div className="relative group/avatar">
+              <div className="w-24 h-24 rounded-[32px] overflow-hidden border-4 border-white shadow-xl relative z-10 transition-transform group-hover/avatar:scale-105 duration-500">
+                <img src={profile.profilePhoto} alt={profile.name} className="w-full h-full object-cover" />
+              </div>
+              <button className="absolute -bottom-2 -right-2 w-10 h-10 bg-lime-500 text-black rounded-2xl border-4 border-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all z-20">
+                <Camera size={16} />
+              </button>
             </div>
-            <button className="absolute -bottom-2 -right-2 w-10 h-10 bg-lime-500 text-black rounded-2xl border-4 border-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all z-20">
-              <Camera size={16} />
-            </button>
+
+            <div className="flex flex-col gap-2 md:hidden">
+              <span className="text-xl font-anton uppercase text-[#1A1A1A]">{profile.name}</span>
+              <div className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-full w-fit">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{profile.membershipTier} Member</span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 w-full md:w-fit">
             {isEditing ? (
               <div className="flex gap-2">
                 <button
                   onClick={handleUpdate}
                   disabled={isUpdating}
-                  className="px-6 py-3 bg-[#1A1A1A] text-white font-anton text-xs uppercase tracking-widest rounded-2xl hover:bg-lime-500 hover:text-black transition-all shadow-lg flex items-center gap-2 disabled:opacity-50"
+                  className="flex-1 md:px-6 py-3 bg-[#1A1A1A] text-white font-anton text-xs uppercase tracking-widest rounded-2xl hover:bg-lime-500 hover:text-black transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {isUpdating ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                   Lưu thay đổi
@@ -118,14 +127,14 @@ export default function PersonalInfoSection({ profile }: { profile: ICustomerPro
             ) : (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-8 py-4 bg-white border-2 border-slate-100 text-[#1A1A1A] font-anton text-sm uppercase tracking-wider rounded-[24px] hover:border-lime-500 hover:bg-lime-50/30 transition-all shadow-sm active:scale-95 flex items-center gap-3"
+                className="w-full md:px-8 py-4 bg-white border-2 border-slate-100 text-[#1A1A1A] font-anton text-sm uppercase tracking-wider rounded-[24px] hover:border-lime-500 hover:bg-lime-50/30 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-3"
               >
                 <Edit3 size={16} />
                 Chỉnh sửa hồ sơ
               </button>
             )}
             {!isEditing && (
-              <div className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-full w-fit">
+              <div className="hidden md:block px-3 py-1 bg-slate-50 border border-slate-100 rounded-full w-fit">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{profile.membershipTier} Member</span>
               </div>
             )}

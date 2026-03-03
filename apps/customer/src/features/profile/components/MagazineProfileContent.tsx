@@ -84,13 +84,12 @@ export default function MagazineProfileContent({ onLogout }: { onLogout: () => v
     <div className="w-full max-w-[1400px] mx-auto flex flex-col md:grid md:grid-cols-[350px_1fr] gap-2 py-2 h-[calc(100vh-88px)]">
 
       {/* LEFT COLUMN: Sidebar Navigation */}
-      <div className="flex flex-col h-full gap-2 overflow-hidden">
+      <div className="flex flex-col h-full gap-2">
         {/* User Quick Info */}
         {isLoading ? (
           <ProfileAvatarCardShimmer />
         ) : (
           <div className="bg-white rounded-[32px] p-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex items-center gap-5 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-lime-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-lime-500/10 transition-all duration-700" />
 
             <div className="relative shrink-0">
               <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-[#F7F7F7] shadow-xl relative z-10 transition-transform group-hover:scale-105 duration-500">
@@ -102,7 +101,7 @@ export default function MagazineProfileContent({ onLogout }: { onLogout: () => v
             </div>
 
             <div className="text-left relative z-10 min-w-0 flex-1">
-              <h2 className="text-xl font-bold text-[#1A1A1A] leading-tight mb-1 truncate">{profileData.name}</h2>
+              <h2 className="text-xl font-anton font-bold text-[#1A1A1A] leading-tight mb-1 truncate">{profileData.name}</h2>
               <div className="flex items-center gap-1.5 text-gray-400">
                 <span className="text-[13px] font-medium truncate opacity-80">{profileData.email}</span>
               </div>

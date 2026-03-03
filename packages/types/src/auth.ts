@@ -14,6 +14,7 @@ export interface IUserLogin {
   id: number;
   email: string;
   name: string;
+  phone?: string;
   role: Role;
 }
 

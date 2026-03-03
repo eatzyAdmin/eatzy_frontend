@@ -1,15 +1,16 @@
-"use client";
-
 import { ImageWithFallback } from "@repo/ui";
-import { Star, Award, Gift } from "@repo/ui/icons";
-import { CustomerProfile } from "../data/mockProfileData";
+import { ShieldCheck } from "@repo/ui/icons";
+import { ICustomerProfileDisplay } from "@repo/types";
 
-export default function CustomerProfileCard({ profile }: { profile: CustomerProfile }) {
+export default function CustomerProfileCard({ profile }: { profile: ICustomerProfileDisplay }) {
   return (
-    <div className="bg-white rounded-[32px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col items-center">
+    <div className="bg-white rounded-[32px] p-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex items-center gap-5 relative overflow-hidden group">
+      {/* Abstract Background Accents */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-lime-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-lime-500/10 transition-all duration-700" />
+
       {/* Avatar & Badge */}
-      <div className="relative w-24 h-24 mb-4">
-        <div className="w-full h-full rounded-full overflow-hidden relative z-10 border-4 border-white shadow-lg">
+      <div className="relative shrink-0">
+        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-[#F7F7F7] shadow-xl relative transition-transform group-hover:scale-105 duration-500">
           <ImageWithFallback
             src={profile.profilePhoto}
             alt={profile.name}
@@ -17,40 +18,20 @@ export default function CustomerProfileCard({ profile }: { profile: CustomerProf
             className="object-cover"
           />
         </div>
-        <div className="absolute -bottom-1 -right-1 z-20 bg-[var(--primary)] text-white w-8 h-8 flex items-center justify-center rounded-full border-2 border-white shadow-md">
-          <Star className="w-4 h-4 fill-white" />
+        <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-lime-500 text-white rounded-xl border-4 border-white flex items-center justify-center shadow-lg">
+          <ShieldCheck size={12} strokeWidth={3} />
         </div>
       </div>
 
       {/* Name & Info */}
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold font-anton text-[#1A1A1A] mb-1">{profile.name}</h2>
-        <div className="flex items-center justify-center gap-2 text-sm text-gray-500 font-medium bg-gray-50 px-3 py-1 rounded-full border border-gray-100 mx-auto w-fit">
-          <Award className="w-4 h-4" />
-          <span>{profile.membershipTier}</span>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="w-full grid grid-cols-3 gap-2 border-t border-gray-100 pt-6">
-        {/* Points */}
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-1 text-xl font-bold text-[#1A1A1A] mb-1">
-            {profile.rewardPoints} <Gift className="w-4 h-4 text-orange-400" />
-          </div>
-          <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Điểm thưởng</div>
-        </div>
-
-        {/* Total Orders */}
-        <div className="text-center border-l border-gray-200">
-          <div className="text-xl font-bold text-[#1A1A1A] mb-1">{profile.totalOrders}</div>
-          <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Đơn hàng</div>
-        </div>
-
-        {/* Reviews */}
-        <div className="text-center border-l border-gray-200">
-          <div className="text-xl font-bold text-[#1A1A1A] mb-1">{profile.reviewsCount}</div>
-          <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Đánh giá</div>
+      <div className="text-left relative z-10 min-w-0 flex-1">
+        <h2 className="text-xl font-anton font-bold text-[#1A1A1A] leading-tight mb-1 truncate">
+          {profile.name}
+        </h2>
+        <div className="flex items-center gap-1.5 text-gray-400">
+          <span className="text-[13px] font-medium truncate opacity-80">
+            {profile.email || "Chưa cập nhật email"}
+          </span>
         </div>
       </div>
     </div>

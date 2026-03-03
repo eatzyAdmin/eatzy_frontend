@@ -55,14 +55,21 @@ export const useCustomerWalletTransactions = () => {
     fetchData();
   }, [fetchData]);
 
+  const hasNextPage = transactionsRes ? transactionsRes.meta.page < transactionsRes.meta.pages - 1 : false;
+
   return {
     wallet,
     transactions: transactionsRes?.result || [],
     meta: transactionsRes?.meta,
     isLoading,
     isFetchingTransactions,
+    hasNextPage,
     error,
     refresh: fetchData,
-    fetchMoreTransactions
+    fetchMoreTransactions: () => {
+      if (hasNextPage && !isFetchingTransactions) {
+        fetchMoreTransactions(transactionsRes!.meta.page + 1);
+      }
+    }
   };
 };

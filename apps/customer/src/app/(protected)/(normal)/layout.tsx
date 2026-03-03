@@ -84,7 +84,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className={`pointer-events-none fixed inset-x-0 top-0 h-20 z-[20] ${(isOrderHistory || isFavorites) ? "bg-[#F7F7F7]/95 backdrop-blur-md" : "backdrop-blur-xl"
+              className={`pointer-events-none fixed inset-x-0 top-0 h-16 md:h-20 z-[20] [mask-image:linear-gradient(to_bottom,black_70%,transparent)] ${(isOrderHistory || isFavorites) ? "bg-[#F7F7F7]/95 backdrop-blur-md" : "backdrop-blur-xl"
                 } ${(isRestaurantDetail || isOrderHistory || isFavorites) ? "hidden md:block" : ""}`}
             />
           )}

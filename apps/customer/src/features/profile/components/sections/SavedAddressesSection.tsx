@@ -49,14 +49,14 @@ export default function SavedAddressesSection() {
       className="space-y-12"
     >
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div className="flex flex-col gap-2">
+        <div className="hidden md:flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
               <MapPin size={12} />
               Địa chỉ giao hàng
             </span>
           </div>
-          <h2 className="text-[56px] font-bold leading-none text-[#1A1A1A] uppercase" style={{ fontFamily: "var(--font-anton), var(--font-sans)" }}>
+          <h2 className="text-4xl md:text-[56px] font-bold leading-none text-[#1A1A1A] uppercase" style={{ fontFamily: "var(--font-anton), var(--font-sans)" }}>
             ADDRESSES
           </h2>
           <p className="text-gray-500 font-medium">Lưu trữ địa chỉ giúp bạn đặt hàng nhanh chóng hơn</p>
@@ -64,7 +64,7 @@ export default function SavedAddressesSection() {
 
         <button
           onClick={handleOpenAdd}
-          className="px-8 py-4 bg-[#1A1A1A] text-white font-anton text-sm uppercase tracking-wider rounded-[24px] hover:bg-lime-500 hover:text-black transition-all shadow-xl active:scale-95 flex items-center gap-3"
+          className="px-8 py-4 bg-[#1A1A1A] text-white font-anton text-sm uppercase tracking-wider rounded-[24px] hover:bg-lime-500 hover:text-black transition-all shadow-xl active:scale-95 flex items-center gap-3 w-full md:w-fit"
         >
           <Plus size={18} />
           Thêm địa chỉ mới
