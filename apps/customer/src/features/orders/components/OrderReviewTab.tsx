@@ -53,7 +53,7 @@ export default function OrderReviewTab({
   }
 
   return (
-    <div className="pb-12 w-full max-w-7xl mx-auto px-4 relative overflow-hidden">
+    <div className="pb-0 w-full max-w-7xl mx-auto px-4 relative overflow-hidden">
 
       {/* Desktop Layout - 2 Columns */}
       <div className="hidden md:flex flex-row items-stretch justify-center gap-8 md:gap-12 relative z-10">

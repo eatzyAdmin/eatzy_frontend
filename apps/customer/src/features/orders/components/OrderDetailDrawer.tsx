@@ -128,7 +128,7 @@ export default function OrderDetailDrawer({
 
             {/* Mobile Tabs Switcher - Updated to sync with Desktop Style */}
             {order.orderStatus === "DELIVERED" && (
-              <div className="md:hidden px-6 pt-1 shrink-0">
+              <div className="md:hidden px-3 pt-1 shrink-0">
                 <div className="flex items-center p-1 bg-gray-100 rounded-[22px] w-full shadow-[inset_0_2px_6px_rgba(0,0,0,0.06)] border border-gray-200/10">
                   {tabs.map((t) => (
                     <button
@@ -213,7 +213,7 @@ export default function OrderDetailDrawer({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="flex-1 min-h-0 overflow-y-auto no-scrollbar p-5 md:py-6 md:px-16"
+                      className="flex-1 min-h-0 overflow-y-auto no-scrollbar py-1 px-0 md:pt-6 md:px-16"
                     >
                       <OrderReviewTab
                         order={order}
