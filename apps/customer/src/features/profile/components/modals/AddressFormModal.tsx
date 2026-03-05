@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "@repo/ui/motion";
 import { X, MapPin, Search, LocateFixed, Navigation, Check, Loader2, Store, Hand } from "@repo/ui/icons";
 import dynamic from "next/dynamic";
 import { IAddress } from "@repo/types";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 // Dynamic import MapView to avoid SSR issues
 const MapViewForPicker = dynamic(
@@ -44,6 +45,8 @@ export default function AddressFormModal({
   initialData,
   isProcessing = false,
 }: AddressFormModalProps) {
+  useMobileBackHandler(isOpen, onClose);
+
   // State
   const [label, setLabel] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -295,17 +298,19 @@ export default function AddressFormModal({
                       value={label}
                       onChange={(e) => setLabel(e.target.value)}
                       placeholder="Ví dụ: Nhà riêng, Công ty..."
-                      className="h-11 px-4 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 focus:border-solid focus:border-lime-500 focus:bg-white text-[#1A1A1A] font-bold outline-none transition-all text-sm placeholder:text-gray-400 hover:border-slate-300"
+                      className="h-11 px-4 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 text-[#1A1A1A] font-bold outline-none transition-all text-sm placeholder:text-gray-400 hover:border-slate-300"
                     />
                   </div>
                 </div>
 
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={onClose}
                   className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-700 hover:bg-gray-200 transition-all duration-300 ml-4"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </motion.button>
               </div>
 
               {/* Mobile Label Input (visible only on small screens) */}
@@ -315,7 +320,7 @@ export default function AddressFormModal({
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
                   placeholder="Tên gợi nhớ: Nhà riêng, Công ty..."
-                  className="w-full h-11 px-4 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 focus:border-solid focus:border-lime-500 focus:bg-white text-[#1A1A1A] font-bold outline-none transition-all text-sm hover:border-slate-300"
+                  className="w-full h-11 px-4 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 text-[#1A1A1A] font-bold outline-none transition-all text-sm hover:border-slate-300"
                 />
               </div>
 
@@ -341,7 +346,7 @@ export default function AddressFormModal({
                         onChange={(e) => handleSearchChange(e.target.value)}
                         onKeyDown={handleSearchKeyDown}
                         placeholder="Tìm kiếm địa điểm, tòa nhà, đường..."
-                        className="w-full h-14 pl-14 pr-4 rounded-[24px] bg-white border border-gray-200 focus:border-lime-500 focus:ring-4 focus:ring-lime-500/10 outline-none transition-all text-[#1A1A1A] font-medium placeholder:text-gray-400 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
+                        className="w-full h-14 pl-14 pr-4 rounded-[24px] bg-white border border-gray-200 focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 outline-none transition-all text-[#1A1A1A] font-medium placeholder:text-gray-400 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
                       />
                       {/* Suggestions Dropdown */}
                       <AnimatePresence>

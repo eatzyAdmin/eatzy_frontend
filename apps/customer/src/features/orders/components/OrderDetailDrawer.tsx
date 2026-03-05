@@ -19,6 +19,7 @@ import {
 import { MobileCarousel } from "./MobileCarousel";
 
 const OrderReviewTab = dynamic(() => import("@/features/orders/components/OrderReviewTab"), { ssr: false });
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 export default function OrderDetailDrawer({
   open,
@@ -29,6 +30,8 @@ export default function OrderDetailDrawer({
   onClose: () => void;
   order: OrderResponse | null;
 }) {
+  useMobileBackHandler(open, onClose);
+
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"details" | "reviews">("details");
   const [isLoading, setIsLoading] = useState(false);

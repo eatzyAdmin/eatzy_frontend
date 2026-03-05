@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import CategoryScroller from '@/features/home/components/CategoryScroller';
+import CategoryScrollerShimmer from '@/features/home/components/CategoryScrollerShimmer';
 import dynamic from 'next/dynamic';
 const RestaurantSlider = dynamic(() => import('@/features/home/components/RestaurantSlider'), { ssr: false });
 import BackgroundTransition from '@/features/home/components/BackgroundTransition';
@@ -23,6 +24,7 @@ import { useSearchRestaurants } from '@/features/search/hooks/useSearchRestauran
 import { mapMagazineToRestaurantWithMenu } from '@/features/search/utils/mappers';
 import type { RestaurantWithMenu } from '@/features/search/hooks/useSearch';
 import { DeliveryLocationButton, useDeliveryLocation } from '@/features/location';
+import { useMobileBackHandler } from '@/hooks/useMobileBackHandler';
 
 export default function HomePage() {
   const {
@@ -48,6 +50,8 @@ export default function HomePage() {
   // Recommended Section Logic (API based)
   const [showRecommended, setShowRecommended] = useState(false);
 
+  useMobileBackHandler(showRecommended, () => setShowRecommended(false));
+  useMobileBackHandler(showAllCategories, () => setShowAllCategories(false));
   // Use delivery location for API calls (selected by user or GPS fallback)
   const { location: deliveryLocation, isLoading: isLocationLoading } = useDeliveryLocation();
   const locationCoords = deliveryLocation;
@@ -112,6 +116,9 @@ export default function HomePage() {
     let processing = false;
     const handleWheel = (e: WheelEvent) => {
       if (processing) return;
+      // Prevent triggering if any modal is open (tagged by layout's useEffect)
+      if (document.body.classList.contains('modal-open')) return;
+
       if (e.deltaY > 50) { // Significant scroll down
         processing = true;
         setShowRecommended(true);
@@ -222,11 +229,7 @@ export default function HomePage() {
               className="flex items-center justify-center h-[28vh] md:h-[42vh]"
             >
               {isCategoriesLoading ? (
-                <div className="flex gap-8 overflow-hidden">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="w-32 h-12 bg-white/10 rounded-full animate-pulse" />
-                  ))}
-                </div>
+                <CategoryScrollerShimmer />
               ) : (
                 <CategoryScroller
                   categories={categories}
@@ -358,7 +361,7 @@ export default function HomePage() {
                 <List className="w-5 h-5" />
                 <span className="text-sm font-semibold">Categories</span>
               </div>
-              <div className="max-h-[calc(100vh-22vh)] overflow-y-auto p-2">
+              <div className="max-h-[calc(100vh-22vh)] overflow-y-auto p-2 [overscroll-behavior:contain]">
                 <ul className="divide-y divide-white/10">
                   {categories.map((c, idx) => (
                     <li key={c.id}>

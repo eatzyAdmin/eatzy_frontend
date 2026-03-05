@@ -34,6 +34,7 @@ export default function CartItemCard({
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      whileTap={{ scale: 0.98 }}
       exit={{ opacity: 0, scale: 0.9 }}
       onClick={() => onCardClick(cart.restaurant.id, cart.id)}
       className={`group relative w-full h-[140px] flex flex-row overflow-hidden rounded-[40px] cursor-pointer transition-all duration-500 ${isSelected

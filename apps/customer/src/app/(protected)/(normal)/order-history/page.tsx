@@ -104,12 +104,14 @@ export default function OrderHistoryPage() {
         <div className="max-w-[1400px] mx-auto px-3 md:px-8">
           {/* Page Title & Back Button (Scrollable) */}
           <div className="flex items-center gap-4 py-3 pb-0 md:pt-20">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => router.back()}
               className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center group flex-shrink-0"
             >
               <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
-            </button>
+            </motion.button>
             <div>
               <h1
                 className="text-[32px] md:text-[56px] font-bold leading-tight text-[#1A1A1A]"
@@ -129,9 +131,11 @@ export default function OrderHistoryPage() {
 
           {/* Sticky Toolbar (Search & Filters) */}
           <div
-            className={`sticky z-40 bg-[#F7F7F7]/95 backdrop-blur-md -mx-4 px-4 md:-mx-8 md:px-8 py-4 mb-2 md:mb-6 flex flex-col-reverse md:flex-row md:items-center justify-between gap-3 transition-all duration-300 ease-in-out ${isTopHeaderVisible ? 'top-0 md:top-[80px]' : 'top-0 border-b border-gray-200/50 shadow-sm'
+            className={`sticky z-40 bg-[#F7F7F7]/95 backdrop-blur-md -mx-4 px-4 md:-mx-8 md:px-8 py-4 mb-2 md:mb-6 flex flex-col-reverse md:flex-row md:items-center justify-between gap-3 transition-all duration-300 ease-in-out [mask-image:linear-gradient(to_bottom,black_90%,transparent)] ${isTopHeaderVisible ? 'top-0 md:top-[80px]' : 'top-0 border-b border-gray-200/50 shadow-sm'
               }`}
           >
+
+
             {/* Status Filters */}
             <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
               <div className="hidden md:flex w-10 h-10 items-center justify-center flex-shrink-0">
@@ -233,6 +237,17 @@ export default function OrderHistoryPage() {
                       : "Bạn chưa có đơn hàng nào"}
                 </p>
               </motion.div>
+            )}
+
+            {!isLoading && orders && orders.length >= 3 && (
+              <div className="py-12 flex items-center justify-center gap-4 opacity-30">
+                <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-24" />
+                <div className="flex flex-col items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-gray-400" />
+                  <span className="text-[14px] font-bold text-gray-400 uppercase font-anton tracking-wider">End of list</span>
+                </div>
+                <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-24" />
+              </div>
             )}
           </div>
         </div>

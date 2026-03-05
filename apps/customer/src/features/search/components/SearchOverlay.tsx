@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "@repo/ui/motion";
 import { Search, X, SlidersHorizontal } from "@repo/ui/icons";
 import { useState, useEffect, KeyboardEvent } from "react";
 import FilterModal from "./FilterModal";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 interface SearchFilters {
   minPrice: number;
@@ -32,6 +33,8 @@ export default function SearchOverlay({
   isSearchBarCompact = false,
   isSearching = false,
 }: SearchOverlayProps) {
+  useMobileBackHandler(open, onClose);
+
   const [query, setQuery] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({
@@ -135,7 +138,7 @@ export default function SearchOverlay({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, delay: 0.1 }}
-              className="fixed inset-x-0 top-[28vh] md:top-[32vh] flex flex-wrap gap-2 md:gap-3 justify-center z-[70] max-w-full md:max-w-2xl px-4 mx-auto"
+              className="fixed inset-x-0 top-[28vh] md:top-[32vh] flex flex-wrap gap-2 md:gap-3 justify-center z-[70] max-w-full md:max-w-2xl px-4 mx-auto [overscroll-behavior:contain]"
             >
               {quickSearchTags.map((tag, index) => (
                 <motion.button
@@ -183,7 +186,7 @@ export default function SearchOverlay({
             }}
             className="fixed z-[50] left-12 right-12 md:left-48 md:right-48 top-4 flex items-center justify-center gap-2 md:gap-3"
           >
-            <div className="relative flex items-center gap-2 md:gap-3 px-3 md:px-5 h-14 md:h-20 text-base md:text-xl rounded-full bg-white shadow-2xl border border-gray-200 overflow-hidden flex-1 max-w-3xl">
+            <div className="relative flex items-center gap-2 md:gap-3 px-3 md:px-5 h-14 md:h-20 text-base md:text-xl rounded-full bg-white shadow-xl border border-gray-200 overflow-hidden flex-1 max-w-3xl focus-within:border-[var(--primary)]/20 focus-within:ring-4 focus-within:ring-[var(--primary)]/5 transition-all">
               {isSearching && (
                 <motion.div
                   initial={{ x: "-100%" }}
@@ -221,7 +224,7 @@ export default function SearchOverlay({
                     stiffness: 100,
                   }}
                   onClick={() => setFilterOpen(true)}
-                  className="h-14 md:h-20 px-4 md:px-8 bg-white rounded-[30px] shadow-2xl border border-gray-100 text-[var(--primary)] font-bold text-base md:text-xl hover:bg-gray-50 transition-colors whitespace-nowrap flex items-center gap-2"
+                  className="h-14 md:h-20 px-4 md:px-8 bg-white rounded-[30px] shadow-xl border border-gray-100 text-[var(--primary)] font-bold text-base md:text-xl hover:bg-gray-50 transition-colors whitespace-nowrap flex items-center gap-2"
                 >
                   <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6" />
                   <span className="hidden md:inline">Filter</span>

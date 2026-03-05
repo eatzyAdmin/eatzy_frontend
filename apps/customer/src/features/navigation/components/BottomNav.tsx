@@ -38,7 +38,7 @@ export default function BottomNav({ onCurrentOrdersClick, isOrdersOpen }: Bottom
           return (
             <button
               key={tab.id}
-              onClick={() => tab.path ? router.push(tab.path) : tab.action?.()}
+              onClick={() => tab.path ? router.replace(tab.path) : tab.action?.()}
               className={`flex items-center justify-center w-14 h-14 rounded-full transition-all duration-300 ${isActive ? 'bg-black text-white shadow-lg scale-110' : 'text-gray-400 hover:bg-gray-200/50'
                 }`}
             >

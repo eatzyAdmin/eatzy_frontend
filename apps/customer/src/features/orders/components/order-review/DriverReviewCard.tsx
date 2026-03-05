@@ -152,7 +152,7 @@ export function DriverReviewCard({
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Feedback for the delivery partner..."
-                    className="w-full bg-white/60 backdrop-blur-md border border-white/50 rounded-[28px] md:rounded-[32px] p-5 md:p-6 text-sm text-black placeholder:text-gray-300 focus:outline-none focus:border-lime-500/50 focus:bg-white/90 transition-all resize-none min-h-[120px] md:min-h-[140px] shadow-[0_10px_30px_rgba(0,0,0,0.02)]"
+                    className="w-full bg-white/60 backdrop-blur-md border-2 border-white rounded-[28px] md:rounded-[32px] p-5 md:p-6 text-sm text-black placeholder:text-gray-300 focus:outline-none focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 focus:bg-white/90 transition-all resize-none min-h-[120px] md:min-h-[140px] shadow-[inset_0_0_20px_rgba(0,0,0,0.09)]"
                   />
                   <div className="absolute top-4 right-6 text-[10px] font-anton text-gray-200 uppercase">Input / Log</div>
                 </div>

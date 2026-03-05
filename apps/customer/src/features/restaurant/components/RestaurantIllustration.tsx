@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ImageWithFallback } from "@repo/ui";
+import { motion } from '@repo/ui/motion';
 import { RestaurantRating } from './RestaurantRating';
 import type { Restaurant } from '@repo/types';
 
@@ -17,7 +18,8 @@ export const RestaurantIllustration: React.FC<RestaurantIllustrationProps> = ({
   onRatingClick
 }) => {
   return (
-    <div
+    <motion.div
+      whileTap={{ scale: 0.98 }}
       onClick={onRatingClick}
       className="hidden md:block group relative rounded-[32px] shadow-lg md:rounded-[36px] overflow-hidden cursor-pointer"
     >
@@ -38,6 +40,6 @@ export const RestaurantIllustration: React.FC<RestaurantIllustrationProps> = ({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
       </div>
-    </div>
+    </motion.div>
   );
 };

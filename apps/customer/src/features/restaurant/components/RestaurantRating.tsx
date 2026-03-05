@@ -19,9 +19,11 @@ export const RestaurantRating: React.FC<RestaurantRatingProps> = ({
 
   if (variant === 'mobile-badge') {
     return (
-      <button
+      <motion.button
+        animate={{ scale: 1 }}
+        whileTap={{ scale: 0.94 }}
         onClick={onClick}
-        className="flex items-center bg-lime-50 border border-lime-100 shadow-sm rounded-[14px] px-1 py-1 gap-2 active:scale-95 transition-transform whitespace-nowrap flex-shrink-0"
+        className="flex items-center bg-lime-50 border border-lime-100 shadow-sm rounded-[14px] px-1 py-1 gap-2 whitespace-nowrap flex-shrink-0"
       >
         <div className="w-6 h-6 rounded-[10px] bg-[#1A1A1A] flex items-center justify-center shadow-sm">
           <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
@@ -30,7 +32,7 @@ export const RestaurantRating: React.FC<RestaurantRatingProps> = ({
           <span className="text-[15px] font-anton text-[#1A1A1A] leading-none pt-0.5">{rating}</span>
           <ChevronRight className="w-3 h-3 text-gray-300" />
         </div>
-      </button>
+      </motion.button>
     );
   }
 
@@ -39,6 +41,7 @@ export const RestaurantRating: React.FC<RestaurantRatingProps> = ({
       <motion.div
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
+        whileTap={{ scale: 0.96 }}
         transition={{
           type: "spring",
           stiffness: 120,
@@ -46,7 +49,7 @@ export const RestaurantRating: React.FC<RestaurantRatingProps> = ({
           mass: 0.8
         }}
         whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
-        className="bg-white/40 backdrop-blur-xl border border-white/30 rounded-full w-full px-8 py-3 shadow-2xl flex items-center justify-center gap-4 transition-colors duration-300"
+        className="bg-white/40 backdrop-blur-xl border border-white/30 rounded-full w-full px-8 py-3 shadow-2xl flex items-center justify-center gap-4 duration-100"
       >
         <div className="flex flex-col items-center">
           <div className="flex items-center gap-2">

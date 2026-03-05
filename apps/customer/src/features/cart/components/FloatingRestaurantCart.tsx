@@ -21,6 +21,7 @@ import { useLoading } from "@repo/ui";
 import { useRouter } from "next/navigation";
 import { useRestaurantCart } from "../hooks/useCart";
 import { useCartStore } from "@repo/store";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 interface FloatingRestaurantCartProps {
   restaurantId: string | number;
@@ -42,7 +43,9 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
 
   const setActiveRestaurant = useCartStore((s) => s.setActiveRestaurant);
   const [isOpen, setIsOpen] = useState(false);
+  useMobileBackHandler(isOpen, () => setIsOpen(false));
   const router = useRouter();
+
   const { show } = useLoading();
   const [mounted, setMounted] = useState(false);
 

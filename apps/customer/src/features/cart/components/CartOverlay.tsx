@@ -8,8 +8,11 @@ import { useCart, cartKeys } from "../hooks/useCart";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCartStore } from "@repo/store";
 import CartItemCard from "./CartItemCard";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 export default function CartOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  useMobileBackHandler(open, onClose);
+
   const {
     carts,
     isLoading: isCartsLoading,
@@ -121,8 +124,8 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                       setSelectedRestIds(new Set());
                     }}
                     className={`h-10 md:h-12 px-5 md:px-7 rounded-full flex items-center justify-center transition-all duration-500 border-2 select-none ${isEditMode
-                        ? "bg-[#1A1A1A] border-[#1A1A1A] text-white shadow-lg shadow-black/10"
-                        : "bg-white border-gray-100 text-[#1A1A1A] hover:bg-gray-50 hover:border-gray-200 shadow-sm"
+                      ? "bg-[#1A1A1A] border-[#1A1A1A] text-white shadow-lg shadow-black/10"
+                      : "bg-white border-gray-100 text-[#1A1A1A] hover:bg-gray-50 hover:border-gray-200 shadow-sm"
                       }`}
                   >
                     <AnimatePresence mode="wait">
@@ -154,7 +157,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto no-scrollbar p-3 md:p-4 space-y-6 relative bg-[#F8F9FA]">
+            <div className="flex-1 overflow-y-auto no-scrollbar p-3 md:p-4 space-y-6 relative bg-[#F8F9FA] [overscroll-behavior:contain]">
               {isCartsLoading ? (
                 <>
                   <CartOverlayShimmer />
@@ -194,6 +197,17 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                       isDeleting={isDeletingCarts}
                     />
                   ))}
+
+                  {carts.length >= 4 && (
+                    <div className="py-8 flex items-center justify-center gap-4 opacity-30 mt-4">
+                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-16" />
+                      <div className="flex flex-col items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
+                        <span className="text-[12px] font-bold text-gray-400 uppercase font-anton tracking-wider">End of list</span>
+                      </div>
+                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-16" />
+                    </div>
+                  )}
                 </motion.div>
               )}
             </div>

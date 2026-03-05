@@ -6,6 +6,7 @@ import type { Dish, DishVariant, OptionGroup, OptionChoice } from "@repo/types";
 import { formatVnd } from "@repo/lib";
 import { useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
 import { ChefHat, X, Loader2, Check, Plus, Sparkles, Utensils, AlertCircle } from "@repo/ui/icons";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 export default function DishCustomizeDrawer({
   open,
@@ -27,6 +28,8 @@ export default function DishCustomizeDrawer({
     startRect?: DOMRect
   ) => void;
 }) {
+  useMobileBackHandler(open, onClose);
+
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     null
   );

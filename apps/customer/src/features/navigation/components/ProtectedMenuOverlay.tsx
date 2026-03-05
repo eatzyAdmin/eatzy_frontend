@@ -79,7 +79,7 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2, type: "spring", stiffness: 150, damping: 18 }}
-            className="fixed z-[70] left-6 top-20 w-[260px] max-w-[92vw] rounded-3xl bg-white/8 backdrop-blur-xl border border-white/20 overflow-hidden"
+            className="fixed z-[70] left-6 top-20 w-[260px] max-w-[92vw] rounded-3xl bg-white/8 backdrop-blur-xl border border-white/20 overflow-hidden [overscroll-behavior:contain]"
           >
 
             {isLoading ? (

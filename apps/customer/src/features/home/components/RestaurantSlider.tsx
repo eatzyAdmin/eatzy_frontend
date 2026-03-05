@@ -177,6 +177,8 @@ export default function RestaurantSlider({
                         opacity: isCenter ? 1.0 : (isMobile ? 0.3 : 1.0), // Fade sides more on mobile
                         zIndex: isCenter ? 20 : 10,
                       }}
+                      whileHover={!isMobile ? { y: 6, scale: 1.02, transition: { duration: 0.2 } } : {}}
+                      whileTap={{ scale: 0.98 }}
                       exit={{ scale: 0.9, opacity: 0 }}
                       transition={{ duration: 0.35, ease: [0.33, 1, 0.68, 1] }}
                       onClick={() => {
@@ -244,7 +246,7 @@ export default function RestaurantSlider({
                                   e.stopPropagation();
                                   handleRestaurantClick(restaurant);
                                 }}
-                                className="inline-flex items-center gap-2.5 rounded-full text-[13px] font-bold text-white transition-colors uppercase tracking-[0.12em]"
+                                className="inline-flex items-center pl-1 gap-2.5 rounded-lg text-[13px] font-bold text-white transition-colors uppercase"
                               >
                                 KHÁM PHÁ
                                 <ChevronRight className="w-4 h-4" />

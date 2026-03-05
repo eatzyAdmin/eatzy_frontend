@@ -245,6 +245,7 @@ export default function CategoryScroller({
                   animate={{
                     opacity: isDragging ? opacity : (isActive ? 1.0 : 0.7),
                   }}
+                  whileHover={!isDragging && !isActive && !isMobile ? { opacity: 0.95 } : {}}
                   transition={{
                     duration: 0.1,
                     ease: [0.33, 1, 0.68, 1],

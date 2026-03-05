@@ -4,6 +4,7 @@ import { X, Search, Star, Sparkles, CheckCircle2, MessageSquare, Map, Tag, ChefH
 import { ImageWithFallback } from "@repo/ui";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import type { Restaurant } from "@repo/types";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 interface ReviewsModalProps {
   restaurant: Restaurant;
@@ -12,6 +13,8 @@ interface ReviewsModalProps {
 }
 
 export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps) => {
+  useMobileBackHandler(isOpen, onClose);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("relevant");
   const [selectedRating, setSelectedRating] = useState<number | null>(null);

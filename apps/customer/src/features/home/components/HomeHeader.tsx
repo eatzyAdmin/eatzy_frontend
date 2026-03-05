@@ -63,11 +63,16 @@ export default function HomeHeader({
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <button onClick={onLogoClick} className="select-none">
+            <motion.button
+              whileHover={{ scale: 1.05, filter: "brightness(1.15)" }}
+              whileTap={{ scale: 0.96 }}
+              onClick={onLogoClick}
+              className="select-none outline-none"
+            >
               <h1 className={`text-xl md:text-3xl font-bold tracking-tight ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
                 my.<span className={hideSearchIcon ? 'text-gray-700' : 'text-white/90'}>Eatzy</span>
               </h1>
-            </button>
+            </motion.button>
           </motion.div>
 
           {/* Delivery Location - Desktop only (mobile has separate floating button) */}

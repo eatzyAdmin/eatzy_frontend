@@ -15,6 +15,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
 import { useCustomerProfile } from "@/features/profile/hooks/useCustomerProfile";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 import MagazineProfileContent from "@/features/profile/components/MagazineProfileContent";
 import PersonalInfoSection from "@/features/profile/components/sections/PersonalInfoSection";
@@ -33,6 +34,9 @@ export default function ProfilePage() {
 
   const [activeMobileSection, setActiveMobileSection] = useState<MobileSection | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useMobileBackHandler(activeMobileSection !== null, () => setActiveMobileSection(null));
+
 
   // Simulate loading finish on mount
   useEffect(() => {
@@ -123,7 +127,7 @@ export default function ProfilePage() {
       >
         <div className="max-w-xl mx-auto">
           {/* Header style matched to favorites/order-history - Sticky */}
-          <div className="sticky top-0 z-50 bg-[#F7F7F7]/95 backdrop-blur-md py-4 mb-2 -mx-3 px-3">
+          <div className="sticky top-0 z-50 bg-[#F7F7F7]/95 backdrop-blur-md py-4 mb-2 -mx-3 px-3 max-md:[mask-image:linear-gradient(to_bottom,black_90%,transparent)]">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setActiveMobileSection(null)}

@@ -12,11 +12,14 @@ import { useCurrentOrders } from "@/features/orders/hooks/useCurrentOrders";
 import { useSwipeConfirmation, useLoading, CurrentOrdersDrawerShimmer } from "@repo/ui";
 import { sileo } from "@/components/DynamicIslandToast";
 import { orderApi } from "@repo/api";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 const OrderMapView = dynamic(() => import("@/features/orders/components/OrderMapView"), { ssr: false });
 import OrderStatusSteps from "@/features/orders/components/OrderStatusSteps";
 
 export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  useMobileBackHandler(open, onClose);
+
   // Fetch orders from API with polling enabled when drawer is open
   // When drawer is open: polls every 5s to simulate real-time updates
   const { orders, isLoading: isLoadingOrders, refetch } = useCurrentOrders({ isDrawerOpen: open });
@@ -124,7 +127,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 100, damping: 18 }}
-            className="fixed z-[70] inset-0 md:inset-x-0 md:bottom-0 md:top-auto md:max-h-[88vh] md:rounded-t-[40px] bg-[#F8F9FA] overflow-hidden shadow-2xl flex flex-col border border-white/20"
+            className="fixed z-[70] inset-0 md:inset-x-0 md:bottom-0 md:top-auto md:max-h-[88vh] md:rounded-t-[40px] bg-[#F8F9FA] overflow-hidden shadow-2xl flex flex-col border border-white/20 [overscroll-behavior:contain]"
           >
             {/* Header */}
             <div className="bg-white px-6 py-5 md:px-8 md:py-6 border-b border-gray-100 flex items-center justify-between shadow-sm/50 shrink-0 z-20">

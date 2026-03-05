@@ -14,6 +14,8 @@ export default function FloatingScrollTrigger({ onClick }: Props) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 50 }}
       onClick={onClick}
+      whileHover={{ scale: 1.05, y: -5 }}
+      whileTap={{ scale: 0.95 }}
       className="fixed bottom-28 md:bottom-8 right-3 md:right-8 z-40 group"
     >
       <div className="relative flex items-center gap-2 md:gap-3">

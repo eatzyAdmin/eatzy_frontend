@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import {
   User, Wallet, ShieldCheck,
@@ -27,6 +27,14 @@ export default function MagazineProfileContent({ onLogout }: { onLogout: () => v
   const { user } = useAuth();
   const { profile, isLoading } = useCustomerProfile();
   const { containerRef, rect, style, moveHighlight, clearHover } = useHoverHighlight<HTMLDivElement>();
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top when tab changes
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [activeId]);
 
   // Fallback to mock data if loading or error for display consistency, but we prefer real data
   const profileData: ICustomerProfileDisplay = {
@@ -147,8 +155,8 @@ export default function MagazineProfileContent({ onLogout }: { onLogout: () => v
                         <item.icon className="w-5 h-5" />
                       </div>
 
-                      <span className={`flex-1 text-left text-base font-bold uppercase transition-all tracking-wide ${activeId === item.id ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'
-                        }`} style={{ fontFamily: "var(--font-anton), var(--font-sans)" }}>
+                      <span className={`flex-1 text-left text-base font-bold transition-all ${activeId === item.id ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'
+                        }`}>
                         {item.label}
                       </span>
 
@@ -180,7 +188,7 @@ export default function MagazineProfileContent({ onLogout }: { onLogout: () => v
               <div className="w-11 h-11 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center transition-all group-hover:bg-red-500 group-hover:text-white group-hover:shadow-lg group-hover:shadow-red-500/20">
                 <LogOut className="w-5 h-5" />
               </div>
-              <span className="flex-1 text-left text-base font-bold uppercase tracking-tight" style={{ fontFamily: "var(--font-anton), var(--font-sans)" }}>
+              <span className="flex-1 text-left text-base font-bold">
                 Đăng xuất
               </span>
               <ChevronRight className="w-4 h-4 text-red-200 group-hover:translate-x-0 transition-all -translate-x-1 opacity-0 group-hover:opacity-100" />
@@ -190,7 +198,10 @@ export default function MagazineProfileContent({ onLogout }: { onLogout: () => v
       </div>
 
       {/* RIGHT COLUMN: Main Content Area */}
-      <div className="flex-1 bg-white rounded-[44px] shadow-[0_8px_40px_rgba(0,0,0,0.04)] border border-gray-100/50 p-8 h-full relative overflow-y-auto overflow-x-hidden no-scrollbar backdrop-blur-3xl">
+      <div
+        ref={contentRef}
+        className="flex-1 bg-white rounded-[44px] shadow-[0_8px_40px_rgba(0,0,0,0.04)] border border-gray-100/50 p-8 h-full relative overflow-y-auto overflow-x-hidden no-scrollbar backdrop-blur-3xl"
+      >
         {/* Abstract Background Accents */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] -mr-64 -mt-64 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full blur-[100px] -ml-48 -mb-48 pointer-events-none" />

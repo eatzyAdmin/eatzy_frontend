@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { ArrowLeft, Heart, Search, X, Store } from "@repo/ui/icons";
+import { ArrowLeft, Heart, Search, X, Store, CheckCircle2 } from "@repo/ui/icons";
 import { useLoading, RestaurantCardShimmer } from "@repo/ui";
 import type { Restaurant, FavoriteResponse } from "@repo/types";
 import FavoriteRestaurantCard from "@/features/favorites/components/FavoriteRestaurantCard";
@@ -109,12 +109,14 @@ export default function FavoritesPage() {
         <div className="max-w-[1400px] mx-auto px-3 md:px-8">
           {/* Page Title & Back Button (Scrollable) */}
           <div className="flex items-center gap-4 py-3 pb-0 md:pt-20">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => router.back()}
               className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center group flex-shrink-0"
             >
               <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
-            </button>
+            </motion.button>
             <div>
               <h1
                 className="text-[32px] md:text-[56px] font-bold leading-tight text-[#1A1A1A]"
@@ -134,7 +136,7 @@ export default function FavoritesPage() {
 
           {/* Sticky Toolbar (Search) */}
           <div
-            className={`sticky z-40 bg-[#F7F7F7]/95 backdrop-blur-md -mx-4 px-4 md:-mx-8 md:px-8 py-4 mb-2 md:mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all duration-300 ease-in-out ${isTopHeaderVisible ? 'top-0 md:top-[80px]' : 'top-0'
+            className={`sticky z-40 bg-[#F7F7F7]/95 backdrop-blur-md -mx-4 px-4 md:-mx-8 md:px-8 py-4 mb-2 md:mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all duration-300 ease-in-out [mask-image:linear-gradient(to_bottom,black_90%,transparent)] ${isTopHeaderVisible ? 'top-0 md:top-[80px]' : 'top-0 border-b border-gray-200/50 shadow-sm'
               }`}
           >
             <div className="flex-1 max-w-lg relative group">
@@ -238,6 +240,17 @@ export default function FavoritesPage() {
                   Try searching with different keywords
                 </p>
               </motion.div>
+            )}
+
+            {!isFavoritesLoading && filteredRestaurants.length >= 5 && (
+              <div className="py-12 flex items-center justify-center gap-4 opacity-30">
+                <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-24" />
+                <div className="flex flex-col items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-gray-400" />
+                  <span className="text-[14px] font-bold text-gray-400 uppercase font-anton tracking-wider">End of list</span>
+                </div>
+                <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-24" />
+              </div>
             )}
           </div>
         </div>

@@ -42,6 +42,8 @@ interface LocationPickerModalProps {
 const _X_T = "cGsuZXlKMUlqb2libWRvYjJGdVoyaHBaVzRpTENKaElqb2lZMjFwWkcwNGNtTnhNRGczWXpKdWNURnZkemd5WXpWNVppSjkuYWRKRjY5QnpMVGttWlp5c01YZ1Vodw==";
 const MAPBOX_TOKEN = typeof window !== 'undefined' ? atob(_X_T) : Buffer.from(_X_T, 'base64').toString();
 
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
+
 // ======== Component ========
 
 export default function LocationPickerModal({
@@ -51,9 +53,34 @@ export default function LocationPickerModal({
   initialLocation,
   initialAddress,
 }: LocationPickerModalProps) {
+  useMobileBackHandler(isOpen, onClose);
+
   // State
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+
+  // Body scroll lock
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+      document.body.style.height = '100vh';
+      document.body.style.touchAction = 'none';
+    } else {
+      // Small delay to prevent sudden transition if another modal opens or to ensure clean exit
+      const timer = setTimeout(() => {
+        // Fix: Use correct CSS selector escaping for Tailwind brackets
+        const otherModals = document.querySelector('.fixed[class*="z-[70]"]');
+        if (!otherModals) {
+          document.body.classList.remove('modal-open');
+          document.body.style.overflow = '';
+          document.body.style.height = '';
+          document.body.style.touchAction = '';
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<PlaceSuggestion | null>(null);
   const [mapPosition, setMapPosition] = useState<{ lng: number; lat: number } | undefined>(
@@ -278,7 +305,7 @@ export default function LocationPickerModal({
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-[#F8F9FA] w-full max-w-full md:max-w-6xl h-[100vh] md:h-[90vh] max-h-full md:max-h-[800px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20"
+              className="relative bg-[#F8F9FA] w-full max-w-full md:max-w-6xl h-[100vh] md:h-[90vh] max-h-full md:max-h-[800px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20 [overscroll-behavior:contain]"
             >
               {/* Header */}
               <div className="bg-white px-4 md:px-8 py-4 md:py-6 border-b border-gray-100 flex items-center justify-between sticky top-0 z-10 shadow-sm/50">
@@ -289,12 +316,14 @@ export default function LocationPickerModal({
                   </div>
                 </div>
 
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={onClose}
                   className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-700 hover:bg-gray-200 transition-all duration-300"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </motion.button>
               </div>
 
               {/* Body Layout */}
@@ -319,7 +348,7 @@ export default function LocationPickerModal({
                         onChange={(e) => handleSearchChange(e.target.value)}
                         onKeyDown={handleSearchKeyDown}
                         placeholder="Tìm kiếm địa điểm, tòa nhà, đường..."
-                        className="w-full h-14 pl-14 pr-4 rounded-[24px] bg-white border border-gray-200 focus:border-lime-500 focus:ring-4 focus:ring-lime-500/10 outline-none transition-all text-[#1A1A1A] font-medium placeholder:text-gray-400 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
+                        className="w-full h-14 pl-14 pr-4 rounded-[24px] bg-white border border-gray-200 focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 outline-none transition-all text-[#1A1A1A] font-medium placeholder:text-gray-400 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
                       />
                       {/* Suggestions Dropdown */}
                       <AnimatePresence>

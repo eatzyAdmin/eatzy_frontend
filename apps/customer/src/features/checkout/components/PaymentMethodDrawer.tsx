@@ -4,6 +4,8 @@ import { X, CheckCircle2 } from "@repo/ui/icons";
 import type { PaymentMethod } from "@repo/types";
 import { formatVnd } from "@repo/lib";
 import { useState, useEffect } from "react";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
+
 
 interface PaymentMethodDrawerProps {
   isOpen: boolean;
@@ -22,7 +24,9 @@ export default function PaymentMethodDrawer({
   onChange,
   balance,
 }: PaymentMethodDrawerProps) {
+  useMobileBackHandler(isOpen, onClose);
   const [tempSelected, setTempSelected] = useState<PaymentMethod>(selectedValue);
+
 
   useEffect(() => {
     if (isOpen) {

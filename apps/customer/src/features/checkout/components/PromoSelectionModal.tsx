@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "@repo/ui/motion";
 import { X, Tag, Truck, Loader2 } from "@repo/ui/icons";
 import type { Voucher } from "@repo/types";
 import PromoVoucherCard from "./PromoVoucherCard";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 interface PromoSelectionModalProps {
   isOpen: boolean;
@@ -36,6 +37,8 @@ export default function PromoSelectionModal({
   currentOrderValue,
   restaurant,
 }: PromoSelectionModalProps) {
+  useMobileBackHandler(isOpen, onClose);
+
   return (
     <AnimatePresence>
       {isOpen && (

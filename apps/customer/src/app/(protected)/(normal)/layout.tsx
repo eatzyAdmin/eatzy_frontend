@@ -11,8 +11,10 @@ import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useSearch } from "@/features/search/hooks/useSearch";
 import BottomNav from "@/features/navigation/components/BottomNav";
 import { BottomNavProvider } from "@/features/navigation/context/BottomNavContext";
+import { useMobileExitGuard } from "@/hooks/useMobileExitGuard";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  useMobileExitGuard();
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -66,6 +68,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [shouldSlideHeader, isProfile]);
 
+  useEffect(() => {
+    // Reset recommended mode if we move away from home
+    if (pathname !== "/home" && isRecommendedMode) {
+      setIsRecommendedMode(false);
+    }
+  }, [pathname, isRecommendedMode]);
+
   const handleSearch = (query: string, filters?: { minPrice?: number; maxPrice?: number; sort?: string; category?: string | null }) => {
     performSearch(query, filters);
   };
@@ -73,6 +82,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isSearchMode) setSearchOpen(false);
   }, [isSearchMode]);
+
+  // Handle body scroll locking when any overlay is open
+  useEffect(() => {
+    const isAnyOverlayOpen = cartOpen || menuOpen || searchOpen || ordersOpen;
+    if (isAnyOverlayOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.height = '100vh';
+      document.body.style.touchAction = 'none';
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+      document.body.style.touchAction = '';
+      document.body.classList.remove('modal-open');
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+      document.body.style.touchAction = '';
+      document.body.classList.remove('modal-open');
+    };
+  }, [cartOpen, menuOpen, searchOpen, ordersOpen]);
 
   return (
     <BottomNavProvider>
@@ -84,7 +116,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className={`pointer-events-none fixed inset-x-0 top-0 h-16 md:h-20 z-[20] [mask-image:linear-gradient(to_bottom,black_70%,transparent)] ${(isOrderHistory || isFavorites) ? "bg-[#F7F7F7]/95 backdrop-blur-md" : "backdrop-blur-xl"
+              className={`pointer-events-none fixed inset-x-0 top-0 h-16 md:h-20 z-[20] max-md:[mask-image:linear-gradient(to_bottom,black_70%,transparent)] ${(isOrderHistory || isFavorites) ? "bg-[#F7F7F7]/95 backdrop-blur-md" : "backdrop-blur-xl"
                 } ${(isRestaurantDetail || isOrderHistory || isFavorites) ? "hidden md:block" : ""}`}
             />
           )}
