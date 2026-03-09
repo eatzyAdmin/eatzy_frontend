@@ -17,11 +17,12 @@ export const reviewApi = {
    * Get all reviews with pagination and filtering
    * GET /api/v1/reviews
    */
-  getAllReviews: (params?: { page?: number; size?: number; filter?: string }) => {
+  getAllReviews: (params?: { page?: number; size?: number; filter?: string; sort?: string }) => {
     const queryParams = new URLSearchParams();
     if (params?.page !== undefined) queryParams.append('page', params.page.toString());
     if (params?.size !== undefined) queryParams.append('size', params.size.toString());
     if (params?.filter) queryParams.append('filter', params.filter);
+    if (params?.sort) queryParams.append('sort', params.sort);
 
     return http.get<IBackendRes<{ result: ReviewDTO[]; meta: { page: number; pages: number; total: number } }>>(
       `/api/v1/reviews${queryParams.toString() ? `?${queryParams.toString()}` : ''}`

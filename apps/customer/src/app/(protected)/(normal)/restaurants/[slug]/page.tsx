@@ -12,7 +12,7 @@ import type { Restaurant, Dish, MenuCategory } from "@repo/types";
 import { useRestaurantCart } from "@/features/cart/hooks/useCart";
 import { useRestaurantWithMenu } from "@/features/restaurant";
 import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer";
-import { ReviewsModal } from "@/features/search/components/ReviewsModal";
+import { ReviewsModal } from "@/features/restaurant/components/ReviewsModal";
 import FloatingRestaurantCart from "@/features/cart/components/FloatingRestaurantCart";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
 import { RestaurantHeader } from "@/features/restaurant/components/RestaurantHeader";

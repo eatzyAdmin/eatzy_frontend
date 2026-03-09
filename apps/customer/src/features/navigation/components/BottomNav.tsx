@@ -19,9 +19,9 @@ export default function BottomNav({ onCurrentOrdersClick, isOrdersOpen }: Bottom
   const tabs = [
     { name: 'Current Order', icon: Truck, action: onCurrentOrdersClick, id: 'orders', isActiveOverride: isOrdersOpen },
     { name: 'History', icon: History, path: '/order-history', id: 'history' },
+    { name: 'Home', icon: Home, path: '/home', id: 'home' },
     { name: 'Favorites', icon: Heart, path: '/favorites', id: 'favorites' },
     { name: 'Profile', icon: User, path: '/profile', id: 'profile' },
-    { name: 'Home', icon: Home, path: '/home', id: 'home' },
   ];
 
   return (

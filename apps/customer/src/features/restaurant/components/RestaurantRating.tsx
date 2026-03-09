@@ -16,6 +16,8 @@ export const RestaurantRating: React.FC<RestaurantRatingProps> = ({
   variant
 }) => {
   if (!rating) return null;
+  const numericRating = Number(rating);
+  const formattedRating = numericRating.toFixed(1).replace('.', ',');
 
   if (variant === 'mobile-badge') {
     return (
@@ -29,7 +31,7 @@ export const RestaurantRating: React.FC<RestaurantRatingProps> = ({
           <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
         </div>
         <div className="flex items-center gap-1">
-          <span className="text-[15px] font-anton text-[#1A1A1A] leading-none pt-0.5">{rating}</span>
+          <span className="text-[15px] font-anton text-[#1A1A1A] leading-none pt-0.5">{formattedRating}</span>
           <ChevronRight className="w-3 h-3 text-gray-300" />
         </div>
       </motion.button>
@@ -54,7 +56,7 @@ export const RestaurantRating: React.FC<RestaurantRatingProps> = ({
         <div className="flex flex-col items-center">
           <div className="flex items-center gap-2">
             <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
-            <span className="text-[28px] font-anton text-[#1A1A1A] leading-none pt-1">{rating}</span>
+            <span className="text-[28px] font-anton text-[#1A1A1A] leading-none pt-1">{formattedRating}</span>
           </div>
         </div>
         <div className="h-8 w-[1px] bg-[#1A1A1A]/10 mx-1" />
@@ -65,7 +67,7 @@ export const RestaurantRating: React.FC<RestaurantRatingProps> = ({
               <Star
                 key={i}
                 size={8}
-                className={i < Math.floor(Number(rating)) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+                className={i < Math.floor(numericRating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
               />
             ))}
           </div>

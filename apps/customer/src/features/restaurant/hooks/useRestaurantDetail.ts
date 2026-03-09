@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { restaurantDetailApi, type RestaurantDetail, type RestaurantMenu } from '@repo/api';
-import type { Dish, MenuCategory, Restaurant } from '@repo/types';
+import { restaurantDetailApi } from '@repo/api';
+import type { Dish, MenuCategory, Restaurant, RestaurantDetail, RestaurantMenu } from '@repo/types';
 import { useMemo } from 'react';
 
 // ======== Query Keys ========
@@ -21,7 +21,7 @@ export const restaurantDetailKeys = {
  */
 function toRestaurantType(detail: RestaurantDetail): Restaurant {
   return {
-    id: detail.id,
+    id: Number(detail.id),
     name: detail.name,
     slug: detail.slug,
     address: detail.address || '',
@@ -33,6 +33,12 @@ function toRestaurantType(detail: RestaurantDetail): Restaurant {
     categories: [], // Categories are fetched separately via menu API
     status: (detail.status as 'OPEN' | 'CLOSED' | 'LOCKED') || 'OPEN',
     reviewCount: detail.reviewCount || 0,
+    averageRating: detail.rating,
+    oneStarCount: detail.oneStarCount,
+    twoStarCount: detail.twoStarCount,
+    threeStarCount: detail.threeStarCount,
+    fourStarCount: detail.fourStarCount,
+    fiveStarCount: detail.fiveStarCount,
   };
 }
 
