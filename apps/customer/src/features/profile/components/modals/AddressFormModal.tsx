@@ -324,11 +324,11 @@ export default function AddressFormModal({
                 />
               </div>
 
-              {/* Body Layout - 100% matched from LocationPickerModal */}
-              <div className="flex-1 overflow-y-auto md:overflow-hidden grid grid-cols-1 md:grid-cols-[60%_40%] pl-4 md:pl-8 py-4 md:pb-8 pr-4 md:pr-14 gap-4 md:gap-6">
+              {/* Body Layout - Updated for mobile integration */}
+              <div className="flex-1 overflow-y-auto md:overflow-hidden grid grid-cols-1 md:grid-cols-[60%_40%] pl-3 md:pl-8 pt-1 md:py-4 pb-0 md:pb-8 pr-3 md:pr-14 gap-2 md:gap-6">
 
-                {/* Left Column: Search & Map */}
-                <div className="flex flex-col h-full min-h-0 space-y-5">
+                {/* Left Column: Search & Map (Mobile: Search & Combined Block) */}
+                <div className="flex flex-col flex-1 md:h-full min-h-0 space-y-2 md:space-y-5">
                   {/* Search Bar */}
                   <div className="relative z-20">
                     <div className="relative">
@@ -345,8 +345,8 @@ export default function AddressFormModal({
                         value={searchQuery}
                         onChange={(e) => handleSearchChange(e.target.value)}
                         onKeyDown={handleSearchKeyDown}
-                        placeholder="Tìm kiếm địa điểm, tòa nhà, đường..."
-                        className="w-full h-14 pl-14 pr-4 rounded-[24px] bg-white border border-gray-200 focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 outline-none transition-all text-[#1A1A1A] font-medium placeholder:text-gray-400 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
+                        placeholder="Search by address, building, street..."
+                        className="w-full h-14 pl-14 pr-4 rounded-[22px] bg-slate-50 border-2 border-white focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 outline-none transition-all text-lg font-bold font-anton text-gray-900 placeholder:text-gray-300 shadow-[inset_0_0_20px_rgba(0,0,0,0.06)]"
                       />
                       {/* Suggestions Dropdown */}
                       <AnimatePresence>
@@ -380,8 +380,70 @@ export default function AddressFormModal({
                     </div>
                   </div>
 
-                  {/* Map */}
-                  <div className="w-full h-64 md:h-auto md:flex-1 relative rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 bg-gray-50">
+                  {/* Mobile Only: Integrated Map & Nearby Places Block (Checkout Sidebar Style) */}
+                  <div className="md:hidden flex flex-1 flex-col min-h-0 rounded-[32px] overflow-hidden border border-gray-100 shadow-sm bg-white mb-2">
+                    {/* Map Section - Flush with edges but keeping internal rounding */}
+                    <div className="relative aspect-[16/9] shrink-0 rounded-[28px] overflow-hidden bg-white border-b border-gray-100/80 transition-all">
+                      <MapViewForPicker
+                        pickupPos={mapPosition}
+                        onPickupChange={handleMapPositionChange}
+                        onPlacesChange={handleNearbyPlacesChange}
+                        flyVersion={flyVersion}
+                      />
+                      <button
+                        onClick={handleLocateUser}
+                        disabled={isLocating}
+                        className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-95 disabled:opacity-50"
+                      >
+                        {isLocating ? (
+                          <Loader2 className="w-4 h-4 text-gray-600 animate-spin" />
+                        ) : (
+                          <LocateFixed className="w-4 h-4 text-gray-700" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Nearby Places Section */}
+                    <div className="relative w-full flex-1 min-h-0 flex flex-col">
+                      <div className="flex-1 overflow-y-auto no-scrollbar p-3 space-y-2">
+                        {nearbyPlaces.length > 0 ? (
+                          nearbyPlaces.map((p, idx) => {
+                            const selected = selectedPlace?.id === p.id;
+                            return (
+                              <motion.div
+                                key={p.id}
+                                layout
+                                initial={{ opacity: 0, y: 4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                onClick={() => handleSelectNearbyPlace(idx, p)}
+                                className={`relative p-3.5 rounded-[24px] cursor-pointer border transition-all duration-200 ${selected ? 'bg-lime-50 border-lime-200 shadow-sm' : 'bg-white border-gray-100'}`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${selected ? 'bg-lime-100 text-lime-700' : 'bg-gray-100 text-gray-500'}`}>
+                                    {selected ? <Hand className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className={`text-[14px] font-bold truncate ${selected ? 'text-[#1A1A1A]' : 'text-gray-600'}`}>{p.text}</div>
+                                    <div className="text-gray-400 text-[11px] font-medium truncate mt-0.5">
+                                      {p.place_name}
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            );
+                          })
+                        ) : (
+                          <div className="py-10 flex flex-col items-center justify-center text-gray-400 gap-2">
+                            <Loader2 className="w-5 h-5 animate-spin opacity-50" />
+                            <span className="text-[10px] font-medium uppercase tracking-widest text-[#1A1A1A]/30">Searching nearby...</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Desktop Only: Original Map */}
+                  <div className="hidden md:block flex-1 relative rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 bg-gray-50">
                     <MapViewForPicker
                       pickupPos={mapPosition}
                       onPickupChange={handleMapPositionChange}
@@ -404,10 +466,10 @@ export default function AddressFormModal({
                   </div>
                 </div>
 
-                {/* Right Column: Nearby Places & Confirm */}
-                <div className="flex flex-col h-full min-h-0 space-y-5">
-                  {/* Nearby Places List */}
-                  <div className="flex-1 min-h-[250px] md:min-h-0 bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col order-1 md:order-none">
+                {/* Right Column: Nearby Places & Confirm (Desktop ONLY for Nearby) */}
+                <div className="flex flex-col h-fit md:h-full min-h-0 space-y-5">
+                  {/* Desktop Nearby Places List */}
+                  <div className="hidden md:flex flex-1 min-h-0 bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex-col">
                     <div className="px-6 py-4 pb-0 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30 shrink-0">
                       <Store className="w-5 h-5 text-gray-400" />
                       <h4 className="font-bold text-[#1A1A1A] text-base">Địa điểm gần đây</h4>
@@ -452,8 +514,8 @@ export default function AddressFormModal({
                     </div>
                   </div>
 
-                  {/* Current Selection Card */}
-                  <div className="bg-white rounded-[28px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col gap-4 shrink-0 order-2 md:order-none">
+                  {/* Current Selection Card (Desktop Only View - Fixed position on mobile below) */}
+                  <div className="hidden md:flex bg-white rounded-[28px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex-col gap-4 shrink-0">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-2xl bg-lime-50 border border-lime-100 flex items-center justify-center flex-shrink-0">
                         <Navigation className="w-5 h-5 text-lime-600" />
@@ -483,6 +545,30 @@ export default function AddressFormModal({
                   </div>
                 </div>
               </div>
+
+              {/* Mobile Fixed Footer Confirm Section */}
+              <div className="md:hidden sticky bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md rounded-t-[36px] border-t border-gray-100 p-3 pb-2 flex flex-col gap-3 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+                <div className="flex items-center gap-3 bg-gray-50/50 px-3 rounded-[20px] border border-gray-100/50">
+                  <div className="w-8 h-8 rounded-xl bg-lime-50 border border-lime-100 flex items-center justify-center flex-shrink-0">
+                    <Navigation className="w-4 h-4 text-lime-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-[#1A1A1A] text-[13px] leading-tight line-clamp-2 mt-0.5">
+                      {currentAddress || "Đang tải vị trí..."}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleConfirm}
+                  disabled={!mapPosition || !currentAddress || !label.trim() || isProcessing}
+                  className="w-full h-12 rounded-[20px] bg-[#1A1A1A] text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl shadow-black/10 active:scale-95"
+                >
+                  {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  {initialData ? "Lưu thay đổi" : "Thêm địa chỉ"}
+                </button>
+              </div>
+
             </motion.div>
           </motion.div>
         )}

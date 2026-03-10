@@ -253,11 +253,11 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 px-3 py-2 bg-[var(--primary)] rounded-2xl shadow-sm flex-shrink-0">
-                      <span className="text-base font-anton font-bold text-[#1A1A1A] leading-none pt-0.5">
+                    <div className="flex items-center gap-2 px-3.5 h-9 bg-[var(--primary)] rounded-full shadow-sm flex-shrink-0">
+                      <span className="text-base font-anton font-bold text-[#1A1A1A] leading-none">
                         {rating > 0 ? rating.toFixed(1).replace('.', ',') : "0,0"}
                       </span>
-                      <Star className="w-3.5 h-3.5 fill-[#1A1A1A] text-[#1A1A1A]" />
+                      <Star className="w-4 h-4 fill-[#1A1A1A] text-[#1A1A1A]" />
                     </div>
                   </div>
 
@@ -266,12 +266,13 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                     <div className="md:hidden flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 -mx-1 px-1">
                       <button
                         onClick={() => setSelectedRating(null)}
-                        className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-xs font-anton uppercase tracking-wider transition-all border-2 ${selectedRating === null
+                        className={`flex-shrink-0 flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl text-[10px] font-anton tracking-wider transition-all border-2 ${selectedRating === null
                           ? 'bg-[var(--primary)] border-[var(--primary)] text-[#1A1A1A] shadow-md shadow-primary/10'
                           : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200'
                           }`}
                       >
-                        Tất cả
+                        <span className="uppercase font-semibold">Tất cả</span>
+                        <span className="opacity-40 text-[9px] leading-tight mt-0.5">{totalReviewsCount} Reviews</span>
                       </button>
                       {[5, 4, 3, 2, 1].map((stars) => {
                         const count = ratingDistribution.find(d => d.stars === stars)?.count || 0;
@@ -279,14 +280,16 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                           <button
                             key={stars}
                             onClick={() => setSelectedRating(selectedRating === stars ? null : stars)}
-                            className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-anton uppercase tracking-wider transition-all border-2 ${selectedRating === stars
+                            className={`flex-shrink-0 flex flex-col items-center justify-center px-4 py-2.5 rounded-2xl text-[10px] font-anton tracking-wider transition-all border-2 ${selectedRating === stars
                               ? 'bg-[var(--primary)] border-[var(--primary)] text-[#1A1A1A] shadow-md shadow-primary/10'
                               : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200'
                               }`}
                           >
-                            <span>{stars}</span>
-                            <Star className={`w-3 h-3 ${selectedRating === stars ? 'fill-[#1A1A1A] text-[#1A1A1A]' : 'text-gray-400'}`} />
-                            <span className="opacity-40 ml-0.5">{count}</span>
+                            <div className="flex items-center gap-1">
+                              <span>{stars}</span>
+                              <Star className={`w-2.5 h-2.5 ${selectedRating === stars ? 'fill-[#1A1A1A] text-[#1A1A1A]' : 'text-gray-400'}`} />
+                            </div>
+                            <span className="opacity-40 text-[9px] leading-tight mt-0.5">{count} Reviews</span>
                           </button>
                         );
                       })}
@@ -396,7 +399,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ duration: 0.3 }}
-                                  className="space-y-2 md:space-y-3 pb-4 md:pb-6 border-b border-gray-100 last:border-0"
+                                  className="space-y-2 md:space-y-3 pb-4 md:pb-6 border-b border-gray-200 last:border-0"
                                 >
                                   {/* Author Info */}
                                   <div className="flex items-start gap-3">

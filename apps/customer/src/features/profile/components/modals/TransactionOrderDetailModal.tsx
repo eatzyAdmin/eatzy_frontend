@@ -17,6 +17,7 @@ import {
   OrderNotes,
 } from "@/features/orders/components/order-detail";
 import { MobileCarousel } from "@/features/orders/components/MobileCarousel";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 interface TransactionOrderDetailModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export default function TransactionOrderDetailModal({
   order,
   isLoading,
 }: TransactionOrderDetailModalProps) {
+  useMobileBackHandler(isOpen, onClose);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

@@ -62,7 +62,7 @@ export default function SavedAddressesSection() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-12"
+        className="md:space-y-12"
       >
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="hidden md:flex flex-col gap-2">
@@ -90,7 +90,7 @@ export default function SavedAddressesSection() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-2 md:gap-4">
           {addresses.length === 0 ? (
             <div className="py-20 border-2 border-dashed border-gray-100 rounded-[40px] flex flex-col items-center justify-center text-gray-400 bg-slate-50/30">
               <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm">
@@ -107,52 +107,79 @@ export default function SavedAddressesSection() {
                   key={addr.id}
                   onClick={() => handleOpenEdit(addr)}
                   whileTap={{ scale: 0.98 }}
-                  className="group relative bg-[#F8F9FA] border-2 border-transparent hover:bg-slate-100/70 p-5 rounded-[32px] transition-all duration-300 hover:shadow-md cursor-pointer active:scale-[0.98]"
+                  className="group relative w-full h-[120px] md:h-[120px] flex flex-row overflow-hidden rounded-[36px] md:rounded-[40px] cursor-pointer transition-all duration-500 bg-white md:bg-white shadow-[0_4px_25px_rgba(0,0,0,0.08)] md:shadow-[0_0_25px_rgba(0,0,0,0.10)] hover:bg-gray-50/50 hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
                 >
-                  <div className="flex items-center gap-6">
-                    {/* Left: Icon Box */}
-                    <div className="w-14 h-14 rounded-[20px] bg-white border border-gray-100 shadow-sm flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-500">
-                      <Icon className="w-7 h-7 text-lime-600" />
-                    </div>
+                  {/* Visual Identity Section (Left) - Similar to CartItemCard */}
+                  <div className="relative w-28 md:w-32 h-full flex-shrink-0 bg-slate-50 flex items-center justify-center border-r border-gray-100 overflow-hidden">
+                    <div className="absolute inset-0 bg-lime-50/30 md:group-hover:bg-lime-50/50 transition-colors duration-500" />
+                    <Icon className="w-8 h-8 md:w-10 md:h-10 text-lime-600 relative z-10 transition-transform duration-500 md:group-hover:scale-110" />
 
-                    {/* Middle: Content */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-bold text-[#1A1A1A] mb-1 tracking-tight group-hover:text-lime-600 transition-colors">
-                        {addr.label}
-                      </h3>
-                      <div className="flex items-baseline gap-2">
-                        <p className="text-gray-500 font-medium text-sm truncate pr-8">
-                          {addr.address_line || addr.addressLine}
-                        </p>
+                    {/* Decorative Badge - Like ChefHat in CartItemCard */}
+                    <div className="absolute top-3 left-3 z-10">
+                      <div className="flex items-center gap-1 bg-white/95 backdrop-blur-sm pl-1 pr-2 py-0.5 rounded-full shadow-md border border-lime-500/10">
+                        <div className="w-4 h-4 rounded-full bg-lime-500/10 flex items-center justify-center">
+                          <MapPin className="w-2.5 h-2.5 text-lime-600" strokeWidth={3} />
+                        </div>
+                        <span className="text-[8px] font-black font-anton uppercase text-lime-600 tracking-wide">
+                          SAVED
+                        </span>
                       </div>
-                    </div>
-
-                    {/* Right: Actions (Hidden until hover) */}
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-500 pr-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenEdit(addr);
-                        }}
-                        className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-500 shadow-sm hover:shadow-lg hover:bg-[#1A1A1A] hover:text-white hover:border-[#1A1A1A] transition-all duration-300"
-                      >
-                        <Edit3 size={18} style={{ strokeWidth: 2.5 }} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(addr);
-                        }}
-                        disabled={isDeleting}
-                        className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-red-500 shadow-sm hover:shadow-lg hover:bg-red-500 hover:text-white hover:border-red-500 transition-all duration-300"
-                      >
-                        <Trash2 size={18} style={{ strokeWidth: 2.5 }} />
-                      </button>
-                      <div className="w-px h-8 bg-gray-100 mx-1" />
-                      <ChevronRight className="w-5 h-5 text-gray-200 group-hover:text-lime-500 group-hover:translate-x-1 transition-all" />
                     </div>
                   </div>
 
+                  {/* Info Section (Right) */}
+                  <div className="flex-1 p-3.5 md:p-5 flex flex-col justify-between min-w-0 pr-12 md:pr-14">
+                    <div className="space-y-0.5">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 mb-1.5 md:mb-1 text-gray-400">
+                          <span className="text-[8px] font-black uppercase tracking-widest leading-none">Vị trí</span>
+                        </div>
+                        <h4 className="font-bold text-[#1A1A1A] text-base md:text-lg tracking-tight leading-tight truncate md:group-hover:text-lime-600 transition-colors">
+                          {addr.label}
+                        </h4>
+                      </div>
+
+                      <p className="text-[11px] md:text-[13px] text-gray-500 font-medium line-clamp-3 md:line-clamp-1 opacity-80 mt-1">
+                        {addr.address_line || addr.addressLine}
+                      </p>
+                    </div>
+
+
+                  </div>
+
+                  {/* Actions Header - Positioned Top Right */}
+                  <div className="absolute top-3 right-3 md:top-4 md:right-4 z-20 flex md:flex-row-reverse items-center gap-1.5">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(addr);
+                      }}
+                      disabled={isDeleting}
+                      className="w-9 h-9 rounded-2xl bg-red-50 md:bg-gray-100/80 flex items-center justify-center text-red-500 md:text-gray-400 shadow-sm transition-all md:hover:bg-red-500 md:hover:text-white md:hover:shadow-lg active:scale-90"
+                    >
+                      <Trash2 size={16} strokeWidth={2.5} />
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenEdit(addr);
+                      }}
+                      className="hidden md:flex w-9 h-9 rounded-2xl bg-gray-100/80 items-center justify-center text-gray-400 shadow-sm transition-all hover:bg-[#1A1A1A] hover:text-white hover:shadow-lg active:scale-90"
+                    >
+                      <Edit3 size={16} strokeWidth={2.5} />
+                    </button>
+                  </div>
+
+                  {/* Desktop Only Chevron Link - Bottom Right */}
+                  <div className="hidden md:flex absolute bottom-4 right-4 z-20 items-center gap-2 overflow-hidden pointer-events-none md:group-hover:pointer-events-auto">
+                    <span className="text-[10px] font-black text-lime-600 uppercase tracking-widest translate-x-10 opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 transition-all duration-500 ease-out">
+                      Cập nhật
+                    </span>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center md:group-hover:bg-lime-500 md:group-hover:text-black transition-all duration-300">
+                      <ChevronRight className="w-4 h-4 transition-transform md:group-hover:translate-x-1" strokeWidth={3} />
+                    </div>
+                  </div>
                 </motion.div>
               );
             })
@@ -165,9 +192,9 @@ export default function SavedAddressesSection() {
         <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-100 z-50">
           <button
             onClick={handleOpenAdd}
-            className="px-8 py-4 bg-[#1A1A1A] text-white font-anton text-sm uppercase tracking-wider rounded-[24px] hover:bg-lime-500 hover:text-black transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 w-full"
+            className="px-8 py-4 bg-[#1A1A1A] text-white font-bold text-sm rounded-[24px] hover:bg-lime-500 hover:text-black transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 w-full"
           >
-            <Plus size={18} />
+            <Plus size={18} strokeWidth={3} />
             Thêm địa chỉ mới
           </button>
         </div>

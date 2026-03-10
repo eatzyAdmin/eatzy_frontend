@@ -12,41 +12,47 @@ export function useMobileBackHandler(isOpen: boolean, onBack: () => void) {
   const onBackRef = useRef(onBack);
   onBackRef.current = onBack;
   const isBackTriggeredRef = useRef(false);
+  const stateIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Only handle on mobile (desktop follows normal flow)
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-    if (!isMobile || !isOpen) return;
+    if (!isMobile) return;
 
-    // We are OPEN.
-    const stateId = `mb-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    window.history.pushState({ mobileBackId: stateId }, "");
-    isBackTriggeredRef.current = false;
-
-    const handlePopState = (e: PopStateEvent) => {
-      // If the current history state is NO LONGER our specific ID,
-      // it means our history entry was popped (user clicked back button).
-      if (window.history.state?.mobileBackId !== stateId) {
-        isBackTriggeredRef.current = true;
-        onBackRef.current();
-      }
-    };
-
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-
-      // If we are closing programmatically (e.g. 'X' button or overlay click),
-      // or the component is unmounting while open, we must remove the dummy 
-      // history entry we added to keep the history clean.
-      if (!isBackTriggeredRef.current) {
-        // Verify we're still at the top of history with our ID before popping
-        if (window.history.state?.mobileBackId === stateId) {
-          window.history.back();
-        }
-      }
+    if (isOpen) {
+      // We are OPENING.
+      const stateId = `mb-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      stateIdRef.current = stateId;
+      window.history.pushState({ mobileBackId: stateId }, "");
       isBackTriggeredRef.current = false;
-    };
-  }, [isOpen]); // ONLY re-run when open/closed status toggles
+
+      const handlePopState = (e: PopStateEvent) => {
+        // Use e.state which is the state we just LANDED on.
+        // If we landed on a state that is NOT our stateId, it means 
+        // a back action (or some navigation) occurred from our state.
+        if (e.state?.mobileBackId !== stateId) {
+          isBackTriggeredRef.current = true;
+          onBackRef.current();
+        }
+      };
+
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+
+        // If we are closing programmatically (e.g. 'X' button or overlay click),
+        // we must remove the history entry we added.
+        if (!isBackTriggeredRef.current) {
+          // Verify we're still at the top or at least that our state is the current one 
+          // before potentially affecting history.
+          if (window.history.state?.mobileBackId === stateId) {
+            window.history.back();
+          }
+        }
+        isBackTriggeredRef.current = false;
+        stateIdRef.current = null;
+      };
+    }
+  }, [isOpen]); // ONLY re-run when status toggles
 }

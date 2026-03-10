@@ -23,6 +23,7 @@ import {
 import { MobileCarousel } from "@/features/orders/components/MobileCarousel";
 import { OrderDetailDrawerShimmer } from "@repo/ui";
 import { formatVnd } from "@repo/lib";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 interface TransactionDetailDrawerProps {
   transaction: WalletTransactionResponse | null;
@@ -38,6 +39,17 @@ export default function TransactionDetailDrawer({
   const [mounted, setMounted] = useState(false);
   const [view, setView] = useState<'info' | 'order'>('info');
   const { order, isLoading, fetchOrder, clearOrder } = useOrderDetail();
+
+  // Mobile Back Handling with nested view support
+  const handleBack = () => {
+    if (view === 'order') {
+      setView('info');
+    } else {
+      onClose();
+    }
+  };
+
+  useMobileBackHandler(open, handleBack);
 
   useEffect(() => {
     setMounted(true);

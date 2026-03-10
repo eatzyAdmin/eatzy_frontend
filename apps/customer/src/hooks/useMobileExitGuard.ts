@@ -27,6 +27,10 @@ export function useMobileExitGuard() {
     window.history.pushState({ isExitGuard: true }, "");
 
     const handlePopState = (event: PopStateEvent) => {
+      // Cooperative check: If we're moving to an overlay state (modal/section), 
+      // do NOT trigger exit logic.
+      if (event.state?.mobileBackId) return;
+
       // If the current history state is NOT our exit guard, it means the user clicked back
       if (!event.state || !event.state.isExitGuard) {
         const now = Date.now();
