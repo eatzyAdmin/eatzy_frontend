@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, Search, Star, Sparkles, CheckCircle2, MessageSquare, Map, Tag, ChefHat, ChevronDown, Loader2 } from "@repo/ui/icons";
+import { X, Search, Star, Sparkles, CheckCircle2, MessageSquare, Map, Tag, ChefHat, ChevronDown, Loader2, ArrowLeft } from "@repo/ui/icons";
 import { ImageWithFallback, ReviewItemShimmer } from "@repo/ui";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import type { Restaurant } from "@repo/types";
@@ -22,6 +22,24 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  // Close sort dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setIsSortOpen(false);
+      }
+    };
+
+    if (isSortOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSortOpen]);
 
   // Fetch reviews from API with filters
   const { reviews, isFetching, isError, error } = useRestaurantReviews(restaurant.name || null, {
@@ -116,31 +134,46 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 100, damping: 18 }}
-              className="w-full max-w-[1050px] h-[100dvh] md:h-[90vh] bg-white md:rounded-[36px] shadow-2xl flex flex-col overflow-hidden"
+              className="w-full max-w-[1050px] h-[100dvh] md:h-[90vh] bg-[#F7F7F7] md:bg-white md:rounded-[36px] shadow-2xl flex flex-col overflow-hidden"
             >
-              {/* Fixed Header with Close Button */}
-              <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white/80 backdrop-blur-md">
-                <div className="flex-1" />
-                <button
+              {/* Desktop Header - CurrentOrdersDrawer Style (Kept as before) */}
+              <div className="hidden md:flex bg-white px-8 py-6 border-b border-gray-100 items-center justify-between shadow-sm/50 shrink-0 z-20">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-lime-50 border border-lime-100 flex items-center justify-center">
+                    <MessageSquare className="w-6 h-6 text-lime-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-anton font-bold text-[#1A1A1A] uppercase">Restaurant Reviews</h3>
+                    <div className="text-sm font-medium text-gray-500 mt-0.5">
+                      {restaurant.name}
+                    </div>
+                  </div>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={onClose}
-                  className="p-4 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-700 hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
                 >
-                  <X className="w-5 h-5 text-gray-900" />
-                </button>
+                  <X className="w-5 h-5" />
+                </motion.button>
               </div>
+
+
+              {/* Two Column Layout with Independent Scrolling */}
 
               {/* Two Column Layout with Independent Scrolling */}
               <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
 
-                {/* Left Column - Scrollable Stats */}
-                <div className="w-full md:w-[380px] flex-shrink-0 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col md:block bg-white h-full overflow-y-auto custom-scrollbar">
+                {/* Left Column - Scrollable Stats - Hidden on Mobile */}
+                <div className="hidden md:block w-[380px] flex-shrink-0 border-r border-gray-200 bg-white h-full overflow-y-auto custom-scrollbar">
                   <div className="p-6 md:p-8 space-y-8">
 
-                    {/* Hero Rating - Premium Design */}
-                    <div className="text-center bg-gray-50 rounded-[28px] p-6 border border-gray-100">
+                    {/* Hero Rating - Premium Design - Desktop only */}
+                    <div className="hidden md:block text-center bg-gray-50 rounded-[28px] p-6 border border-gray-100">
                       <div className="flex items-center justify-center gap-4 mb-3">
                         <span className="text-3xl md:text-4xl drop-shadow-md">🏆</span>
-                        <div className="text-[60px] md:text-[80px] leading-none font-anton font-bold text-[#1A1A1A] tracking-tighter drop-shadow-sm">
+                        <div className="text-[44px] md:text-[80px] leading-none font-anton font-bold text-[#1A1A1A] tracking-tighter drop-shadow-sm">
                           {rating > 0 ? rating.toFixed(1).replace('.', ',') : "0,0"}
                         </div>
                         <span className="text-3xl md:text-4xl drop-shadow-md">🏆</span>
@@ -153,8 +186,8 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                       </p>
                     </div>
 
-                    {/* Rating Distribution - Improved Design */}
-                    <div className="space-y-3">
+                    {/* Rating Distribution - Improved Design - Desktop only */}
+                    <div className="hidden md:block space-y-3">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="font-anton font-bold text-[#1A1A1A] uppercase text-lg">Rating Breakdown</h4>
                         {selectedRating !== null && (
@@ -171,7 +204,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                         <div
                           key={item.stars}
                           onClick={() => setSelectedRating(selectedRating === item.stars ? null : item.stars)}
-                          className={`flex items-center gap-3 cursor-pointer p-2 rounded-xl transition-all ${selectedRating === item.stars ? 'bg-gray-100 ring-2 ring-gray-100' : 'hover:bg-gray-50'
+                          className={`flex items-center gap-3 cursor-pointer p-2 rounded-xl transition-all ${selectedRating === item.stars ? 'bg-gray-100 ring-2 ring-[var(--primary)]/20' : 'hover:bg-gray-50'
                             }`}
                         >
                           <div className="flex items-center gap-1 w-8 justify-center">
@@ -181,7 +214,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                             <Star size={12} className={`${selectedRating === item.stars ? 'text-yellow-500 fill-yellow-500' : 'text-gray-400'}`} />
                           </div>
 
-                          <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                          <div className={`flex-1 h-2.5 rounded-full overflow-hidden ${selectedRating === item.stars ? 'bg-white' : 'bg-gray-100'}`}>
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${item.percentage}%` }}
@@ -198,167 +231,243 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                 </div>
 
                 {/* Right Column - Scrollable Reviews */}
-                <div className="flex-1 overflow-y-auto px-5 md:pr-12 md:pl-8 py-6 relative">
-                  <div className="space-y-6">
-                    {/* Header */}
-                    <div className="flex items-center justify-between pb-4">
-                      <h2 className="text-xl font-bold text-gray-900">
-                        {displayReviews.length} lượt đánh giá
-                      </h2>
-
-                      <div className="relative">
-                        <button
-                          onClick={() => setIsSortOpen(!isSortOpen)}
-                          className="group flex items-center gap-3 px-6 py-4 bg-slate-50 border-2 border-white rounded-[24px] text-base font-bold hover:border-[var(--primary)]/20 transition-all text-[#1A1A1A] min-w-[200px] justify-between shadow-[inset_0_0_20px_rgba(0,0,0,0.05)] focus:ring-4 focus:ring-[var(--primary)]/5"
-                        >
-                          <div className="flex items-center gap-3">
-                            <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isSortOpen ? 'rotate-180 text-[var(--primary)]' : ''}`} />
-                            <div className="w-px h-4 bg-gray-200" />
-                            <span className="tracking-tight">{sortOptions.find(o => o.value === sortBy)?.label}</span>
-                          </div>
-                        </button>
-
-                        <AnimatePresence>
-                          {isSortOpen && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                              transition={{ duration: 0.2, type: "spring", damping: 20, stiffness: 300 }}
-                              className="absolute right-0 top-full mt-3 w-64 bg-white rounded-[28px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] border border-white p-3 z-30 overflow-hidden"
-                            >
-                              {sortOptions.map(option => (
-                                <button
-                                  key={option.value}
-                                  onClick={() => { setSortBy(option.value); setIsSortOpen(false); }}
-                                  className={`w-full text-left px-5 py-4 text-sm rounded-2xl transition-all flex items-center justify-between mb-1 last:mb-0 ${sortBy === option.value
-                                    ? 'text-[var(--primary)] font-bold bg-primary/10'
-                                    : 'text-gray-700 hover:bg-slate-50 font-medium'
-                                    }`}
-                                >
-                                  <span className={sortBy === option.value ? 'font-bold px-1' : 'font-medium'}>
-                                    {option.label}
-                                  </span>
-                                  {sortBy === option.value && <div className="w-2 h-2 rounded-full bg-[var(--primary)] shadow-[0_0_10px_rgba(255,190,0,0.5)]" />}
-                                </button>
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                <div className="flex-1 overflow-y-auto px-3 md:pr-12 md:pl-8 py-0 md:py-6 relative bg-[#F7F7F7] md:bg-white no-scrollbar">
+                  {/* Mobile Header - Profile Sub-header Style - Moved inside to enable blur/mask effects */}
+                  <div className="md:hidden sticky top-0 z-50 bg-[#F7F7F7]/85 backdrop-blur-md py-3 mb-2 -mx-3 px-3 flex items-center justify-between shrink-0 max-md:[mask-image:linear-gradient(to_bottom,black_85%,transparent)]">
+                    <div className="flex items-center gap-4 pl-1">
+                      <motion.button
+                        whileHover={{ scale: 1.06 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={onClose}
+                        className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center group flex-shrink-0"
+                      >
+                        <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
+                      </motion.button>
+                      <div>
+                        <h1 className="text-[28px] font-bold leading-tight text-[#1A1A1A] font-anton uppercase tracking-tight">
+                          REVIEWS
+                        </h1>
+                        <p className="text-[10px] font-medium text-gray-500 mt-0.5 line-clamp-1">
+                          {restaurant.name}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Search Bar - Matches Favorites Page Design */}
-                    <div className="relative group">
-                      <div className="absolute left-5 top-1/2 -translate-y-1/2 flex items-center gap-3 z-10">
-                        <Search className="w-5 h-5 text-gray-400 group-focus-within:text-[var(--primary)] transition-colors" />
-                        <div className="w-px h-4 bg-gray-200" />
-                      </div>
+                    <div className="flex items-center gap-1.5 px-3 py-2 bg-[var(--primary)] rounded-2xl shadow-sm flex-shrink-0">
+                      <span className="text-base font-anton font-bold text-[#1A1A1A] leading-none pt-0.5">
+                        {rating > 0 ? rating.toFixed(1).replace('.', ',') : "0,0"}
+                      </span>
+                      <Star className="w-3.5 h-3.5 fill-[#1A1A1A] text-[#1A1A1A]" />
+                    </div>
+                  </div>
 
-                      <input
-                        type="text"
-                        placeholder="Search reviews by content..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={handleSearchKeyDown}
-                        className="w-full bg-slate-50 border-2 border-white focus:border-[var(--primary)]/20 rounded-3xl py-4 pl-14 pr-12 text-lg font-bold font-anton text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/5 transition-all shadow-[inset_0_0_20px_rgba(0,0,0,0.05)]"
-                      />
-
-                      {searchQuery && (
-                        <button
-                          onClick={() => {
-                            setSearchQuery("");
-                            setActiveSearch("");
-                          }}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-all group/close"
-                        >
-                          <X className="w-4 h-4 text-gray-600 group-hover/close:rotate-90 transition-transform duration-300" />
-                        </button>
-                      )}
+                  <div className="space-y-4 md:space-y-0 px-1 md:px-0">
+                    {/* Mobile Rating Filter Badges - Visible only on mobile */}
+                    <div className="md:hidden flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 -mx-1 px-1">
+                      <button
+                        onClick={() => setSelectedRating(null)}
+                        className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-xs font-anton uppercase tracking-wider transition-all border-2 ${selectedRating === null
+                          ? 'bg-[var(--primary)] border-[var(--primary)] text-[#1A1A1A] shadow-md shadow-primary/10'
+                          : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200'
+                          }`}
+                      >
+                        Tất cả
+                      </button>
+                      {[5, 4, 3, 2, 1].map((stars) => {
+                        const count = ratingDistribution.find(d => d.stars === stars)?.count || 0;
+                        return (
+                          <button
+                            key={stars}
+                            onClick={() => setSelectedRating(selectedRating === stars ? null : stars)}
+                            className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-anton uppercase tracking-wider transition-all border-2 ${selectedRating === stars
+                              ? 'bg-[var(--primary)] border-[var(--primary)] text-[#1A1A1A] shadow-md shadow-primary/10'
+                              : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200'
+                              }`}
+                          >
+                            <span>{stars}</span>
+                            <Star className={`w-3 h-3 ${selectedRating === stars ? 'fill-[#1A1A1A] text-[#1A1A1A]' : 'text-gray-400'}`} />
+                            <span className="opacity-40 ml-0.5">{count}</span>
+                          </button>
+                        );
+                      })}
                     </div>
 
-                    {/* Content Section: Shimmer, Error, or List */}
-                    {isFetching ? (
-                      <div className="pt-2">
-                        <ReviewItemShimmer count={3} />
-                      </div>
-                    ) : isError ? (
-                      <div className="flex flex-col items-center justify-center text-center py-12">
-                        <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                          <X className="w-8 h-8 text-red-500" />
+                    <div className="space-y-4 md:space-y-6">
+                      {/* Header */}
+                      <div className="flex items-center justify-between pl-2 md:pl-0">
+                        <h2 className="text-sm md:text-xl font-bold text-gray-900">
+                          {displayReviews.length} lượt đánh giá
+                        </h2>
+
+                        <div className="relative" ref={sortRef}>
+                          <button
+                            onClick={() => setIsSortOpen(!isSortOpen)}
+                            className="group flex items-center gap-2 md:gap-3 px-4 py-2.5 md:px-6 md:py-4 bg-slate-50 border-2 border-white rounded-[20px] md:rounded-[24px] text-xs md:text-base font-bold hover:border-[var(--primary)]/20 transition-all text-[#1A1A1A] min-w-[140px] md:min-w-[200px] justify-between shadow-[inset_0_0_20px_rgba(0,0,0,0.05)] focus:ring-4 focus:ring-[var(--primary)]/5"
+                          >
+                            <div className="flex items-center gap-2 md:gap-3">
+                              <ChevronDown className={`w-4 h-4 md:w-5 md:h-5 text-gray-400 transition-transform duration-300 ${isSortOpen ? 'rotate-180 text-[var(--primary)]' : ''}`} />
+                              <div className="w-px h-3 md:h-4 bg-gray-200" />
+                              <span className="tracking-tight">{sortOptions.find(o => o.value === sortBy)?.label}</span>
+                            </div>
+                          </button>
+
+                          <AnimatePresence>
+                            {isSortOpen && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                transition={{ duration: 0.2, type: "spring", damping: 20, stiffness: 300 }}
+                                className="absolute right-0 top-full mt-3 w-64 bg-white rounded-[28px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] border border-white p-3 z-30 overflow-hidden"
+                              >
+                                {sortOptions.map(option => (
+                                  <button
+                                    key={option.value}
+                                    onClick={() => { setSortBy(option.value); setIsSortOpen(false); }}
+                                    className={`w-full text-left px-5 py-4 text-sm rounded-2xl transition-all flex items-center justify-between mb-1 last:mb-0 ${sortBy === option.value
+                                      ? 'text-[var(--primary)] font-bold bg-primary/10'
+                                      : 'text-gray-700 hover:bg-slate-50 font-medium'
+                                      }`}
+                                  >
+                                    <span className={sortBy === option.value ? 'font-bold px-1' : 'font-medium'}>
+                                      {option.label}
+                                    </span>
+                                    {sortBy === option.value && <div className="w-2 h-2 rounded-full bg-[var(--primary)] shadow-[0_0_10px_rgba(255,190,0,0.5)]" />}
+                                  </button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">Đã có lỗi xảy ra</h3>
-                        <p className="text-gray-500 mb-6 max-w-xs">{error?.message || "Không thể tải danh sách đánh giá từ máy chủ."}</p>
                       </div>
-                    ) : (
-                      <div className="space-y-6 pt-2">
-                        {displayReviews.length === 0 ? (
-                          <div className="text-center py-12 text-gray-500 text-sm font-medium">
-                            Không tìm thấy đánh giá nào khớp với yêu cầu của bạn.
-                          </div>
-                        ) : (
-                          displayReviews.map((review) => (
-                            <motion.div
-                              key={review.id}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.3 }}
-                              className="space-y-3 pb-6 border-b border-gray-100 last:border-0"
-                            >
-                              {/* Author Info */}
-                              <div className="flex items-start gap-3">
-                                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                                  <ImageWithFallback
-                                    src={review.authorAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${review.authorName}`}
-                                    alt={review.authorName}
-                                    fill
-                                    className="object-cover"
-                                  />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-bold text-gray-900 text-sm">{review.authorName}</div>
-                                  <div className="text-xs text-gray-500 font-medium">Khách hàng Eatzy</div>
-                                </div>
-                              </div>
 
-                              {/* Rating & Date */}
-                              <div className="flex items-center gap-2 text-xs">
-                                <div className="flex gap-0.5">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-3 h-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`}
-                                    />
-                                  ))}
-                                </div>
-                                <span className="text-gray-300">·</span>
-                                <span className="text-gray-500 font-medium">{review.date}</span>
-                              </div>
+                      {/* Search Bar - Matches Favorites Page Design */}
+                      <div className="relative group">
+                        <div className="absolute left-5 top-1/2 -translate-y-1/2 flex items-center gap-3 z-10">
+                          <Search className="w-5 h-5 text-gray-400 group-focus-within:text-[var(--primary)] transition-colors" />
+                        </div>
 
-                              {/* Review Content */}
-                              <p className="text-gray-700 leading-relaxed text-[15px] font-medium">
-                                {review.content}
-                              </p>
+                        <input
+                          type="text"
+                          placeholder="Search reviews by content..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onKeyDown={handleSearchKeyDown}
+                          className="w-full bg-slate-50 border-2 border-white focus:border-[var(--primary)]/20 rounded-3xl py-4 pl-14 pr-12 text-lg font-bold font-anton text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/5 transition-all shadow-[inset_0_0_20px_rgba(0,0,0,0.05)]"
+                        />
 
-                              {/* Admin Reply */}
-                              {review.reply && (
-                                <div className="mt-4 p-4 bg-gray-50 rounded-2xl border-l-4 border-[var(--primary)] space-y-2">
-                                  <div className="flex items-center gap-2 text-xs font-bold text-gray-900">
-                                    <div className="w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center text-white">
-                                      <ChefHat size={12} />
-                                    </div>
-                                    Phản hồi từ quán
-                                  </div>
-                                  <p className="text-gray-600 text-sm leading-relaxed italic">
-                                    "{review.reply}"
-                                  </p>
-                                </div>
-                              )}
-                            </motion.div>
-                          ))
+                        {searchQuery && (
+                          <button
+                            onClick={() => {
+                              setSearchQuery("");
+                              setActiveSearch("");
+                            }}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-all group/close"
+                          >
+                            <X className="w-4 h-4 text-gray-600 group-hover/close:rotate-90 transition-transform duration-300" />
+                          </button>
                         )}
                       </div>
-                    )}
+
+                      {/* Content Section: Shimmer, Error, or List */}
+                      {isFetching ? (
+                        <div className="pt-2 px-2 md:px-0">
+                          <ReviewItemShimmer count={3} />
+                        </div>
+                      ) : isError ? (
+                        <div className="flex flex-col items-center justify-center text-center py-12">
+                          <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                            <X className="w-8 h-8 text-red-500" />
+                          </div>
+                          <h3 className="text-lg font-bold text-gray-900 mb-2">Đã có lỗi xảy ra</h3>
+                          <p className="text-gray-500 mb-6 max-w-xs">{error?.message || "Không thể tải danh sách đánh giá từ máy chủ."}</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-6 pt-2 px-2">
+                          {displayReviews.length === 0 ? (
+                            <div className="text-center py-12 text-gray-500 text-sm font-medium">
+                              Không tìm thấy đánh giá nào khớp với yêu cầu của bạn.
+                            </div>
+                          ) : (
+                            <>
+                              {displayReviews.map((review) => (
+                                <motion.div
+                                  key={review.id}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="space-y-2 md:space-y-3 pb-4 md:pb-6 border-b border-gray-100 last:border-0"
+                                >
+                                  {/* Author Info */}
+                                  <div className="flex items-start gap-3">
+                                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                                      <ImageWithFallback
+                                        src={review.authorAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${review.authorName}`}
+                                        alt={review.authorName}
+                                        fill
+                                        className="object-cover"
+                                      />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="font-bold text-gray-900 text-sm">{review.authorName}</div>
+                                      <div className="text-xs text-gray-500 font-medium">Khách hàng Eatzy</div>
+                                    </div>
+                                  </div>
+
+                                  {/* Rating & Date */}
+                                  <div className="flex items-center gap-2 text-xs">
+                                    <div className="flex gap-0.5">
+                                      {[...Array(5)].map((_, i) => (
+                                        <Star
+                                          key={i}
+                                          className={`w-3 h-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`}
+                                        />
+                                      ))}
+                                    </div>
+                                    <span className="text-gray-300">·</span>
+                                    <span className="text-gray-500 font-medium">{review.date}</span>
+                                  </div>
+
+                                  {/* Review Content */}
+                                  <p className="text-gray-700 leading-relaxed text-[15px] font-medium">
+                                    {review.content}
+                                  </p>
+
+                                  {/* Admin Reply */}
+                                  {review.reply && (
+                                    <div className="mt-4 p-4 bg-gray-50 rounded-2xl border-l-4 border-[var(--primary)] space-y-0">
+                                      <div className="flex items-center gap-2 text-xs font-bold text-gray-900">
+                                        <div className="w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center text-white">
+                                          <ChefHat size={12} />
+                                        </div>
+                                        Phản hồi từ quán
+                                      </div>
+                                      <p className="text-gray-600 text-sm leading-relaxed italic">
+                                        "{review.reply}"
+                                      </p>
+                                    </div>
+                                  )}
+                                </motion.div>
+                              ))}
+
+                              {/* End of List Label - Always show if >= 3 items */}
+                              {displayReviews.length >= 3 && (
+                                <div className="py-8 flex items-center justify-center gap-4 opacity-30 flex">
+                                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-16" />
+                                  <div className="flex flex-col items-center gap-2">
+                                    <CheckCircle2 className="w-4 h-4 text-gray-400" />
+                                    <span className="text-[11px] font-bold text-gray-400 uppercase font-anton tracking-widest text-center max-w-[180px]">
+                                      End of list
+                                    </span>
+                                  </div>
+                                  <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-16" />
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
