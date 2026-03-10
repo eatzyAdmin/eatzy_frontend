@@ -355,7 +355,7 @@ export default function AddressFormModal({
                             initial={{ opacity: 0, y: 10, scale: 0.98 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                            className="absolute top-full left-0 right-0 mt-2 bg-white rounded-[24px] shadow-2xl border border-gray-100 overflow-hidden z-30 max-h-[300px] overflow-y-auto"
+                            className="absolute top-full left-0 right-0 mt-2 bg-white rounded-[24px] shadow-2xl border border-gray-100 overflow-hidden z-30 max-h-[300px] overflow-y-auto custom-scrollbar"
                           >
                             <div className="p-2 space-y-1">
                               {suggestions.map((place) => (
@@ -405,7 +405,7 @@ export default function AddressFormModal({
 
                     {/* Nearby Places Section */}
                     <div className="relative w-full flex-1 min-h-0 flex flex-col">
-                      <div className="flex-1 overflow-y-auto no-scrollbar p-3 space-y-2">
+                      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
                         {nearbyPlaces.length > 0 ? (
                           nearbyPlaces.map((p, idx) => {
                             const selected = selectedPlace?.id === p.id;
@@ -548,7 +548,7 @@ export default function AddressFormModal({
 
               {/* Mobile Fixed Footer Confirm Section */}
               <div className="md:hidden sticky bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md rounded-t-[36px] border-t border-gray-100 p-3 pb-2 flex flex-col gap-3 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-                <div className="flex items-center gap-3 bg-gray-50/50 px-3 rounded-[20px] border border-gray-100/50">
+                <div className="flex items-center gap-3 px-3 rounded-[20px]">
                   <div className="w-8 h-8 rounded-xl bg-lime-50 border border-lime-100 flex items-center justify-center flex-shrink-0">
                     <Navigation className="w-4 h-4 text-lime-600" />
                   </div>

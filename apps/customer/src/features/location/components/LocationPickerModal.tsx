@@ -310,7 +310,7 @@ export default function LocationPickerModal({
               {/* Header */}
               <div className="bg-white px-4 md:px-8 py-4 md:py-6 border-b border-gray-100 flex items-center justify-between sticky top-0 z-50 shadow-sm/50">
                 <div>
-                  <h3 className="text-2xl md:text-[40px] font-anton font-bold text-[#1A1A1A] uppercase tracking-tight leading-none">BAN MUỐN GIAO ĐẾN ĐÂU?</h3>
+                  <h3 className="text-2xl font-anton font-bold text-[#1A1A1A] uppercase">BẠN MUỐN GIAO ĐẾN ĐÂU?</h3>
                   <div className="text-xs md:text-sm font-medium text-gray-500 mt-1">
                     Kéo thả ghim hoặc tìm kiếm địa chỉ của bạn
                   </div>
@@ -401,7 +401,7 @@ export default function LocationPickerModal({
                     </div>
 
                     <div className="relative w-full flex-1 min-h-0 flex flex-col">
-                      <div className="flex-1 overflow-y-auto no-scrollbar p-3 space-y-2">
+                      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
                         {nearbyPlaces.length > 0 ? (
                           nearbyPlaces.map((p, idx) => {
                             const selected = selectedNearbyIndex === idx;
@@ -456,33 +456,48 @@ export default function LocationPickerModal({
 
                 {/* Right Column: Desktop Only Nearby Places */}
                 <div className="flex flex-col h-fit md:h-full min-h-0 space-y-5">
-                  <div className="hidden md:flex flex-1 min-h-0 bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col">
+                  <div className="hidden md:flex flex-1 min-h-0 bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex-col">
                     <div className="px-6 py-4 pb-0 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30 shrink-0">
                       <Store className="w-5 h-5 text-gray-400" />
-                      <h4 className="font-bold text-[#1A1A1A] text-base uppercase font-anton tracking-wider">Địa điểm gần đây</h4>
+                      <h4 className="font-bold text-[#1A1A1A] text-base">Địa điểm gần đây</h4>
                     </div>
                     <div className="flex-1 overflow-y-auto p-4 custom-scrollbar pr-3">
-                      {nearbyPlaces.map((p, idx) => {
-                        const selected = selectedNearbyIndex === idx;
-                        return (
-                          <motion.div
-                            key={p.id}
-                            layout
-                            onClick={() => handleSelectNearbyPlace(idx, p)}
-                            className={`p-4 rounded-[20px] cursor-pointer border transition-all duration-200 ${selected ? 'bg-lime-50 border-lime-200' : 'bg-white border-gray-100 hover:bg-gray-50'}`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${selected ? 'bg-lime-100 text-lime-700' : 'bg-gray-100 text-gray-500'}`}>
-                                {selected ? <Check className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className={`text-sm font-bold truncate ${selected ? 'text-[#1A1A1A]' : 'text-gray-600'}`}>{p.text}</div>
-                                <div className="text-xs text-gray-400 line-clamp-1 mt-0.5">{p.place_name}</div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
+                      {nearbyPlaces.length > 0 ? (
+                        <div className="space-y-2">
+                          {nearbyPlaces.map((p, idx) => {
+                            const selected = selectedNearbyIndex === idx;
+                            return (
+                              <motion.div
+                                key={p.id}
+                                layout
+                                onClick={() => handleSelectNearbyPlace(idx, p)}
+                                className={`
+                                  relative p-4 rounded-[20px] cursor-pointer border transition-all duration-200 group
+                                  ${selected
+                                    ? 'bg-lime-50 border-lime-200 shadow-sm'
+                                    : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                                  }
+                                `}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${selected ? 'bg-lime-100 text-lime-700' : 'bg-gray-100 text-gray-500'}`}>
+                                    {selected ? <Check className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className={`text-sm font-bold truncate ${selected ? 'text-[#1A1A1A]' : 'text-gray-600'}`}>{p.text}</div>
+                                    <div className="text-xs text-gray-400 font-medium line-clamp-1 mt-0.5">{p.place_name}</div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-center text-gray-400 space-y-2">
+                          <Loader2 className="w-6 h-6 animate-spin opacity-50" />
+                          <div className="text-xs font-medium">Đang tìm địa điểm gần đó...</div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -493,7 +508,7 @@ export default function LocationPickerModal({
                         <Navigation className="w-5 h-5 text-lime-600" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ĐỊA CHỈ ĐANG CHỌN</h4>
+                        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">ĐỊA CHỈ ĐANG CHỌN</h4>
                         <div className="font-bold text-[#1A1A1A] text-sm leading-snug line-clamp-2 mt-0.5">
                           {currentAddress || "Đang tải vị trí..."}
                         </div>
@@ -502,7 +517,7 @@ export default function LocationPickerModal({
                     <button
                       onClick={handleConfirm}
                       disabled={!mapPosition || !currentAddress}
-                      className="w-full h-12 rounded-[18px] bg-[#1A1A1A] text-white font-anton text-sm uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-black transition-all active:scale-95 disabled:opacity-50"
+                      className="w-full h-12 rounded-[16px] bg-[#1A1A1A] text-white font-bold text-base flex items-center justify-center gap-2 hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-black/10"
                     >
                       <Check className="w-5 h-5" />
                       Xác nhận địa điểm
@@ -513,7 +528,7 @@ export default function LocationPickerModal({
 
               {/* Mobile Fixed Footer */}
               <div className="md:hidden sticky bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md rounded-t-[36px] border-t border-gray-100 p-3 pb-0 flex flex-col gap-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-[60]">
-                <div className="flex items-center gap-3 bg-gray-50/50 rounded-[20px] border border-gray-100/50">
+                <div className="flex items-center gap-3 rounded-[20px]">
                   <div className="w-9 h-9 rounded-xl bg-lime-50 border border-lime-100 flex items-center justify-center flex-shrink-0">
                     <Navigation className="w-4 h-4 text-lime-600" />
                   </div>

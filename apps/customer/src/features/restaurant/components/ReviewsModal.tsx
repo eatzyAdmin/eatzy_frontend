@@ -393,14 +393,16 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                             </div>
                           ) : (
                             <>
-                              {displayReviews.map((review) => (
-                                <motion.div
-                                  key={review.id}
-                                  initial={{ opacity: 0, y: 10 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ duration: 0.3 }}
-                                  className="space-y-2 md:space-y-3 pb-4 md:pb-6 border-b border-gray-200 last:border-0"
-                                >
+                              {displayReviews.map((review, index) => {
+                                const isLast = index === displayReviews.length - 1;
+                                return (
+                                  <motion.div
+                                    key={review.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className={`space-y-2 md:space-y-3 pb-4 md:pb-6 border-b border-gray-200/90 ${isLast ? 'border-b-0' : ''}`}
+                                  >
                                   {/* Author Info */}
                                   <div className="flex items-start gap-3">
                                     <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
@@ -451,7 +453,8 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                                     </div>
                                   )}
                                 </motion.div>
-                              ))}
+                              );
+                            })}
 
                               {/* End of List Label - Always show if >= 3 items */}
                               {displayReviews.length >= 3 && (

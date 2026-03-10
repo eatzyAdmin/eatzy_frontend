@@ -12,8 +12,6 @@ export default function SavedAddressesSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<IAddress | null>(null);
 
-  if (isLoading) return <SavedAddressesShimmer />;
-
   const handleOpenAdd = () => {
     setEditingAddress(null);
     setIsModalOpen(true);
@@ -91,7 +89,9 @@ export default function SavedAddressesSection() {
         </div>
 
         <div className="grid grid-cols-1 gap-2 md:gap-4">
-          {addresses.length === 0 ? (
+          {isLoading ? (
+            <SavedAddressesShimmer cardCount={3} />
+          ) : addresses.length === 0 ? (
             <div className="py-20 border-2 border-dashed border-gray-100 rounded-[40px] flex flex-col items-center justify-center text-gray-400 bg-slate-50/30">
               <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm">
                 <MapPin size={24} className="text-gray-300" />
