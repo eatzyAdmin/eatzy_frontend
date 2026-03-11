@@ -31,8 +31,8 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
         <TapRippleOverlay ripple={ripple} />
 
         {/* Mobile Header (Horizontal) */}
-        <div className="md:hidden w-full bg-black text-white p-8 flex items-center justify-between relative z-10 border-b-[3px] border-black">
-          <h1 className="text-4xl font-anton font-bold uppercase tracking-tighter">{restaurant.name}</h1>
+        <div className="md:hidden w-full bg-black text-white p-4 flex items-center justify-between relative z-10 border-b-[3px] border-black">
+          <h1 className="text-2xl font-anton font-bold uppercase tracking-tighter">{restaurant.name}</h1>
           <div className="bg-amber-500 text-black px-3 py-1 rounded-xl font-anton text-xl">{restaurant.rating}</div>
         </div>
 
@@ -60,7 +60,7 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
 
         <div className="relative flex-1 flex flex-col overflow-hidden">
           {/* Row 1 - Single large item */}
-          <div onMouseEnter={(e) => moveHighlight(e, { borderRadius: 32, backgroundColor: 'rgba(0,0,0,0.06)', opacity: 1, scaleEnabled: true, scale: 1.02 })} className="border-b-[3px] border-black p-6 md:p-12 flex-shrink-0 relative z-10">
+          <div onMouseEnter={(e) => moveHighlight(e, { borderRadius: 32, backgroundColor: 'rgba(0,0,0,0.06)', opacity: 1, scaleEnabled: true, scale: 1.02 })} className="border-b-[3px] border-black p-4 md:p-12 flex-shrink-0 relative z-10">
             <div className="flex flex-col md:flex-row gap-8 md:gap-12 h-full min-h-auto md:min-h-[600px] items-start md:items-center">
               <div className="flex-1 order-2 md:order-1 flex flex-col gap-4 md:gap-6 w-full">
                 <div className="flex items-start gap-4 md:gap-6">
@@ -101,7 +101,7 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
               <div
                 key={dish.id}
                 onMouseEnter={(e) => moveHighlight(e, { borderRadius: 24, backgroundColor: 'rgba(0,0,0,0.06)', opacity: 1, scaleEnabled: true, scale: 1.05 })}
-                className={`relative z-10 cursor-pointer p-6 md:p-8 ${idx < 3 ? 'md:border-r-[3px] border-black' : ''} ${idx % 2 === 0 ? 'border-r-[3px] md:border-r-[0px] border-black' : ''} flex flex-col group/dish`}
+                className={`relative z-10 cursor-pointer p-4 md:p-8 ${idx < 3 ? 'md:border-r-[3px] border-black' : ''} ${idx % 2 === 0 ? 'border-r-[3px] md:border-r-[0px] border-black' : ''} flex flex-col group/dish`}
               >
                 <div className="text-3xl md:text-5xl font-anton font-bold text-gray-200 leading-none mb-4 md:mb-6 transition-colors group-hover/dish:text-amber-500">{String(idx + 2).padStart(2, '0')}</div>
                 <div className="relative mb-4 md:mb-6 aspect-square overflow-hidden rounded-2xl md:rounded-[24px] shadow-md border border-gray-100 bg-white">
@@ -128,7 +128,7 @@ export default function MagazineLayout6({ restaurant, dishes }: { restaurant: Re
                 <div
                   key={dish.id}
                   onMouseEnter={(e) => moveHighlight(e, { borderRadius: 32, backgroundColor: 'rgba(0,0,0,0.06)', opacity: 1, scaleEnabled: true, scale: 1.05 })}
-                  className={`relative z-10 cursor-pointer p-6 md:p-12 ${idx === 0 && items.slice(5, 7).length > 1 ? 'border-r-[3px] border-black' : ''} group/pair`}
+                  className={`relative z-10 cursor-pointer p-4 md:p-12 ${idx === 0 && items.slice(5, 7).length > 1 ? 'border-r-[3px] border-black' : ''} group/pair`}
                 >
                   <div className={`flex ${items.slice(5, 7).length === 1 ? 'flex-row' : 'flex-col md:flex-row'} gap-4 md:gap-8 h-full items-start md:items-center`}>
                     <div className={`relative flex-shrink-0 overflow-hidden rounded-2xl md:rounded-[32px] shadow-xl border border-gray-100 bg-white aspect-square ${items.slice(5, 7).length === 1 ? 'w-32 h-32 md:w-[240px] md:h-[240px]' : 'w-full md:w-[240px] md:h-[240px]'}`}>

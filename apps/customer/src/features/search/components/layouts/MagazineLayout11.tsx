@@ -17,7 +17,7 @@ export default function MagazineLayout11({ restaurant, dishes }: { restaurant: R
 
   return (
     <motion.section
-      className="overflow-hidden shadow-2xl mb-16 md:mb-32 rounded-[60px] bg-[#F5E6D3] text-[#2C2416] relative"
+      className="overflow-hidden shadow-2xl mb-16 md:mb-32 rounded-[32px] md:rounded-[60px] bg-[#F5E6D3] text-[#2C2416] relative"
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
@@ -26,12 +26,12 @@ export default function MagazineLayout11({ restaurant, dishes }: { restaurant: R
       {/* Decorative accent */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#D4A574]/10 to-transparent pointer-events-none" />
 
-      <div className="p-8 md:p-20 relative z-10">
+      <div className="p-4 md:p-20 relative z-10">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row items-baseline justify-between gap-4 mb-20 border-b border-[#D4A574]/30 pb-8">
+        <div className="flex flex-col md:flex-row items-baseline justify-between gap-4 mb-6 md:mb-20 border-b border-[#D4A574]/30 pb-8">
           <div className="flex flex-col">
-            <span className="text-[10px] font-anton font-bold text-[#8B7355] uppercase tracking-[0.5em] mb-4">Curated Selection</span>
-            <h1 className="text-5xl md:text-8xl font-anton font-bold tracking-tighter uppercase leading-none md:leading-tight text-[#2C2416]">
+            <span className="text-[10px] font-anton font-bold text-[#8B7355] uppercase tracking-[0.5em] mb-2 md:mb-4">Curated Selection</span>
+            <h1 className="text-3xl md:text-8xl font-anton font-bold tracking-tighter uppercase leading-none md:leading-tight text-[#2C2416]">
               {restaurant.name}
             </h1>
           </div>
@@ -47,7 +47,7 @@ export default function MagazineLayout11({ restaurant, dishes }: { restaurant: R
           ref={setRefs}
           onMouseLeave={clearHover}
           onClick={(e) => { triggerTap(e); setTimeout(() => { show('Đang mở chi tiết quán'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
-          className="relative grid grid-cols-2 md:grid-cols-2 gap-6 md:gap-24 cursor-pointer"
+          className="relative grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-24 cursor-pointer"
         >
           <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
           <TapRippleOverlay ripple={ripple} />
@@ -71,14 +71,14 @@ export default function MagazineLayout11({ restaurant, dishes }: { restaurant: R
                   className="object-cover group-hover:scale-110 transition-transform duration-[2s]"
                 />
                 {/* Overlay Badge */}
-                <div className="absolute bottom-4 right-4 md:bottom-10 md:right-10 bg-[#2C2416] text-white font-anton text-lg md:text-3xl px-3 py-1 md:px-6 md:py-2 rounded-xl md:rounded-2xl transform rotate-3 group-hover:rotate-0 transition-transform shadow-2xl text-center">
+                <div className="absolute bottom-2 right-2 md:bottom-10 md:right-10 bg-[#2C2416] text-white font-anton text-sm md:text-3xl px-3 py-1 md:px-6 md:py-2 rounded-lg md:rounded-2xl transform rotate-3 group-hover:rotate-0 transition-transform shadow-2xl text-center">
                   {(dish.price / 1000).toFixed(0)}K
                 </div>
               </div>
 
               {/* Text Content */}
               <div className="flex-1 px-1 md:px-4">
-                <div className="text-[8px] md:text-[10px] font-anton font-bold text-[#8B7355] uppercase tracking-widest mb-1 md:mb-2">Plate 0{index + 1}</div>
+                <div className="hidden md:block text-[8px] md:text-[10px] font-anton font-bold text-[#8B7355] uppercase tracking-widest mb-1 md:mb-2">Plate 0{index + 1}</div>
                 <h3 className="text-base md:text-5xl font-anton font-bold mb-1 md:mb-4 uppercase tracking-tighter text-[#2C2416] group-hover:text-[#8B7355] transition-colors line-clamp-1 leading-tight py-1">
                   {dish.name}
                 </h3>
@@ -91,8 +91,8 @@ export default function MagazineLayout11({ restaurant, dishes }: { restaurant: R
         </div>
 
         {/* Footer Decoration */}
-        <div className="mt-24 pt-10 border-t border-[#D4A574]/30 flex items-center justify-between">
-          <div className="text-[10px] font-anton font-bold text-[#8B7355] uppercase tracking-[0.5em]">
+        <div className="mt-8 md:mt-24 pt-6 md:pt-10 border-t border-[#D4A574]/30 flex items-center justify-between">
+          <div className="hidden md:block text-[10px] font-anton font-bold text-[#8B7355] uppercase tracking-[0.5em]">
             Eatzy Gourmet Collection
           </div>
           <div className="text-[#8B7355] text-sm italic font-serif">

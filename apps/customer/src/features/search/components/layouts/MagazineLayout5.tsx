@@ -31,7 +31,7 @@ export default function MagazineLayout5({ restaurant, dishes }: Props) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6 }}
-      className="mb-16 md:mb-32 px-4"
+      className="mb-16 md:mb-32 px-0 md:px-4"
     >
       <div
         ref={setRefs}
@@ -68,11 +68,11 @@ export default function MagazineLayout5({ restaurant, dishes }: Props) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16 items-start">
           {/* Main column (2/3) */}
-          <div className="col-span-1 md:col-span-2 space-y-24 md:space-y-32">
+          <div className="col-span-1 md:col-span-2 space-y-0 md:space-y-32">
             {/* Hero dish */}
             <div
               onMouseEnter={(e) => moveHighlight(e, { borderRadius: 40, backgroundColor: 'rgba(0,0,0,0.06)', opacity: 1, scaleEnabled: true, scale: 1.02 })}
-              className="relative group/main"
+              className="hidden md:block relative group/main"
             >
               <div className="relative aspect-[16/10] overflow-hidden rounded-[40px] shadow-2xl bg-gray-100">
                 <ImageWithFallback
@@ -86,7 +86,7 @@ export default function MagazineLayout5({ restaurant, dishes }: Props) {
               </div>
 
               {/* Overlapping label - Liquid Glass style - Restored original look */}
-              <div className="absolute -bottom-10 left-10 right-10 md:right-auto bg-white/90 backdrop-blur-2xl px-10 py-8 rounded-[32px] shadow-2xl border border-white/40 max-w-xl transform -rotate-1 transition-transform group-hover/main:rotate-0 duration-700">
+              <div className="hidden md:block absolute -bottom-10 left-10 right-10 md:right-auto bg-white/90 backdrop-blur-2xl px-10 py-8 rounded-[32px] shadow-2xl border border-white/40 max-w-xl transform -rotate-1 transition-transform group-hover/main:rotate-0 duration-700">
                 <div className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
                   <span className="w-8 h-px bg-amber-500" />
                   Hero Plate
@@ -120,7 +120,7 @@ export default function MagazineLayout5({ restaurant, dishes }: Props) {
                     </div>
                   </div>
                   <div className="px-2">
-                    <div className="text-[9px] uppercase font-anton font-bold tracking-[0.3em] text-amber-600 mb-2">Editor&apos;s Pick {idx + 1}</div>
+                    <div className="hidden md:block text-[9px] uppercase font-anton font-bold tracking-[0.3em] text-amber-600 mb-2">Editor&apos;s Pick {idx + 1}</div>
                     <h4 className="text-2xl font-anton font-bold text-black uppercase mb-3 line-clamp-1 group-hover/spotlight:text-amber-600 transition-colors">
                       {dish.name}
                     </h4>
@@ -134,8 +134,8 @@ export default function MagazineLayout5({ restaurant, dishes }: Props) {
           </div>
 
           {/* Right sidebar column */}
-          <div className="grid grid-cols-2 gap-6 md:block md:space-y-12">
-            <div className="col-span-2 md:col-span-1 bg-amber-50/40 backdrop-blur-md p-8 rounded-[36px] border border-amber-100/50">
+          <div className="grid grid-cols-2 gap-4 md:gap-6 md:block md:space-y-12">
+            <div className="hidden md:block col-span-2 md:col-span-1 bg-amber-50/40 backdrop-blur-md p-8 rounded-[36px] border border-amber-100/50">
               <div className="text-[10px] uppercase font-anton font-bold tracking-[0.4em] text-amber-700 mb-4">Masterclass Details</div>
               <p className="text-gray-500 text-sm font-medium leading-relaxed">
                 Handpicked by our curators for their exceptional balance of seasonal flavors and artistic presentation.
@@ -177,7 +177,7 @@ export default function MagazineLayout5({ restaurant, dishes }: Props) {
         {bottomDishes.length > 1 && (
           <div
             className={`
-              grid gap-8 md:gap-12 mt-32 pt-16 border-t-[4px] border-black
+              grid gap-3 gap-y-4 md:gap-12 md:gap-y-12 mt-6 md:mt-32 pt-6 md:pt-16 border-t-[4px] border-black
               grid-cols-2 
               ${bottomDishes.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' : ''}
               ${bottomDishes.length === 3 ? 'md:grid-cols-3' : ''}
@@ -194,7 +194,7 @@ export default function MagazineLayout5({ restaurant, dishes }: Props) {
                 onMouseEnter={(e) => moveHighlight(e, { borderRadius: 24, backgroundColor: 'rgba(0,0,0,0.06)', opacity: 1, scaleEnabled: true, scale: 1.05 })}
                 className="group cursor-pointer relative z-10"
               >
-                <div className="relative aspect-[3/4] overflow-hidden mb-6 rounded-[24px] shadow-lg border border-gray-100 bg-white">
+                <div className="relative aspect-[3/4] overflow-hidden mb-3 md:mb-6 rounded-[24px] shadow-lg border border-gray-100 bg-white">
                   <ImageWithFallback
                     src={dish.imageUrl}
                     alt={dish.name}
@@ -204,11 +204,11 @@ export default function MagazineLayout5({ restaurant, dishes }: Props) {
                   />
                 </div>
                 <div className="flex flex-col gap-1 px-2">
-                  <div className="text-[10px] font-anton font-bold text-gray-300 uppercase tracking-widest">
+                  <div className="hidden md:block text-[10px] font-anton font-bold text-gray-300 uppercase tracking-widest">
                     Series {String(idx + 3).padStart(2, '0')}
                   </div>
                   <h4 className="font-anton font-bold text-lg md:text-xl text-black uppercase tracking-tight line-clamp-2 leading-none">{dish.name}</h4>
-                  <div className="mt-2 flex items-center justify-between">
+                  <div className="md:mt-2 flex items-center justify-between">
                     <span className="text-xl font-anton font-bold text-amber-600">
                       {(dish.price / 1000).toFixed(0)}K
                     </span>

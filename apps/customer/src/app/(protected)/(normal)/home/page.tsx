@@ -72,11 +72,14 @@ export default function HomePage() {
     }
   );
 
+  // Create a stable random seed for this session/mount
+  const sessionSeed = useMemo(() => Math.floor(Math.random() * 1000000), []);
+
   const recommendedResults = useMemo(() => {
     return apiRestaurants.map((magazine, index) =>
-      mapMagazineToRestaurantWithMenu(magazine, index)
+      mapMagazineToRestaurantWithMenu(magazine, index, sessionSeed)
     );
-  }, [apiRestaurants]);
+  }, [apiRestaurants, sessionSeed]);
 
   // Handle global loading state (transition from Login)
   const { hide } = useLoading();

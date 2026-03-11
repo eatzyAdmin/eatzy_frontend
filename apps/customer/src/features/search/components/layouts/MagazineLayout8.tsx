@@ -17,7 +17,7 @@ export default function MagazineLayout8({ restaurant, dishes }: { restaurant: Re
 
   return (
     <motion.section
-      className="overflow-hidden shadow-2xl mb-16 md:mb-32 rounded-[60px] bg-black text-white relative"
+      className="overflow-hidden shadow-2xl mb-16 md:mb-32 rounded-[32px] md:rounded-[60px] bg-black text-white relative"
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
@@ -26,9 +26,9 @@ export default function MagazineLayout8({ restaurant, dishes }: { restaurant: Re
       {/* Decorative accent */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-amber-500/10 to-transparent pointer-events-none" />
 
-      <div className="p-8 md:p-20 relative z-10">
+      <div className="p-4 md:p-20 relative z-10">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row items-baseline justify-between gap-4 mb-20 border-b border-white/10 pb-8">
+        <div className="flex flex-col md:flex-row items-baseline justify-between gap-4 mb-6 md:mb-20 border-b border-white/10 pb-8">
           <div className="flex flex-col">
             <span className="text-[10px] font-anton font-bold text-amber-500 uppercase tracking-[0.5em] mb-4">Masterclass Selection</span>
             <h1 className="text-5xl md:text-8xl font-anton font-bold tracking-tighter uppercase leading-none md:leading-tight">
@@ -47,7 +47,7 @@ export default function MagazineLayout8({ restaurant, dishes }: { restaurant: Re
           ref={setRefs}
           onMouseLeave={clearHover}
           onClick={(e) => { triggerTap(e); setTimeout(() => { show('Đang mở chi tiết quán'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
-          className="relative grid grid-cols-2 md:grid-cols-2 gap-6 md:gap-24 cursor-pointer"
+          className="relative grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-24 cursor-pointer"
         >
           <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
           <TapRippleOverlay ripple={ripple} />
@@ -71,7 +71,7 @@ export default function MagazineLayout8({ restaurant, dishes }: { restaurant: Re
                   className="object-cover group-hover:scale-110 transition-transform duration-[2s]"
                 />
                 {/* Overlay Badge */}
-                <div className="absolute bottom-4 right-4 md:bottom-10 md:right-10 bg-white text-black font-anton text-lg md:text-3xl px-3 py-1 md:px-6 md:py-2 rounded-xl md:rounded-2xl transform rotate-3 group-hover:rotate-0 transition-transform shadow-2xl text-center">
+                <div className="absolute bottom-2 right-2 md:bottom-10 md:right-10 bg-white text-black font-anton text-sm md:text-3xl px-3 py-1 md:px-6 md:py-2 rounded-lg md:rounded-2xl transform rotate-3 group-hover:rotate-0 transition-transform shadow-2xl text-center">
                   {(dish.price / 1000).toFixed(0)}K
                 </div>
               </div>
@@ -91,8 +91,8 @@ export default function MagazineLayout8({ restaurant, dishes }: { restaurant: Re
         </div>
 
         {/* Footer Decoration */}
-        <div className="mt-24 pt-10 border-t border-white/5 flex items-center justify-between">
-          <div className="text-[10px] font-anton font-bold text-gray-500 uppercase tracking-[0.5em]">
+        <div className="mt-6 md:mt-24 pt-6 md:pt-10 border-t border-white/5 flex items-center justify-between">
+          <div className="hidden md:block text-[10px] font-anton font-bold text-gray-500 uppercase tracking-[0.5em]">
             Eatzy Haute Cuisine Selection
           </div>
           <div className="text-gray-500 text-sm italic font-serif">

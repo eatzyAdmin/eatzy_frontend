@@ -93,12 +93,19 @@ export function useHomePage() {
     return restaurantsPages.pages.flatMap(page => page.result);
   }, [restaurantsPages]);
 
+  // Create a stable random seed for this session/mount
+  const sessionSeed = useMemo(() => Math.floor(Math.random() * 1000000), []);
+
   // Map to Restaurant type for slider
   const mappedRestaurants = useMemo(() => {
     return allRestaurantMagazines.map((magazine, index) =>
-      mapMagazineToRestaurantWithMenu(magazine as RestaurantMagazine, index).restaurant
+      mapMagazineToRestaurantWithMenu(
+        magazine as RestaurantMagazine,
+        index,
+        `${sessionSeed}-${activeCategory?.id || 'home'}`
+      ).restaurant
     );
-  }, [allRestaurantMagazines]);
+  }, [allRestaurantMagazines, sessionSeed, activeCategory?.id]);
 
   const restaurantsInCategory = mappedRestaurants;
   const activeRestaurant = restaurantsInCategory[activeRestaurantIndex];

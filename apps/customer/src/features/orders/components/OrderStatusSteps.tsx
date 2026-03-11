@@ -1,91 +1,157 @@
 "use client";
 import { motion } from "@repo/ui/motion";
-import { Clock, ClipboardList, ChefHat, Bike, BadgeCheck } from "@repo/ui/icons";
+import {
+  Store,
+  Package,
+  Bike,
+  Home
+} from "@repo/ui/icons";
 import type { ComponentType } from "react";
+
+import { useState, useEffect } from "react";
 
 type IconType = ComponentType<{ className?: string; strokeWidth?: number }>;
 
-// Backend order statuses: PENDING, PLACED, PREPARING, READY, PICKED_UP, ARRIVED, DELIVERED, CANCELLED
-const steps: ReadonlyArray<{ key: string; label: string; icon: IconType }> = [
-  { key: "PENDING", label: "Chờ xác nhận", icon: Clock as IconType },
-  { key: "PLACED", label: "Đã đặt", icon: ClipboardList as IconType },
-  { key: "DRIVER_ASSIGNED", label: "Có tài xế", icon: Bike as IconType },
-  { key: "PICKED_UP", label: "Đang giao", icon: Bike as IconType },
-  { key: "DELIVERED", label: "Thành công", icon: BadgeCheck as IconType },
+interface Step {
+  key: string;
+  label: string;
+  icon: IconType;
+}
+
+const steps: Step[] = [
+  { key: "PREPARING", label: "Confirmed", icon: Store as IconType },
+  { key: "READY", label: "Prepared", icon: Package as IconType },
+  { key: "PICKED_UP", label: "Delivering", icon: Bike as IconType },
+  { key: "DELIVERED", label: "Delivered", icon: Home as IconType },
 ];
 
-export default function OrderStatusSteps({ status }: { status: string }) {
-  // Find index based on backend status
-  let activeIndex = steps.findIndex((s) => s.key === status);
-  
-  // Handle grouped statuses
-  if (status === "PREPARING") activeIndex = steps.findIndex((s) => s.key === "PLACED");
-  if (status === "READY") activeIndex = steps.findIndex((s) => s.key === "DRIVER_ASSIGNED");
-  if (status === "ARRIVED") activeIndex = steps.findIndex((s) => s.key === "PICKED_UP");
-  
-  if (activeIndex === -1 && status === 'CANCELLED') activeIndex = 0;
-  if (activeIndex === -1) activeIndex = 0;
+export default function OrderStatusSteps({ status }: { status: string; createdAt?: string }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Initial check
+    setIsMobile(window.innerWidth < 768);
+
+    // Add listener for window resize
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Mapping backend status to 4 UI stages (0-3)
+  const getActiveIndex = (status: string) => {
+    switch (status) {
+      case "PENDING":
+      case "PLACED":
+      case "PREPARING":
+        return 0;
+      case "READY":
+      case "DRIVER_ASSIGNED":
+        return 1;
+      case "PICKED_UP":
+      case "ARRIVED":
+        return 2;
+      case "DELIVERED":
+        return 3;
+      default:
+        return 0;
+    }
+  };
+
+  const activeIndex = getActiveIndex(status);
+
+  // Status text based on current status
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case "PENDING": return "Đang chờ xác nhận...";
+      case "PLACED": return "Đã đặt hàng thành công";
+      case "PREPARING": return "Nhà hàng đang chuẩn bị";
+      case "READY": return "Món ăn đã sẵn sàng";
+      case "DRIVER_ASSIGNED": return "Tài xế đang đến lấy";
+      case "PICKED_UP": return "Đang giao hàng đến bạn";
+      case "ARRIVED": return "Tài xế đã đến điểm giao";
+      case "DELIVERED": return "Giao hàng thành công";
+      default: return "Đang cập nhật...";
+    }
+  };
+
+  const offset = isMobile ? 16 : 24;
 
   return (
-    <div className="w-full py-4 pb-8 relative">
-      <div className="relative flex justify-between items-start z-10 mx-2 md:mx-4">
-        {/* Background Track - Centered at top-6 (24px) */}
-        <div className="absolute top-6 left-0 right-0 h-1 bg-gray-100 -translate-y-1/2 -z-10 rounded-full" />
+    <div className="flex flex-col gap-3 md:gap-6 w-full">
+      {/* Header Info */}
+      <div className="flex flex-col pl-3">
+        <h3 className="text-white text-lg md:text-2xl font-bold font-anton tracking-tight">
+          {getStatusDisplay(status)}
+        </h3>
+      </div>
 
-        {/* Active Track */}
-        <motion.div
-          className="absolute top-6 left-0 h-1 bg-[var(--primary)] -translate-y-1/2 -z-10 origin-left rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: `${(activeIndex / (steps.length - 1)) * 100}%` }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-        />
+      {/* Progress Bar Container - Extra space for labels */}
+      <div className="relative pt-2 pb-10">
+        <div className="relative h-[12px] md:h-[18px] flex items-center">
+          {/* Track Background (White) - Full width with rounded caps */}
+          <div className="absolute inset-x-0 h-full bg-white rounded-full" />
 
-        {steps.map((s, i) => {
-          const isActive = i === activeIndex;
-          const isCompleted = i < activeIndex;
-          const DisplayIcon = s.icon;
+          {/* Active Track (Primary Green) - Starts from left edge to current icon center */}
+          <motion.div
+            initial={{ width: `${offset}px` }}
+            animate={{
+              width: activeIndex === 3
+                ? "100%"
+                : `calc(${offset}px + ${(activeIndex / 3)} * (100% - ${offset * 2}px))`
+            }}
+            transition={{ duration: 0.8, ease: "circOut" }}
+            className="absolute left-0 h-full bg-[var(--primary)] rounded-full z-10 shadow-[0_0_12px_rgba(132,204,22,0.4)]"
+          />
 
-          return (
-            <div key={s.key} className="flex flex-col items-center gap-3 relative group w-20">
-              {/* Icon Container - Fixed Height (h-12 = 48px) for alignment */}
-              <div className="h-12 w-full flex items-center justify-center relative">
-                <motion.div
-                  initial={false}
-                  animate={{
-                    scale: isActive ? 1.1 : 1,
-                    backgroundColor: isActive || isCompleted ? "var(--primary)" : "#F3F4F6",
-                    borderColor: isActive ? "#ffffff" : isCompleted ? "var(--primary)" : "#F3F4F6",
-                    color: isActive || isCompleted ? "#ffffff" : "#9CA3AF",
-                  }}
-                  className={`
-                      relative flex items-center justify-center rounded-full border-[3px] z-10 transition-all duration-300 bg-clip-padding
-                      ${isActive ? 'w-10 h-10 shadow-[0_4px_12px_rgba(132,204,22,0.4)]' : 'w-8 h-8'}
+          {/* Circles/Icons Wrapped in a spread container with side padding */}
+          <div className="absolute inset-0 flex justify-between items-center z-20 px-4 md:px-6">
+            {steps.map((step, index) => {
+              const isActive = index <= activeIndex;
+              const isCurrent = index === activeIndex;
+              const Icon = step.icon;
+
+              return (
+                <div key={index} className="relative flex flex-col items-center group">
+                  <motion.div
+                    initial={false}
+                    animate={{
+                      backgroundColor: isActive ? "var(--primary)" : "#FFFFFF",
+                      borderColor: isActive ? "var(--primary)" : "#FFFFFF",
+                    }}
+                    className={`
+                      w-8 h-8 md:w-11 md:h-11 rounded-full flex items-center justify-center shadow-lg border-2 md:border-[3px] relative z-30 transition-all duration-300
+                      ${isActive ? 'text-black' : 'text-gray-400'}
                     `}
-                >
-                  <DisplayIcon className={`${isActive ? 'w-5 h-5' : 'w-4 h-4'}`} strokeWidth={isActive ? 2.5 : 2} />
+                  >
+                    <Icon className="w-3.5 h-3.5 md:w-5 h-5" strokeWidth={2.5} />
 
-                  {/* Ripple effect for active - positioned relative to this circle */}
-                  {isActive && (
-                    <motion.div
-                      className="absolute inset-0 rounded-full border-2 border-[var(--primary)]"
-                      initial={{ opacity: 0.8, scale: 1 }}
-                      animate={{ opacity: 0, scale: 1.8 }}
-                      transition={{ repeat: Infinity, duration: 2, ease: "easeOut" }}
-                    />
-                  )}
-                </motion.div>
-              </div>
+                    {/* Active Pulse for CURRENT status */}
+                    {isCurrent && status !== 'DELIVERED' && (
+                      <motion.div
+                        className="absolute inset-[-4px] md:inset-[-6px] rounded-full border-2 border-[var(--primary)]"
+                        initial={{ opacity: 0.8, scale: 1 }}
+                        animate={{ opacity: 0, scale: 1.5 }}
+                        transition={{ repeat: Infinity, duration: 2, ease: "easeOut" }}
+                      />
+                    )}
+                  </motion.div>
 
-              {/* Label - Absolute positioning to prevent layout shift if content width varies slightly, but here fixed width helps */}
-              <div className={`
-                text-[10px] md:text-xs font-bold text-center leading-tight transition-colors duration-300 w-24 absolute top-14 left-1/2 -translate-x-1/2
-                ${isActive ? 'text-[#1A1A1A] scale-105' : isCompleted ? 'text-[var(--primary)]' : 'text-gray-400'}
-              `}>
-                {s.label}
-              </div>
-            </div>
-          );
-        })}
+                  {/* Status Label below step - Centered using translate */}
+                  <div className={`
+                    absolute top-10 md:top-14 left-1/2 -translate-x-1/2 text-[9px] md:text-xs font-bold whitespace-nowrap transition-all duration-300
+                    ${isActive ? 'text-[var(--primary)] scale-105 md:scale-110' : 'text-gray-500'}
+                  `}>
+                    {step.label}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

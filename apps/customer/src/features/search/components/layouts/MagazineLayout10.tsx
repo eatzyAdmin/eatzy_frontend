@@ -36,7 +36,7 @@ export default function MagazineLayout10({ restaurant, dishes }: { restaurant: R
         </div>
 
         {/* Overlay Card - Ultra Modern block style */}
-        <div className="relative w-full bg-white p-8 md:absolute md:inset-y-0 md:left-0 md:w-3/5 lg:w-2/5 md:bg-white/95 md:backdrop-blur-xl md:p-14 md:clip-path-[polygon(0_0,100%_0,88%_100%,0_100%)] flex flex-col justify-center">
+        <div className="relative w-full bg-white p-6 md:p-8 md:absolute md:inset-y-0 md:left-0 md:w-3/5 lg:w-2/5 md:bg-white/95 md:backdrop-blur-xl md:p-14 md:clip-path-[polygon(0_0,100%_0,88%_100%,0_100%)] flex flex-col justify-center">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-1 bg-black" />
             <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Editorial Pick</span>
@@ -50,7 +50,7 @@ export default function MagazineLayout10({ restaurant, dishes }: { restaurant: R
             <div className="h-6 w-px bg-gray-200" />
             <span className="text-sm font-medium text-gray-400 italic line-clamp-1">{restaurant.address}</span>
           </div>
-          <p className="text-gray-500 text-lg font-medium leading-relaxed italic max-w-sm">
+          <p className="text-gray-500 text-sm font-medium leading-relaxed italic max-w-sm">
             &quot;{restaurant.description}&quot;
           </p>
         </div>
@@ -60,7 +60,7 @@ export default function MagazineLayout10({ restaurant, dishes }: { restaurant: R
         ref={setRefs}
         onMouseLeave={clearHover}
         onClick={(e) => { triggerTap(e); setTimeout(() => { show('Đang mở chi tiết quán'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
-        className="relative grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mt-12 cursor-pointer"
+        className="relative grid grid-cols-2 md:grid-cols-4 gap-3 gap-y-8 md:gap-12 md:gap-y-12 mt-12 cursor-pointer"
       >
         <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
         <TapRippleOverlay ripple={ripple} />
@@ -82,10 +82,10 @@ export default function MagazineLayout10({ restaurant, dishes }: { restaurant: R
                 <span className="font-anton text-sm text-white">{(d.price / 1000).toFixed(0)}K</span>
               </div>
             </div>
-            <div className="mt-6 px-2">
-              <div className="text-[10px] font-anton font-bold text-gray-300 uppercase tracking-widest mb-1">Series 10-0{idx + 1}</div>
+            <div className="mt-4 md:mt-6 px-2">
+              <div className="hidden md:block text-[10px] font-anton font-bold text-gray-300 uppercase tracking-widest mb-1">Series 10-0{idx + 1}</div>
               <h3 className="text-xl font-anton font-bold text-black uppercase tracking-tight leading-none group-hover:text-amber-600 transition-colors mb-2">{d.name}</h3>
-              <p className="text-sm text-gray-400 font-medium leading-relaxed line-clamp-2 md:max-w-[200px]">{d.description}</p>
+              <p className="text-xs md:text-sm text-gray-400 font-medium leading-relaxed line-clamp-2 md:max-w-[200px]">{d.description}</p>
             </div>
           </div>
         ))}

@@ -22,12 +22,12 @@ export default function MagazineLayout7({ restaurant, dishes }: { restaurant: Re
       viewport={{ once: true }}
       transition={{ duration: 0.8 }}
     >
-      <div className="p-8 md:p-16">
+      <div className="p-5 md:p-16">
         {/* Header - Modern Editorial Style */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-16 border-b-[3px] border-black pb-10">
           <div className="flex flex-col">
             <div className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.5em] mb-3">Contemporary Series</div>
-            <h2 className="text-5xl md:text-8xl font-anton font-bold text-black uppercase tracking-tighter leading-[0.85]">
+            <h2 className="text-3xl md:text-8xl font-anton font-bold text-black uppercase tracking-tighter leading-[0.85]">
               {restaurant.name}
             </h2>
           </div>
@@ -91,7 +91,7 @@ export default function MagazineLayout7({ restaurant, dishes }: { restaurant: Re
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between mt-20 pt-10 border-t border-gray-100">
+        <div className="hidden md:flex items-center justify-between mt-20 pt-10 border-t border-gray-100">
           <div className="text-[10px] font-anton font-bold text-gray-300 uppercase tracking-[0.3em]">
             Eatzy Gourmet Selection © 2024
           </div>

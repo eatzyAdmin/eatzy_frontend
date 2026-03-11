@@ -130,7 +130,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
             className="fixed z-[70] inset-0 md:inset-x-0 md:bottom-0 md:top-auto md:max-h-[88vh] md:rounded-t-[40px] bg-[#F8F9FA] overflow-hidden shadow-2xl flex flex-col border border-white/20 [overscroll-behavior:contain]"
           >
             {/* Header */}
-            <div className="bg-white px-6 py-5 md:px-8 md:py-6 border-b border-gray-100 flex items-center justify-between shadow-sm/50 shrink-0 z-20">
+            <div className="bg-white px-3 py-3 md:px-8 md:py-6 border-b border-gray-100 flex items-center justify-between shadow-sm/50 shrink-0 z-20">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-lime-50 border border-lime-100 flex items-center justify-center">
                   <ClipboardList className="w-6 h-6 text-lime-600" />
@@ -165,38 +165,40 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
             ) : (
               <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-[25%_40%_35%] bg-[#F8F9FA]">
 
-                {/* 1. Mobile Order List (Horizontal) */}
-                <div className="flex md:hidden overflow-x-auto custom-scrollbar p-4 space-x-3 bg-white border-b border-gray-100 shrink-0">
-                  {orders.map((o) => {
-                    const active = o.id === activeOrderId;
-                    return (
-                      <motion.div
-                        key={o.id}
-                        onClick={() => setActiveOrderId(o.id)}
-                        className={`
-                          relative p-3 rounded-[20px] cursor-pointer border transition-all duration-200 min-w-[260px] flex items-center gap-3
-                          ${active
-                            ? 'bg-lime-50 border-lime-500 shadow-sm ring-1 ring-lime-500/20'
-                            : 'bg-white border-gray-100'
-                          }
-                        `}
-                      >
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-bold font-anton text-sm ${active ? "bg-white text-lime-700 shadow-sm" : "bg-gray-100 text-gray-500"}`}>
-                          #{o.id}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className={`text-sm font-bold line-clamp-1 ${active ? "text-[#1A1A1A]" : "text-gray-600"}`}>{o.restaurant?.name}</div>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs font-medium text-gray-400">{formatVnd(o.totalAmount)}</span>
-                            <div className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${active ? 'bg-white text-lime-700' : 'bg-gray-100 text-gray-500'}`}>
-                              {statusLabel(o.orderStatus)}
+                {/* 1. Mobile Order List (Horizontal) - Hidden if only 1 active order */}
+                {orders.length > 1 && (
+                  <div className="flex md:hidden overflow-x-auto custom-scrollbar p-4 space-x-3 bg-white border-b border-gray-100 shrink-0">
+                    {orders.map((o) => {
+                      const active = o.id === activeOrderId;
+                      return (
+                        <motion.div
+                          key={o.id}
+                          onClick={() => setActiveOrderId(o.id)}
+                          className={`
+                            relative p-3 rounded-[20px] cursor-pointer border transition-all duration-200 min-w-[260px] flex items-center gap-3
+                            ${active
+                              ? 'bg-lime-50 border-lime-500 shadow-sm ring-1 ring-lime-500/20'
+                              : 'bg-white border-gray-100'
+                            }
+                          `}
+                        >
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-bold font-anton text-sm ${active ? "bg-white text-lime-700 shadow-sm" : "bg-gray-100 text-gray-500"}`}>
+                            #{o.id}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className={`text-sm font-bold line-clamp-1 ${active ? "text-[#1A1A1A]" : "text-gray-600"}`}>{o.restaurant?.name}</div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs font-medium text-gray-400">{formatVnd(o.totalAmount)}</span>
+                              <div className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${active ? 'bg-white text-lime-700' : 'bg-gray-100 text-gray-500'}`}>
+                                {statusLabel(o.orderStatus)}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* 2. Desktop Order List Column (Vertical) */}
                 <div className="hidden md:flex flex-col border-r border-gray-100 bg-[#F8F9FA] h-full overflow-hidden">
@@ -286,14 +288,14 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
                 </div>
 
                 {/* 4. Details Column */}
-                <div ref={detailsContainerRef} className="flex-1 overflow-y-auto p-5 md:p-6 space-y-5 custom-scrollbar bg-[#F8F9FA] h-full pb-24 md:pb-6 relative">
+                <div ref={detailsContainerRef} className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-5 custom-scrollbar bg-[#F8F9FA] h-full pb-4 md:pb-6 relative">
 
 
                   {activeOrder && (
                     <>
-                      {/* Status Steps Card */}
-                      <div className="bg-white rounded-[28px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
-                        <OrderStatusSteps status={activeOrder.orderStatus} />
+                      {/* Status Steps Card - Premium Dark Style */}
+                      <div className="bg-gray-300 rounded-[40px] md:rounded-[46px] p-3 md:p-4 border-4 border-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
+                        <OrderStatusSteps status={activeOrder.orderStatus} createdAt={activeOrder.createdAt} />
                       </div>
 
                       {/* Driver Info Card */}

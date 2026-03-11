@@ -168,7 +168,7 @@ export default function SearchResults({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className="min-h-screen bg-white pt-28 md:pt-32 pb-20 px-4 md:px-6 magazine-scroll"
+      className="min-h-screen bg-white pt-28 md:pt-32 pb-20 px-3 md:px-6 magazine-scroll"
     >
       <div className="max-w-7xl mx-auto">
         {/* Search header */}

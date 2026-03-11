@@ -182,7 +182,7 @@ export default function RecommendedSection({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1] }}
-      className="min-h-screen bg-white pt-24 pb-20 px-4 md:pt-32 md:px-6 magazine-scroll"
+      className="min-h-screen bg-white pt-24 pb-20 px-3 md:pt-32 md:px-6 magazine-scroll"
     >
       <div className="max-w-7xl mx-auto">
         {/* Header */}

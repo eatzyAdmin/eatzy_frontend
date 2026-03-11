@@ -29,7 +29,7 @@ export default function MagazineLayout1({ restaurant, dishes, distance }: Props)
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6 }}
-      className="mb-8 md:mb-16 px-4"
+      className="mb-8 md:mb-16 px-0 md:px-4"
     >
       <div className="max-w-[1240px] mx-auto">
         {/* Magazine page indicator */}

@@ -80,7 +80,7 @@ export function useSearch() {
   const searchResults = useMemo<RestaurantWithMenu[]>(() => {
     if (!apiRestaurants.length) return [];
     return apiRestaurants.map((magazine, index) =>
-      mapMagazineToRestaurantWithMenu(magazine, index)
+      mapMagazineToRestaurantWithMenu(magazine, index, currentQuery)
     );
   }, [apiRestaurants]);
 

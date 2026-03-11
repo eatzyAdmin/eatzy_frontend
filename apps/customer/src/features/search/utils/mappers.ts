@@ -11,7 +11,8 @@ import type { RestaurantWithMenu } from '../hooks/useSearch';
  */
 export function mapMagazineToRestaurantWithMenu(
   magazine: RestaurantMagazine,
-  layoutIndex: number
+  layoutIndex: number,
+  seed: string | number = 0
 ): RestaurantWithMenu {
   const menuCategories: MenuCategory[] = (magazine.category || []).map((cat, idx) => ({
     id: String(cat.id),
@@ -68,10 +69,17 @@ export function mapMagazineToRestaurantWithMenu(
       (magazine.fiveStarCount || 0),
   };
 
-  // Stable pseudo-random layout selection (1-14) based on restaurant name/id
-  // This ensures the layout is "random" but stays the same for a specific restaurant
-  const nameHash = magazine.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const stableLayoutType = ((nameHash + (layoutIndex * 7)) % 11) + 1;
+  // Stable pseudo-random layout selection (1-11) based on restaurant metadata and seed
+  // This ensures variety while maintaining stability within the same result set
+  const idStr = String(magazine.id);
+  const seedStr = String(seed);
+  const combined = idStr + magazine.name + seedStr;
+  const hash = combined.split('').reduce((acc, char) => {
+    return ((acc << 5) - acc) + char.charCodeAt(0) | 0;
+  }, 0);
+
+  // Use 11 as we have 11 layouts (MagazineLayout1 to MagazineLayout11)
+  const stableLayoutType = (Math.abs(hash + (layoutIndex * 13)) % 11) + 1;
 
   return {
     restaurant,

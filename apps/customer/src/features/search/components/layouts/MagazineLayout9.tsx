@@ -81,7 +81,7 @@ export default function MagazineLayout9({ restaurant, dishes, menuCategories }: 
         </div>
 
         {restaurant.description && (
-          <p className="mb-8 text-lg text-gray-400 font-medium leading-relaxed italic line-clamp-2">
+          <p className="hidden md:block mb-8 text-lg text-gray-400 font-medium leading-relaxed italic line-clamp-2">
             &quot;{restaurant.description}&quot;
           </p>
         )}
@@ -102,7 +102,7 @@ export default function MagazineLayout9({ restaurant, dishes, menuCategories }: 
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-xl md:text-2xl font-anton font-bold text-black uppercase tracking-tight group-hover/item:text-amber-600 transition-colors leading-none">{d.name}</h3>
                 </div>
-                <p className="text-sm text-gray-500 font-medium leading-relaxed line-clamp-2 md:max-w-[280px]">
+                <p className="hidden md:block text-sm text-gray-500 font-medium leading-relaxed line-clamp-2 md:max-w-[280px]">
                   {d.description}
                 </p>
                 <div className="text-[10px] text-gray-400 font-anton uppercase tracking-widest mt-2">{catMap[d.menuCategoryId] || 'Main Plate'}</div>

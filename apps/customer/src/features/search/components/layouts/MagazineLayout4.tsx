@@ -49,11 +49,11 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6 }}
-      className="mb-12 md:mb-24 px-4"
+      className="mb-12 md:mb-24 px-0 md:px-4"
     >
       <div className="max-w-[1240px] mx-auto">
         {/* Header - Modern High Fashion Look - Compacted */}
-        <div className="text-center mb-10 md:mb-14 relative">
+        <div className="text-center mb-6 md:mb-14 relative">
           <div className="absolute top-0 left-0 w-full h-[4px] bg-black" />
           <div className="pt-8 mb-6">
             <div className="text-[9px] md:text-[10px] text-amber-600 font-anton font-bold uppercase tracking-[0.6em] mb-4">Contemporary Dining Selection</div>
@@ -75,7 +75,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
         </div>
 
         <div className="mb-12 md:mb-16 text-center max-w-3xl mx-auto">
-          <p className="text-lg md:text-xl text-gray-400 leading-relaxed font-medium italic">
+          <p className="text-sm md:text-xl text-gray-400 leading-relaxed font-medium italic">
             &quot;{restaurant.description}&quot;
           </p>
         </div>
@@ -94,7 +94,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
             <div className="relative">
               <div className="mb-12 border-l-[6px] border-black pl-8">
                 <span className="text-[10px] font-anton font-bold text-gray-400 uppercase tracking-[0.3em] block mb-2">Section 01</span>
-                <h3 className="text-4xl md:text-6xl font-anton font-bold mb-4 uppercase tracking-tighter text-black">
+                <h3 className="text-2xl md:text-6xl font-anton font-bold md:mb-4 uppercase tracking-tighter text-black">
                   {firstCategory?.name || 'Highlights'}
                 </h3>
               </div>
@@ -149,7 +149,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
             <div className="relative">
               <div className="mb-12 border-l-[6px] border-black pl-8">
                 <span className="text-[10px] font-anton font-bold text-gray-400 uppercase tracking-[0.3em] block mb-2">Section 02</span>
-                <h3 className="text-4xl md:text-6xl font-anton font-bold mb-4 uppercase tracking-tighter text-black">
+                <h3 className="text-2xl md:text-6xl font-anton font-bold md:mb-4 uppercase tracking-tighter text-black">
                   {secondCategory?.name || firstCategory?.name || 'Selection'}
                 </h3>
               </div>

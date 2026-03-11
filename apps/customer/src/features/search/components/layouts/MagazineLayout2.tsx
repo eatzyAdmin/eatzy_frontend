@@ -35,7 +35,7 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.6 }}
-      className="mb-16 md:mb-24 px-4"
+      className="mb-16 md:mb-24 px-0 md:px-4"
     >
       <div className="max-w-[1240px] mx-auto">
         {/* Page header - more compact & integrated */}
@@ -83,7 +83,7 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
           ref={setRefs}
           onMouseLeave={clearHover}
           onClick={(e) => { triggerTap(e); setTimeout(() => { show('Đang mở chi tiết quán'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
-          className="relative grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-12 lg:gap-16 cursor-pointer"
+          className="relative grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-12 lg:gap-16 cursor-pointer"
         >
           <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
           <TapRippleOverlay ripple={ripple} />
@@ -105,7 +105,7 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
                   <div className="relative aspect-[4/5] md:aspect-[3/4] overflow-hidden mb-4 md:mb-6 rounded-[28px] md:rounded-[32px] shadow-lg bg-gray-50 border border-gray-100">
                     <ImageWithFallback src={dish.imageUrl} alt={dish.name} fill placeholderMode="horizontal" className="object-cover transition-transform duration-[1.5s] group-hover:scale-110" />
                   </div>
-                  <div className="flex flex-col gap-2 md:gap-3 px-1 md:px-2">
+                  <div className="flex flex-col gap-1 md:gap-3 px-1 md:px-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] md:text-xs font-anton font-bold text-gray-300">#{String(originalIdx + 1).padStart(2, '0')}</span>
@@ -117,7 +117,7 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
                     <h3 className="text-lg md:text-3xl font-anton font-bold uppercase tracking-tight text-black line-clamp-1">
                       {dish.name}
                     </h3>
-                    <p className="hidden md:block text-gray-500 text-sm font-medium leading-relaxed line-clamp-2">
+                    <p className="md:block text-gray-500 text-xs md:text-sm font-medium leading-relaxed line-clamp-2">
                       {dish.description}
                     </p>
                   </div>
@@ -143,7 +143,7 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
                   <div className="relative aspect-[4/5] md:aspect-[3/4] overflow-hidden mb-4 md:mb-6 rounded-[28px] md:rounded-[32px] shadow-lg bg-gray-50 border border-gray-100">
                     <ImageWithFallback src={dish.imageUrl} alt={dish.name} fill placeholderMode="horizontal" className="object-cover transition-transform duration-[1.5s] group-hover:scale-110" />
                   </div>
-                  <div className="flex flex-col gap-2 md:gap-3 px-1 md:px-2">
+                  <div className="flex flex-col gap-1 md:gap-3 px-1 md:px-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] md:text-xs font-anton font-bold text-gray-300">#{String(originalIdx + 1).padStart(2, '0')}</span>
@@ -155,7 +155,7 @@ export default function MagazineLayout2({ restaurant, dishes }: Props) {
                     <h3 className="text-lg md:text-3xl font-anton font-bold uppercase tracking-tight text-black line-clamp-1">
                       {dish.name}
                     </h3>
-                    <p className="hidden md:block text-gray-500 text-sm font-medium leading-relaxed line-clamp-2">
+                    <p className="md:block text-gray-500 text-xs md:text-sm font-medium leading-relaxed line-clamp-2">
                       {dish.description}
                     </p>
                   </div>
