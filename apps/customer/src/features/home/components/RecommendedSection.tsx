@@ -23,6 +23,7 @@ interface Props {
   hasNextPage?: boolean;
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
+  totalResults?: number;
 }
 
 export default function RecommendedSection({
@@ -31,7 +32,8 @@ export default function RecommendedSection({
   isLoading = false,
   hasNextPage = false,
   onLoadMore,
-  isLoadingMore = false
+  isLoadingMore = false,
+  totalResults
 }: Props) {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -211,7 +213,7 @@ export default function RecommendedSection({
           isLoadingMore={isLoadingMore}
           hasMore={hasNextPage}
           isEmpty={!isLoading && results.length === 0}
-          totalResults={results.length}
+          totalResults={totalResults || results.length}
           ShimmerComponent={MagazineLayout8Shimmer}
           initialShimmerCount={2}
           loadMoreShimmerCount={1}

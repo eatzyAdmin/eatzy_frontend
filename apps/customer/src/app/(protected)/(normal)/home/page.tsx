@@ -62,6 +62,7 @@ export default function HomePage() {
     hasNextPage: recommendedHasNextPage,
     fetchNextPage: recommendedFetchNextPage,
     isFetchingNextPage: recommendedIsFetchingNextPage,
+    totalCount: recommendedTotalCount,
   } = useSearchRestaurants(
     showRecommended ? {
       latitude: locationCoords.latitude,
@@ -315,6 +316,7 @@ export default function HomePage() {
               hasNextPage={recommendedHasNextPage}
               onLoadMore={recommendedFetchNextPage}
               isLoadingMore={recommendedIsFetchingNextPage}
+              totalResults={recommendedTotalCount}
             />
           </motion.div>
         )}
