@@ -20,6 +20,7 @@ const RightSidebar = dynamic(() => import("@/features/checkout/components/RightS
 const OrderSummaryList = dynamic(() => import("@/features/checkout/components/OrderSummaryList"), { ssr: false });
 import CheckoutMapSection from "@/features/checkout/components/CheckoutMapSection";
 import LocationPickerModal from "@/features/location/components/LocationPickerModal";
+import SavedAddressesModal from "@/features/profile/components/modals/SavedAddressesModal";
 import PromoSelectionModal from "@/features/checkout/components/PromoSelectionModal";
 import PromoSummary from "@/features/checkout/components/PromoSummary";
 import { useDeliveryLocationStore } from "@/store/deliveryLocationStore";
@@ -29,6 +30,7 @@ export default function CheckoutPage() {
   const { show, hide } = useLoading();
   const [mounted, setMounted] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [isSavedAddressesModalOpen, setIsSavedAddressesModalOpen] = useState(false);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
 
   useEffect(() => {
@@ -323,6 +325,7 @@ export default function CheckoutPage() {
                     onClick={() => {
                       if (window.innerWidth < 768) setIsLocationModalOpen(true);
                     }}
+                    onOpenSaved={() => setIsSavedAddressesModalOpen(true)}
                   />
                 </section>
 
@@ -526,6 +529,24 @@ export default function CheckoutPage() {
           longitude: selectedLocation.longitude
         } : undefined}
         initialAddress={address}
+        onOpenSaved={() => setIsSavedAddressesModalOpen(true)}
+      />
+
+      <SavedAddressesModal
+        isOpen={isSavedAddressesModalOpen}
+        onClose={() => setIsSavedAddressesModalOpen(false)}
+        onSelect={(addr) => {
+          const selectedAddr = addr.address_line || addr.addressLine || "";
+          setAddress(selectedAddr);
+          setSelectedLocation({
+            latitude: addr.latitude,
+            longitude: addr.longitude,
+            address: selectedAddr,
+            placeName: addr.label
+          } as any);
+          setIsSavedAddressesModalOpen(false);
+          setIsLocationModalOpen(false); // Close location modal if it was open
+        }}
       />
 
       <PromoSelectionModal

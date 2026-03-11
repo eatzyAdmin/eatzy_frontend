@@ -5,11 +5,13 @@ import { MapPin, ChevronRight, Lock } from "@repo/ui/icons";
 export default function AddressForm({
   value,
   onChange,
-  onClick
+  onClick,
+  onOpenSaved,
 }: {
   value: string;
   onChange: (v: string) => void;
   onClick?: () => void;
+  onOpenSaved?: () => void;
 }) {
   return (
     <div className="bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
@@ -45,16 +47,24 @@ export default function AddressForm({
         </div>
       </div>
 
-      {/* 💻 DESKTOP VIEW (Visible on >= 768px) */}
-      <div className="hidden md:block bg-gray-50/20 cursor-default">
+    <div className="hidden md:block bg-gray-50/20 cursor-default">
         <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/30">
           <div className="flex items-center gap-2">
             <MapPin className="w-5 h-5 text-gray-300" />
             <h4 className="font-bold text-gray-400">Địa chỉ giao hàng</h4>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-100 rounded-full text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-            <Lock size={12} className="text-gray-300" />
-            Cố định trên Map
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onOpenSaved}
+              className="flex items-center gap-2 px-4 py-1.5 bg-[var(--primary)] text-white hover:bg-lime-600 transition-all rounded-full text-[11px] font-bold uppercase tracking-wider shadow-sm active:scale-95"
+            >
+              <MapPin size={12} className="text-white" />
+              DÙNG ĐỊA CHỈ ĐÃ LƯU
+            </button>
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-100 rounded-full text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              <Lock size={12} className="text-gray-300" />
+              Cố định trên Map
+            </div>
           </div>
         </div>
 
