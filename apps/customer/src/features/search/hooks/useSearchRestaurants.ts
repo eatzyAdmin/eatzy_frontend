@@ -107,12 +107,14 @@ export function useSearchRestaurants(
     initialPageParam: 0,
 
     getNextPageParam: (lastPage, allPages) => {
-      // If last page has fewer items than page size, we've reached the end
-      if (!lastPage?.result || lastPage.result.length < DEFAULT_PAGE_SIZE) {
-        return undefined;
+      const total = lastPage?.meta?.total || 0;
+      const loaded = allPages.reduce((acc, p) => acc + (p?.result?.length || 0), 0);
+
+      // If we haven't loaded all items yet, return next page index
+      if (loaded < total && lastPage?.result?.length === DEFAULT_PAGE_SIZE) {
+        return allPages.length;
       }
-      // Return next page number
-      return allPages.length;
+      return undefined;
     },
 
     enabled: enabled && hasValidLocation && !!baseParams,

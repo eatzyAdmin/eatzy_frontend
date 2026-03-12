@@ -99,7 +99,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                 </h3>
               </div>
 
-              <div className="space-y-10 md:space-y-12">
+              <div className="space-y-8 md:space-y-12">
                 {cat1Dishes.map((dish, idx) => (
                   <motion.div
                     key={dish.id}
@@ -110,7 +110,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                     onMouseEnter={(e) => moveHighlight(e, { borderRadius: 32, backgroundColor: 'rgba(0,0,0,0.06)', opacity: 1, scaleEnabled: true, scale: 1.02, paddingX: 8, paddingY: 12 })}
                     className="flex flex-col sm:flex-row gap-6 group cursor-pointer relative z-10"
                   >
-                    <div className="relative w-full sm:w-36 aspect-square sm:h-36 flex-shrink-0 overflow-hidden rounded-[32px] shadow-lg border border-gray-100 bg-white">
+                    <div className="relative w-full sm:w-36 aspect-[5/3] md:aspect-square sm:h-36 flex-shrink-0 overflow-hidden rounded-[32px] shadow-lg border border-gray-100 bg-white">
                       <ImageWithFallback
                         src={dish.imageUrl}
                         alt={dish.name}
@@ -132,7 +132,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                         {dish.description}
                       </p>
                       {dish.rating && (
-                        <div className="flex items-center gap-1.5 mt-2 bg-gray-50 self-start px-2 py-1 rounded-lg">
+                        <div className="hidden md:flex items-center gap-1.5 mt-2 bg-gray-50 self-start px-2 py-1 rounded-lg">
                           <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                           <span className="text-[10px] font-anton font-bold text-gray-500 translate-y-[1px]">{dish.rating} Score</span>
                         </div>
@@ -154,7 +154,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                 </h3>
               </div>
 
-              <div className="space-y-10 md:space-y-12">
+              <div className="space-y-8 md:space-y-12">
                 {cat2Dishes.map((dish, idx) => (
                   <motion.div
                     key={dish.id}
@@ -165,7 +165,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                     onMouseEnter={(e) => moveHighlight(e, { borderRadius: 32, backgroundColor: 'rgba(0,0,0,0.06)', opacity: 1, scaleEnabled: true, scale: 1.02, paddingX: 8, paddingY: 12 })}
                     className="flex flex-col sm:flex-row gap-6 group cursor-pointer relative z-10"
                   >
-                    <div className="relative w-full sm:w-36 aspect-square sm:h-36 flex-shrink-0 overflow-hidden rounded-[32px] shadow-lg border border-gray-100 bg-white">
+                    <div className="relative w-full sm:w-36 aspect-[5/3] md:aspect-square sm:h-36 flex-shrink-0 overflow-hidden rounded-[32px] shadow-lg border border-gray-100 bg-white">
                       <ImageWithFallback
                         src={dish.imageUrl}
                         alt={dish.name}
@@ -187,7 +187,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
                         {dish.description}
                       </p>
                       {dish.rating && (
-                        <div className="flex items-center gap-1.5 mt-2 bg-gray-50 self-start px-2 py-1 rounded-lg">
+                        <div className="hidden md:flex items-center gap-1.5 mt-2 bg-gray-50 self-start px-2 py-1 rounded-lg">
                           <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                           <span className="text-[10px] font-anton font-bold text-gray-500 translate-y-[1px]">{dish.rating} Score</span>
                         </div>

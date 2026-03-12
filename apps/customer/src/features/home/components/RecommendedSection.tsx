@@ -35,28 +35,12 @@ export default function RecommendedSection({
   isLoadingMore = false,
   totalResults
 }: Props) {
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { setIsVisible } = useBottomNav();
   const containerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync internal loading state with prop if needed, or just use prop
-  // Here we keep the initial fake loading effect if prop isLoading is true,
-  // or we can remove the fake loading and rely on real data.
-  // Given we are switching to real API, let's respect the isLoading prop primarily,
-  // but we can keep the "entrance animation" effect.
-
-  useEffect(() => {
-    if (!isLoading) {
-      // Small delay to ensure smooth transition
-      const timer = setTimeout(() => setIsInitialLoading(false), 500);
-      return () => clearTimeout(timer);
-    } else {
-      setIsInitialLoading(true);
-    }
-  }, [isLoading]);
+  // Header visibility logic
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   // Handle scroll-up to return home
   useEffect(() => {
@@ -209,7 +193,7 @@ export default function RecommendedSection({
         {/* Results with Infinite Scroll Container */}
         <InfiniteScrollContainer
           sentinelRef={sentinelRef}
-          isLoading={isInitialLoading}
+          isLoading={isLoading}
           isLoadingMore={isLoadingMore}
           hasMore={hasNextPage}
           isEmpty={!isLoading && results.length === 0}

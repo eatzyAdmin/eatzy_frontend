@@ -31,7 +31,7 @@ export default function MagazineLayout8({ restaurant, dishes }: { restaurant: Re
         <div className="flex flex-col md:flex-row items-baseline justify-between gap-4 mb-6 md:mb-20 border-b border-white/10 pb-8">
           <div className="flex flex-col">
             <span className="text-[10px] font-anton font-bold text-amber-500 uppercase tracking-[0.5em] mb-4">Masterclass Selection</span>
-            <h1 className="text-5xl md:text-8xl font-anton font-bold tracking-tighter uppercase leading-none md:leading-tight">
+            <h1 className="text-3xl md:text-8xl font-anton font-bold tracking-tighter uppercase leading-none md:leading-tight">
               {restaurant.name}
             </h1>
           </div>
