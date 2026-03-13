@@ -270,6 +270,11 @@ export default function LocationPickerModal({
   const handleConfirm = () => {
     if (!mapPosition) return;
 
+    // Blur active element to ensure keyboard closes (important for mobile)
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     onSelectLocation({
       latitude: mapPosition.lat,
       longitude: mapPosition.lng,
@@ -282,35 +287,47 @@ export default function LocationPickerModal({
 
   return (
     <div
-      className="fixed inset-0 z-[200]"
+      className="fixed inset-0 z-[200] overflow-hidden"
       style={{ pointerEvents: isOpen ? 'auto' : 'none' }}
     >
       <AnimatePresence>
         {isOpen && (
-          <>
+          <motion.div
+            key="location-picker-presence-wrapper"
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="fixed inset-0 z-[200]"
+          >
             {/* Backdrop */}
             <motion.div
+              key="location-picker-backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
               onClick={onClose}
               className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[200]"
             />
 
             {/* Modal Container */}
             <div
-              className="fixed inset-0 flex items-end md:items-center justify-center p-0 md:p-6 z-[201]"
-              onClick={onClose}
+              className="fixed inset-0 flex items-end md:items-center justify-center p-0 md:p-6 z-[201] pointer-events-none"
             >
               {/* Modal Content */}
               <motion.div
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100%" }}
-                transition={{ type: "spring", stiffness: 100, damping: 18 }}
+                key="location-picker-content"
+                initial={{ y: "100%", opacity: 0.5 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: "105%", opacity: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 120,
+                  damping: 18,
+                  mass: 0.8
+                }}
                 onClick={(e) => e.stopPropagation()}
-                className="relative bg-[#F8F9FA] w-full max-w-full md:max-w-6xl h-screen md:h-[90vh] max-h-full md:max-h-[800px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20"
+                className="relative pointer-events-auto bg-[#F8F9FA] w-full max-w-full md:max-w-6xl h-screen md:h-[90vh] max-h-full md:max-h-[800px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20 will-change-transform"
               >
                 {/* Header */}
                 <div className="bg-white px-4 md:px-8 py-4 md:py-6 border-b border-gray-100 flex items-center justify-between sticky top-0 z-50 shadow-sm/50">
@@ -592,7 +609,7 @@ export default function LocationPickerModal({
                 </div>
               </motion.div>
             </div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
