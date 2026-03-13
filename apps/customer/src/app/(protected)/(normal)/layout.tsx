@@ -12,6 +12,7 @@ import { useSearch } from "@/features/search/hooks/useSearch";
 import BottomNav from "@/features/navigation/components/BottomNav";
 import { BottomNavProvider } from "@/features/navigation/context/BottomNavContext";
 import { useMobileExitGuard } from "@/hooks/useMobileExitGuard";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   useMobileExitGuard();
@@ -55,10 +56,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const handleOpenOrders = () => setOrdersOpen(true);
     window.addEventListener('openOrdersDrawer', handleOpenOrders);
 
+    // Custom event to open cart overlay from anywhere (SearchOverlay bottom buttons)
+    const handleOpenCart = () => setCartOpen(true);
+    window.addEventListener('openCart', handleOpenCart);
+
     return () => {
       window.removeEventListener('searchHeaderVisibility', handleHeaderVisibility);
       window.removeEventListener('recommendedModeChange', handleRecommendedMode);
       window.removeEventListener('openOrdersDrawer', handleOpenOrders);
+      window.removeEventListener('openCart', handleOpenCart);
     };
   }, []);
 
@@ -106,6 +112,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     };
   }, [cartOpen, menuOpen, searchOpen, ordersOpen]);
 
+  const isMobile = useIsMobile();
+
   return (
     <BottomNavProvider>
       <div className={`relative w-full overflow-x-hidden ${(isOrderHistory || isFavorites) ? "h-screen overflow-y-hidden" : "min-h-screen"}`}>
@@ -138,10 +146,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 onCartClick={() => setCartOpen(true)}
                 hideSearchIcon={shouldSlideHeader || isRestaurantDetail || isFavorites || isProfile}
                 hideCart={isRestaurantDetail}
+                showHomeIcon={isMobile}
                 onLogoClick={() => {
+                  if (pathname === '/home' && !isSearchMode && !isRecommendedMode) return;
+
                   const next = new URLSearchParams(searchParams.toString());
                   next.delete('q');
                   router.replace(`/home`, { scroll: false });
+
+                  // Reset modes
+                  if (isRecommendedMode) {
+                    window.dispatchEvent(new CustomEvent('recommendedModeChange', {
+                      detail: { active: false }
+                    }));
+                  }
                 }}
               />
             </motion.div>
@@ -158,8 +176,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           isSearchBarCompact={isSearchBarCompact}
           isSearching={isSearching}
         />
-        {!isRestaurantDetail && <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />}
         {children}
+        {!isRestaurantDetail && !effectiveSearchMode && <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />}
       </div>
     </BottomNavProvider>
   );

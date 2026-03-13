@@ -39,7 +39,7 @@ export default function CartItemCard({
       onClick={() => onCardClick(cart.restaurant.id, cart.id)}
       className={`group relative w-full h-[140px] flex flex-row overflow-hidden rounded-[40px] cursor-pointer transition-all duration-500 ${isSelected
         ? "bg-lime-50/50 shadow-[0_0_20px_rgba(0,0,0,0.06),0_0_15px_rgba(132,204,22,0.08)]"
-        : "bg-white shadow-[0_4px_25px_rgba(0,0,0,0.08)] md:shadow-[0_0_25px_rgba(0,0,0,0.10)] hover:bg-gray-50/50 hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+        : "bg-white shadow-[0_4px_25px_rgba(0,0,0,0.08)] md:shadow-[0_0_25px_rgba(0,0,0,0.10)] md:hover:bg-gray-50/50 md:hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
         }`}
     >
       {/* Selection Border Overlay - Fixed positioning to prevent layout jump */}
@@ -81,9 +81,9 @@ export default function CartItemCard({
           src={previewImage}
           alt={cart.restaurant.name}
           fill
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+          className="object-cover transition-transform duration-700 ease-out md:group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-black/5 transition-all duration-700 ease-out group-hover:bg-black/0" />
+        <div className="absolute inset-0 bg-black/5 transition-all duration-700 ease-out md:group-hover:bg-black/0" />
 
         {/* Counter Badge - OrderHistory Style */}
         <div className="absolute top-3 left-3 z-10">
@@ -139,11 +139,11 @@ export default function CartItemCard({
           </motion.button>
 
           {/* Checkout Link - Bottom Right */}
-          <div className="absolute bottom-3 right-3 z-20 flex items-center gap-2 overflow-hidden pointer-events-none group-hover:pointer-events-auto">
-            <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-widest translate-x-10 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500 ease-out">
+          <div className="absolute bottom-3 right-3 z-20 flex items-center gap-2 overflow-hidden pointer-events-none md:group-hover:pointer-events-auto">
+            <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-widest translate-x-10 opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 transition-all duration-500 ease-out">
               Checkout
             </span>
-            <div className="w-9 h-9 rounded-full flex items-center justify-center group-hover:bg-[var(--primary)] group-hover:text-white transition-all duration-300">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center md:group-hover:bg-[var(--primary)] md:group-hover:text-white transition-all duration-300">
               <ChevronRight className="w-4 h-4 transition-transform" strokeWidth={3} />
             </div>
           </div>

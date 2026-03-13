@@ -287,7 +287,7 @@ export default function LocationPickerModal({
 
   return (
     <div
-      className="fixed inset-0 z-[200] overflow-hidden"
+      className="fixed inset-0 z-[80] overflow-hidden"
       style={{ pointerEvents: isOpen ? 'auto' : 'none' }}
     >
       <AnimatePresence>
@@ -297,7 +297,7 @@ export default function LocationPickerModal({
             initial="initial"
             animate="animate"
             exit="exit"
-            className="fixed inset-0 z-[200]"
+            className="fixed inset-0 z-[80]"
           >
             {/* Backdrop */}
             <motion.div
@@ -307,12 +307,12 @@ export default function LocationPickerModal({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
               onClick={onClose}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[200]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80]"
             />
 
             {/* Modal Container */}
             <div
-              className="fixed inset-0 flex items-end md:items-center justify-center p-0 md:p-6 z-[201] pointer-events-none"
+              className="fixed inset-0 flex items-end md:items-center justify-center p-0 md:p-6 z-[81] pointer-events-none"
             >
               {/* Modal Content */}
               <motion.div

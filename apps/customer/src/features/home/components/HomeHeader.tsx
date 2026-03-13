@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from '@repo/ui/motion';
-import { Menu, BookHeart, Search, ShoppingCart } from '@repo/ui/icons';
+import { Menu, BookHeart, Search, ShoppingCart, Home } from '@repo/ui/icons';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/features/cart/hooks/useCart';
 import dynamic from 'next/dynamic';
@@ -20,6 +20,7 @@ interface HomeHeaderProps {
   hideSearchIcon?: boolean;
   hideCart?: boolean;
   onLogoClick?: () => void;
+  showHomeIcon?: boolean;
 }
 
 export default function HomeHeader({
@@ -30,6 +31,7 @@ export default function HomeHeader({
   hideSearchIcon = false,
   hideCart = false,
   onLogoClick,
+  showHomeIcon = false,
 }: HomeHeaderProps) {
   const { totalItems } = useCart();
 
@@ -49,13 +51,29 @@ export default function HomeHeader({
                 stiffness: 100,
               },
             }}
-            onClick={onMenuClick}
+            onClick={showHomeIcon ? onLogoClick : onMenuClick}
             className={`w-10 h-10 rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
               ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
               : 'bg-white/10 border-white/20 hover:bg-white/20'
               }`}
           >
-            <Menu strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
+            {showHomeIcon ? (
+              <motion.div
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                key="home-icon"
+              >
+                <Home strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ rotate: 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                key="menu-icon"
+              >
+                <Menu strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
+              </motion.div>
+            )}
           </motion.button>
 
           <motion.div

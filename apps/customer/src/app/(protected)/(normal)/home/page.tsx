@@ -145,6 +145,16 @@ export default function HomePage() {
     window.dispatchEvent(new CustomEvent('recommendedModeChange', {
       detail: { active: showRecommended }
     }));
+
+    // Listen for external reset (e.g. from logo click in layout)
+    const handleExternalReset = (e: Event) => {
+      const customEvent = e as CustomEvent<{ active: boolean }>;
+      if (customEvent.detail.active === false) {
+        setShowRecommended(false);
+      }
+    };
+    window.addEventListener('recommendedModeChange', handleExternalReset);
+    return () => window.removeEventListener('recommendedModeChange', handleExternalReset);
   }, [showRecommended]);
 
   // Reset recommended mode if search mode starts
@@ -183,7 +193,7 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100vh', transition: { delay: 0.15, duration: 0.8, ease: [0.33, 1, 0.68, 1] } }}
             transition={{ duration: 0.6 }}
-            className="fixed z-50 left-3 right-3 md:hidden top-[12vh]"
+            className="fixed z-50 left-3 right-3 md:hidden top-[9vh] md:top-[12vh]"
           >
             <DeliveryLocationButton variant="compact" />
           </motion.div>
@@ -209,7 +219,7 @@ export default function HomePage() {
               },
             }}
             onClick={() => setShowAllCategories(true)}
-            className="fixed z-30 right-3 md:right-6 top-[18vh] md:top-[18vh] flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
+            className="fixed z-30 right-3 md:right-6 top-[15vh] md:top-[18vh] flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
           >
             <List className="w-4 h-4 md:w-5 md:h-5" />
             <span className="text-xs md:text-sm font-medium">All categories</span>
@@ -307,7 +317,7 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100vh' }}
             transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
-            className="fixed inset-0 z-[40] overflow-y-auto bg-white magazine-scroll"
+            className="fixed inset-0 z-[40] overflow-y-auto bg-[#F7F7F7] magazine-scroll"
           >
             <RecommendedSection
               results={recommendedResults}

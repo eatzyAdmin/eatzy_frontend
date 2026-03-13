@@ -1,9 +1,12 @@
 "use client";
 import { AnimatePresence, motion } from "@repo/ui/motion";
-import { Search, X, SlidersHorizontal } from "@repo/ui/icons";
+import { Search, X, Filter, Home, ShoppingCart, SlidersHorizontal } from "@repo/ui/icons";
 import { useState, useEffect, KeyboardEvent } from "react";
 import FilterModal from "./FilterModal";
 import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { useCart } from "@/features/cart/hooks/useCart";
+import { useRouter } from "next/navigation";
 
 interface SearchFilters {
   minPrice: number;
@@ -34,7 +37,16 @@ export default function SearchOverlay({
   isSearching = false,
 }: SearchOverlayProps) {
   useMobileBackHandler(open, onClose);
+  const isMobile = useIsMobile();
+  const router = useRouter();
+  const { totalItems } = useCart();
 
+  const handleReturnHome = () => {
+    onClose();
+    if (window.clearHomeSearch) window.clearHomeSearch();
+    window.dispatchEvent(new CustomEvent('recommendedModeChange', { detail: { active: false } }));
+    router.replace('/home');
+  };
   const [query, setQuery] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({
@@ -105,7 +117,7 @@ export default function SearchOverlay({
               }}
               className="fixed z-[70] inset-x-4 md:inset-x-60 top-[16vh] md:-translate-x-1/2 max-w-full md:max-w-[92vw]"
             >
-              <div className="relative flex items-center gap-3 px-5 h-16 md:h-20 text-lg md:text-xl rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl overflow-hidden">
+              <div className="relative flex items-center gap-3 px-5 h-16 md:h-20 text-lg md:text-xl rounded-[36px] bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl overflow-hidden">
                 {isSearching && (
                   <motion.div
                     initial={{ x: "-100%" }}
@@ -169,83 +181,173 @@ export default function SearchOverlay({
       {/* Compact search bar + Filter Button */}
       <AnimatePresence>
         {isSearchMode && (
-          <motion.div
-            layoutId="search-bar"
-            initial={{ scale: 0.85, y: 0 }}
-            animate={{
-              scale: 0.85,
-              y: isSearchBarCompact ? -100 : 0,
-            }}
-            exit={{ scale: 1, y: 0 }}
-            transition={{
-              duration: 0.4,
-              spring: {
-                damping: 18,
-                stiffness: 150,
-              }
-            }}
-            className="fixed z-[50] left-12 right-12 md:left-48 md:right-48 top-4 flex items-center justify-center gap-2 md:gap-3"
-          >
-            <div className="relative flex items-center gap-2 md:gap-3 px-3 md:px-5 h-14 md:h-20 text-base md:text-xl rounded-full bg-white shadow-xl border border-gray-200 overflow-hidden flex-1 max-w-3xl focus-within:border-[var(--primary)]/20 focus-within:ring-4 focus-within:ring-[var(--primary)]/5 transition-all">
-              {isSearching && (
-                <motion.div
-                  initial={{ x: "-100%" }}
-                  animate={{ x: "100%" }}
-                  transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                  className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-gray-300 to-transparent"
-                />
-              )}
-              <Search className="w-5 h-5 md:w-8 md:h-8 text-gray-500" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Tìm món, nhà hàng..."
-                className="flex-1 bg-transparent text-gray-900 font-medium placeholder:text-gray-400 focus:outline-none min-w-0"
-              />
-              <button
-                onClick={() => handleSearch()}
-                className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--primary)] text-white flex items-center justify-center hover:bg-[var(--primary)]/90 transition-colors flex-shrink-0"
+          isMobile ? (
+            /* MOBILE VERSION: 100% Match Favorites Page Style */
+            <>
+              <motion.div
+                layoutId="search-bar"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{
+                  opacity: 1,
+                  y: isSearchBarCompact ? -100 : 0,
+                }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  duration: 0.3,
+                  ease: "easeInOut"
+                }}
+                className="fixed z-[50] inset-x-0 top-0 bg-[#F7F7F7]/95 backdrop-blur-md px-2 pt-3 pb-4 flex items-center justify-between gap-3 border-b border-gray-200/50 shadow-sm [mask-image:linear-gradient(to_bottom,black_90%,transparent)]"
               >
-                <Search className="w-5 h-5 md:w-6 md:h-6" />
-              </button>
-            </div>
+                <div className="relative w-full flex-shrink-0 group">
+                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[var(--primary)] transition-colors pointer-events-none z-20" />
 
-            <AnimatePresence>
-              {!filterOpen && (
-                <motion.button
-                  layoutId="filter-modal"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{
-                    type: "spring",
-                    damping: 18,
-                    stiffness: 100,
-                  }}
-                  onClick={() => setFilterOpen(true)}
-                  className="h-14 md:h-20 px-4 md:px-8 bg-white rounded-[30px] shadow-xl border border-gray-100 text-[var(--primary)] font-bold text-base md:text-xl hover:bg-gray-50 transition-colors whitespace-nowrap flex items-center gap-2"
+                  {/* Shimmer Loading */}
+                  <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none z-10">
+                    {isSearching && (
+                      <motion.div
+                        initial={{ x: "-100%" }}
+                        animate={{ x: "100%" }}
+                        transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+                        className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-gray-400/25 to-transparent"
+                      />
+                    )}
+                  </div>
+
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Search dishes, restaurants..."
+                    className="w-full bg-slate-50 border-2 border-white focus:border-[var(--primary)]/20 rounded-3xl py-4 pl-14 pr-12 text-lg font-bold font-anton text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/5 transition-all shadow-[inset_0_0_20px_rgba(0,0,0,0.09)] relative z-10"
+                  />
+
+                  {query && (
+                    <button
+                      onClick={() => {
+                        setQuery("");
+                        if (onSearch) onSearch("");
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-gray-200/50 hover:bg-gray-200 text-gray-500 hover:text-gray-700 flex items-center justify-center transition-all z-20"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+
+              {/* Bottom Fixed Navigation Bar (Mobile Only) */}
+              <div className="fixed bottom-2 left-2 right-2 z-[50] flex justify-center pointer-events-none">
+                <motion.div
+                  initial={{ y: 100, opacity: 0 }}
+                  animate={{ y: isSearchBarCompact ? 200 : 0, opacity: isSearchBarCompact ? 0 : 1 }}
+                  exit={{ y: 100, opacity: 0 }}
+                  transition={{ duration: 0.5, type: 'spring', damping: 20 }}
+                  className="pointer-events-auto backdrop-blur-xl text-black rounded-[32px] border border-white/40 px-3 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center gap-3"
                 >
-                  <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6" />
-                  <span className="hidden md:inline">Filter</span>
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </motion.div>
+                  <button
+                    onClick={() => setFilterOpen(true)}
+                    className="flex items-center justify-center w-14 h-14 rounded-full text-gray-400 hover:bg-gray-200/50 hover:text-gray-900 shadow-sm transition-all duration-300"
+                  >
+                    <Filter className="w-6 h-6" strokeWidth={2.5} />
+                  </button>
+
+                  <button
+                    onClick={handleReturnHome}
+                    className="flex items-center justify-center w-14 h-14 rounded-full bg-black text-white hover:scale-105 shadow-xl transition-all duration-300"
+                  >
+                    <Home className="w-6 h-6" strokeWidth={2.5} />
+                  </button>
+
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('openCart'))}
+                    className="flex items-center justify-center w-14 h-14 rounded-full text-gray-400 hover:bg-gray-200/50 hover:text-gray-900 shadow-sm transition-all duration-300 relative"
+                  >
+                    <ShoppingCart className="w-6 h-6" strokeWidth={2.5} />
+                    {totalItems > 0 && (
+                      <span className="absolute top-2 right-2 min-w-[20px] h-[20px] px-1 rounded-full bg-[var(--primary)] text-[10px] leading-[20px] text-black font-bold border border-white/60 flex items-center justify-center shadow-md">
+                        {totalItems}
+                      </span>
+                    )}
+                  </button>
+                </motion.div>
+              </div>
+            </>
+          ) : (
+            /* DESKTOP VERSION: Order History Style */
+            <motion.div
+              layoutId="search-bar"
+              initial={{ scale: 0.85, y: 0 }}
+              animate={{
+                scale: 0.85,
+                y: isSearchBarCompact ? -100 : 0,
+              }}
+              exit={{ scale: 1, y: 0 }}
+              transition={{
+                duration: 0.4,
+                spring: {
+                  damping: 18,
+                  stiffness: 150,
+                }
+              }}
+              className="fixed z-[50] left-12 right-12 md:left-48 md:right-48 top-4 flex items-center justify-center gap-2 md:gap-3"
+            >
+              <div className="relative flex items-center gap-2 md:gap-3 px-3 md:px-5 h-14 md:h-20 text-base md:text-xl rounded-full bg-white shadow-xl border border-gray-200 overflow-hidden flex-1 max-w-3xl focus-within:border-[var(--primary)]/20 focus-within:ring-4 focus-within:ring-[var(--primary)]/5 transition-all">
+                {isSearching && (
+                  <motion.div
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "100%" }}
+                    transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                    className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-gray-300 to-transparent"
+                  />
+                )}
+                <Search className="w-5 h-5 md:w-8 md:h-8 text-gray-500" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Tìm món, nhà hàng..."
+                  className="flex-1 bg-transparent text-gray-900 font-medium placeholder:text-gray-400 focus:outline-none min-w-0"
+                />
+                <button
+                  onClick={() => handleSearch()}
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--primary)] text-white flex items-center justify-center hover:bg-[var(--primary)]/90 transition-colors flex-shrink-0"
+                >
+                  <Search className="w-5 h-5 md:w-6 md:h-6" />
+                </button>
+              </div>
+
+              <AnimatePresence>
+                {!filterOpen && (
+                  <motion.button
+                    layoutId="filter-modal"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{
+                      type: "spring",
+                      damping: 18,
+                      stiffness: 100,
+                    }}
+                    onClick={() => setFilterOpen(true)}
+                    className="h-14 md:h-20 px-4 md:px-8 bg-white rounded-[30px] shadow-xl border border-gray-100 text-[var(--primary)] font-bold text-base md:text-xl hover:bg-gray-50 transition-colors whitespace-nowrap flex items-center gap-2"
+                  >
+                    <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6" />
+                    <span className="hidden md:inline">Filter</span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {filterOpen && (
-          <FilterModal
-            open={filterOpen}
-            onClose={() => setFilterOpen(false)}
-            layoutId="filter-modal"
-            filters={filters}
-            onApply={handleApplyFilter}
-          />
-        )}
-      </AnimatePresence>
+      <FilterModal
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        layoutId="filter-modal"
+        filters={filters}
+        onApply={handleApplyFilter}
+      />
     </>
   );
 }

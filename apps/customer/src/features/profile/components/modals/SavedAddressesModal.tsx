@@ -95,7 +95,7 @@ export default function SavedAddressesModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[1100]"
+      className="fixed inset-0 z-[90]"
       style={{ pointerEvents: isOpen ? 'auto' : 'none' }}
     >
       <AnimatePresence>
@@ -108,12 +108,12 @@ export default function SavedAddressesModal({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={onClose}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1101]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[91]"
             />
 
             {/* Modal Container */}
             <div
-              className="fixed inset-0 flex items-end md:items-center justify-center p-0 md:p-6 z-[1102]"
+              className="fixed inset-0 flex items-end md:items-center justify-center p-0 md:p-6 z-[92]"
               onClick={onClose}
             >
               {/* Modal Content */}
@@ -215,31 +215,28 @@ export default function SavedAddressesModal({
                               </div>
                             </div>
 
-                            {/* Desktop Only Chevron Link - Bottom Right */}
-                            <div className="hidden md:flex absolute bottom-4 right-4 z-20 items-center gap-2 overflow-hidden pointer-events-none md:group-hover:pointer-events-auto">
-                              <span className="text-[10px] font-black text-lime-600 uppercase tracking-widest translate-x-10 opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 transition-all duration-500 ease-out">
-                                Chọn địa chỉ
-                              </span>
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center md:group-hover:bg-lime-500 md:group-hover:text-black transition-all duration-300">
-                                <ChevronRight className="w-4 h-4 transition-transform md:group-hover:translate-x-1" strokeWidth={3} />
+                            {/* Desktop Only Static Chevron - Bottom Right */}
+                            <div className="hidden md:flex absolute bottom-4 right-4 z-20 items-center justify-center pointer-events-none">
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 group-hover:text-lime-600 transition-colors">
+                                <ChevronRight className="w-4 h-4" strokeWidth={3} />
                               </div>
                             </div>
 
                             {/* Actions Header */}
-                            <div className="absolute top-3 right-3 md:top-4 md:right-4 z-20 flex md:flex-row-reverse items-center gap-1.5">
+                            <div className="absolute top-3 right-3 md:top-4 md:right-4 z-20 flex items-center gap-1.5">
+                              <button
+                                onClick={(e) => handleOpenEdit(addr, e)}
+                                className="flex w-8 h-8 md:w-9 md:h-9 rounded-2xl bg-gray-50 md:bg-gray-100/80 items-center justify-center text-gray-400 shadow-sm transition-all hover:bg-[#1A1A1A] hover:text-white hover:shadow-lg active:scale-90"
+                              >
+                                <Edit3 size={14} className="md:w-4 md:h-4" strokeWidth={2.5} />
+                              </button>
+
                               <button
                                 onClick={(e) => handleDelete(addr, e)}
                                 disabled={isDeleting}
                                 className="w-8 h-8 md:w-9 md:h-9 rounded-2xl bg-red-50 md:bg-gray-100/80 flex items-center justify-center text-red-500 md:text-gray-400 shadow-sm transition-all md:hover:bg-red-500 md:hover:text-white md:hover:shadow-lg active:scale-90"
                               >
                                 <Trash2 size={14} className="md:w-4 md:h-4" strokeWidth={2.5} />
-                              </button>
-
-                              <button
-                                onClick={(e) => handleOpenEdit(addr, e)}
-                                className="hidden md:flex w-8 h-8 md:w-9 md:h-9 rounded-2xl bg-gray-50 md:bg-gray-100/80 items-center justify-center text-gray-400 shadow-sm transition-all hover:bg-[#1A1A1A] hover:text-white hover:shadow-lg active:scale-90"
-                              >
-                                <Edit3 size={14} className="md:w-4 md:h-4" strokeWidth={2.5} />
                               </button>
                             </div>
                           </motion.div>

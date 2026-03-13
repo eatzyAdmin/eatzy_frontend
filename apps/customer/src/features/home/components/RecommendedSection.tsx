@@ -2,7 +2,6 @@ import { motion } from '@repo/ui/motion';
 import { useEffect, useState, useRef } from 'react';
 import { MagazineLayout8Shimmer, InfiniteScrollContainer } from '@repo/ui';
 import { useInfiniteScroll } from '@repo/hooks';
-import { useBottomNav } from '@/features/navigation/context/BottomNavContext';
 import type { RestaurantWithMenu } from '@/features/search/hooks/useSearch';
 import MagazineLayout1 from '@/features/search/components/layouts/MagazineLayout1';
 import MagazineLayout2 from '@/features/search/components/layouts/MagazineLayout2';
@@ -35,7 +34,6 @@ export default function RecommendedSection({
   isLoadingMore = false,
   totalResults
 }: Props) {
-  const { setIsVisible } = useBottomNav();
   const containerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
@@ -91,10 +89,8 @@ export default function RecommendedSection({
 
           if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
             setIsHeaderVisible(false);
-            setIsVisible(false);
           } else if (currentScrollY < lastScrollY.current) {
             setIsHeaderVisible(true);
-            setIsVisible(true);
           }
 
           lastScrollY.current = currentScrollY;
@@ -168,7 +164,7 @@ export default function RecommendedSection({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1] }}
-      className="min-h-screen bg-white pt-24 pb-20 px-3 md:pt-32 md:px-6 magazine-scroll"
+      className="min-h-screen bg-[#F7F7F7] pt-24 pb-20 px-3 md:pt-32 md:px-6 magazine-scroll"
     >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
