@@ -70,16 +70,6 @@ export default function SearchResults({
   // Client-side filtering logic
   const filteredResults = useMemo(() => {
     return results.filter(item => {
-      // Category Filter
-      if (filters?.category) {
-        const restCats = item.restaurant.categories || [];
-        const menuCats = item.menuCategories?.map(c => c.name) || [];
-        const allCats = [...restCats, ...menuCats];
-        const match = allCats.some(c =>
-          typeof c === 'string' && c.toLowerCase().includes(filters.category!.split("/")[0].toLowerCase())
-        );
-        if (!match) return false;
-      }
 
       // Price Filter
       if (filters && (filters.minPrice > 0 || filters.maxPrice < 500000)) {
@@ -142,7 +132,7 @@ export default function SearchResults({
             <div className="w-12 h-1 bg-black" />
             <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Search Advisory</span>
           </div>
-          <h2 className="text-5xl md:text-8xl font-anton font-bold text-black uppercase tracking-tighter leading-[0.85] mb-8">
+          <h2 className="text-5xl md:text-8xl font-anton font-bold text-black uppercase tracking-tighter leading-none mb-8">
             NO RESULTS<br />FOUND
           </h2>
           <p className="text-xl md:text-2xl text-gray-400 font-medium italic leading-relaxed">
@@ -182,7 +172,7 @@ export default function SearchResults({
             <div className="w-12 h-1 bg-black" />
             <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Dispatch Selection</span>
           </div>
-          <h1 className="text-5xl md:text-8xl font-anton font-bold text-black mb-4 uppercase tracking-tighter leading-[0.85]">
+          <h1 className="text-5xl md:text-8xl font-anton font-bold text-black mb-4 uppercase tracking-tighter leading-none">
             CURATED<br />DISCOVERIES
           </h1>
           {!isLoading ? (

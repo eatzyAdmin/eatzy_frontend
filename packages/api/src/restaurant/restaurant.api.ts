@@ -101,9 +101,23 @@ export const restaurantApi = {
     if (params.search?.trim()) {
       queryParams.append('search', params.search.trim());
     }
-    // Filter by restaurant type/category ID using JPA Specification filter syntax
+    // Build JPA Specification filter string (Turkraft SpringFilter syntax)
+    const filters: string[] = [];
+
     if (params.typeId !== undefined) {
-      queryParams.append('filter', `restaurantTypes.id:${params.typeId}`);
+      filters.push(`restaurantTypes.id:${params.typeId}`);
+    }
+
+    // Add price range filter linking to dishes.price
+    if ((params.minPrice !== undefined && params.minPrice > 0) ||
+      (params.maxPrice !== undefined && params.maxPrice < 500000)) {
+      const min = params.minPrice || 0;
+      const max = params.maxPrice || 5000000;
+      filters.push(`dishes.price>=${min} and dishes.price<=${max}`);
+    }
+
+    if (filters.length > 0) {
+      queryParams.append('filter', filters.join(' and '));
     }
     if (params.page !== undefined) {
       queryParams.append('page', params.page.toString());

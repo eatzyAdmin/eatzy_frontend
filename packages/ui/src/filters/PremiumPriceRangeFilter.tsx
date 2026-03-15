@@ -154,7 +154,7 @@ export const PremiumPriceRangeFilter = ({
     <div className="bg-white p-8 rounded-[36px] border border-gray-100 shadow-[0_0_30px_rgba(0,0,0,0.06)]">
 
       {/* Price Display */}
-      <div className="flex justify-between items-end mb-10">
+      <div className="flex justify-between items-end mb-1 md:mb-6">
         <div>
           <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Selected range</h4>
           <div className="flex items-baseline gap-2">
@@ -259,9 +259,9 @@ export const PremiumPriceRangeFilter = ({
       </div>
 
       {/* Manual Input Section */}
-      <div className="grid grid-cols-2 gap-6 pt-4">
-        <div className="space-y-3">
-          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Minimum</label>
+      <div className="grid grid-cols-2 gap-2 md:gap-6 md:pt-4">
+        <div className="space-y-1 md:space-y-3">
+          <label className="text-[10px] font-bold md:font-black text-gray-400 uppercase tracking-widest ml-1">Minimum</label>
           <div className="relative group">
             <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 font-bold text-lg">₫</div>
             <input
@@ -269,12 +269,12 @@ export const PremiumPriceRangeFilter = ({
               value={formatCurrency(localRange[0])}
               onChange={(e) => handleInputChange('min', e.target.value)}
               onBlur={handleInputBlur}
-              className={`w-full bg-gray-50 border-2 border-transparent group-hover:bg-white group-hover:border-gray-100 focus:bg-white ${activeTheme.focusRing} rounded-2xl py-5 pl-12 pr-6 text-xl font-bold tracking-tight text-[#1A1A1A] transition-all outline-none`}
+              className={`w-full bg-gray-50 border-2 border-transparent group-hover:bg-white group-hover:border-gray-100 focus:bg-white ${activeTheme.focusRing} rounded-2xl py-3 md:py-5 pl-12 pr-6 text-lg md:text-xl font-bold tracking-tight text-[#1A1A1A] transition-all outline-none`}
             />
           </div>
         </div>
-        <div className="space-y-3">
-          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Maximum</label>
+        <div className="space-y-1 md:space-y-3">
+          <label className="text-[10px] font-bold md:font-black text-gray-400 uppercase tracking-widest ml-1">Maximum</label>
           <div className="relative group">
             <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 font-bold text-lg">₫</div>
             <input
@@ -282,7 +282,7 @@ export const PremiumPriceRangeFilter = ({
               value={formatCurrency(localRange[1])}
               onChange={(e) => handleInputChange('max', e.target.value)}
               onBlur={handleInputBlur}
-              className={`w-full bg-gray-50 border-2 border-transparent group-hover:bg-white group-hover:border-gray-100 focus:bg-white ${activeTheme.focusRing} rounded-2xl py-5 pl-12 pr-6 text-xl font-bold tracking-tight text-[#1A1A1A] transition-all outline-none`}
+              className={`w-full bg-gray-50 border-2 border-transparent group-hover:bg-white group-hover:border-gray-100 focus:bg-white ${activeTheme.focusRing} rounded-2xl py-3 md:py-5 pl-12 pr-6 text-lg md:text-xl font-bold tracking-tight text-[#1A1A1A] transition-all outline-none`}
             />
           </div>
         </div>

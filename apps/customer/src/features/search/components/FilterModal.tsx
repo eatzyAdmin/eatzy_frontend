@@ -1,9 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion } from "@repo/ui/motion";
-import { X, SlidersHorizontal, Flame, Star, MapPin, Sparkles, Tag } from "@repo/ui/icons";
+import { X, SlidersHorizontal, Flame, Star, MapPin, Sparkles, Tag, Check, List, Banknote } from "@repo/ui/icons";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { PremiumPriceRangeFilter } from "@repo/ui";
+import { useRestaurantTypes } from "@/features/restaurant/hooks/useRestaurantTypes";
+import { sileo } from "@/components/DynamicIslandToast";
 
 interface FilterModalProps {
   open: boolean;
@@ -34,7 +37,6 @@ const SORT_OPTIONS = [
 ];
 
 const HISTOGRAM_DATA = [10, 25, 15, 30, 45, 60, 80, 50, 40, 70, 65, 55, 45, 35, 25, 15, 10, 20, 30, 40, 50, 45, 35, 25, 15];
-const CATEGORIES = ["Cơm", "Trà sữa/Cà phê", "Bún/Phở", "Tráng miệng", "Ăn vặt", "Đồ uống", "Pizza/Burger"];
 
 export default function FilterModal({ open, onClose, layoutId, filters, onApply }: FilterModalProps) {
   const [priceRange, setPriceRange] = useState<[number, number]>([filters.minPrice || 0, filters.maxPrice || MAX_PRICE]);
@@ -44,6 +46,11 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
 
   const trackRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef<'min' | 'max' | null>(null);
+
+  // Fetch categories using shared hook
+  const { data: categoriesData } = useRestaurantTypes();
+
+  const CATEGORIES = categoriesData || [];
 
   useEffect(() => {
     if (open) {
@@ -126,9 +133,9 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
               initial={isMobile ? { y: "100%" } : { opacity: 0, scale: 0.9 }}
               animate={isMobile ? { y: 0 } : { opacity: 1, scale: 1 }}
               exit={isMobile ? { y: "100%" } : { opacity: 0, scale: 0.9 }}
-              className={`bg-white w-full max-h-[90vh] pointer-events-auto flex flex-col shadow-2xl ${isMobile
+              className={`bg-white w-full max-h-[92vh] pointer-events-auto flex flex-col shadow-2xl ${isMobile
                 ? 'rounded-t-[32px]'
-                : 'max-w-xl rounded-[32px] overflow-hidden'
+                : 'max-w-xl rounded-[36px] overflow-hidden'
                 }`}
               transition={isMobile ? {
                 type: "spring",
@@ -142,9 +149,9 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
             >
               {/* Header */}
               <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-100">
-                <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2 uppercase tracking-wide">
+                <h2 className="text-xl md:text-2xl font-bold font-anton flex items-center gap-2 uppercase tracking-wide">
                   <SlidersHorizontal className="w-5 h-5" />
-                  Bộ lọc
+                  Filters
                 </h2>
                 <button
                   onClick={onClose}
@@ -162,105 +169,66 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
                   <h3 className="text-xl font-bold mb-2">Khoảng giá</h3>
                   <p className="text-gray-500 text-sm mb-6">Giá món ăn/đồ uống (VND)</p>
 
-                  <div className="mb-8 select-none">
-                    {/* Histogram */}
-                    <div className="flex items-end h-24 gap-1 mb-2 px-4">
-                      {HISTOGRAM_DATA.map((height, i) => (
-                        <div
-                          key={i}
-                          className="flex-1 rounded-t-sm bg-pink-500/20"
-                          style={{ height: `${height}%` }}
-                        />
-                      ))}
-                    </div>
+                  {/* Container that overrides bounded box of PremiumPriceRangeFilter */}
+                  <div className="[&>div]:bg-transparent [&>div]:p-0 [&>div]:border-none [&>div]:shadow-none">
 
-                    {/* Range Slider Visualization */}
-                    <div className="relative h-6 mb-8" ref={trackRef}>
-                      <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 rounded-full -translate-y-1/2"></div>
-                      <div
-                        className="absolute top-1/2 h-1 bg-[var(--primary)] rounded-full -translate-y-1/2"
-                        style={{
-                          left: `${getPercentage(priceRange[0])}%`,
-                          right: `${100 - getPercentage(priceRange[1])}%`
-                        }}
-                      ></div>
-
-                      {/* Thumbs */}
-                      <div
-                        className="absolute top-1/2 w-8 h-8 bg-white border border-gray-200 shadow-lg rounded-full -translate-y-1/2 -translate-x-1/2 cursor-grab active:cursor-grabbing hover:scale-110 transition-transform z-10 flex items-center justify-center"
-                        style={{ left: `${getPercentage(priceRange[0])}%` }}
-                        onMouseDown={handleMouseDown('min')}
-                      >
-                        <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                      </div>
-                      <div
-                        className="absolute top-1/2 w-8 h-8 bg-white border border-gray-200 shadow-lg rounded-full -translate-y-1/2 -translate-x-1/2 cursor-grab active:cursor-grabbing hover:scale-110 transition-transform z-10 flex items-center justify-center"
-                        style={{ left: `${getPercentage(priceRange[1])}%` }}
-                        onMouseDown={handleMouseDown('max')}
-                      >
-                        <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                      </div>
-                    </div>
-
-                    {/* Price Inputs */}
-                    <div className="flex items-center justify-between gap-4">
-                      {/* Min Input */}
-                      <div className="border border-gray-200 rounded-2xl px-4 py-3 flex-1 flex flex-col focus-within:border-[var(--primary)] transition-colors relative">
-                        <label className="text-xs text-gray-500 mb-1">Tối thiểu</label>
-                        <div className="flex items-center">
-                          <span className="text-gray-400 mr-1">₫</span>
-                          <input
-                            type="number"
-                            value={priceRange[0]}
-                            onChange={(e) => handlePriceInputChange(0, e.target.value)}
-                            className="w-full font-semibold text-lg outline-none text-gray-900 bg-transparent placeholder-gray-300"
-                            min={0}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="h-[1px] w-8 bg-gray-300"></div>
-
-                      {/* Max Input */}
-                      <div className="border border-gray-200 rounded-2xl px-4 py-3 flex-1 flex flex-col focus-within:border-[var(--primary)] transition-colors relative">
-                        <label className="text-xs text-gray-500 mb-1">Tối đa</label>
-                        <div className="flex items-center">
-                          <span className="text-gray-400 mr-1">₫</span>
-                          <input
-                            type="number"
-                            value={priceRange[1]}
-                            onChange={(e) => handlePriceInputChange(1, e.target.value)}
-                            className="w-full font-semibold text-lg outline-none text-gray-900 bg-transparent placeholder-gray-300"
-                            min={0}
-                          />
-                        </div>
-                      </div>
-                    </div>
+                    <PremiumPriceRangeFilter
+                      min={MIN_PRICE}
+                      max={MAX_PRICE}
+                      step={10000}
+                      value={{ min: priceRange[0], max: priceRange[1] }}
+                      onChange={(range) => setPriceRange([range.min, range.max])}
+                      activeColor="lime"
+                    />
                   </div>
                 </section>
 
                 {/* Sort Options */}
                 <section>
                   <h3 className="text-xl font-bold mb-6">Sắp xếp theo</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+                  <div className="grid grid-cols-2 gap-1 md:gap-3">
                     {SORT_OPTIONS.map(opt => {
                       const Icon = opt.icon;
-                      const isActive = sort === opt.id;
+                      const active = sort === opt.id;
                       return (
                         <button
                           key={opt.id}
                           onClick={() => setSort(opt.id)}
                           className={`
-                        aspect-square rounded-3xl p-4 flex flex-col items-center justify-center gap-3 text-center transition-all border-2
-                        ${isActive
-                              ? 'border-[var(--primary)] bg-[var(--primary)]/5'
-                              : 'border-gray-100 hover:border-gray-200 bg-white hover:bg-gray-50'}
-                      `}
+                                relative w-full text-left p-2 md:p-2.5 rounded-[20px] md:rounded-[28px] border-2 transition-all duration-300 group flex items-center gap-2 md:gap-4
+                                ${active
+                              ? "bg-lime-50 border-lime-100 shadow-sm"
+                              : "bg-white border-gray-50 hover:border-gray-100 hover:bg-gray-50/30"
+                            }
+                              `}
                         >
-                          <Icon className={`w-8 h-8 ${isActive ? 'text-[var(--primary)]' : 'text-gray-500'}`} />
-                          <span className={`text-sm font-medium ${isActive ? 'text-[var(--primary)]' : 'text-gray-700'}`}>
+                          {/* Icon Box */}
+                          <div className={`
+                                w-8 h-8 md:w-11 md:h-11 rounded-[12px] md:rounded-[18px] flex items-center justify-center flex-shrink-0 transition-all duration-300
+                                ${active
+                              ? 'bg-lime-200 text-lime-700'
+                              : 'bg-gray-50 text-gray-400 group-hover:bg-white'
+                            }
+                              `}>
+                            <Icon className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.5} />
+                          </div>
+
+                          {/* Label */}
+                          <span className={`flex-1 text-[12px] md:text-[15px] leading-tight font-bold tracking-tight transition-all whitespace-nowrap ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
                             {opt.label}
                           </span>
+
+                          {/* Checkmark Circle at the end */}
+                          <div className={`
+                                w-5 h-5 md:w-8 md:h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500
+                                ${active
+                              ? "bg-lime-500 text-white scale-100"
+                              : "bg-gray-100 text-transparent scale-90"
+                            }
+                              `}>
+                            <Check className={`w-3 h-3 md:w-4 md:h-4 ${active ? "opacity-100" : "opacity-0"}`} strokeWidth={4} />
+                          </div>
                         </button>
                       )
                     })}
@@ -270,19 +238,23 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
                 {/* Categories */}
                 <section>
                   <h3 className="text-xl font-bold mb-4">Danh mục món ăn</h3>
-                  <div className="flex flex-wrap gap-2">
+
+                  <div className="flex flex-wrap gap-2.5">
                     {CATEGORIES.map(cat => {
-                      const isActive = category === cat;
+                      const active = category === String(cat.id);
                       return (
                         <button
-                          key={cat}
-                          onClick={() => setCategory(isActive ? null : cat)}
-                          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive
-                            ? 'bg-[var(--primary)] text-[#1A1A1A] shadow-md shadow-[var(--primary)]/20'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
+                          key={cat.id}
+                          onClick={() => setCategory(active ? null : String(cat.id))}
+                          className={`
+                            px-5 py-2.5 rounded-2xl text-[14px] font-bold transition-all border duration-300
+                            ${active
+                              ? 'bg-[var(--primary)] text-white border-[var(--primary)] shadow-[0_8px_20px_rgba(132,204,22,0.3)] shadow-[var(--primary)]/20 -translate-y-0.5'
+                              : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700'
+                            }
+                          `}
                         >
-                          {cat}
+                          {cat.name}
                         </button>
                       )
                     })}
@@ -291,20 +263,44 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
 
               </div>
 
-              {/* Footer */}
               <div className="p-4 md:p-6 border-t border-gray-100 bg-white flex items-center justify-between">
-                <button
-                  onClick={() => { setPriceRange([0, MAX_PRICE]); setSort('recommended'); setCategory(null); }}
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    const isDefault = priceRange[0] === 0 &&
+                      priceRange[1] === MAX_PRICE &&
+                      sort === 'recommended' &&
+                      category === null;
+                    if (isDefault) {
+                      sileo.info({ title: 'Bộ lọc mặc định', description: 'Bộ lọc hiện đã ở trạng thái ban đầu.' });
+                    } else {
+                      setPriceRange([0, MAX_PRICE]);
+                      setSort('recommended');
+                      setCategory(null);
+                    }
+                  }}
                   className="text-gray-600 hover:text-gray-900 font-medium px-4 py-2 hover:bg-gray-100 rounded-xl transition-colors"
                 >
-                  Xóa tất cả
-                </button>
-                <button
-                  onClick={() => onApply({ minPrice: priceRange[0], maxPrice: priceRange[1], sort, category })}
-                  className="px-8 py-3 bg-[var(--primary)] text-white font-bold rounded-xl hover:bg-[var(--primary)]/90 transition-colors shadow-lg shadow-[var(--primary)]/30"
+                  Xóa bộ lọc
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    const isChanged = priceRange[0] !== (filters.minPrice || 0) ||
+                      priceRange[1] !== (filters.maxPrice || MAX_PRICE) ||
+                      sort !== (filters.sort || 'recommended') ||
+                      category !== filters.category;
+                    if (!isChanged) {
+                      sileo.info({ title: 'Bộ lọc không có gì thay đổi', description: 'Các tiêu chí lọc vẫn đang được giữ nguyên.' });
+                      onClose();
+                    } else {
+                      onApply({ minPrice: priceRange[0], maxPrice: priceRange[1], sort, category });
+                    }
+                  }}
+                  className="px-8 py-3 bg-[var(--primary)] text-white font-bold rounded-2xl hover:bg-[var(--primary)]/90 transition-colors shadow-lg shadow-[var(--primary)]/30"
                 >
                   Áp dụng
-                </button>
+                </motion.button>
               </div>
 
             </motion.div>

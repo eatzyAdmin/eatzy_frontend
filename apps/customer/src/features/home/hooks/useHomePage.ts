@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
-import { restaurantTypeApi, restaurantApi } from '@repo/api';
-import type { RestaurantCategory, RestaurantMagazine, Restaurant } from '@repo/types';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { restaurantApi } from '@repo/api';
+import type { RestaurantMagazine } from '@repo/types';
 import { useDeliveryLocationStore } from '@/store/deliveryLocationStore';
 import { DEFAULT_LOCATION_HCMC } from '@repo/hooks';
 import { mapMagazineToRestaurantWithMenu } from '@/features/search/utils/mappers';
+import { useRestaurantTypes } from '@/features/restaurant/hooks/useRestaurantTypes';
 
 // Helper to get category background (still static or needs DB field)
 const getCategoryBackgroundImage = (slug: string) => {
@@ -28,17 +29,7 @@ export function useHomePage() {
   const [filter, setFilter] = useState('All recipes');
 
   // 1. Get Categories
-  const { data: categoriesData, isLoading: isCategoriesLoading } = useQuery({
-    queryKey: ['restaurant-types', 'all'],
-    queryFn: async () => {
-      const res = await restaurantTypeApi.getAllRestaurantTypes();
-      if (res.statusCode === 200 && res.data) {
-        return res.data.result;
-      }
-      return [];
-    },
-    staleTime: 60 * 60 * 1000, // 1 hour
-  });
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useRestaurantTypes();
 
   const categories = categoriesData || [];
   const activeCategory = categories[activeCategoryIndex];

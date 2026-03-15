@@ -178,7 +178,7 @@ export default function RecommendedSection({
             <div className="w-12 h-1 bg-black" />
             <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Curated For You</span>
           </div>
-          <h1 className="text-5xl md:text-8xl font-anton font-bold text-black mb-4 uppercase tracking-tighter leading-[0.85]">
+          <h1 className="text-5xl md:text-8xl font-anton font-bold text-black mb-4 uppercase tracking-tighter leading-none">
             DINING<br />RECOMMENDATIONS
           </h1>
           <p className="text-xl md:text-2xl text-gray-500 font-medium italic">

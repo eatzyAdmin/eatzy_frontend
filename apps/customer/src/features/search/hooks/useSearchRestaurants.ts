@@ -79,6 +79,9 @@ export function useSearchRestaurants(
     latitude: params.latitude,
     longitude: params.longitude,
     search: params.search?.trim() || undefined,
+    typeId: params.typeId,
+    minPrice: params.minPrice,
+    maxPrice: params.maxPrice,
   } : null;
 
   // Main infinite query

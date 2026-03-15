@@ -32,8 +32,7 @@ export function useSearch() {
   const pathname = usePathname();
 
   // Local state
-  const [localSearchQuery, setLocalSearchQuery] = useState('');
-  const [hasSearched, setHasSearched] = useState(false);
+  // We remove localSearchQuery and hasSearched states because they conflict with the URL during router transitions.
 
   // Get delivery location from store (selected location or GPS fallback)
   const selectedLocation = useDeliveryLocationStore((state) => state.selectedLocation);
@@ -51,7 +50,7 @@ export function useSearch() {
   }), [searchParams]);
 
   // Check if in search mode
-  const isSearchMode = searchParams.has('q');
+  const isSearchMode = searchParams.has('q') || searchParams.has('category');
   const currentQuery = searchParams.get('q') || '';
 
   // ===== useInfiniteQuery via useSearchRestaurants =====
@@ -69,6 +68,9 @@ export function useSearch() {
       latitude: locationCoords.latitude,
       longitude: locationCoords.longitude,
       search: currentQuery,
+      typeId: filters.category ? Number(filters.category) : undefined,
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice,
     } : null,
     {
       enabled: isSearchMode && !isLocationLoading,
@@ -87,53 +89,37 @@ export function useSearch() {
   // ===== Actions =====
 
   const performSearch = useCallback(async (query: string, newFilters?: Partial<SearchFilters>) => {
-    if (!query.trim()) return;
+    const filtersToUse = newFilters ? { ...filters, ...newFilters } : filters;
 
     const params = new URLSearchParams(searchParams.toString());
-    params.set('q', query);
 
-    const filtersToUse = newFilters ? { ...filters, ...newFilters } : filters;
+    // Always set q to keep us in search mode, even if it's empty
+    params.set('q', query.trim());
+
     if (filtersToUse.minPrice !== undefined) params.set('minPrice', filtersToUse.minPrice.toString());
     if (filtersToUse.maxPrice !== undefined) params.set('maxPrice', filtersToUse.maxPrice.toString());
     if (filtersToUse.sort) params.set('sort', filtersToUse.sort);
     if (filtersToUse.category) params.set('category', filtersToUse.category);
     else params.delete('category');
 
-    setHasSearched(true);
-    setLocalSearchQuery(query);
-
     router.push(`?${params.toString()}`, { scroll: false });
   }, [searchParams, router, filters]);
 
   const clearSearch = useCallback(() => {
-    setLocalSearchQuery('');
-    setHasSearched(false);
-
     const next = new URLSearchParams(searchParams.toString());
     ['q', 'minPrice', 'maxPrice', 'sort', 'category'].forEach(key => next.delete(key));
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   }, [router, searchParams, pathname]);
 
-  // Sync URL query changes
-  useEffect(() => {
-    const query = searchParams.get('q') || '';
-    if (!query || isApiLoading) return;
-
-    if (query !== localSearchQuery) {
-      setLocalSearchQuery(query);
-      setHasSearched(true);
-    }
-  }, [searchParams, localSearchQuery, isApiLoading]);
-
   // ===== Return =====
 
   return {
     // State
-    searchQuery: localSearchQuery,
-    setSearchQuery: setLocalSearchQuery,
+    searchQuery: currentQuery,
+    setSearchQuery: () => { }, // No-op for backwards compatibility
     searchResults,
     isSearching: isApiLoading,
-    hasSearched,
+    hasSearched: isSearchMode,
     isSearchMode,
     filters,
 

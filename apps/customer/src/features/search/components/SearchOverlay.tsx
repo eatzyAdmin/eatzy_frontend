@@ -22,6 +22,8 @@ interface SearchOverlayProps {
   isSearchMode?: boolean;
   isSearchBarCompact?: boolean;
   isSearching?: boolean;
+  searchQuery?: string;
+  activeFilters?: SearchFilters;
 }
 
 
@@ -35,6 +37,8 @@ export default function SearchOverlay({
   isSearchMode = false,
   isSearchBarCompact = false,
   isSearching = false,
+  searchQuery = "",
+  activeFilters,
 }: SearchOverlayProps) {
   useMobileBackHandler(open, onClose);
   const isMobile = useIsMobile();
@@ -47,17 +51,23 @@ export default function SearchOverlay({
     window.dispatchEvent(new CustomEvent('recommendedModeChange', { detail: { active: false } }));
     router.replace('/home');
   };
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(searchQuery);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filters, setFilters] = useState<SearchFilters>({
+  const [filters, setFilters] = useState<SearchFilters>(activeFilters || {
     minPrice: 0,
     maxPrice: 500000,
     sort: 'recommended',
     category: null
   });
 
+  useEffect(() => {
+    if (activeFilters) {
+      setFilters(activeFilters);
+    }
+  }, [activeFilters]);
+
   const handleSearch = () => {
-    if (query.trim() && onSearch) {
+    if ((query.trim() || filters.category) && onSearch) {
       onSearch(query.trim(), filters);
     }
   };
@@ -65,7 +75,7 @@ export default function SearchOverlay({
   const handleApplyFilter = (newFilters: SearchFilters) => {
     setFilters(newFilters);
     setFilterOpen(false);
-    if (query.trim() && onSearch) {
+    if (onSearch) {
       onSearch(query.trim(), newFilters);
     }
   };
@@ -84,10 +94,20 @@ export default function SearchOverlay({
   };
 
   useEffect(() => {
-    if (!open) {
+    if (!open && !isSearchMode) {
       setQuery("");
+      setFilters({
+        minPrice: 0,
+        maxPrice: 500000,
+        sort: 'recommended',
+        category: null
+      });
     }
-  }, [open]);
+  }, [open, isSearchMode]);
+
+  useEffect(() => {
+    setQuery(searchQuery);
+  }, [searchQuery]);
 
   return (
     <>
@@ -198,11 +218,11 @@ export default function SearchOverlay({
                 }}
                 className="fixed z-[50] inset-x-0 top-0 bg-[#F7F7F7]/95 backdrop-blur-md px-2 pt-3 pb-4 flex items-center justify-between gap-3 border-b border-gray-200/50 shadow-sm [mask-image:linear-gradient(to_bottom,black_90%,transparent)]"
               >
-                <div className="relative w-full flex-shrink-0 group">
+                <div className="relative w-full flex-shrink-0 group bg-slate-50 rounded-3xl border-2 border-white focus-within:border-[var(--primary)]/20 shadow-[inset_0_0_20px_rgba(0,0,0,0.09)] overflow-hidden transition-all">
                   <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[var(--primary)] transition-colors pointer-events-none z-20" />
 
                   {/* Shimmer Loading */}
-                  <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none z-10">
+                  <div className="absolute inset-0 pointer-events-none z-10">
                     {isSearching && (
                       <motion.div
                         initial={{ x: "-100%" }}
@@ -218,7 +238,7 @@ export default function SearchOverlay({
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Search dishes, restaurants..."
-                    className="w-full bg-slate-50 border-2 border-white focus:border-[var(--primary)]/20 rounded-3xl py-4 pl-14 pr-12 text-lg font-bold font-anton text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/5 transition-all shadow-[inset_0_0_20px_rgba(0,0,0,0.09)] relative z-10"
+                    className="w-full bg-transparent py-4 pl-14 pr-12 text-lg font-bold font-anton text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/5 transition-all relative z-20"
                   />
 
                   {query && (
@@ -246,28 +266,32 @@ export default function SearchOverlay({
                 >
                   <button
                     onClick={() => setFilterOpen(true)}
-                    className="flex items-center justify-center w-14 h-14 rounded-full text-gray-400 hover:bg-gray-200/50 hover:text-gray-900 shadow-sm transition-all duration-300"
+                    className="flex flex-col items-center justify-center w-[72px] h-14 rounded-2xl text-gray-500 hover:bg-gray-200/50 hover:text-gray-900 transition-all duration-300 gap-1"
                   >
-                    <Filter className="w-6 h-6" strokeWidth={2.5} />
+                    <Filter className="w-[22px] h-[22px]" strokeWidth={2.5} />
+                    <span className="text-[11px] font-bold">Bộ lọc</span>
                   </button>
 
                   <button
                     onClick={handleReturnHome}
-                    className="flex items-center justify-center w-14 h-14 rounded-full bg-black text-white hover:scale-105 shadow-xl transition-all duration-300"
+                    className="flex items-center justify-center w-14 h-14 rounded-full bg-black text-white hover:scale-105 shadow-xl transition-all duration-300 mx-1"
                   >
                     <Home className="w-6 h-6" strokeWidth={2.5} />
                   </button>
 
                   <button
                     onClick={() => window.dispatchEvent(new CustomEvent('openCart'))}
-                    className="flex items-center justify-center w-14 h-14 rounded-full text-gray-400 hover:bg-gray-200/50 hover:text-gray-900 shadow-sm transition-all duration-300 relative"
+                    className="flex flex-col items-center justify-center w-[72px] h-14 rounded-2xl text-gray-500 hover:bg-gray-200/50 hover:text-gray-900 transition-all duration-300 gap-1 relative"
                   >
-                    <ShoppingCart className="w-6 h-6" strokeWidth={2.5} />
-                    {totalItems > 0 && (
-                      <span className="absolute top-2 right-2 min-w-[20px] h-[20px] px-1 rounded-full bg-[var(--primary)] text-[10px] leading-[20px] text-black font-bold border border-white/60 flex items-center justify-center shadow-md">
-                        {totalItems}
-                      </span>
-                    )}
+                    <div className="relative">
+                      <ShoppingCart className="w-[22px] h-[22px]" strokeWidth={2.5} />
+                      {totalItems > 0 && (
+                        <span className="absolute -top-1.5 -right-2 min-w-[16px] h-[16px] px-1 rounded-full bg-[var(--primary)] text-[9px] leading-[16px] text-black font-bold border border-white flex items-center justify-center shadow-sm">
+                          {totalItems}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[11px] font-bold">Giỏ hàng</span>
                   </button>
                 </motion.div>
               </div>
@@ -279,7 +303,7 @@ export default function SearchOverlay({
               initial={{ scale: 0.85, y: 0 }}
               animate={{
                 scale: 0.85,
-                y: isSearchBarCompact ? -100 : 0,
+                y: isSearchBarCompact ? -120 : 0,
               }}
               exit={{ scale: 1, y: 0 }}
               transition={{
@@ -289,31 +313,46 @@ export default function SearchOverlay({
                   stiffness: 150,
                 }
               }}
-              className="fixed z-[50] left-12 right-12 md:left-48 md:right-48 top-4 flex items-center justify-center gap-2 md:gap-3"
+              className="fixed z-[50] left-48 right-48 top-1.5 flex items-center justify-center gap-3"
             >
-              <div className="relative flex items-center gap-2 md:gap-3 px-3 md:px-5 h-14 md:h-20 text-base md:text-xl rounded-full bg-white shadow-xl border border-gray-200 overflow-hidden flex-1 max-w-3xl focus-within:border-[var(--primary)]/20 focus-within:ring-4 focus-within:ring-[var(--primary)]/5 transition-all">
-                {isSearching && (
-                  <motion.div
-                    initial={{ x: "-100%" }}
-                    animate={{ x: "100%" }}
-                    transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                    className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-gray-300 to-transparent"
-                  />
-                )}
-                <Search className="w-5 h-5 md:w-8 md:h-8 text-gray-500" />
+              <div className="relative flex-1 max-w-3xl group h-20">
+                {/* Search Icon + Vertical Divider */}
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 flex items-center gap-3 z-20 pointer-events-none">
+                  <Search className="w-6 h-6 text-gray-400 group-focus-within:text-[var(--primary)] transition-colors" />
+                  <div className="w-px h-5 bg-gray-200" />
+                </div>
+
+                {/* Shimmer Loading */}
+                <div className="absolute inset-0 overflow-hidden rounded-[32px] pointer-events-none z-10">
+                  {isSearching && (
+                    <motion.div
+                      initial={{ x: "-100%" }}
+                      animate={{ x: "100%" }}
+                      transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+                      className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-gray-400/20 to-transparent"
+                    />
+                  )}
+                </div>
+
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Tìm món, nhà hàng..."
-                  className="flex-1 bg-transparent text-gray-900 font-medium placeholder:text-gray-400 focus:outline-none min-w-0"
+                  placeholder="Search dishes, restaurants..."
+                  className="w-full h-full bg-slate-50 border-2 border-white focus:border-[var(--primary)]/20 rounded-[32px] pl-16 pr-14 text-xl font-bold font-anton text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/5 transition-all shadow-[inset_0_0_20px_rgba(0,0,0,0.09),0_20px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]"
                 />
-                <button
-                  onClick={() => handleSearch()}
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--primary)] text-white flex items-center justify-center hover:bg-[var(--primary)]/90 transition-colors flex-shrink-0"
-                >
-                  <Search className="w-5 h-5 md:w-6 md:h-6" />
-                </button>
+
+                {query && (
+                  <button
+                    onClick={() => {
+                      setQuery("");
+                      if (onSearch) onSearch("");
+                    }}
+                    className="absolute right-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-gray-200/50 hover:bg-gray-200 text-gray-500 hover:text-gray-700 flex items-center justify-center transition-colors z-20"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
               </div>
 
               <AnimatePresence>
@@ -329,10 +368,10 @@ export default function SearchOverlay({
                       stiffness: 100,
                     }}
                     onClick={() => setFilterOpen(true)}
-                    className="h-14 md:h-20 px-4 md:px-8 bg-white rounded-[30px] shadow-xl border border-gray-100 text-[var(--primary)] font-bold text-base md:text-xl hover:bg-gray-50 transition-colors whitespace-nowrap flex items-center gap-2"
+                    className="h-20 px-8 bg-slate-50 border-2 border-white rounded-[32px] shadow-[inset_0_0_20px_rgba(0,0,0,0.08),0_20px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] text-gray-900 font-bold font-anton text-xl hover:bg-gray-100 transition-colors whitespace-nowrap flex items-center gap-2"
                   >
-                    <SlidersHorizontal className="w-5 h-5 md:w-6 md:h-6" />
-                    <span className="hidden md:inline">Filter</span>
+                    <Filter className="w-6 h-6 text-[var(--primary)]" strokeWidth={2.5} />
+                    <span>FILTER</span>
                   </motion.button>
                 )}
               </AnimatePresence>

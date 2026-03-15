@@ -25,8 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const { isSearching, performSearch } = useSearch();
-  const isSearchMode = searchParams.has("q");
+  const { isSearching, performSearch, isSearchMode, searchQuery, filters } = useSearch();
   const isRestaurantDetail = pathname?.startsWith("/restaurants/") ?? false;
   const isOrderHistory = pathname?.startsWith("/order-history") ?? false;
   const isFavorites = pathname?.startsWith("/favorites") ?? false;
@@ -175,6 +174,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           isSearchMode={effectiveSearchMode}
           isSearchBarCompact={isSearchBarCompact}
           isSearching={isSearching}
+          searchQuery={searchQuery}
+          activeFilters={filters}
         />
         {children}
         {!isRestaurantDetail && !effectiveSearchMode && <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />}

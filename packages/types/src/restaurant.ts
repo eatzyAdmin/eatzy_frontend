@@ -164,6 +164,8 @@ export type NearbyRestaurantsParams = {
   longitude: number;
   search?: string;
   typeId?: number;  // Filter by restaurant type/category ID
+  minPrice?: number;
+  maxPrice?: number;
   page?: number;
   size?: number;
 };
