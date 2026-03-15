@@ -8,13 +8,15 @@ export default function CheckoutSummary({
   baseFee,
   discount,
   shippingDiscount = 0,
-  isLoadingFee = false
+  isLoadingFee = false,
+  isOverDistance = false
 }: {
   subtotal: number;
   baseFee: number;
   discount: number;
   shippingDiscount?: number;
   isLoadingFee?: boolean;
+  isOverDistance?: boolean;
 }) {
   return (
     <div className="bg-white rounded-[32px] md:rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 h-full flex flex-col">
@@ -34,13 +36,15 @@ export default function CheckoutSummary({
           <div className="text-right">
             {isLoadingFee ? (
               <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+            ) : isOverDistance ? (
+              <span className="font-semibold text-orange-500">Phạm vi quá xa</span>
             ) : (
               <span className="font-bold text-gray-900">{formatVnd(baseFee)}</span>
             )}
           </div>
         </div>
 
-        {shippingDiscount > 0 && (
+        {shippingDiscount > 0 && !isOverDistance && (
           <div className="flex justify-between items-center text-sm animate-in fade-in slide-in-from-right-2">
             <span className="text-gray-500 font-medium">Shipping Discount</span>
             <span className="font-bold text-[var(--danger)]">-{formatVnd(shippingDiscount)}</span>
@@ -62,6 +66,8 @@ export default function CheckoutSummary({
             <span className="font-anton text-3xl text-[var(--primary)]">
               {isLoadingFee ? (
                 <div className="h-9 w-24 bg-gray-100 animate-pulse rounded-lg" />
+              ) : isOverDistance ? (
+                <span className="text-orange-500 tracking-tighter">---</span>
               ) : (
                 formatVnd(Math.max(0, subtotal + (baseFee - shippingDiscount) - discount))
               )}

@@ -83,12 +83,12 @@ export default function DistanceWarningModal({
 
               {/* Content */}
               <div className="px-4 py-5 pb-4 md:px-8 md:py-8 md:pb-8 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center mb-6 mx-auto border border-orange-100">
+                <div className="w-16 h-16 rounded-3xl bg-orange-50 flex items-center justify-center mb-6 mx-auto border border-orange-100">
                   <AlertTriangle size={32} className="text-orange-500" strokeWidth={2.5} />
                 </div>
 
-                <p className="text-gray-500 text-[15px] leading-relaxed mb-8">
-                  Vì lý do phục vụ trải nghiệm món ăn tốt nhất và đảm bảo chất lượng giao hàng, Eatzy giới hạn bán kính giao hàng tối đa là <span className="font-bold text-[#154D1B]">{maxDistance}km</span>.
+                <p className="text-gray-500 text-[15px] font-medium leading-relaxed mb-8">
+                  Vì lý do phục vụ trải nghiệm món ăn tốt nhất và đảm bảo chất lượng giao hàng, Eatzy giới hạn bán kính giao hàng tối đa là <span className="font-black text-xl text-[#154D1B] ml-0.5 ">{maxDistance}km</span>.
                   <br />
                   <span className="block mt-2 text-sm">
                     Vị trí của bạn đang cách quán <span className="font-bold text-orange-600 px-1.5 py-0.5 bg-orange-50 rounded-lg">{currentDistance.toFixed(1)}km</span>.
@@ -100,10 +100,9 @@ export default function DistanceWarningModal({
                   <div className="flex flex-col gap-1">
                     {/* Mobile: Select Location */}
                     <motion.button
-                      whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={onSelectLocation || onClose}
-                      className="md:hidden group/btn relative w-full h-[60px] bg-[var(--primary)] text-[#154D1B] rounded-[24px] flex items-center justify-center px-6 shadow-[0_12px_30px_rgba(0,0,0,0.1)] transition-all duration-300"
+                      className="md:hidden group/btn relative w-full h-[60px] bg-[var(--primary)] hover:bg-[#A9E23D] text-[#154D1B] rounded-[24px] flex items-center justify-center px-6 shadow-[0_12px_30px_rgba(0,0,0,0.1)] transition-all duration-300 overflow-hidden"
                     >
                       <div className="flex items-center gap-3 relative z-10 transition-all">
                         <MapPin size={20} strokeWidth={2.5} />
@@ -116,10 +115,9 @@ export default function DistanceWarningModal({
 
                     {/* Desktop: Got it */}
                     <motion.button
-                      whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={onClose}
-                      className="hidden md:flex group/btn relative w-full h-[60px] bg-[var(--primary)] text-[#154D1B] rounded-[24px] items-center justify-center px-6 shadow-[0_12px_30px_rgba(0,0,0,0.1)] transition-all duration-300"
+                      className="hidden md:flex group/btn relative w-full h-[60px] bg-[var(--primary)] hover:bg-[#A9E23D] text-[#154D1B] rounded-[24px] items-center justify-center px-6 shadow-[0_12px_30px_rgba(0,0,0,0.1)] transition-all duration-300"
                     >
                       <div className="flex items-center gap-3 relative z-10 transition-all">
                         <span className="text-xl font-anton font-black tracking-tight uppercase">

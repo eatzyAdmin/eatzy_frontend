@@ -368,7 +368,14 @@ export default function CheckoutPage() {
                   </section>
 
                   <section data-id="payment">
-                    <CheckoutSummary subtotal={subtotal} baseFee={baseFee} discount={discount} shippingDiscount={shippingDiscount} isLoadingFee={isLoadingFee} />
+                    <CheckoutSummary
+                      subtotal={subtotal}
+                      baseFee={baseFee}
+                      discount={discount}
+                      shippingDiscount={shippingDiscount}
+                      isLoadingFee={isLoadingFee}
+                      isOverDistance={isOverDistance}
+                    />
                   </section>
                 </div>
 
@@ -506,7 +513,14 @@ export default function CheckoutPage() {
                     </section>
 
                     <section className="col-span-1 md:col-span-4 h-full" data-id="payment">
-                      <CheckoutSummary subtotal={subtotal} baseFee={baseFee} discount={discount} shippingDiscount={shippingDiscount} isLoadingFee={isLoadingFee} />
+                      <CheckoutSummary
+                        subtotal={subtotal}
+                        baseFee={baseFee}
+                        discount={discount}
+                        shippingDiscount={shippingDiscount}
+                        isLoadingFee={isLoadingFee}
+                        isOverDistance={isOverDistance}
+                      />
                     </section>
                   </div>
                 </div>
