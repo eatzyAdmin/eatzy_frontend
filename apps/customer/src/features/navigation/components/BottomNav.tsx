@@ -17,7 +17,7 @@ export default function BottomNav({ onCurrentOrdersClick, isOrdersOpen }: Bottom
   const { isVisible } = useBottomNav();
 
   const tabs = [
-    { name: 'Current Order', icon: Truck, action: onCurrentOrdersClick, id: 'orders', isActiveOverride: isOrdersOpen },
+    { name: 'Orders', icon: Truck, action: onCurrentOrdersClick, id: 'orders', isActiveOverride: isOrdersOpen },
     { name: 'History', icon: History, path: '/order-history', id: 'history' },
     { name: 'Home', icon: Home, path: '/home', id: 'home' },
     { name: 'Favorites', icon: Heart, path: '/favorites', id: 'favorites' },
@@ -39,10 +39,12 @@ export default function BottomNav({ onCurrentOrdersClick, isOrdersOpen }: Bottom
             <button
               key={tab.id}
               onClick={() => tab.path ? router.replace(tab.path) : tab.action?.()}
-              className={`flex items-center justify-center w-14 h-14 rounded-full transition-all duration-300 ${isActive ? 'bg-black text-white shadow-lg scale-110' : 'text-gray-400 hover:bg-gray-200/50'
-                }`}
+              className={`flex flex-col items-center justify-center flex-1 h-[60px] transition-all duration-300 ${isActive ? 'gap-1' : 'gap-0'}`}
             >
-              <tab.icon className="w-6 h-6" strokeWidth={2.5} />
+              <div className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 ${isActive ? 'bg-black text-white shadow-md scale-110' : 'text-gray-400 active:bg-gray-200/50 active:scale-95'}`}>
+                <tab.icon className="w-6 h-6" strokeWidth={2.3} />
+              </div>
+              <span className="text-[10px] font-bold whitespace-nowrap text-gray-500">{tab.name}</span>
             </button>
           );
         })}
