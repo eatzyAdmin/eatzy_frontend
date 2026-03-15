@@ -39,12 +39,21 @@ export default function BottomNav({ onCurrentOrdersClick, isOrdersOpen }: Bottom
             <button
               key={tab.id}
               onClick={() => tab.path ? router.replace(tab.path) : tab.action?.()}
-              className={`flex flex-col items-center justify-center flex-1 h-[60px] transition-all duration-300 ${isActive ? 'gap-1' : 'gap-0'}`}
+              className="flex flex-col items-center justify-center flex-1 h-[60px] transition-all duration-300 gap-0"
             >
-              <div className={`flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 ${isActive ? 'bg-black text-white shadow-md scale-110' : 'text-gray-400 active:bg-gray-200/50 active:scale-95'}`}>
-                <tab.icon className="w-6 h-6" strokeWidth={2.3} />
+              <div className={`flex items-center justify-center rounded-full transition-all duration-300 relative z-10
+                ${tab.id === 'home'
+                  ? (isActive ? 'w-14 h-14 mx-3 bg-black text-white shadow-lg scale-110' : 'w-14 h-14 mx-3 bg-white/20 text-gray-400 scale-110')
+                  : (isActive ? 'w-12 h-12 bg-black text-white shadow-md scale-110' : 'w-12 h-12 text-gray-400 active:bg-gray-200/50 active:scale-95')
+                }`}
+              >
+                <tab.icon className={tab.id === 'home' ? "w-7 h-7" : "w-6 h-6"} strokeWidth={2.5} />
               </div>
-              <span className="text-[10px] font-bold whitespace-nowrap text-gray-500">{tab.name}</span>
+              {tab.id !== 'home' && (
+                <span className={`text-[10px] font-bold whitespace-nowrap text-gray-400 relative z-20 transition-all duration-300 ${isActive ? 'mt-1' : 'mt-[-5px]'}`}>
+                  {tab.name}
+                </span>
+              )}
             </button>
           );
         })}
