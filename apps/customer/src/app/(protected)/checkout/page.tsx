@@ -24,6 +24,8 @@ import SavedAddressesModal from "@/features/profile/components/modals/SavedAddre
 import PromoSelectionModal from "@/features/checkout/components/PromoSelectionModal";
 import PromoSummary from "@/features/checkout/components/PromoSummary";
 import { useDeliveryLocationStore } from "@/store/deliveryLocationStore";
+import { useDeliveryDistanceValidator } from "@/features/checkout/hooks/useDeliveryDistanceValidator";
+import DistanceWarningModal from "@/features/checkout/components/DistanceWarningModal";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -67,7 +69,16 @@ export default function CheckoutPage() {
     cartItems,
     selectedLocation,
     isLoadingFee,
+    distance,
   } = useCheckout();
+
+  const {
+    isOverDistance,
+    maxDistance,
+    showWarning,
+    setShowWarning,
+    handleRestrictedAction
+  } = useDeliveryDistanceValidator(distance);
 
   const { user } = useAuth();
   const { createOrder, isCreating } = useCreateOrder({
@@ -510,7 +521,9 @@ export default function CheckoutPage() {
               totalPayable={totalPayable}
               onAddressChange={(addr) => setAddress(addr)}
               onPlaceOrder={handlePlaceOrder}
+              onRestrictedClick={handleRestrictedAction}
               isCreating={isCreating || isLoadingFee}
+              isOverDistance={isOverDistance}
             />
           </div>
         </div>
@@ -563,6 +576,17 @@ export default function CheckoutPage() {
         isLoadingVouchers={isLoadingVouchers}
         currentOrderValue={subtotal}
         restaurant={restaurant}
+      />
+
+      <DistanceWarningModal
+        isOpen={showWarning}
+        onClose={() => setShowWarning(false)}
+        maxDistance={maxDistance}
+        currentDistance={distance}
+        onSelectLocation={() => {
+          setShowWarning(false);
+          setIsLocationModalOpen(true);
+        }}
       />
     </div>
   );

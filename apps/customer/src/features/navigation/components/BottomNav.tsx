@@ -43,7 +43,7 @@ export default function BottomNav({ onCurrentOrdersClick, isOrdersOpen }: Bottom
             >
               <div className={`flex items-center justify-center rounded-full transition-all duration-300 relative z-10
                 ${tab.id === 'home'
-                  ? (isActive ? 'w-14 h-14 mx-3 bg-black text-white shadow-lg scale-110' : 'w-14 h-14 mx-3 bg-white/20 text-gray-400 scale-110')
+                  ? (isActive ? 'w-14 h-14 mx-3 bg-black text-white shadow-lg scale-110' : 'w-14 h-14 mx-3 bg-white/20 text-gray-400 shadow-md scale-110')
                   : (isActive ? 'w-12 h-12 bg-black text-white shadow-md scale-110' : 'w-12 h-12 text-gray-400 active:bg-gray-200/50 active:scale-95')
                 }`}
               >

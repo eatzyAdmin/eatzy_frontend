@@ -5,7 +5,7 @@ import CheckoutMapSection from "@/features/checkout/components/CheckoutMapSectio
 import { formatVnd } from "@repo/lib";
 import { useRouter } from "next/navigation";
 import { ImageWithFallback } from "@repo/ui";
-import { ShoppingBag, Loader2, ChevronLeft, Store } from "@repo/ui/icons";
+import { ShoppingBag, Loader2, ChevronLeft, Store, ChevronRight } from "@repo/ui/icons";
 
 interface RightSidebarProps {
   restaurantName?: string;
@@ -15,7 +15,9 @@ interface RightSidebarProps {
   totalPayable: number;
   onAddressChange?: (addr: string) => void;
   onPlaceOrder?: () => Promise<void>;
+  onRestrictedClick?: () => void;
   isCreating?: boolean;
+  isOverDistance?: boolean;
   children?: React.ReactNode;
 }
 
@@ -27,13 +29,19 @@ export default function RightSidebar({
   totalPayable,
   onAddressChange,
   onPlaceOrder,
+  onRestrictedClick,
   isCreating = false,
+  isOverDistance = false,
   children,
 }: RightSidebarProps) {
   const router = useRouter();
   const { confirm } = useSwipeConfirmation();
 
   const handleCompleteOrder = () => {
+    if (isOverDistance) {
+      onRestrictedClick?.();
+      return;
+    }
     if (isCreating || !onPlaceOrder) return;
 
     confirm({
@@ -91,11 +99,10 @@ export default function RightSidebar({
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-[60] md:relative md:bg-transparent md:border-none md:shadow-none md:z-auto md:pb-0">
         <div className="p-4 md:p-0">
           <motion.button
-            whileHover={{ scale: isCreating ? 1 : 1.02 }}
-            whileTap={{ scale: isCreating ? 1 : 0.98 }}
+            whileHover={{ scale: (isCreating || isOverDistance) ? 1 : 1.02 }}
+            whileTap={{ scale: (isCreating || isOverDistance) ? 1 : 0.98 }}
             onClick={handleCompleteOrder}
-            disabled={isCreating}
-            className={`w-full h-14 md:h-16 rounded-[20px] text-white text-xl font-semibold md:text-2xl uppercase font-anton shadow-lg transition-all flex items-center justify-center gap-2 ${isCreating
+            className={`w-full h-14 md:h-16 rounded-[20px] text-white text-xl font-semibold md:text-2xl uppercase font-anton shadow-lg transition-all flex items-center justify-center gap-2 ${isCreating || isOverDistance
               ? 'bg-gray-400 cursor-not-allowed shadow-gray-300/30'
               : 'bg-[var(--primary)] shadow-lime-500/30 hover:shadow-lime-500/50'
               }`}
@@ -104,6 +111,11 @@ export default function RightSidebar({
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
                 <span>Processing...</span>
+              </>
+            ) : isOverDistance ? (
+              <>
+                <span>Vui lòng chọn điểm giao khác</span>
+                <ChevronRight className="w-5 h-5" strokeWidth={3.3} />
               </>
             ) : (
               <>
