@@ -21,6 +21,7 @@ import { useLoading } from "@repo/ui";
 import { useRouter } from "next/navigation";
 import { useRestaurantCart } from "../hooks/useCart";
 import { useCartStore } from "@repo/store";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 interface FloatingRestaurantCartProps {
@@ -29,6 +30,7 @@ interface FloatingRestaurantCartProps {
 }
 
 export default function FloatingRestaurantCart({ restaurantId, restaurantName }: FloatingRestaurantCartProps) {
+  const isMobile = useIsMobile();
   const numericRestaurantId = typeof restaurantId === 'string' ? Number(restaurantId) : restaurantId;
 
   const {
@@ -128,20 +130,21 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
               />
               <motion.div
                 key="cart-wrapper"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className={`fixed inset-0 z-[101] flex items-center justify-center p-4 ${!isOpen ? 'pointer-events-none' : ''}`}
+                initial={isMobile ? { y: "100%" } : { opacity: 0 }}
+                animate={isMobile ? { y: 0 } : { opacity: 1 }}
+                exit={isMobile ? { y: "100%" } : { opacity: 0 }}
+                transition={isMobile ? { type: "spring", stiffness: 100, damping: 18 } : { duration: 0.3 }}
+                className={`fixed inset-0 z-[101] flex ${isMobile ? 'items-end' : 'items-center'} justify-center p-0 md:p-4 will-change-transform ${!isOpen ? 'pointer-events-none' : ''}`}
                 onClick={() => setIsOpen(false)}
               >
                 <motion.div
-                  layoutId={layoutId}
+                  layoutId={!isMobile ? layoutId : undefined}
                   onClick={(e) => e.stopPropagation()}
                   transition={{ type: "spring", stiffness: 120, damping: 19 }}
-                  className="w-[calc(100vw-32px)] sm:w-full sm:max-w-[460px] bg-white rounded-[40px] shadow-[0_-40px_80px_rgba(0,0,0,0.25),0_32px_80px_rgba(0,0,0,0.3)] flex flex-col max-h-[85vh] sm:max-h-[95vh] relative overflow-visible pointer-events-auto"
+                  className="w-full md:max-w-[460px] bg-white rounded-t-[40px] md:rounded-[40px] shadow-[0_-40px_80px_rgba(0,0,0,0.25),0_32px_80px_rgba(0,0,0,0.3)] flex flex-col max-h-[85vh] md:max-h-[95vh] relative overflow-visible pointer-events-auto"
                 >
                   {/* CART OVERLAY STYLE HEADER - RESPONSIVE */}
-                  <div className="flex items-center justify-between px-5 py-5 sm:px-7 sm:py-7 sm:pb-5 text-[#1A1A1A] bg-[#E4F8D5] flex-shrink-0 rounded-[40px] rounded-b-[40px] sm:rounded-b-[50px] shadow-sm">
+                  <div className="flex items-center justify-between px-5 py-5 pb-4 sm:px-7 sm:py-7 sm:pb-5 text-[#1A1A1A] bg-[#E4F8D5] flex-shrink-0 rounded-[40px] rounded-b-[40px] sm:rounded-b-[50px] shadow-sm">
                     <div className="flex flex-col gap-1 sm:gap-1.5">
                       <div className="text-2xl sm:text-3xl font-anton font-bold uppercase tracking-tight text-[#154D1B] leading-none">
                         {restaurantName || "MY CART"}

@@ -43,9 +43,9 @@ export default function DistanceWarningModal({
 
           {/* Modal Container */}
           <motion.div
-            initial={{ y: "100dvh", opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "100dvh", opacity: 0 }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 100, damping: 18 }}
             onClick={(e) => e.stopPropagation()}
             className="fixed inset-0 z-[101] flex items-end md:items-center justify-center p-0 md:p-4 will-change-transform"

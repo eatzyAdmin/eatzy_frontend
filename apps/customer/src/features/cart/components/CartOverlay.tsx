@@ -225,12 +225,12 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                     damping: 20,
                     mass: 0.8
                   }}
-                  className="absolute bottom-8 left-6 right-6 z-[80]"
+                  className="absolute bottom-3 left-3 right-3 md:bottom-4 md:left-4 md:right-4 z-[80]"
                 >
                   <button
                     onClick={handleBulkDelete}
                     disabled={isDeletingCarts}
-                    className="group/btn relative w-full h-[72px] bg-red-500 text-white rounded-[32px] flex items-center justify-between px-8 shadow-xl shadow-red-500/20 hover:bg-red-600 transition-all duration-300 active:scale-[0.97] disabled:opacity-70 overflow-hidden"
+                    className="group/btn relative w-full h-[72px] bg-red-500 text-white rounded-[32px] flex items-center justify-between px-8 shadow-2xl hover:bg-red-600 transition-all duration-300 active:scale-[0.97] disabled:opacity-70 overflow-hidden"
                   >
                     <div className="flex items-center gap-4 relative z-10">
                       <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
