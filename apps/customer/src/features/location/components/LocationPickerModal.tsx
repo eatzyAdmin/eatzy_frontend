@@ -99,6 +99,8 @@ export default function LocationPickerModal({
   // Ref to track if a suggestion was just selected
   const justSelectedSuggestionRef = useRef(false);
 
+  const [isMapVisible, setIsMapVisible] = useState(false);
+
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -111,6 +113,11 @@ export default function LocationPickerModal({
       if (initialAddress) {
         setCurrentAddress(initialAddress);
       }
+
+      const timer = setTimeout(() => setIsMapVisible(true), 600);
+      return () => clearTimeout(timer);
+    } else {
+      setIsMapVisible(false);
     }
   }, [isOpen, initialLocation, initialAddress]);
 
@@ -317,9 +324,9 @@ export default function LocationPickerModal({
               {/* Modal Content */}
               <motion.div
                 key="location-picker-content"
-                initial={{ y: "100%", opacity: 0.5 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: "105%", opacity: 0 }}
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "110%" }}
                 transition={{
                   type: "spring",
                   stiffness: 120,
@@ -431,13 +438,21 @@ export default function LocationPickerModal({
 
                     {/* Mobile Only: Integrated Map & Nearby Block */}
                     <div className="md:hidden flex flex-1 flex-col min-h-0 rounded-[32px] overflow-hidden border border-gray-100 shadow-sm bg-white mb-2">
-                      <div className="relative aspect-[16/9] shrink-0 rounded-[28px] overflow-hidden bg-white border-b border-gray-100/80 transition-all">
-                        <MapViewForPicker
-                          pickupPos={mapPosition}
-                          onPickupChange={handleMapPositionChange}
-                          onPlacesChange={handleNearbyPlacesChange}
-                          flyVersion={flyVersion}
-                        />
+                      <div className="relative aspect-[16/9] shrink-0 rounded-[28px] overflow-hidden bg-gray-50 border-b border-gray-100/80 transition-all flex items-center justify-center">
+                        {isMapVisible && (
+                          <MapViewForPicker
+                            pickupPos={mapPosition}
+                            onPickupChange={handleMapPositionChange}
+                            onPlacesChange={handleNearbyPlacesChange}
+                            flyVersion={flyVersion}
+                          />
+                        )}
+                        {!isMapVisible && (
+                          <div className="flex flex-col items-center gap-2">
+                            <Loader2 className="w-5 h-5 animate-spin text-gray-400 opacity-40" />
+                            <span className="text-[10px] font-medium text-gray-300">Loading Map...</span>
+                          </div>
+                        )}
                         <button
                           onClick={handleLocateUser}
                           disabled={isLocating}
@@ -484,13 +499,20 @@ export default function LocationPickerModal({
                     </div>
 
                     {/* Desktop Only: Original Map */}
-                    <div className="hidden md:block flex-1 relative rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 bg-gray-50">
-                      <MapViewForPicker
-                        pickupPos={mapPosition}
-                        onPickupChange={handleMapPositionChange}
-                        onPlacesChange={handleNearbyPlacesChange}
-                        flyVersion={flyVersion}
-                      />
+                    <div className="hidden md:flex flex-1 relative rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 bg-gray-50 items-center justify-center">
+                      {isMapVisible ? (
+                        <MapViewForPicker
+                          pickupPos={mapPosition}
+                          onPickupChange={handleMapPositionChange}
+                          onPlacesChange={handleNearbyPlacesChange}
+                          flyVersion={flyVersion}
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center gap-3">
+                          <Loader2 className="w-6 h-6 animate-spin text-gray-400 opacity-40" />
+                          <span className="text-xs font-medium text-gray-300">Loading Map...</span>
+                        </div>
+                      )}
                       <button
                         onClick={handleLocateUser}
                         disabled={isLocating}

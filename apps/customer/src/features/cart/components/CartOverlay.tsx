@@ -100,116 +100,119 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
             transition={{ type: "spring", stiffness: 220, damping: 28 }}
             className="fixed z-[70] inset-y-0 right-0 w-full md:w-[480px] bg-[#F8F9FA] border-l border-gray-100 overflow-hidden md:rounded-l-[46px] shadow-2xl flex flex-col"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-5 md:p-6 text-[#1A1A1A] bg-[#F8F9FA] flex-shrink-0">
-              <div className="flex flex-col gap-1">
-                <div className="text-3xl font-anton font-bold uppercase tracking-tight">MY CART</div>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="px-2 py-0.5 bg-[#1A1A1A] rounded-lg shadow-sm">
-                    <span className="text-[10px] font-black font-anton text-white uppercase tabular-nums">
-                      {carts.length} BASKETS
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">• {totalItems} items</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {carts.length > 0 && (
-                  <motion.button
-                    layout
-                    whileHover={{ scale: 1.02, y: -1 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      setIsEditMode(!isEditMode);
-                      setSelectedRestIds(new Set());
-                    }}
-                    className={`h-10 md:h-12 px-5 md:px-7 rounded-full flex items-center justify-center transition-all duration-500 border-2 select-none ${isEditMode
-                      ? "bg-[#1A1A1A] border-[#1A1A1A] text-white shadow-lg shadow-black/10"
-                      : "bg-white border-gray-100 text-[#1A1A1A] hover:bg-gray-50 hover:border-gray-200 shadow-sm"
-                      }`}
-                  >
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={isEditMode ? 'done' : 'edit'}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 1.1 }}
-                        transition={{ duration: 0.3, ease: "circOut" }}
-                        className="flex items-center gap-2"
-                      >
-                        {isEditMode ? <Check className="w-3.5 h-3.5 md:w-4 md:h-4" strokeWidth={3} /> : <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4" strokeWidth={3} />}
-                        <span className="text-[13px] md:text-[15px] font-anton font-semibold uppercase leading-none pt-0.5">
-                          {isEditMode ? "Done" : "Edit"}
-                        </span>
-                      </motion.div>
-                    </AnimatePresence>
-                  </motion.button>
-                )}
-                <motion.button
-                  whileHover={{ scale: 1.06 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onClose}
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-700 hover:bg-gray-200 transition-all duration-300"
-                >
-                  <X size={20} />
-                </motion.button>
-              </div>
-            </div>
-
-            {/* List */}
-            <div className="flex-1 overflow-y-auto no-scrollbar p-3 md:p-4 space-y-6 relative bg-[#F8F9FA] [overscroll-behavior:contain]">
-              {isCartsLoading ? (
-                <>
-                  <CartOverlayShimmer />
-                  <CartOverlayShimmer />
-                  <CartOverlayShimmer />
-                </>
-              ) : carts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-gray-300 space-y-5 px-10">
-                  <div className="w-24 h-24 rounded-[32px] bg-gray-50 flex items-center justify-center relative">
-                    <div className="absolute inset-0 bg-[var(--primary)]/5 rounded-[32px] scale-110 blur-xl opacity-50" />
-                    <ShoppingBag className="w-10 h-10 opacity-20 relative z-10" />
-                  </div>
-                  <p className="font-anton uppercase tracking-widest text-sm text-[#1A1A1A] opacity-30">Your basket is empty</p>
-                  <button
-                    onClick={onClose}
-                    className="mt-4 px-8 py-4 bg-[#1A1A1A] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-black/10 hover:y-[-2px] transition-all"
-                  >
-                    Start Ordering
-                  </button>
-                </div>
-              ) : (
-                <motion.div
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="space-y-2 md:space-y-3"
-                >
-                  {carts.map(cart => (
-                    <CartItemCard
-                      key={cart.id}
-                      cart={cart}
-                      isEditMode={isEditMode}
-                      isSelected={selectedRestIds.has(cart.id)}
-                      onToggleSelection={toggleSelection}
-                      onCardClick={handleCardClick}
-                      onDeleteSingle={handleDeleteSingleCart}
-                      isDeleting={isDeletingCarts}
-                    />
-                  ))}
-
-                  {carts.length >= 4 && (
-                    <div className="py-8 flex items-center justify-center gap-4 opacity-30 mt-4">
-                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-16" />
-                      <div className="flex flex-col items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
-                        <span className="text-[12px] font-bold text-gray-400 uppercase font-anton tracking-wider">End of list</span>
-                      </div>
-                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-16" />
+            {/* Scrollable Container */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar relative">
+              {/* Header - Sticky with Mask Effect */}
+              <div className="flex items-center justify-between p-5 md:p-6 text-[#1A1A1A] bg-[#F8F9FA]/95 backdrop-blur-md sticky top-0 z-20 flex-shrink-0 max-md:[mask-image:linear-gradient(to_bottom,black_90%,transparent)]">
+                <div className="flex flex-col gap-1">
+                  <div className="text-3xl font-anton font-bold uppercase tracking-tight">MY CART</div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="px-2 py-0.5 bg-[#1A1A1A] rounded-lg shadow-sm">
+                      <span className="text-[10px] font-black font-anton text-white uppercase tabular-nums">
+                        {carts.length} BASKETS
+                      </span>
                     </div>
+                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">• {totalItems} items</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {carts.length > 0 && (
+                    <motion.button
+                      layout
+                      whileHover={{ scale: 1.02, y: -1 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setIsEditMode(!isEditMode);
+                        setSelectedRestIds(new Set());
+                      }}
+                      className={`h-10 md:h-12 px-5 md:px-7 rounded-full flex items-center justify-center transition-all duration-500 border-2 select-none ${isEditMode
+                        ? "bg-[#1A1A1A] border-[#1A1A1A] text-white shadow-lg shadow-black/10"
+                        : "bg-white border-gray-100 text-[#1A1A1A] hover:bg-gray-50 hover:border-gray-200 shadow-sm"
+                        }`}
+                    >
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={isEditMode ? 'done' : 'edit'}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 1.1 }}
+                          transition={{ duration: 0.3, ease: "circOut" }}
+                          className="flex items-center gap-2"
+                        >
+                          {isEditMode ? <Check className="w-3.5 h-3.5 md:w-4 md:h-4" strokeWidth={3} /> : <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4" strokeWidth={3} />}
+                          <span className="text-[13px] md:text-[15px] font-anton font-semibold uppercase leading-none pt-0.5">
+                            {isEditMode ? "Done" : "Edit"}
+                          </span>
+                        </motion.div>
+                      </AnimatePresence>
+                    </motion.button>
                   )}
-                </motion.div>
-              )}
+                  <motion.button
+                    whileHover={{ scale: 1.06 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={onClose}
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-700 hover:bg-gray-200 transition-all duration-300"
+                  >
+                    <X size={20} />
+                  </motion.button>
+                </div>
+              </div>
+
+              {/* List Content */}
+              <div className="p-3 md:p-4 pb-32 space-y-6 bg-[#F8F9FA]">
+                {isCartsLoading ? (
+                  <>
+                    <CartOverlayShimmer />
+                    <CartOverlayShimmer />
+                    <CartOverlayShimmer />
+                  </>
+                ) : carts.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-gray-300 space-y-5 px-10">
+                    <div className="w-24 h-24 rounded-[32px] bg-gray-50 flex items-center justify-center relative">
+                      <div className="absolute inset-0 bg-[var(--primary)]/5 rounded-[32px] scale-110 blur-xl opacity-50" />
+                      <ShoppingBag className="w-10 h-10 opacity-20 relative z-10" />
+                    </div>
+                    <p className="font-anton uppercase tracking-widest text-sm text-[#1A1A1A] opacity-30">Your basket is empty</p>
+                    <button
+                      onClick={onClose}
+                      className="mt-4 px-8 py-4 bg-[#1A1A1A] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-black/10 hover:y-[-2px] transition-all"
+                    >
+                      Start Ordering
+                    </button>
+                  </div>
+                ) : (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="space-y-2 md:space-y-3"
+                  >
+                    {carts.map(cart => (
+                      <CartItemCard
+                        key={cart.id}
+                        cart={cart}
+                        isEditMode={isEditMode}
+                        isSelected={selectedRestIds.has(cart.id)}
+                        onToggleSelection={toggleSelection}
+                        onCardClick={handleCardClick}
+                        onDeleteSingle={handleDeleteSingleCart}
+                        isDeleting={isDeletingCarts}
+                      />
+                    ))}
+
+                    {carts.length >= 4 && (
+                      <div className="py-8 flex items-center justify-center gap-4 opacity-30 mt-4">
+                        <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-16" />
+                        <div className="flex flex-col items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
+                          <span className="text-[12px] font-bold text-gray-400 uppercase font-anton tracking-wider">End of list</span>
+                        </div>
+                        <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-16" />
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </div>
             </div>
 
             {/* Bottom Actions - Clean Premium Delete Button */}

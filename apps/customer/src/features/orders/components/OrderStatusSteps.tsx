@@ -108,7 +108,7 @@ export default function OrderStatusSteps({ status }: { status: string; createdAt
           />
 
           {/* Circles/Icons Wrapped in a spread container with side padding */}
-          <div className="absolute inset-0 flex justify-between items-center z-20 px-4 md:px-6">
+          <div className="absolute inset-0 flex justify-between items-center z-10 px-4 md:px-6">
             {steps.map((step, index) => {
               const isActive = index <= activeIndex;
               const isCurrent = index === activeIndex;

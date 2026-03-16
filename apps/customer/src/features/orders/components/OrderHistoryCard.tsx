@@ -77,7 +77,7 @@ export default function OrderHistoryCard({ order, onClick }: { order: OrderRespo
           src={order.restaurant.imageUrl || ""}
           alt={order.restaurant.name}
           fill
-          placeholderMode="vertical"
+          placeholderMode="horizontal"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
         {/* Gradients - Desktop Only Overlay Protection */}

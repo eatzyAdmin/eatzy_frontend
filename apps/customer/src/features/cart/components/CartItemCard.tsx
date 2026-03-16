@@ -44,7 +44,7 @@ export default function CartItemCard({
     >
       {/* Selection Border Overlay - Fixed positioning to prevent layout jump */}
       <div
-        className={`absolute inset-0 z-40 rounded-[40px] border-2 pointer-events-none transition-all duration-500 ${isEditMode
+        className={`absolute inset-0 z-10 rounded-[40px] border-2 pointer-events-none transition-all duration-500 ${isEditMode
           ? isSelected ? "border-lime-100" : "border-transparent"
           : "border-transparent"
           }`}
@@ -57,7 +57,7 @@ export default function CartItemCard({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-3 right-3 md:top-4 md:right-4 z-30"
+            className="absolute top-3 right-3 md:top-4 md:right-4 z-10"
           >
             <div
               className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500 cursor-pointer ${isSelected
@@ -133,13 +133,13 @@ export default function CartItemCard({
             whileTap={{ scale: 0.95 }}
             onClick={(e) => onDeleteSingle(cart.id, e)}
             disabled={isDeleting}
-            className="absolute top-3 right-3 md:top-4 md:right-4 z-20 w-9 h-9 rounded-2xl bg-gray-100/80 flex items-center justify-center text-gray-400 shadow-sm transition-colors"
+            className="absolute top-3 right-3 md:top-4 md:right-4 z-10 w-9 h-9 rounded-2xl bg-gray-100/80 flex items-center justify-center text-gray-400 shadow-sm transition-colors"
           >
             {isDeleting ? <Loader2 className="w-4 h-4 animate-spin text-red-400" /> : <Trash className="w-4 h-4" />}
           </motion.button>
 
           {/* Checkout Link - Bottom Right */}
-          <div className="absolute bottom-3 right-3 z-20 flex items-center gap-2 overflow-hidden pointer-events-none md:group-hover:pointer-events-auto">
+          <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2 overflow-hidden pointer-events-none md:group-hover:pointer-events-auto">
             <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-widest translate-x-10 opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 transition-all duration-500 ease-out">
               Checkout
             </span>
