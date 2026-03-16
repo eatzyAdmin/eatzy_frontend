@@ -112,18 +112,17 @@ export default function SavedAddressesModal({
             />
 
             {/* Modal Container */}
-            <div
-              className="fixed inset-0 flex items-end md:items-center justify-center p-0 md:p-6 z-[92]"
-              onClick={onClose}
+            {/* Modal Content */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 100, damping: 18 }}
+              className="fixed inset-0 z-[92] flex items-end md:items-center justify-center p-0 md:p-6 will-change-transform pointer-events-none"
             >
-              {/* Modal Content */}
-              <motion.div
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100%" }}
-                transition={{ type: "spring", stiffness: 100, damping: 18 }}
+              <div
                 onClick={(e) => e.stopPropagation()}
-                className="relative bg-[#F8F9FA] w-full max-w-full md:max-w-2xl h-[85vh] md:h-[90vh] max-h-full md:max-h-[800px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20 rounded-t-[40px]"
+                className="relative bg-[#F8F9FA] w-full max-w-full md:max-w-2xl h-[85vh] md:h-[90vh] max-h-full md:max-h-[800px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20 rounded-t-[40px] pointer-events-auto"
               >
                 {/* Header */}
                 <div className="bg-white px-4 md:px-8 py-4 md:py-6 border-b border-gray-100 flex items-center justify-between sticky top-0 z-20 shadow-sm/50">
@@ -270,8 +269,8 @@ export default function SavedAddressesModal({
                     THÊM ĐỊA CHỈ MỚI
                   </button>
                 </div>
-              </motion.div>
-            </div>
+              </div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>

@@ -200,8 +200,8 @@ export default function PromoVoucherCard({
               <div className="flex flex-col">
                 {missingAmount !== null && missingAmount > 0 ? (
                   <div className="flex items-baseline gap-1 md:gap-1.5 text-[10px] md:text-[11px] font-bold text-gray-500 uppercase tracking-tight">
-                    <span className="translate-y-[-0.5px]">Mua thêm</span>
-                    <span className="font-anton text-[13px] md:text-[15px] text-black tracking-normal leading-none translate-y-[1px]">{formatVnd(missingAmount)}</span>
+                    <span className="translate-y-[-0.5px] whitespace-nowrap">Mua thêm</span>
+                    <span className="font-anton text-[13px] md:text-[15px] text-black tracking-normal whitespace-nowrap leading-none translate-y-[1px]">{formatVnd(missingAmount)}</span>
                     <span className="translate-y-[-0.5px]">để nhận {getIneligibleBenefitText()}</span>
                   </div>
                 ) : (

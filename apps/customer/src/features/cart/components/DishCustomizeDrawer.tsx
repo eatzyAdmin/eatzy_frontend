@@ -185,7 +185,7 @@ export default function DishCustomizeDrawer({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 100, damping: 18 }}
-            className="fixed z-[70] left-0 right-0 bottom-0 h-auto max-h-[90vh] md:h-auto md:max-h-[90vh] rounded-t-[32px] md:rounded-t-[48px] bg-[#F7F7F7] border-t border-gray-200 shadow-2xl overflow-y-auto md:overflow-hidden flex flex-col"
+            className="fixed z-[70] left-0 right-0 bottom-0 h-auto max-h-[90vh] md:h-auto md:max-h-[90vh] rounded-t-[32px] md:rounded-t-[48px] bg-[#F7F7F7] border-t border-gray-200 shadow-2xl overflow-hidden flex flex-col will-change-transform"
           >
             {/* Mobile Sticky Header */}
             <div className="md:hidden sticky top-0 left-0 right-0 z-[80] bg-[#F7F7F7] px-6 py-4 border-b border-gray-200 flex items-start gap-4 shrink-0">
@@ -207,7 +207,7 @@ export default function DishCustomizeDrawer({
               </button>
             </div>
 
-            <div className="flex flex-col md:grid md:grid-cols-[40%_60%] gap-0 pb-0 flex-1 min-h-0">
+            <div className="flex flex-col md:grid md:grid-cols-[40%_60%] gap-0 pb-0 flex-1 min-h-0 overflow-y-auto">
 
               {/* Left Column - Image & Qty */}
               <div className="relative shrink-0 h-auto md:h-full md:overflow-y-auto no-scrollbar p-5 pt-0 md:p-8 md:pt-8 md:pb-24">
@@ -420,7 +420,6 @@ export default function DishCustomizeDrawer({
                                 >
                                   {/* Icon Box - Restored to TableFilterBadges style */}
                                   <motion.div
-                                    layout
                                     className={`
                                       flex-shrink-0 items-center justify-center flex
                                       ${isSatisfied
@@ -457,7 +456,6 @@ export default function DishCustomizeDrawer({
                                     {!isSatisfied && (
                                       <motion.div
                                         key="text"
-                                        layout
                                         initial={{ opacity: 0, width: 0, x: -5 }}
                                         animate={{ opacity: 1, width: "auto", x: 0 }}
                                         exit={{ opacity: 0, width: 0, x: -5 }}
@@ -561,7 +559,7 @@ export default function DishCustomizeDrawer({
             </div>
 
             {/* Fixed Footer */}
-            <div className="fixed md:absolute bottom-0 left-0 right-0 p-4 md:py-6 md:px-12 bg-white/80 backdrop-blur-xl border-t border-gray-100 z-[90] md:z-10 md:w-[60%] md:left-auto flex justify-center">
+            <div className="fixed md:absolute bottom-0 left-0 right-0 p-4 md:py-6 md:px-12 bg-white/80 backdrop-blur-lg border-t border-gray-100 z-[90] md:z-10 md:w-[60%] md:left-auto flex justify-center">
               <motion.button
                 whileHover={canConfirm && !isAdding ? { y: -2 } : {}}
                 whileTap={canConfirm && !isAdding ? { scale: 0.98 } : {}}

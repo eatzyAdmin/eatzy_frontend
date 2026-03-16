@@ -42,18 +42,15 @@ export default function DistanceWarningModal({
           />
 
           {/* Modal Container */}
-          <div
-            className="fixed inset-0 z-[101] flex items-end md:items-center justify-center p-0 md:p-4"
-            onClick={onClose}
+          <motion.div
+            initial={{ y: "100dvh", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100dvh", opacity: 0 }}
+            transition={{ type: "spring", stiffness: 100, damping: 18 }}
+            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[101] flex items-end md:items-center justify-center p-0 md:p-4 will-change-transform"
           >
-            <motion.div
-              initial={{ y: "100dvh", opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: "100dvh", opacity: 0 }}
-              transition={{ type: "spring", stiffness: 100, damping: 18 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full md:max-w-md bg-white rounded-t-[40px] md:rounded-[40px] shadow-2xl flex flex-col overflow-hidden border border-white/20"
-            >
+            <div className="relative w-full md:max-w-md bg-white rounded-t-[40px] md:rounded-[40px] shadow-2xl flex flex-col overflow-hidden border border-white/20">
               {/* Header Style - Matching Floating Cart */}
               <div className="flex items-center justify-between px-6 py-6 pb-5 md:px-7 md:py-7 md:pb-6 text-[#154D1B] bg-[#E4F8D5] flex-shrink-0 rounded-t-[40px] md:rounded-t-[40px] rounded-b-[40px] md:rounded-b-[50px] shadow-sm">
                 <div className="flex flex-col gap-1.5">
@@ -88,7 +85,7 @@ export default function DistanceWarningModal({
                 </div>
 
                 <p className="text-gray-500 text-[15px] font-medium leading-relaxed mb-8">
-                  Vì lý do phục vụ trải nghiệm món ăn tốt nhất và đảm bảo chất lượng giao hàng, Eatzy giới hạn bán kính giao hàng tối đa là <span className="font-black text-xl text-[#154D1B] ml-0.5 ">{maxDistance}km</span>.
+                  Vì lý do phục vụ trải nghiệm món ăn tốt nhất và đảm bảo chất lượng giao hàng, Eatzy giới hạn bán kính giao hàng tối đa là <span className="font-bold md:font-black text-lg md:text-xl text-[#154D1B] ml-0.5 ">{maxDistance}km</span>.
                   <br />
                   <span className="block mt-2 text-sm">
                     Vị trí của bạn đang cách quán <span className="font-bold text-orange-600 px-1.5 py-0.5 bg-orange-50 rounded-lg">{currentDistance.toFixed(1)}km</span>.
@@ -136,8 +133,8 @@ export default function DistanceWarningModal({
                   Để sau
                 </button>
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </>
       )}
     </AnimatePresence>,
