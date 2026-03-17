@@ -8,6 +8,7 @@ const RestaurantSlider = dynamic(() => import('@/features/home/components/Restau
 import BackgroundTransition from '@/features/home/components/BackgroundTransition';
 import { useHomePage } from '@/features/home/hooks/useHomePage';
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { List, Loader2 } from '@repo/ui/icons';
 import { useLoading } from '@repo/ui';
 import { useSearch } from '@/features/search/hooks/useSearch';
@@ -84,12 +85,23 @@ export default function HomePage() {
 
   // Handle global loading state (transition from Login)
   const { hide } = useLoading();
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     const timer = setTimeout(() => {
       hide();
     }, 1500);
     return () => clearTimeout(timer);
   }, [hide]);
+
+  useEffect(() => {
+    if (searchParams.get('recommend') === 'true') {
+      setShowRecommended(true);
+      // Optional: Clear the param after showing to avoid re-triggering on manual home clicks
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams]);
 
   const {
     searchResults,

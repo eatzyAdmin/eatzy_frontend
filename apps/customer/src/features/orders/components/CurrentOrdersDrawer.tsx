@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useCurrentOrders } from "@/features/orders/hooks/useCurrentOrders";
 import { useSwipeConfirmation, useLoading } from "@repo/ui";
@@ -10,6 +11,9 @@ import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 import { DesktopView, MobileView } from "./current-orders-drawer/index";
 
 export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   const { orders, isLoading: isLoadingOrders, refetch } = useCurrentOrders({ isDrawerOpen: open });
   const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
   const [mobileView, setMobileView] = useState<"LIST" | "DETAIL">("LIST");
@@ -45,7 +49,13 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
   useEffect(() => {
     if (open) {
       refetch();
-      setMobileView("LIST"); // Only reset to LIST when EXACTLY opening the drawer
+      // If we have exactly one order, jump directly to DETAIL view
+      if (orders.length === 1) {
+        setMobileView("DETAIL");
+        setActiveOrderId(orders[0].id);
+      } else {
+        setMobileView("LIST");
+      }
     } else {
       // Khi đóng drawer, sau 2s reset lại về LIST để lần sau mở lên luôn ở trang danh sách
       const timer = setTimeout(() => {
@@ -53,7 +63,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [open]); // Removed refetch from dependencies
+  }, [open, orders.length]); // Added orders.length to re-check if data arrives after opening
 
   useEffect(() => {
     if (open) {
@@ -121,30 +131,31 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
     setMobileView("DETAIL");
   };
 
-  return (
-    <>
-      <AnimatePresence>
-        {open && (
+  if (!mounted) return null;
+
+  return createPortal(
+    <AnimatePresence mode="wait">
+      {open && (
+        <div className="fixed inset-0 z-[1000] pointer-events-none">
+          {/* Backdrop */}
           <motion.div
             key="orders-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto"
             onClick={onClose}
           />
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {open && (
+
+          {/* Panel Container */}
           <motion.div
             key="orders-panel"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 100, damping: 18 }}
-            className="fixed z-[70] inset-0 md:inset-x-0 md:bottom-0 md:top-auto md:max-h-[88vh] md:rounded-t-[40px] bg-[#F8F9FA] overflow-hidden shadow-2xl flex flex-col border border-white/20 [overscroll-behavior:contain]"
+            className="fixed inset-0 md:inset-x-0 md:bottom-0 md:top-auto md:max-h-[90vh] md:rounded-t-[46px] bg-[#F8F9FA] overflow-hidden shadow-[0_-20px_80px_rgba(0,0,0,0.15)] flex flex-col border border-white/20 pointer-events-auto will-change-[transform,opacity] overscroll-contain"
           >
             <MobileView
               orders={orders}
@@ -175,8 +186,9 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
               detailsContainerRef={detailsContainerRef}
             />
           </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 }

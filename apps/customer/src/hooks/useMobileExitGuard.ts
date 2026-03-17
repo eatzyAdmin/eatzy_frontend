@@ -28,8 +28,10 @@ export function useMobileExitGuard() {
 
     const handlePopState = (event: PopStateEvent) => {
       // Cooperative check: If we're moving to an overlay state (modal/section), 
+      // or if an overlay is currently open (checked via body class),
       // do NOT trigger exit logic.
-      if (event.state?.mobileBackId) return;
+      const isOverlayOpen = typeof document !== 'undefined' && document.body.classList.contains('modal-open');
+      if (event.state?.mobileBackId || isOverlayOpen) return;
 
       // If the current history state is NOT our exit guard, it means the user clicked back
       if (!event.state || !event.state.isExitGuard) {

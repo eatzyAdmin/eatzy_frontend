@@ -3,7 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { ArrowLeft, Receipt, Filter, Search, X, LayoutGrid, CheckCircle2, XCircle } from "@repo/ui/icons";
+import { ArrowLeft, Receipt, Filter, Search, X, LayoutGrid, CheckCircle2, XCircle, Compass, Store } from "@repo/ui/icons";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useLoading, OrderHistoryCardShimmer } from "@repo/ui";
 import type { OrderResponse } from "@repo/types";
 import { useOrderHistory } from "@/features/orders/hooks/useOrderHistory";
@@ -217,26 +218,27 @@ export default function OrderHistoryPage() {
                   ))}
                 </AnimatePresence>
               </div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center justify-center py-24"
-              >
-                <div className="w-24 h-24 rounded-3xl bg-gray-100 flex items-center justify-center mb-6 border border-gray-200 shadow-inner">
-                  <Receipt className="w-12 h-12 text-gray-400" />
-                </div>
-                <h3 className="text-2xl font-bold text-[#1A1A1A] mb-2">
-                  Không tìm thấy đơn hàng
-                </h3>
-                <p className="text-gray-600 text-center max-w-md">
-                  {actualSearchQuery
+            ) : (actualSearchQuery || statusFilter !== "ALL") ? (
+              <EmptyState
+                icon={Store}
+                title="Không tìm thấy đơn hàng"
+                description={
+                  actualSearchQuery
                     ? "Không có đơn hàng nào phù hợp với tìm kiếm của bạn"
-                    : statusFilter !== "ALL"
-                      ? "Không có đơn hàng nào trong phân loại này"
-                      : "Bạn chưa có đơn hàng nào"}
-                </p>
-              </motion.div>
+                    : "Không có đơn hàng nào trong phân loại này"
+                }
+                className="py-24"
+              />
+            ) : (
+              <EmptyState
+                icon={Receipt}
+                title="Bạn chưa có đơn hàng nào"
+                description="Hãy bắt đầu đặt món để tích lũy lịch sử đơn hàng của bạn nhé!"
+                buttonText="Khám phá ngay"
+                buttonIcon={Compass}
+                onButtonClick={() => router.push('/home?recommend=true')}
+                className="py-24"
+              />
             )}
 
             {!isLoading && orders && orders.length >= 3 && (

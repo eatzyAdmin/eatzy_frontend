@@ -1,6 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { X, Trash, CheckCircle2, Store, Loader2, ShoppingBag, Pencil, Check } from "@repo/ui/icons";
+import { X, Trash, CheckCircle2, Store, Loader2, ShoppingBag, Pencil, Check, Compass } from "@repo/ui/icons";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLoading, CartOverlayShimmer } from "@repo/ui";
@@ -167,19 +168,20 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                     <CartOverlayShimmer />
                   </>
                 ) : carts.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-300 space-y-5 px-10">
-                    <div className="w-24 h-24 rounded-[32px] bg-gray-50 flex items-center justify-center relative">
-                      <div className="absolute inset-0 bg-[var(--primary)]/5 rounded-[32px] scale-110 blur-xl opacity-50" />
-                      <ShoppingBag className="w-10 h-10 opacity-20 relative z-10" />
-                    </div>
-                    <p className="font-anton uppercase tracking-widest text-sm text-[#1A1A1A] opacity-30">Your basket is empty</p>
-                    <button
-                      onClick={onClose}
-                      className="mt-4 px-8 py-4 bg-[#1A1A1A] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-black/10 hover:y-[-2px] transition-all"
-                    >
-                      Start Ordering
-                    </button>
-                  </div>
+                  <EmptyState
+                    icon={ShoppingBag}
+                    title="Your basket is empty"
+                    description="Looks like you haven't added anything to your cart yet."
+                    buttonText="Start Ordering"
+                    buttonIcon={Compass}
+                    onButtonClick={() => {
+                      onClose();
+                      setTimeout(() => {
+                        router.push('/home?recommend=true');
+                      }, 300);
+                    }}
+                    className="h-full"
+                  />
                 ) : (
                   <motion.div
                     layout

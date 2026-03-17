@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { ArrowLeft, Heart, Search, X, Store, CheckCircle2 } from "@repo/ui/icons";
+import { ArrowLeft, Heart, Search, X, Store, CheckCircle2, Compass } from "@repo/ui/icons";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useLoading, RestaurantCardShimmer } from "@repo/ui";
 import type { Restaurant, FavoriteResponse } from "@repo/types";
 import FavoriteRestaurantCard from "@/features/favorites/components/FavoriteRestaurantCard";
@@ -201,45 +202,22 @@ export default function FavoritesPage() {
                 </AnimatePresence>
               </div>
             ) : favoriteRestaurants.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center justify-center py-20"
-              >
-                <div className="w-24 h-24 rounded-3xl bg-red-50 flex items-center justify-center mb-6">
-                  <Heart className="w-12 h-12 text-red-400" />
-                </div>
-                <h3 className="text-2xl font-bold text-[#1A1A1A] mb-2">
-                  No favorites yet
-                </h3>
-                <p className="text-gray-600 text-center max-w-md mb-6">
-                  Start adding restaurants to your favorites by clicking the heart icon
-                </p>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => router.push('/home')}
-                  className="px-6 py-3 bg-[var(--primary)] text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all"
-                >
-                  Explore Restaurants
-                </motion.button>
-              </motion.div>
+              <EmptyState
+                icon={Heart}
+                title="No favorites yet"
+                description="Start adding restaurants to your favorites by clicking the heart icon"
+                buttonText="Explore Restaurants"
+                buttonIcon={Compass}
+                onButtonClick={() => router.push('/home?recommend=true')}
+                className="py-20"
+              />
             ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center justify-center py-20"
-              >
-                <div className="w-24 h-24 rounded-3xl bg-gray-100 flex items-center justify-center mb-6">
-                  <Store className="w-12 h-12 text-gray-400" />
-                </div>
-                <h3 className="text-2xl font-bold text-[#1A1A1A] mb-2">
-                  No matches found
-                </h3>
-                <p className="text-gray-600 text-center max-w-md">
-                  Try searching with different keywords
-                </p>
-              </motion.div>
+              <EmptyState
+                icon={Store}
+                title="No matches found"
+                description="Try searching with different keywords"
+                className="py-20"
+              />
             )}
 
             {!isFavoritesLoading && filteredRestaurants.length >= 5 && (

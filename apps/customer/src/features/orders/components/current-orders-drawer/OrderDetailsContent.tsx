@@ -17,6 +17,7 @@ interface OrderDetailsContentProps {
   cancellationReasons: string[];
   isMobileDetail?: boolean;
   isMapVisible?: boolean;
+  hideHeader?: boolean;
 }
 
 export default function OrderDetailsContent({
@@ -27,16 +28,19 @@ export default function OrderDetailsContent({
   onConfirmCancel,
   cancellationReasons,
   isMobileDetail,
-  isMapVisible = true
+  isMapVisible = true,
+  hideHeader = false,
 }: OrderDetailsContentProps) {
   return (
     <>
       {/* Status Steps Card - Premium Dark Style */}
-      <div className="bg-gray-300 rounded-[40px] md:rounded-[46px] p-3 md:p-4 border-4 border-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
-        <OrderStatusSteps status={order.orderStatus} createdAt={order.createdAt} />
-      </div>
+      {!hideHeader && (
+        <div className="bg-gray-300 rounded-[40px] md:rounded-[46px] p-3 md:p-4 border-4 border-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
+          <OrderStatusSteps status={order.orderStatus} createdAt={order.createdAt} />
+        </div>
+      )}
 
-      {isMobileDetail && (
+      {isMobileDetail && !hideHeader && (
         <div className="relative h-[220px] rounded-[40px] overflow-hidden border border-gray-100 bg-gray-50 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
           {isMapVisible ? (
             <OrderMapView

@@ -141,10 +141,7 @@ export default function OrderStatusSteps({ status }: { status: string; createdAt
                   </motion.div>
 
                   {/* Status Label below step - Centered using translate */}
-                  <div className={`
-                    absolute top-10 md:top-14 left-1/2 -translate-x-1/2 text-[9px] md:text-xs font-bold whitespace-nowrap transition-all duration-300
-                    ${isActive ? 'text-[var(--primary)] scale-105 md:scale-110' : 'text-gray-500'}
-                  `}>
+                  <div className="absolute top-10 md:top-14 left-1/2 -translate-x-1/2 text-[9px] md:text-xs font-bold text-gray-500 whitespace-nowrap transition-all duration-300">
                     {step.label}
                   </div>
                 </div>
