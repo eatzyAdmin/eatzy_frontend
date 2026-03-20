@@ -6,6 +6,7 @@ import CartOverlay from "@/features/cart/components/CartOverlay";
 import ProtectedMenuOverlay from "@/features/navigation/components/ProtectedMenuOverlay";
 import dynamic from "next/dynamic";
 const CurrentOrdersDrawer = dynamic(() => import("@/features/orders/components/CurrentOrdersDrawer"), { ssr: false });
+const DeliveryLocationButton = dynamic(() => import("@/features/location/components/DeliveryLocationButton"), { ssr: false });
 import SearchOverlay from "@/features/search/components/SearchOverlay";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useSearch } from "@/features/search/hooks/useSearch";
@@ -179,6 +180,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         />
         {children}
         {!isRestaurantDetail && !effectiveSearchMode && <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />}
+        <DeliveryLocationButton variant="listener" />
       </div>
     </BottomNavProvider>
   );

@@ -420,8 +420,6 @@ export default function HomePage() {
           </>
         )}
       </AnimatePresence>
-
-      <DeliveryLocationButton variant="listener" />
     </div>
   );
 }

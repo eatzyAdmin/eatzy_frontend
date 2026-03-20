@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 
 import { motion, AnimatePresence, PanInfo } from '@repo/ui/motion';
 import { Restaurant } from '@repo/types';
-import { ChevronLeft, ChevronRight, Loader2 } from '@repo/ui/icons';
+import { ChevronLeft, ChevronRight, Loader2, Store, MapPin } from '@repo/ui/icons';
 import { ImageWithFallback } from '@repo/ui';
+import { useDeliveryLocationStore } from '@/store/deliveryLocationStore';
 
 interface RestaurantSliderProps {
   restaurants: Restaurant[];
@@ -79,17 +80,75 @@ export default function RestaurantSlider({
     }
   };
 
+  const { selectedLocation } = useDeliveryLocationStore();
+
   if (!restaurants || restaurants.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-white/50 py-10">
-        {isFetchingNextPage ? (
-          <>
-            <Loader2 className="w-8 h-8 animate-spin mb-2" />
-            <p className="text-lg font-medium">Đang tải...</p>
-          </>
-        ) : (
-          <p className="text-lg font-medium">Không tìm thấy quán ăn trong danh mục này</p>
-        )}
+      <div className="w-full flex flex-col items-center justify-center py-12 md:py-20 text-center px-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center"
+        >
+          {/* Subtle Home-themed Icon */}
+          <div className="relative mb-6">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-[24px] md:rounded-[30px] bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/5 shadow-inner">
+              <Store className="w-8 h-8 md:w-10 md:h-10 text-white/30" strokeWidth={1.2} />
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border-2 border-[#1A1A1A]">
+              <MapPin className="w-4 h-4 text-white/40" strokeWidth={2.5} />
+            </div>
+          </div>
+
+          {/* Text Content - EmptyState Style */}
+          <div className="max-w-md space-y-2 mb-8">
+            {isFetchingNextPage ? (
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-6 h-6 animate-spin text-white/20" />
+                <h3 className="text-lg md:text-xl font-bold text-white tracking-tight">
+                  Đang tìm kiếm...
+                </h3>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-md md:text-xl font-bold md:font-extrabold text-white tracking-tight">
+                  Không tìm thấy quán
+                </h3>
+                <p className="text-[13px] md:text-[14px] text-gray-400 font-medium leading-relaxed max-w-[280px] md:max-w-none mx-auto">
+                  Rất tiếc, chưa có nhà hàng nào trong danh mục này tại
+                  <span className="text-white font-semibold px-1">
+                    {selectedLocation?.address
+                      ? selectedLocation.address
+                        .split(',')
+                        .map(s => s.trim())
+                        // Filter out parts that are purely numbers (postal codes)
+                        .filter(s => !/^\d+$/.test(s))
+                        // Clean leading house numbers from the first part
+                        .map((s, idx) => idx === 0 ? s.replace(/^\d+[\d\-/]*\s+/, '') : s)
+                        .slice(0, 3)
+                        .join(', ')
+                      : "địa chỉ đã chọn"
+                    }
+                  </span>
+                </p>
+              </>
+            )}
+          </div>
+
+          {/* Home Style Action Button */}
+          {!isFetchingNextPage && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.dispatchEvent(new CustomEvent('openLocationPicker'))}
+              className="group relative flex items-center gap-2.5 px-6 py-3 bg-primary/60 border-2 border-white/20 backdrop-blur-sm rounded-full text-white/90 font-semibold font-anton text-lg md:text-xl uppercase shadow-lg shadow-black/10 transition-all hover:bg-white hover:text-[#1A1A1A]"
+            >
+              <MapPin className="w-4 h-4" strokeWidth={2.5} />
+              Chọn điểm giao khác
+              <ChevronRight className="w-4 h-4 opacity-40 group-hover:translate-x-1 transition-transform" strokeWidth={3} />
+            </motion.button>
+          )}
+        </motion.div>
       </div>
     );
   }

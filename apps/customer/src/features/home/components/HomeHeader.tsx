@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from '@repo/ui/motion';
-import { Menu, BookHeart, Search, ShoppingCart, Home, Truck } from '@repo/ui/icons';
+import { Menu, BookHeart, Search, ShoppingCart, Home, Truck, BellRing } from '@repo/ui/icons';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useCurrentOrders } from '@/features/orders/hooks/useCurrentOrders';
@@ -55,7 +55,7 @@ export default function HomeHeader({
               },
             }}
             onClick={showHomeIcon ? onLogoClick : onMenuClick}
-            className={`w-10 h-10 rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
+            className={`w-10 h-10 rounded-2xl md:rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
               ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
               : 'bg-white/10 border-white/20 hover:bg-white/20'
               }`}
@@ -66,7 +66,7 @@ export default function HomeHeader({
                 animate={{ rotate: 0, opacity: 1 }}
                 key="home-icon"
               >
-                <Home strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
+                <BellRing strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
               </motion.div>
             ) : (
               <motion.div
@@ -90,7 +90,7 @@ export default function HomeHeader({
               onClick={onLogoClick}
               className="select-none outline-none"
             >
-              <h1 className={`text-xl md:text-3xl font-bold tracking-tight ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
+              <h1 className={`text-2xl md:text-3xl font-black font-anton tracking-tight ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
                 my.<span className={hideSearchIcon ? 'text-gray-700' : 'text-white/90'}>Eatzy</span>
               </h1>
             </motion.button>
@@ -164,7 +164,7 @@ export default function HomeHeader({
                 },
               }}
               onClick={onSearchClick}
-              className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
+              className="w-10 h-10 rounded-2xl md:rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
             >
               <Search strokeWidth={2.3} className="w-5 h-5 text-white" />
             </motion.button>
@@ -183,7 +183,7 @@ export default function HomeHeader({
               }}
               onClick={onCartClick}
               id="header-cart-button"
-              className={`relative rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
+              className={`relative rounded-2xl md:rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
                 ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
                 : 'bg-white/10 border-white/20 hover:bg-white/20'
                 } ${cartCount > 0 ? 'px-3 w-auto h-10 md:h-10 gap-2' : 'w-10 h-10 md:w-10 md:h-10'}`}

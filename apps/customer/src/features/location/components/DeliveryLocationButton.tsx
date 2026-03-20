@@ -91,10 +91,13 @@ export default function DeliveryLocationButton({
 
   // Global event listener to open modal from anywhere
   useEffect(() => {
+    // Only the 'listener' variant should handle global events to avoid duplicates
+    if (variant !== "listener") return;
+
     const handleOpen = () => setIsModalOpen(true);
     window.addEventListener('openLocationPicker', handleOpen);
     return () => window.removeEventListener('openLocationPicker', handleOpen);
-  }, []);
+  }, [variant]);
 
   // Handle location selection from modal
   const handleSelectLocation = (location: {
@@ -122,7 +125,7 @@ export default function DeliveryLocationButton({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setIsModalOpen(true)}
-          className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all ${className}`}
+          className={`flex items-center gap-2 px-3 py-2 rounded-2xl md:rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all ${className}`}
         >
           <MapPin className="w-4 h-4 text-lime-400" />
           <span className="text-sm font-medium text-white truncate max-w-[180px]">

@@ -137,7 +137,7 @@ export default function SearchOverlay({
               }}
               className="fixed z-[70] inset-x-4 md:inset-x-60 top-[16vh] md:-translate-x-1/2 max-w-full md:max-w-[92vw]"
             >
-              <div className="relative flex items-center gap-3 px-5 h-16 md:h-20 text-lg md:text-xl rounded-[36px] bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl overflow-hidden">
+              <div className="relative flex items-center gap-3 px-5 h-16 md:h-20 text-lg md:text-xl rounded-[28px] md:rounded-[36px] bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl overflow-hidden">
                 {isSearching && (
                   <motion.div
                     initial={{ x: "-100%" }}
@@ -153,7 +153,7 @@ export default function SearchOverlay({
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Tìm món, nhà hàng..."
-                  className="flex-1 bg-transparent text-white font-medium placeholder:text-white/60 focus:outline-none min-w-0"
+                  className="flex-1 bg-transparent text-white text-xl md:text-2xl font-semibold font-anton placeholder:text-white/60 focus:outline-none min-w-0"
                 />
                 <button
                   onClick={onClose}
@@ -188,7 +188,7 @@ export default function SearchOverlay({
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleQuickSearch(tag)}
-                  className="px-4 py-2 md:px-6 md:py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium hover:bg-white/20 hover:border-white/30 transition-colors shadow-lg"
+                  className="px-4 py-2 md:px-6 md:py-2.5 rounded-2xl md:rounded-3xl bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium hover:bg-white/20 hover:border-white/30 transition-colors shadow-lg"
                 >
                   {tag}
                 </motion.button>
