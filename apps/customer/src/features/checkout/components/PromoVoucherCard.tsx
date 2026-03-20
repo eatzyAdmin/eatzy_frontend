@@ -29,7 +29,11 @@ export default function PromoVoucherCard({
 
   const getIneligibleBenefitText = () => {
     if (isFreeship) {
-      return `giảm đến ${formatVnd(voucher.maxDiscountAmount || 0)} phí ship`;
+      return (
+        <>
+          giảm <span className="hidden md:inline">đến </span>{formatVnd(voucher.maxDiscountAmount || 0)} phí ship
+        </>
+      );
     }
     if (voucher.discountType === 'PERCENTAGE') {
       return `giảm ${voucher.discountValue}% giá món`;
@@ -106,7 +110,7 @@ export default function PromoVoucherCard({
       <div
         onClick={handleClick}
         className={`
-          relative w-full text-left p-3.5 md:p-4 rounded-[28px] md:rounded-[32px] border-[3px] transition-all duration-500 group flex items-stretch gap-4 z-10 shadow-[0_0_15px_rgba(0,0,0,0.06)]
+          relative w-full text-left p-3.5 md:p-4 pr-12 md:pr-16 rounded-[28px] md:rounded-[32px] border-[3px] transition-all duration-500 group flex items-stretch gap-4 z-10 shadow-[0_0_15px_rgba(0,0,0,0.06)]
           ${disabled
             ? 'bg-gray-50 border-gray-100 cursor-not-allowed peer/inner'
             : selected
@@ -127,7 +131,6 @@ export default function PromoVoucherCard({
         )}
 
         {/* Main Content Area - WISE Layout */}
-        {/* Main Content Area - WISE Layout */}
         <div className="flex-1 flex flex-col justify-center min-w-0">
           <div className="flex items-center gap-2.5 mb-1">
             <div className={`
@@ -146,7 +149,7 @@ export default function PromoVoucherCard({
 
           <div className="flex items-baseline gap-2">
             <h4 className={`
-              font-anton font-normal text-2xl md:text-3xl leading-none tracking-tight transition-all
+              font-anton font-bold md:font-semibold text-2xl md:text-3xl leading-none tracking-tight transition-all
               ${isFreeship ? 'text-blue-600' : 'text-[var(--primary)]'} ${disabled ? 'opacity-40' : 'opacity-100'}
             `}>
               {primaryValue}
@@ -170,15 +173,14 @@ export default function PromoVoucherCard({
           </div>
         </div>
 
-        {/* Side Action Area */}
+        {/* Side Action Area - Absolutely positioned to not affect flow */}
         {!disabled && (
-          <div className="flex flex-col items-center justify-center pl-3 md:pl-4">
+          <div className="absolute top-1/2 right-4 md:right-5 -translate-y-1/2 flex items-center justify-center pointer-events-none">
             <div className={`
               w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-500
               ${selected
-                ? isFreeship ? 'bg-blue-500 text-white' : 'bg-lime-500 text-white'
+                ? isFreeship ? 'bg-blue-500 text-white shadow-lg shadow-blue-200' : 'bg-lime-500 text-white shadow-lg shadow-lime-200'
                 : 'bg-gray-100 text-transparent scale-90'}
-              shadow-sm
             `}>
               <Check size={selected ? 16 : 10} strokeWidth={6} className="transition-all duration-500" />
             </div>
@@ -200,9 +202,15 @@ export default function PromoVoucherCard({
               <div className="flex flex-col">
                 {missingAmount !== null && missingAmount > 0 ? (
                   <div className="flex items-baseline gap-1 md:gap-1.5 text-[10px] md:text-[11px] font-bold text-gray-500 uppercase tracking-tight">
-                    <span className="translate-y-[-0.5px] whitespace-nowrap">Mua thêm</span>
+                    <span className="translate-y-[-0.5px] whitespace-nowrap">
+                      <span className="md:hidden">Thêm</span>
+                      <span className="hidden md:inline">Mua thêm</span>
+                    </span>
                     <span className="font-anton text-[13px] md:text-[15px] text-black tracking-normal whitespace-nowrap leading-none translate-y-[1px]">{formatVnd(missingAmount)}</span>
-                    <span className="translate-y-[-0.5px]">để nhận {getIneligibleBenefitText()}</span>
+                    <span className="translate-y-[-0.5px]">
+                      <span className="md:hidden">nhận</span>
+                      <span className="hidden md:inline">để nhận</span> {getIneligibleBenefitText()}
+                    </span>
                   </div>
                 ) : (
                   <span className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">

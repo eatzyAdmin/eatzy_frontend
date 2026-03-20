@@ -82,7 +82,7 @@ export default function DesktopView({
             buttonText="Khám phá ngay"
             buttonIcon={Compass}
             onButtonClick={handleExplore}
-            className="px-0"
+            className="px-0 py-12"
           />
         </div>
       ) : (

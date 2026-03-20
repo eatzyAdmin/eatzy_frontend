@@ -32,10 +32,14 @@ export default function CartItemCard({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
       whileTap={{ scale: 0.98 }}
-      exit={{ opacity: 0, scale: 0.9 }}
+      exit={{
+        opacity: 0,
+        scale: 0.95,
+        x: 40,
+        filter: "blur(4px)",
+        transition: { duration: 0.4, ease: [0.32, 0, 0.67, 0] }
+      }}
       onClick={() => onCardClick(cart.restaurant.id, cart.id)}
       className={`group relative w-full h-[140px] flex flex-row overflow-hidden rounded-[40px] cursor-pointer transition-all duration-500 ${isSelected
         ? "bg-lime-50/50 shadow-[0_0_20px_rgba(0,0,0,0.06),0_0_15px_rgba(132,204,22,0.08)]"
@@ -81,13 +85,14 @@ export default function CartItemCard({
           src={previewImage}
           alt={cart.restaurant.name}
           fill
+          placeholderMode="horizontal"
           className="object-cover transition-transform duration-700 ease-out md:group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-black/5 transition-all duration-700 ease-out md:group-hover:bg-black/0" />
 
         {/* Counter Badge - OrderHistory Style */}
         <div className="absolute top-3 left-3 z-10">
-          <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm pl-1 pr-2.5 py-1 rounded-full shadow-lg border border-[var(--primary)]/10">
+          <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm pl-1 pr-2.5 py-1 rounded-3xl shadow-lg border border-[var(--primary)]/10">
             <div className={`w-5 h-5 rounded-full bg-[var(--primary)]/10 flex items-center justify-center`}>
               <ChefHat className={`w-3 h-3 text-[var(--primary)]`} strokeWidth={3} />
             </div>

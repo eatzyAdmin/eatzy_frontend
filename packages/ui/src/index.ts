@@ -78,3 +78,4 @@ export { default as PersonalInfoShimmer } from "./feedback/shimmer/PersonalInfoS
 export { default as SavedAddressesShimmer } from "./feedback/shimmer/SavedAddressesShimmer";
 export { default as WalletTransactionsShimmer } from "./feedback/shimmer/WalletTransactionsShimmer";
 export { TransactionRowShimmer } from "./feedback/shimmer/TransactionRowShimmer";
+export { default as CurrentOrderCardShimmer } from "./feedback/shimmer/CurrentOrderCardShimmer";

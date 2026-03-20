@@ -5,7 +5,7 @@ import { ChevronRight, type LucideIcon } from "@repo/ui/icons";
 interface EmptyStateProps {
   icon: LucideIcon;
   title: string;
-  description: string;
+  description: React.ReactNode;
   buttonText?: string;
   buttonIcon?: LucideIcon;
   onButtonClick?: () => void;
@@ -25,7 +25,7 @@ export function EmptyState({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`flex flex-col items-center justify-center text-center px-0 py-12 w-full ${className}`}
+      className={`flex flex-col items-center justify-center text-center px-0 w-full ${className}`}
     >
       <div className="mb-6">
         <div className="w-20 h-20 md:w-24 md:h-24 rounded-[32px] md:rounded-[36px] bg-gray-50 flex items-center justify-center text-gray-200 border-2 border-white shadow-[inset_0_2px_8px_rgba(0,0,0,0.05)] md:shadow-[inset_0_2px_10px_rgba(0,0,0,0.06)] mx-auto relative group">

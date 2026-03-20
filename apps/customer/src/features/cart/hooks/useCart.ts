@@ -26,6 +26,10 @@ export interface UseCartResult {
   totalPrice: number;
   // Actions
   clearAllCarts: () => Promise<void>;
+  deleteCart: (cartId: number) => Promise<void>;
+  deleteCarts: (cartIds: number[]) => Promise<void>;
+  isDeleting: boolean;
+  deletingCartIds: number[];
 }
 
 export interface UseRestaurantCartResult {
@@ -83,12 +87,40 @@ export function useCart(): UseCartResult {
 
   const queryClient = useQueryClient();
 
-  const clearAllCarts = useCallback(async () => {
-    for (const cart of carts) {
-      await cartApi.deleteCart(cart.id);
+  const deleteCartsMutation = useMutation({
+    mutationFn: async (cartIds: number[]) => {
+      for (const id of cartIds) {
+        const response = await cartApi.deleteCart(id);
+        if (response.statusCode !== 200) {
+          throw new Error(response.message || 'Không thể xóa giỏ hàng');
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: cartKeys.all });
+    },
+    onError: (error: Error) => {
+      sileo.error({
+        title: "Lỗi xóa giỏ hàng",
+        description: error.message || "Đã có lỗi xảy ra khi xóa giỏ hàng"
+      });
     }
-    queryClient.invalidateQueries({ queryKey: cartKeys.all });
-  }, [carts, queryClient]);
+  });
+
+  const clearAllCarts = useCallback(async () => {
+    const ids = carts.map(c => c.id);
+    if (ids.length > 0) {
+      await deleteCartsMutation.mutateAsync(ids);
+    }
+  }, [carts, deleteCartsMutation]);
+
+  const deleteCart = useCallback(async (cartId: number) => {
+    await deleteCartsMutation.mutateAsync([cartId]);
+  }, [deleteCartsMutation]);
+
+  const deleteCarts = useCallback(async (cartIds: number[]) => {
+    await deleteCartsMutation.mutateAsync(cartIds);
+  }, [deleteCartsMutation]);
 
   return {
     carts,
@@ -99,6 +131,10 @@ export function useCart(): UseCartResult {
     totalItems,
     totalPrice,
     clearAllCarts,
+    deleteCart,
+    deleteCarts,
+    isDeleting: deleteCartsMutation.isPending,
+    deletingCartIds: deleteCartsMutation.variables || [],
   };
 }
 

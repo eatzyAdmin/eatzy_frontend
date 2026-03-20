@@ -5,6 +5,7 @@ import { useCustomerAddresses } from "../../hooks/useCustomerAddresses";
 import { SavedAddressesShimmer, useSwipeConfirmation } from "@repo/ui";
 import { IAddress } from "@repo/types";
 import AddressFormModal from "../modals/AddressFormModal";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function SavedAddressesSection() {
   const { addresses, isLoading, createAddress, updateAddress, deleteAddress, isCreating, isUpdating, isDeleting } = useCustomerAddresses();
@@ -92,13 +93,12 @@ export default function SavedAddressesSection() {
           {isLoading ? (
             <SavedAddressesShimmer cardCount={3} />
           ) : addresses.length === 0 ? (
-            <div className="py-20 border-2 border-dashed border-gray-100 rounded-[40px] flex flex-col items-center justify-center text-gray-400 bg-slate-50/30">
-              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm">
-                <MapPin size={24} className="text-gray-300" />
-              </div>
-              <p className="text-sm font-bold uppercase tracking-widest mb-1">Chưa có địa chỉ nào</p>
-              <p className="text-xs">Hãy thêm địa chỉ giao hàng đầu tiên của bạn</p>
-            </div>
+            <EmptyState
+              icon={MapPin}
+              title="Chưa có địa chỉ nào"
+              description="Hãy thêm địa chỉ giao hàng của bạn để đặt món nhanh hơn nhé!"
+              className="py-12"
+            />
           ) : (
             addresses.map((addr) => {
               const Icon = getIcon(addr.label);

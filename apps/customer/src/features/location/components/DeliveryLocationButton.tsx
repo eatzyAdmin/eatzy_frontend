@@ -21,7 +21,7 @@ const SavedAddressesModal = dynamic(
 // ======== Types ========
 
 interface DeliveryLocationButtonProps {
-  variant?: "home" | "header" | "compact" | "mini";
+  variant?: "home" | "header" | "compact" | "mini" | "listener";
   className?: string;
 }
 
@@ -89,6 +89,13 @@ export default function DeliveryLocationButton({
     initLocation();
   }, [userLocation, isLocationLoading, selectedLocation, setSelectedLocation]);
 
+  // Global event listener to open modal from anywhere
+  useEffect(() => {
+    const handleOpen = () => setIsModalOpen(true);
+    window.addEventListener('openLocationPicker', handleOpen);
+    return () => window.removeEventListener('openLocationPicker', handleOpen);
+  }, []);
+
   // Handle location selection from modal
   const handleSelectLocation = (location: {
     latitude: number;
@@ -107,6 +114,8 @@ export default function DeliveryLocationButton({
   // ======== Render Variants ========
 
   const renderButton = () => {
+    if (variant === "listener") return null;
+
     if (variant === "compact") {
       return (
         <motion.button

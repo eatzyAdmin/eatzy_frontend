@@ -2,8 +2,11 @@ import { motion } from '@repo/ui/motion';
 import { useEffect, useState, useRef } from 'react';
 import { MagazineLayout8Shimmer, InfiniteScrollContainer } from '@repo/ui';
 import { useInfiniteScroll } from '@repo/hooks';
+import { MapPin, Store } from '@repo/ui/icons';
+import { EmptyState } from '@/components/ui/EmptyState';
 import type { RestaurantWithMenu } from '@/features/search/hooks/useSearch';
 import MagazineLayout1 from '@/features/search/components/layouts/MagazineLayout1';
+import { useDeliveryLocationStore } from '@/store/deliveryLocationStore';
 import MagazineLayout2 from '@/features/search/components/layouts/MagazineLayout2';
 import MagazineLayout3 from '@/features/search/components/layouts/MagazineLayout3';
 import MagazineLayout4 from '@/features/search/components/layouts/MagazineLayout4';
@@ -34,6 +37,10 @@ export default function RecommendedSection({
   isLoadingMore = false,
   totalResults
 }: Props) {
+  const { selectedLocation } = useDeliveryLocationStore();
+  const currentAddress = selectedLocation?.address || "";
+  const shortAddress = currentAddress.split(',').map((s: string) => s.trim()).filter((s: string) => !/^\d{5}$/.test(s)).slice(0, 3).join(', ');
+
   const containerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
@@ -199,8 +206,19 @@ export default function RecommendedSection({
           loadMoreShimmerCount={1}
           endMessage="Bạn đã xem hết các gợi ý gần đây"
           EmptyComponent={
-            <div className="py-12 text-center text-gray-500">
-              Không tìm thấy nhà hàng nào quanh khu vực của bạn.
+            <div className="py-2">
+              <EmptyState
+                icon={MapPin}
+                title="Không tìm thấy nhà hàng"
+                description={
+                  <>
+                    Rất tiếc, chúng tôi không tìm thấy nhà hàng nào quanh khu vực của bạn tại <span className="text-gray-500 font-bold">"{shortAddress}..."</span>
+                  </>
+                }
+                buttonText="Chọn điểm giao khác"
+                buttonIcon={Store}
+                onButtonClick={() => window.dispatchEvent(new CustomEvent('openLocationPicker'))}
+              />
             </div>
           }
         >

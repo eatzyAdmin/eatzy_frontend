@@ -89,7 +89,7 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
       })}
 
       {/* End of list indicator */}
-      <div className="py-12 flex items-center justify-center gap-4 opacity-60">
+      <div className="pt-0 pb-24 flex items-center justify-center gap-4 opacity-60">
         <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
         <div className="flex flex-col items-center gap-2">
           <div className="">

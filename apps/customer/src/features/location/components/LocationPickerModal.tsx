@@ -261,10 +261,10 @@ export default function LocationPickerModal({
         const { longitude: lng, latitude: lat } = position.coords;
         setMapPosition({ lng, lat });
         setFlyVersion((v) => v + 1);
+        setIsLocating(false);
 
         const address = await reverseGeocode(lng, lat);
         setCurrentAddress(address);
-        setIsLocating(false);
       },
       () => {
         setIsLocating(false);
@@ -466,13 +466,10 @@ export default function LocationPickerModal({
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
                           {nearbyPlaces.length > 0 ? (
                             nearbyPlaces.map((p, idx) => {
-                              const selected = selectedNearbyIndex === idx;
+                              const selected = selectedPlace?.id === p.id;
                               return (
-                                <motion.div
+                                <div
                                   key={p.id}
-                                  layout
-                                  initial={{ opacity: 0, y: 4 }}
-                                  animate={{ opacity: 1, y: 0 }}
                                   onClick={() => handleSelectNearbyPlace(idx, p)}
                                   className={`relative p-3.5 rounded-[24px] cursor-pointer border transition-all duration-200 ${selected ? 'bg-lime-50 border-lime-200 shadow-sm' : 'bg-white border-gray-100'}`}
                                 >
@@ -485,7 +482,7 @@ export default function LocationPickerModal({
                                       <div className="text-gray-400 text-[11px] font-medium truncate mt-0.5">{p.place_name}</div>
                                     </div>
                                   </div>
-                                </motion.div>
+                                </div>
                               );
                             })
                           ) : (
@@ -534,11 +531,10 @@ export default function LocationPickerModal({
                         {nearbyPlaces.length > 0 ? (
                           <div className="space-y-2">
                             {nearbyPlaces.map((p, idx) => {
-                              const selected = selectedNearbyIndex === idx;
+                              const selected = selectedPlace?.id === p.id;
                               return (
-                                <motion.div
+                                <div
                                   key={p.id}
-                                  layout
                                   onClick={() => handleSelectNearbyPlace(idx, p)}
                                   className={`
                                   relative p-4 rounded-[20px] cursor-pointer border transition-all duration-200 group
@@ -557,7 +553,7 @@ export default function LocationPickerModal({
                                       <div className="text-xs text-gray-400 font-medium line-clamp-1 mt-0.5">{p.place_name}</div>
                                     </div>
                                   </div>
-                                </motion.div>
+                                </div>
                               );
                             })}
                           </div>

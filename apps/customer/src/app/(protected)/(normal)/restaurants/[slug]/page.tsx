@@ -25,6 +25,8 @@ import { RestaurantCategoryTabs } from "@/features/restaurant/components/Restaur
 import { MobileRestaurantHero } from "@/features/restaurant/components/MobileRestaurantHero";
 import { MobileRestaurantAvatar } from "@/features/restaurant/components/MobileRestaurantAvatar";
 import { sileo } from "@/components/DynamicIslandToast";
+import { useDeliveryDistanceValidator } from "@/features/checkout/hooks/useDeliveryDistanceValidator";
+import DistanceWarningModal from "@/features/checkout/components/DistanceWarningModal";
 
 export default function RestaurantDetailPage() {
   const params = useParams() as { slug: string };
@@ -88,8 +90,17 @@ export default function RestaurantDetailPage() {
     distance,
     minOrderForDiscount,
     hasFreeship,
-    isLoading: isLoadingShipping
+    isLoading: isLoadingShipping,
+    selectedLocation
   } = useRestaurantShippingInfo(numericRestaurantId);
+
+  const {
+    showWarning,
+    setShowWarning,
+    handleRestrictedAction,
+    maxDistance,
+    isOverDistance
+  } = useDeliveryDistanceValidator(distance);
 
 
   const { ghosts, fly } = useFlyToCart();
@@ -196,6 +207,7 @@ export default function RestaurantDetailPage() {
                           finalFee={finalFee}
                           hasFreeship={hasFreeship}
                           variant="mobile"
+                          isOverDistance={isOverDistance}
                         />
                       </div>
                     </RestaurantHeader>
@@ -207,6 +219,7 @@ export default function RestaurantDetailPage() {
                       finalFee={finalFee}
                       hasFreeship={hasFreeship}
                       variant="desktop"
+                      isOverDistance={isOverDistance}
                     />
                   </div>
 
@@ -268,6 +281,9 @@ export default function RestaurantDetailPage() {
         onConfirm={async (payload, startRect) => {
           if (!drawerDish || !restaurant) return;
 
+          // Check distance restriction
+          if (handleRestrictedAction()) return;
+
           // Collect selected option IDs for API
           const selectedOptionIds: { id: number }[] = [];
 
@@ -326,6 +342,18 @@ export default function RestaurantDetailPage() {
       />
       <ReviewsModal restaurant={restaurant} isOpen={isReviewsOpen} onClose={() => setIsReviewsOpen(false)} />
       {!isApiLoading && restaurant && <FloatingRestaurantCart restaurantId={restaurant.id} restaurantName={restaurant.name} />}
+
+      <DistanceWarningModal
+        isOpen={showWarning}
+        onClose={() => setShowWarning(false)}
+        maxDistance={maxDistance}
+        currentDistance={distance}
+        currentAddress={selectedLocation?.address}
+        onSelectLocation={() => {
+          setShowWarning(false);
+          window.dispatchEvent(new CustomEvent('openLocationPicker'));
+        }}
+      />
     </div>
   );
 }

@@ -228,10 +228,10 @@ export default function AddressFormModal({
         const { longitude: lng, latitude: lat } = position.coords;
         setMapPosition({ lng, lat });
         setFlyVersion((v) => v + 1);
+        setIsLocating(false);
 
         const address = await reverseGeocode(lng, lat);
         setCurrentAddress(address);
-        setIsLocating(false);
       },
       () => {
         setIsLocating(false);
@@ -428,11 +428,8 @@ export default function AddressFormModal({
                             nearbyPlaces.map((p, idx) => {
                               const selected = selectedPlace?.id === p.id;
                               return (
-                                <motion.div
+                                <div
                                   key={p.id}
-                                  layout
-                                  initial={{ opacity: 0, y: 4 }}
-                                  animate={{ opacity: 1, y: 0 }}
                                   onClick={() => handleSelectNearbyPlace(idx, p)}
                                   className={`relative p-3.5 rounded-[24px] cursor-pointer border transition-all duration-200 ${selected ? 'bg-lime-50 border-lime-200 shadow-sm' : 'bg-white border-gray-100'}`}
                                 >
@@ -447,7 +444,7 @@ export default function AddressFormModal({
                                       </div>
                                     </div>
                                   </div>
-                                </motion.div>
+                                </div>
                               );
                             })
                           ) : (
@@ -461,7 +458,7 @@ export default function AddressFormModal({
                     </div>
 
                     {/* Desktop Only: Original Map */}
-                    <div className="hidden md:block flex-1 relative rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 bg-gray-50 items-center justify-center">
+                    <div className="hidden md:flex flex-1 relative rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 bg-gray-50 items-center justify-center">
                       {isMapVisible ? (
                         <MapViewForPicker
                           pickupPos={mapPosition}
@@ -505,9 +502,8 @@ export default function AddressFormModal({
                             {nearbyPlaces.map((p, idx) => {
                               const selected = selectedPlace?.id === p.id;
                               return (
-                                <motion.div
+                                <div
                                   key={p.id}
-                                  layout
                                   onClick={() => handleSelectNearbyPlace(idx, p)}
                                   className={`
                                                     relative p-4 rounded-[20px] cursor-pointer border transition-all duration-200 group
@@ -526,7 +522,7 @@ export default function AddressFormModal({
                                       <div className="text-xs text-gray-400 font-medium line-clamp-1 mt-0.5">{p.place_name}</div>
                                     </div>
                                   </div>
-                                </motion.div>
+                                </div>
                               )
                             })}
                           </div>

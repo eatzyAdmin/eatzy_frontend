@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "@repo/ui/motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, useDragControls } from "@repo/ui/motion";
 import { X, ClipboardList, ArrowLeft, Loader2, ShoppingBag, Compass, FileText, ChevronRight } from "@repo/ui/icons";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useRouter } from "next/navigation";
 import type { OrderResponse } from "@repo/types";
-import { OrderHistoryCardShimmer } from "@repo/ui";
+import { CurrentOrderCardShimmer } from "@repo/ui";
 import { statusLabel } from "./status-helpers";
-import OrderHistoryCard from "../OrderHistoryCard";
+import CurrentOrderCard from "../CurrentOrderCard";
 import OrderDetailsContent from "./OrderDetailsContent";
 import OrderStatusSteps from "../OrderStatusSteps";
 import dynamic from "next/dynamic";
@@ -46,6 +46,11 @@ export default function MobileView({
   const draggbleRef = useRef<HTMLDivElement>(null);
   const dragY = useMotionValue(0);
   const [drawerY, setDrawerY] = useState<number | string>("100%");
+  const dragControls = useDragControls();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const downEvent = useRef<React.PointerEvent | null>(null);
+  const startY = useRef(0);
+  const dragStarted = useRef(false);
   const router = useRouter();
 
   const handleExplore = () => {
@@ -115,11 +120,11 @@ export default function MobileView({
 
             <div className="px-3">
               {isLoadingOrders ? (
-                <div className="pt-4 space-y-2.5">
-                  <OrderHistoryCardShimmer cardCount={3} />
+                <div className="pt-4 space-y-2">
+                  <CurrentOrderCardShimmer cardCount={1} />
                 </div>
               ) : (
-                <div className="pt-4 space-y-2.5">
+                <div className="pt-4 space-y-2">
                   {orders.length === 0 ? (
                     <EmptyState
                       icon={FileText}
@@ -132,7 +137,7 @@ export default function MobileView({
                     />
                   ) : (
                     orders.map(o => (
-                      <OrderHistoryCard
+                      <CurrentOrderCard
                         key={o.id}
                         order={o}
                         onClick={() => handleOrderClick(o.id)}
@@ -208,10 +213,11 @@ export default function MobileView({
             <motion.div
               style={{ y: dragY }}
               drag="y"
+              dragControls={dragControls}
+              dragListener={false}
               dragConstraints={{ top: 0, bottom: 540 }}
               dragElastic={0.1}
               onDragEnd={(e, info) => {
-                // Snapping logic based on movement and velocity
                 if (info.offset.y < -50 || info.velocity.y < -300) {
                   setDrawerY(0); // Maximize
                 } else if (info.offset.y > 50 || info.velocity.y > 300) {
@@ -223,13 +229,48 @@ export default function MobileView({
               animate={{ y: drawerY }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              {/* Handle */}
-              <div className="w-full h-8 flex items-center justify-center flex-shrink-0 pt-2">
+              {/* Handle - Always draggable */}
+              <div
+                onPointerDown={(e) => dragControls.start(e)}
+                className="w-full h-8 flex items-center justify-center flex-shrink-0 pt-2 cursor-grab active:cursor-grabbing"
+              >
                 <div className="w-12 h-1.5 bg-gray-200 rounded-full" />
               </div>
 
               {/* Scrollable Content inside Drawer */}
-              <div className="flex-1 overflow-y-auto no-scrollbar p-3 pt-0 space-y-3">
+              <div
+                ref={contentRef}
+                onPointerDown={(e) => {
+                  downEvent.current = e;
+                  startY.current = e.clientY;
+                  dragStarted.current = false;
+
+                  // If not maximized, any touch starts the drawer movement
+                  if (drawerY !== 0) {
+                    dragControls.start(e);
+                    dragStarted.current = true;
+                  }
+                }}
+                onPointerMove={(e) => {
+                  // If maximized, we only start drawer drag if we are pulling DOWN at the top
+                  if (drawerY === 0 && !dragStarted.current && contentRef.current) {
+                    const isAtTop = contentRef.current.scrollTop <= 0;
+                    const deltaY = e.clientY - startY.current;
+
+                    if (isAtTop && deltaY > 5) {
+                      dragStarted.current = true;
+                      if (downEvent.current) {
+                        dragControls.start(downEvent.current);
+                      }
+                    }
+                  }
+                }}
+                className={`flex-1 ${drawerY === 0 ? "overflow-y-auto" : "overflow-y-hidden"} no-scrollbar p-3 pt-0 space-y-3`}
+                style={{
+                  touchAction: drawerY === 0 ? "pan-y" : "none",
+                  WebkitOverflowScrolling: 'touch'
+                }}
+              >
                 {activeOrder && (
                   <OrderDetailsContent
                     order={activeOrder}
@@ -239,8 +280,8 @@ export default function MobileView({
                     onConfirmCancel={handleConfirmCancel}
                     cancellationReasons={cancellationReasons}
                     isMobileDetail={true}
-                    isMapVisible={false} // Hidden inside drawer
-                    hideHeader={true} // Hidden inside drawer (we render it in top fixed area)
+                    isMapVisible={false}
+                    hideHeader={true}
                   />
                 )}
               </div>

@@ -18,6 +18,10 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
     carts,
     isLoading: isCartsLoading,
     totalItems,
+    deleteCart,
+    deleteCarts,
+    isDeleting: isDeletingCarts,
+    deletingCartIds
   } = useCart();
 
   const queryClient = useQueryClient();
@@ -25,7 +29,6 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
   const { show } = useLoading();
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedRestIds, setSelectedRestIds] = useState<Set<number>>(new Set());
-  const [isDeletingCarts, setIsDeletingCarts] = useState(false);
   const setActiveRestaurant = useCartStore((s) => s.setActiveRestaurant);
 
   const toggleSelection = (cartId: number) => {
@@ -35,32 +38,15 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
     setSelectedRestIds(next);
   };
 
-  const handleBulkDelete = async () => {
-    setIsDeletingCarts(true);
-    try {
-      const { cartApi } = await import("@repo/api");
-      const cartIds = Array.from(selectedRestIds);
-      for (const cartId of cartIds) {
-        await cartApi.deleteCart(cartId);
-      }
-      await queryClient.invalidateQueries({ queryKey: cartKeys.all });
-      setSelectedRestIds(new Set());
-      setIsEditMode(false);
-    } finally {
-      setIsDeletingCarts(false);
-    }
+  const handleBulkDelete = () => {
+    deleteCarts(Array.from(selectedRestIds));
+    setSelectedRestIds(new Set());
+    setIsEditMode(false);
   };
 
-  const handleDeleteSingleCart = async (cartId: number, e: React.MouseEvent) => {
+  const handleDeleteSingleCart = (cartId: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsDeletingCarts(true);
-    try {
-      const { cartApi } = await import("@repo/api");
-      await cartApi.deleteCart(cartId);
-      await queryClient.invalidateQueries({ queryKey: cartKeys.all });
-    } finally {
-      setIsDeletingCarts(false);
-    }
+    deleteCart(cartId);
   };
 
   const handleCardClick = (restaurantId: number, cartId: number) => {
@@ -162,11 +148,11 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
               {/* List Content */}
               <div className="p-3 md:p-4 pb-32 space-y-6 bg-[#F8F9FA]">
                 {isCartsLoading ? (
-                  <>
+                  <motion.div layout className="space-y-2 md:space-y-3">
                     <CartOverlayShimmer />
                     <CartOverlayShimmer />
                     <CartOverlayShimmer />
-                  </>
+                  </motion.div>
                 ) : carts.length === 0 ? (
                   <EmptyState
                     icon={ShoppingBag}
@@ -180,27 +166,24 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                         router.push('/home?recommend=true');
                       }, 300);
                     }}
-                    className="h-full"
+                    className="h-full py-12"
                   />
                 ) : (
-                  <motion.div
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="space-y-2 md:space-y-3"
-                  >
-                    {carts.map(cart => (
-                      <CartItemCard
-                        key={cart.id}
-                        cart={cart}
-                        isEditMode={isEditMode}
-                        isSelected={selectedRestIds.has(cart.id)}
-                        onToggleSelection={toggleSelection}
-                        onCardClick={handleCardClick}
-                        onDeleteSingle={handleDeleteSingleCart}
-                        isDeleting={isDeletingCarts}
-                      />
-                    ))}
+                  <motion.div layout className="space-y-2 md:space-y-3">
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      {carts.map(cart => (
+                        <CartItemCard
+                          key={cart.id}
+                          cart={cart}
+                          isEditMode={isEditMode}
+                          isSelected={selectedRestIds.has(cart.id)}
+                          onToggleSelection={toggleSelection}
+                          onCardClick={handleCardClick}
+                          onDeleteSingle={handleDeleteSingleCart}
+                          isDeleting={deletingCartIds.includes(cart.id) || (isDeletingCarts && selectedRestIds.has(cart.id))}
+                        />
+                      ))}
+                    </AnimatePresence>
 
                     {carts.length >= 4 && (
                       <div className="py-8 flex items-center justify-center gap-4 opacity-30 mt-4">

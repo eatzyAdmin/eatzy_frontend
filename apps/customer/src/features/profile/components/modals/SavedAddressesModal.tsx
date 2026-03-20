@@ -12,6 +12,7 @@ import { SavedAddressesShimmer, useSwipeConfirmation } from "@repo/ui";
 import { IAddress } from "@repo/types";
 import AddressFormModal from "./AddressFormModal";
 import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 interface SavedAddressesModalProps {
   isOpen: boolean;
@@ -154,19 +155,12 @@ export default function SavedAddressesModal({
                       <SavedAddressesShimmer cardCount={4} />
                     </div>
                   ) : addresses.length === 0 ? (
-                    <div className="py-20 border-2 border-dashed border-gray-100 rounded-[40px] flex flex-col items-center justify-center text-gray-400 bg-slate-50/30">
-                      <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm">
-                        <MapPin size={24} className="text-gray-300" />
-                      </div>
-                      <p className="text-sm font-bold uppercase tracking-widest mb-1">Chưa có địa chỉ nào</p>
-                      <p className="text-xs">Hãy thêm địa chỉ giao hàng đầu tiên của bạn</p>
-                      <button
-                        onClick={handleOpenAdd}
-                        className="mt-6 px-6 py-3 bg-[#1A1A1A] text-white font-bold text-xs uppercase tracking-widest rounded-full hover:bg-black transition-all active:scale-95"
-                      >
-                        Thêm địa chỉ ngay
-                      </button>
-                    </div>
+                    <EmptyState
+                      icon={MapPin}
+                      title="Chưa có địa chỉ nào"
+                      description="Hãy thêm địa chỉ giao hàng của bạn để đặt món nhanh hơn nhé!"
+                      className="py-12"
+                    />
                   ) : (
                     <div className="grid grid-cols-1 gap-2 md:pb-0">
                       {addresses.map((addr) => {

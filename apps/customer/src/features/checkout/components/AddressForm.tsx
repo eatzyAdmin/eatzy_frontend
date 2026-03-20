@@ -25,6 +25,10 @@ export default function AddressForm({
             <MapPin className="w-5 h-5 text-gray-400" />
             <h4 className="font-bold text-[#1A1A1A]">Địa chỉ giao hàng</h4>
           </div>
+          <div className="flex items-center gap-1 text-lime-600 font-bold text-[12px]">
+            Change
+            <ChevronRight className="w-4 h-4" strokeWidth={3} />
+          </div>
         </div>
 
         <div className="p-4 pt-0">
@@ -34,10 +38,23 @@ export default function AddressForm({
             </div>
             <div className="flex-1 min-w-0">
               <div className="py-2 border-b border-gray-100 min-h-[40px] flex items-center group">
-                <span className={`text-[14px] font-bold ${value ? 'text-[#1A1A1A]' : 'text-gray-300'} flex-1 truncate`}>
+                <motion.span
+                  key={value}
+                  initial={{ 
+                    backgroundColor: "rgba(132, 204, 22, 0.45)", 
+                    color: "#3f6212",
+                    boxShadow: "0 0 20px rgba(132, 204, 22, 0.3)"
+                  }}
+                  animate={{ 
+                    backgroundColor: "rgba(132, 204, 22, 0)", 
+                    color: "inherit",
+                    boxShadow: "0 0 0px rgba(132, 204, 22, 0)"
+                  }}
+                  transition={{ duration: 1.2, ease: "easeOut" }}
+                  className={`text-[14px] font-bold ${value ? 'text-[#1A1A1A]' : 'text-gray-300'} flex-1 truncate px-2 py-0.5 rounded-lg overflow-hidden`}
+                >
                   {value || "Chọn địa chỉ giao hàng của bạn"}
-                </span>
-                <ChevronRight className="w-5 h-5 text-gray-300" />
+                </motion.span>
               </div>
               <div className="mt-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                 Nhấn để tìm kiếm địa chỉ trên bản đồ
@@ -47,8 +64,8 @@ export default function AddressForm({
         </div>
       </div>
 
-    <div className="hidden md:block bg-gray-50/20 cursor-default">
-        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/30">
+      <div className="hidden md:block bg-gray-50/20 cursor-default">
+        <div className="px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MapPin className="w-5 h-5 text-gray-300" />
             <h4 className="font-bold text-gray-400">Địa chỉ giao hàng</h4>
@@ -75,9 +92,23 @@ export default function AddressForm({
             </div>
             <div className="flex-1 min-w-0">
               <div className="py-2 border-b border-gray-100 min-h-[40px] flex items-center opacity-60">
-                <span className="text-[14px] font-bold text-gray-500 truncate">
+                <motion.span
+                  key={value}
+                  initial={{ 
+                    backgroundColor: "rgba(132, 204, 22, 0.45)", 
+                    color: "#3f6212",
+                    boxShadow: "0 0 20px rgba(132, 204, 22, 0.3)"
+                  }}
+                  animate={{ 
+                    backgroundColor: "rgba(132, 204, 22, 0)", 
+                    color: "inherit",
+                    boxShadow: "0 0 0px rgba(132, 204, 22, 0)"
+                  }}
+                  transition={{ duration: 1.2, ease: "easeOut" }}
+                  className="text-[14px] font-bold text-gray-500 truncate px-2 py-0.5 rounded-lg overflow-hidden"
+                >
                   {value || "Chưa xác định vị trí"}
-                </span>
+                </motion.span>
               </div>
               <div className="mt-2 text-[12px] font-bold italic flex items-start gap-1.5 text-lime-500">
                 <div className="w-1.5 h-1.5 rounded-full bg-lime-500 mt-1 animate-pulse flex-shrink-0" />

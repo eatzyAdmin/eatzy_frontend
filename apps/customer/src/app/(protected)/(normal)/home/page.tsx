@@ -205,7 +205,7 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100vh', transition: { delay: 0.15, duration: 0.8, ease: [0.33, 1, 0.68, 1] } }}
             transition={{ duration: 0.6 }}
-            className="fixed z-50 left-3 right-3 md:hidden top-[9vh] md:top-[12vh]"
+            className="fixed z-50 left-3 right-3 md:hidden top-[9vh]"
           >
             <DeliveryLocationButton variant="compact" />
           </motion.div>
@@ -356,6 +356,10 @@ export default function HomePage() {
             hasMore={hasMore}
             onLoadMore={loadMore}
             totalResults={totalResults}
+            onShowRecommendations={() => {
+              clearSearch();
+              setShowRecommended(true);
+            }}
           />
         )}
       </AnimatePresence>
@@ -416,6 +420,8 @@ export default function HomePage() {
           </>
         )}
       </AnimatePresence>
+
+      <DeliveryLocationButton variant="listener" />
     </div>
   );
 }

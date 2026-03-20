@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, Search, Star, Sparkles, CheckCircle2, MessageSquare, Map, Tag, ChefHat, ChevronDown, Loader2, ArrowLeft } from "@repo/ui/icons";
+import { X, Search, Star, Sparkles, CheckCircle2, MessageSquare, Map, Tag, ChefHat, ChevronDown, Loader2, ArrowLeft, AlertCircle, ShoppingBag } from "@repo/ui/icons";
 import { ImageWithFallback, ReviewItemShimmer } from "@repo/ui";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import type { Restaurant } from "@repo/types";
 import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 import { useRestaurantReviews } from "../hooks/useRestaurantReviews";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 interface ReviewsModalProps {
   restaurant: Restaurant;
@@ -378,19 +379,24 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                           <ReviewItemShimmer count={3} />
                         </div>
                       ) : isError ? (
-                        <div className="flex flex-col items-center justify-center text-center py-12">
-                          <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                            <X className="w-8 h-8 text-red-500" />
-                          </div>
-                          <h3 className="text-lg font-bold text-gray-900 mb-2">Đã có lỗi xảy ra</h3>
-                          <p className="text-gray-500 mb-6 max-w-xs">{error?.message || "Không thể tải danh sách đánh giá từ máy chủ."}</p>
-                        </div>
+                        <EmptyState
+                          icon={AlertCircle}
+                          title="Đã có lỗi xảy ra"
+                          description={error?.message || "Không thể tải danh sách đánh giá từ máy chủ."}
+                          className="py-12"
+                        />
                       ) : (
                         <div className="space-y-6 pt-2 px-2">
                           {displayReviews.length === 0 ? (
-                            <div className="text-center py-12 text-gray-500 text-sm font-medium">
-                              Không tìm thấy đánh giá nào khớp với yêu cầu của bạn.
-                            </div>
+                            <EmptyState
+                              icon={activeSearch ? Search : MessageSquare}
+                              title={activeSearch ? "Không tìm thấy kết quả" : "Chưa có đánh giá nào"}
+                              description={activeSearch
+                                ? `Không tìm thấy đánh giá nào khớp với từ khóa "${activeSearch}"`
+                                : `Nhà hàng "${restaurant.name}" hiện chưa có lượt đánh giá nào từ khách hàng.`
+                              }
+                              className="py-12"
+                            />
                           ) : (
                             <>
                               {displayReviews.map((review, index) => {
@@ -403,58 +409,58 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                                     transition={{ duration: 0.3 }}
                                     className={`space-y-2 md:space-y-3 pb-4 md:pb-6 border-b border-gray-200/90 ${isLast ? 'border-b-0' : ''}`}
                                   >
-                                  {/* Author Info */}
-                                  <div className="flex items-start gap-3">
-                                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                                      <ImageWithFallback
-                                        src={review.authorAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${review.authorName}`}
-                                        alt={review.authorName}
-                                        fill
-                                        className="object-cover"
-                                      />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <div className="font-bold text-gray-900 text-sm">{review.authorName}</div>
-                                      <div className="text-xs text-gray-500 font-medium">Khách hàng Eatzy</div>
-                                    </div>
-                                  </div>
-
-                                  {/* Rating & Date */}
-                                  <div className="flex items-center gap-2 text-xs">
-                                    <div className="flex gap-0.5">
-                                      {[...Array(5)].map((_, i) => (
-                                        <Star
-                                          key={i}
-                                          className={`w-3 h-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`}
+                                    {/* Author Info */}
+                                    <div className="flex items-start gap-3">
+                                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                                        <ImageWithFallback
+                                          src={review.authorAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${review.authorName}`}
+                                          alt={review.authorName}
+                                          fill
+                                          className="object-cover"
                                         />
-                                      ))}
-                                    </div>
-                                    <span className="text-gray-300">·</span>
-                                    <span className="text-gray-500 font-medium">{review.date}</span>
-                                  </div>
-
-                                  {/* Review Content */}
-                                  <p className="text-gray-700 leading-relaxed text-[15px] font-medium">
-                                    {review.content}
-                                  </p>
-
-                                  {/* Admin Reply */}
-                                  {review.reply && (
-                                    <div className="mt-4 p-4 bg-gray-50 rounded-2xl border-l-4 border-[var(--primary)] space-y-0">
-                                      <div className="flex items-center gap-2 text-xs font-bold text-gray-900">
-                                        <div className="w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center text-white">
-                                          <ChefHat size={12} />
-                                        </div>
-                                        Phản hồi từ quán
                                       </div>
-                                      <p className="text-gray-600 text-sm leading-relaxed italic">
-                                        "{review.reply}"
-                                      </p>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="font-bold text-gray-900 text-sm">{review.authorName}</div>
+                                        <div className="text-xs text-gray-500 font-medium">Khách hàng Eatzy</div>
+                                      </div>
                                     </div>
-                                  )}
-                                </motion.div>
-                              );
-                            })}
+
+                                    {/* Rating & Date */}
+                                    <div className="flex items-center gap-2 text-xs">
+                                      <div className="flex gap-0.5">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`w-3 h-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`}
+                                          />
+                                        ))}
+                                      </div>
+                                      <span className="text-gray-300">·</span>
+                                      <span className="text-gray-500 font-medium">{review.date}</span>
+                                    </div>
+
+                                    {/* Review Content */}
+                                    <p className="text-gray-700 leading-relaxed text-[15px] font-medium">
+                                      {review.content}
+                                    </p>
+
+                                    {/* Admin Reply */}
+                                    {review.reply && (
+                                      <div className="mt-4 p-4 bg-gray-50 rounded-2xl border-l-4 border-[var(--primary)] space-y-0">
+                                        <div className="flex items-center gap-2 text-xs font-bold text-gray-900">
+                                          <div className="w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center text-white">
+                                            <ChefHat size={12} />
+                                          </div>
+                                          Phản hồi từ quán
+                                        </div>
+                                        <p className="text-gray-600 text-sm leading-relaxed italic">
+                                          "{review.reply}"
+                                        </p>
+                                      </div>
+                                    )}
+                                  </motion.div>
+                                );
+                              })}
 
                               {/* End of List Label - Always show if >= 3 items */}
                               {displayReviews.length >= 3 && (

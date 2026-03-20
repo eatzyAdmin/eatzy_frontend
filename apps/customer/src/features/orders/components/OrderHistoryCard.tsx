@@ -133,7 +133,7 @@ export default function OrderHistoryCard({ order, onClick }: { order: OrderRespo
         </div>
 
         {/* Info & Metrics */}
-        <div className="flex-1 flex flex-col justify-between md:flex-none md:block md:space-y-2 md:drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
+        <div className="space-y-2 md:space-y-3 md:drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
           {/* Top Block: Price & Name */}
           <div className="space-y-1">
             <div className="md:hidden text-gray-400 text-[9px] uppercase font-bold tracking-widest leading-none">Total Amount</div>
@@ -142,10 +142,10 @@ export default function OrderHistoryCard({ order, onClick }: { order: OrderRespo
               {formatVnd(order.totalAmount)}
             </h2>
           </div>
-          <div className="space-y-2 md:space-y-1">
-            <div className="space-y-0.5">
+          <div className="space-y-4 md:space-y-1">
+            <div className="space-y-0.5 mt-3 md:mt-0">
               <div className="flex items-center gap-1.5 w-fit">
-                <span className="text-[14px] md:text-base font-semibold md:font-bold text-gray-800 md:text-white/90 leading-none">
+                <span className="text-[14px] md:text-base font-bold md:font-bold text-gray-800 md:text-white/90 line-clamp-1 tracking-tight md:tracking-normal leading-tight md:leading-none">
                   {order.restaurant.name}
                 </span>
               </div>
@@ -154,12 +154,12 @@ export default function OrderHistoryCard({ order, onClick }: { order: OrderRespo
               <p className="md:hidden text-[11px] text-gray-500 font-medium line-clamp-2 italic tracking-tight">
                 {dishNamesStr}
               </p>
-
-              <p className="text-[9px] md:text-xs text-gray-400 md:text-white/50 font-medium flex items-start gap-1">
-                <MapPin className="w-2.5 h-2.5 mt-0.5 md:w-3 md:h-3 flex-shrink-0" />
-                <span className="line-clamp-2">{order.deliveryAddress}</span>
-              </p>
             </div>
+
+            <p className="mt-0 md:mt-3 text-[9px] md:text-xs text-gray-400 md:text-white/50 font-medium flex items-start gap-1">
+              <MapPin className="w-2.5 h-2.5 mt-0.5 md:w-3 md:h-3 flex-shrink-0" />
+              <span className="line-clamp-1 md:line-clamp-2">{order.deliveryAddress}</span>
+            </p>
           </div>
 
           {/* Bottom Block: Metrics & Date (Refactored) */}

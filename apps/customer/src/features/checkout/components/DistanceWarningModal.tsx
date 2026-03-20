@@ -9,6 +9,7 @@ interface DistanceWarningModalProps {
   onClose: () => void;
   maxDistance: number;
   currentDistance: number;
+  currentAddress?: string;
   onSelectLocation?: () => void;
 }
 
@@ -17,6 +18,7 @@ export default function DistanceWarningModal({
   onClose,
   maxDistance,
   currentDistance,
+  currentAddress,
   onSelectLocation,
 }: DistanceWarningModalProps) {
   const [mounted, setMounted] = useState(false);
@@ -84,13 +86,15 @@ export default function DistanceWarningModal({
                   <AlertTriangle size={32} className="text-orange-500" strokeWidth={2.5} />
                 </div>
 
-                <p className="text-gray-500 text-[15px] font-medium leading-relaxed mb-8">
-                  Vì lý do phục vụ trải nghiệm món ăn tốt nhất và đảm bảo chất lượng giao hàng, Eatzy giới hạn bán kính giao hàng tối đa là <span className="font-bold md:font-black text-lg md:text-xl text-[#154D1B] ml-0.5 ">{maxDistance}km</span>.
-                  <br />
-                  <span className="block mt-2 text-sm">
-                    Vị trí của bạn đang cách quán <span className="font-bold text-orange-600 px-1.5 py-0.5 bg-orange-50 rounded-lg">{currentDistance.toFixed(1)}km</span>.
-                  </span>
-                </p>
+                <div className="mb-8">
+                  <p className="text-gray-500 text-[15px] font-medium leading-relaxed">
+                    Vì lý do phục vụ trải nghiệm món ăn tốt nhất và đảm bảo chất lượng giao hàng, Eatzy giới hạn bán kính giao hàng tối đa là <span className="font-bold md:font-black text-lg md:text-xl text-[#154D1B] ml-0.5 ">{maxDistance}km</span>.
+                  </p>
+                  <div className="mt-2 text-sm text-gray-500 font-medium">
+                    Vị trí hiện tại của bạn tại <span className="text-[#1A1A1A] font-bold">"{currentAddress?.split(',').map(s => s.trim()).filter(s => !/^\d{5}$/.test(s)).slice(0, 3).join(', ')}..." </span>
+                    đang cách quán <span className="font-bold text-orange-600 px-1.5 py-0.5 bg-orange-50 rounded-lg">{currentDistance.toFixed(1)}km</span>.
+                  </div>
+                </div>
 
                 {/* Bottom Footer Section - Matching Floating Cart Footer */}
                 <div className="bg-[#E4F8D5] rounded-[28px] p-1">
@@ -110,16 +114,18 @@ export default function DistanceWarningModal({
                       </div>
                     </motion.button>
 
-                    {/* Desktop: Got it */}
+                    {/* Desktop: Select Location */}
                     <motion.button
                       whileTap={{ scale: 0.98 }}
-                      onClick={onClose}
-                      className="hidden md:flex group/btn relative w-full h-[60px] bg-[var(--primary)] hover:bg-[#A9E23D] text-[#154D1B] rounded-[24px] items-center justify-center px-6 shadow-[0_12px_30px_rgba(0,0,0,0.1)] transition-all duration-300"
+                      onClick={onSelectLocation || onClose}
+                      className="hidden md:flex group/btn relative w-full h-[60px] bg-[var(--primary)] hover:bg-[#A9E23D] text-[#154D1B] rounded-[24px] items-center justify-center px-6 shadow-[0_12px_30px_rgba(0,0,0,0.1)] transition-all duration-300 overflow-hidden"
                     >
                       <div className="flex items-center gap-3 relative z-10 transition-all">
+                        <MapPin size={22} strokeWidth={2.5} />
                         <span className="text-xl font-anton font-black tracking-tight uppercase">
-                          Đã hiểu
+                          Chọn điểm giao khác
                         </span>
+                        <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1.5 transition-transform duration-300" strokeWidth={3} />
                       </div>
                     </motion.button>
                   </div>

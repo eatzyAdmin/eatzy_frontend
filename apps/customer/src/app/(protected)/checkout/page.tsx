@@ -13,7 +13,7 @@ import NotesInput from "@/features/checkout/components/NotesInput";
 import PaymentMethodSelector from "@/features/checkout/components/PaymentMethodSelector";
 import PromoVoucherCard from "@/features/checkout/components/PromoVoucherCard";
 import { AnimatePresence, motion } from "@repo/ui/motion";
-import { Truck, Tag, ShoppingBag, ChevronLeft, Store, ChevronUp, ChevronDown } from "@repo/ui/icons";
+import { Truck, Tag, ShoppingBag, ChevronLeft, Store, ChevronUp, ChevronDown, ChevronRight } from "@repo/ui/icons";
 import type { CreateOrderRequest } from "@repo/types";
 const CheckoutSummary = dynamic(() => import("@/features/checkout/components/CheckoutSummary"), { ssr: false });
 const RightSidebar = dynamic(() => import("@/features/checkout/components/RightSidebar"), { ssr: false });
@@ -388,9 +388,18 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-1 md:grid-cols-10 gap-6 items-stretch">
                     <section className="col-span-1 md:col-span-6" data-id="promo">
                       <div className="bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 h-full flex flex-col">
-                        <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30">
-                          <Tag className="w-5 h-5 text-gray-400" />
-                          <h4 className="font-bold text-[#1A1A1A]">Promo & Vouchers</h4>
+                        <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
+                          <div className="flex items-center gap-2">
+                            <Tag className="w-5 h-5 text-gray-400" />
+                            <h4 className="font-bold text-[#1A1A1A]">Promo & Vouchers</h4>
+                          </div>
+                          <button
+                            onClick={() => setIsPromoModalOpen(true)}
+                            className="flex items-center gap-0.5 text-lime-600 font-bold text-[12px] hover:text-lime-700 transition-colors"
+                          >
+                            Xem tất cả
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
                         </div>
 
                         <div className="p-2 md:p-4 flex-1 relative group/promo">
@@ -534,6 +543,7 @@ export default function CheckoutPage() {
               restaurantAvatar={restaurant?.avatarUrl}
               totalPayable={totalPayable}
               onAddressChange={(addr) => setAddress(addr)}
+              onOpenLocationPicker={() => setIsLocationModalOpen(true)}
               onPlaceOrder={handlePlaceOrder}
               onRestrictedClick={handleRestrictedAction}
               isCreating={isCreating || isLoadingFee}
@@ -597,6 +607,7 @@ export default function CheckoutPage() {
         onClose={() => setShowWarning(false)}
         maxDistance={maxDistance}
         currentDistance={distance}
+        currentAddress={address}
         onSelectLocation={() => {
           setShowWarning(false);
           setIsLocationModalOpen(true);

@@ -20,7 +20,7 @@ export default function CheckoutSummary({
 }) {
   return (
     <div className="bg-white rounded-[32px] md:rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 h-full flex flex-col">
-      <div className="px-4 md:px-6 py-5 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30">
+      <div className="px-4 md:px-6 py-5 flex items-center gap-2">
         <Banknote className="w-5 h-5 text-gray-400" />
         <h4 className="font-bold text-[#1A1A1A]">Payment Details</h4>
       </div>

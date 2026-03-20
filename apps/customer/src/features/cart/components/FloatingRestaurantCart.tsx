@@ -90,24 +90,53 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
             layoutId={layoutId}
             id="local-cart-fab"
             onClick={() => setIsOpen(true)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={isMobile ? { y: 100, opacity: 0 } : { opacity: 0 }}
+            animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1 }}
+            exit={isMobile ? { y: 100, opacity: 0 } : { opacity: 0 }}
             transition={{ type: "spring", stiffness: 120, damping: 18 }}
-            className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50 bg-[var(--primary)] text-[#1A1A1A] rounded-full shadow-2xl p-2 pr-4 md:p-4 md:pr-6 flex items-center gap-2 md:gap-3 cursor-pointer hover:brightness-110 active:scale-95"
+            whileTap={{ scale: 0.96 }}
+            className={isMobile
+              ? "fixed bottom-0 left-0 right-0 z-50 bg-[var(--primary)] text-[#1A1A1A] rounded-t-[32px] shadow-[0_-10px_20px_rgba(0,0,0,0.06)] px-4 py-2.5 flex items-center justify-between gap-3 h-[68px] cursor-pointer"
+              : "fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50 bg-[var(--primary)] text-[#1A1A1A] rounded-full shadow-2xl p-2 pr-4 md:p-4 md:pr-6 flex items-center gap-2 md:gap-3 cursor-pointer hover:brightness-110"
+            }
           >
-            <div className="relative">
-              <div className="w-9 h-9 md:w-12 md:h-12 rounded-full bg-black/10 flex items-center justify-center">
-                <ShoppingBag className="w-4 h-4 md:w-6 md:h-6" />
-              </div>
-              <span className="absolute -top-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full bg-white text-[#1A1A1A] font-bold text-[10px] md:text-xs flex items-center justify-center border-2 border-[var(--primary)] shadow-sm">
-                {totalItems}
-              </span>
-            </div>
-            <div className="flex flex-col items-start mr-1 md:mr-2">
-              <span className="hidden md:block text-xs font-semibold opacity-80 uppercase tracking-wide">Giỏ hàng</span>
-              <span className="font-bold text-sm md:text-lg leading-none">{formatVnd(totalPrice)}</span>
-            </div>
+            {isMobile ? (
+              <>
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <div className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center">
+                      <ShoppingBag className="w-5 h-5" />
+                    </div>
+                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white text-[#154D1B] font-bold text-[10px] flex items-center justify-center border-2 border-[var(--primary)] shadow-sm">
+                      {totalItems}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-start leading-tight max-w-[140px] sm:max-w-none">
+                    <span className="font-anton font-bold text-lg leading-none pt-0.5">{formatVnd(totalPrice)}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 bg-black/10 px-4 py-2.5 rounded-2xl">
+                  <span className="text-[13px] font-anton font-bold uppercase tracking-tight">Chi tiết</span>
+                  <ChevronRight className="w-4 h-4" strokeWidth={3} />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="relative">
+                  <div className="w-9 h-9 md:w-12 md:h-12 rounded-full bg-black/10 flex items-center justify-center">
+                    <ShoppingBag className="w-4 h-4 md:w-6 md:h-6" />
+                  </div>
+                  <span className="absolute -top-1 -right-1 w-5 h-5 md:w-6 md:h-6 rounded-full bg-white text-[#1A1A1A] font-bold text-[10px] md:text-xs flex items-center justify-center border-2 border-[var(--primary)] shadow-sm">
+                    {totalItems}
+                  </span>
+                </div>
+                <div className="flex flex-col items-start mr-1 md:mr-2">
+                  <span className="hidden md:block text-xs font-semibold opacity-80 uppercase tracking-wide">Giỏ hàng</span>
+                  <span className="font-bold text-sm md:text-lg leading-none">{formatVnd(totalPrice)}</span>
+                </div>
+              </>
+            )}
           </motion.button>
         )}
       </AnimatePresence>

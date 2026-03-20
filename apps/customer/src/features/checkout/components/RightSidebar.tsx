@@ -14,6 +14,7 @@ interface RightSidebarProps {
   restaurantAvatar?: string | null;
   totalPayable: number;
   onAddressChange?: (addr: string) => void;
+  onOpenLocationPicker?: () => void;
   onPlaceOrder?: () => Promise<void>;
   onRestrictedClick?: () => void;
   isCreating?: boolean;
@@ -28,6 +29,7 @@ export default function RightSidebar({
   restaurantAvatar,
   totalPayable,
   onAddressChange,
+  onOpenLocationPicker,
   onPlaceOrder,
   onRestrictedClick,
   isCreating = false,
@@ -91,7 +93,10 @@ export default function RightSidebar({
       </div>
 
       <div className="hidden md:flex flex-1 min-h-0 mb-3">
-        <CheckoutMapSection onAddressChange={onAddressChange}>
+        <CheckoutMapSection
+          onAddressChange={onAddressChange}
+          onOpenLocationPicker={onOpenLocationPicker}
+        >
           {children}
         </CheckoutMapSection>
       </div>

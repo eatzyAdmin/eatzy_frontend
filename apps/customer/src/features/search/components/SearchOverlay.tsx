@@ -264,24 +264,30 @@ export default function SearchOverlay({
                   transition={{ duration: 0.5, type: 'spring', damping: 20 }}
                   className="pointer-events-auto backdrop-blur-xl text-black rounded-[32px] border border-white/40 px-3 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center gap-3"
                 >
-                  <button
+                  <motion.button
+                    whileTap={{ scale: 0.94 }}
+                    transition={{ type: "spring", stiffness: 180, damping: 10 }}
                     onClick={() => setFilterOpen(true)}
-                    className="flex flex-col items-center justify-center w-[72px] h-14 rounded-2xl text-gray-500 hover:bg-gray-200/50 hover:text-gray-900 transition-all duration-300 gap-1"
+                    className="flex flex-col items-center justify-center w-[72px] h-14 rounded-2xl text-gray-500 gap-1 outline-none"
                   >
                     <Filter className="w-[22px] h-[22px]" strokeWidth={2.5} />
                     <span className="text-[11px] font-bold">Bộ lọc</span>
-                  </button>
+                  </motion.button>
 
-                  <button
+                  <motion.button
+                    whileTap={{ scale: 0.94 }}
+                    transition={{ type: "spring", stiffness: 180, damping: 10 }}
                     onClick={handleReturnHome}
-                    className="flex items-center justify-center w-14 h-14 rounded-full bg-black text-white hover:scale-105 shadow-xl transition-all duration-300 mx-1"
+                    className="flex items-center justify-center w-14 h-14 rounded-full bg-black text-white hover:scale-105 shadow-xl mx-1 outline-none"
                   >
                     <Home className="w-6 h-6" strokeWidth={2.5} />
-                  </button>
+                  </motion.button>
 
-                  <button
+                  <motion.button
+                    whileTap={{ scale: 0.94 }}
+                    transition={{ type: "spring", stiffness: 180, damping: 10 }}
                     onClick={() => window.dispatchEvent(new CustomEvent('openCart'))}
-                    className="flex flex-col items-center justify-center w-[72px] h-14 rounded-2xl text-gray-500 hover:bg-gray-200/50 hover:text-gray-900 transition-all duration-300 gap-1 relative"
+                    className="flex flex-col items-center justify-center w-[72px] h-14 rounded-2xl text-gray-500 gap-1 relative outline-none"
                   >
                     <div className="relative">
                       <ShoppingCart className="w-[22px] h-[22px]" strokeWidth={2.5} />
@@ -292,7 +298,7 @@ export default function SearchOverlay({
                       )}
                     </div>
                     <span className="text-[11px] font-bold">Giỏ hàng</span>
-                  </button>
+                  </motion.button>
                 </motion.div>
               </div>
             </>

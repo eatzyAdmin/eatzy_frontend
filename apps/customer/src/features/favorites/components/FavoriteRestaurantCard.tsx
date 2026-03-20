@@ -110,13 +110,13 @@ export default function FavoriteRestaurantCard({
         <div className="space-y-2 md:space-y-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
           {/* Name & Address */}
           <div className="space-y-0.5 md:space-y-1">
-            <h2 className="text-lg md:text-2xl font-anton font-semibold text-white tracking-wide uppercase line-clamp-2 leading-tight">
+            <h2 className="text-lg md:text-2xl font-anton font-semibold text-white uppercase truncate leading-[1.4] pt-2 md:pb-0.5 -mt-2">
               {restaurant.name}
             </h2>
             {restaurant.address && (
               <p className="text-[10px] md:text-xs text-white/50 font-medium line-clamp-1 flex items-center gap-1">
                 <MapPin className="w-2.5 h-2.5 md:w-3 md:h-3 flex-shrink-0" />
-                {restaurant.address}
+                <span className="line-clamp-1">{restaurant.address}</span>
               </p>
             )}
           </div>

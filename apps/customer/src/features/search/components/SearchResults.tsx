@@ -15,6 +15,8 @@ import MagazineLayout8 from './layouts/MagazineLayout8';
 import MagazineLayout9 from './layouts/MagazineLayout9';
 import MagazineLayout10 from './layouts/MagazineLayout10';
 import MagazineLayout11 from './layouts/MagazineLayout11';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Search, Sparkles } from '@repo/ui/icons';
 
 interface Props {
   results: RestaurantWithMenu[];
@@ -31,6 +33,7 @@ interface Props {
   hasMore?: boolean;
   onLoadMore?: () => void;
   totalResults?: number;
+  onShowRecommendations?: () => void;
 }
 
 export default function SearchResults({
@@ -42,6 +45,7 @@ export default function SearchResults({
   hasMore = false,
   onLoadMore,
   totalResults,
+  onShowRecommendations,
 }: Props) {
   const { setIsVisible } = useBottomNav();
 
@@ -122,33 +126,16 @@ export default function SearchResults({
 
   const displayCount = totalResults || filteredResults.length;
 
-  // Empty state component
-  const EmptyState = (
-    <div className="bg-[#fafafa] rounded-[40px] border border-gray-100 p-8 md:p-20 overflow-hidden relative group">
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-amber-500/5 to-transparent pointer-events-none" />
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div>
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-1 bg-black" />
-            <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Search Advisory</span>
-          </div>
-          <h2 className="text-5xl md:text-8xl font-anton font-bold text-black uppercase tracking-tighter leading-none mb-8">
-            NO RESULTS<br />FOUND
-          </h2>
-          <p className="text-xl md:text-2xl text-gray-400 font-medium italic leading-relaxed">
-            We couldn&apos;t match your inquiry. <br />
-            Explore our curated suggestions or refine your terms.
-          </p>
-        </div>
-        <div className="bg-black text-white p-10 rounded-[40px] shadow-2xl transform group-hover:scale-[1.02] transition-transform">
-          <div className="text-[10px] font-anton font-bold text-amber-400 uppercase tracking-[0.4em] mb-6">
-            Pro Tip
-          </div>
-          <p className="text-lg font-medium leading-relaxed italic text-gray-300">
-            Consider exploring trending cuisines or seasonal specialties for an alternative dining experience.
-          </p>
-        </div>
-      </div>
+  const EmptyResultState = (
+    <div className="py-0">
+      <EmptyState
+        icon={Search}
+        title="Không tìm thấy kết quả"
+        description={`Rất tiếc, chúng tôi không tìm thấy kết quả nào phù hợp với "${searchQuery}". Hãy thử thay đổi từ khóa hoặc xem các gợi ý dành riêng cho bạn.`}
+        buttonText="Xem gợi ý"
+        buttonIcon={Sparkles}
+        onButtonClick={onShowRecommendations}
+      />
     </div>
   );
 
@@ -199,7 +186,7 @@ export default function SearchResults({
           initialShimmerCount={3}
           loadMoreShimmerCount={2}
           endMessage={`Đã hiển thị tất cả ${displayCount} kết quả`}
-          EmptyComponent={EmptyState}
+          EmptyComponent={EmptyResultState}
         >
           {filteredResults.map((item) => renderLayout(item))}
         </InfiniteScrollContainer>

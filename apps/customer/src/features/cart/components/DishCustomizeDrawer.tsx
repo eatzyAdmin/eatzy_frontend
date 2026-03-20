@@ -379,7 +379,7 @@ export default function DishCustomizeDrawer({
                           data-id={g.id}
                           className="bg-white rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 scroll-mt-36"
                         >
-                          <div className="px-6 py-4 md:py-5 pb-0 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
+                          <div className="px-6 py-4 md:py-5 flex items-center justify-between">
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-lime-100 flex items-center justify-center text-lime-600 flex-shrink-0">
                                 <ChefHat className="w-5 h-5 md:w-6 md:h-6" />
@@ -476,7 +476,7 @@ export default function DishCustomizeDrawer({
                             })()}
                           </div>
 
-                          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="p-4 pt-0 md:pt-4 grid grid-cols-1 md:grid-cols-2 gap-1.5 md:gap-3">
                             {(g.options ?? []).map((opt) => {
                               const set = selectedAddonIds[g.id] ?? new Set<string>();
                               const active = set.has(opt.id);

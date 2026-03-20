@@ -1,7 +1,6 @@
 "use client";
-
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { X, Tag, Truck, Loader2 } from "@repo/ui/icons";
+import { X, Tag, Truck, Loader2, CheckCircle } from "@repo/ui/icons";
 import type { Voucher } from "@repo/types";
 import PromoVoucherCard from "./PromoVoucherCard";
 import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
@@ -62,24 +61,26 @@ export default function PromoSelectionModal({
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-white w-full max-w-lg h-[90vh] md:h-auto md:max-h-[80vh] rounded-t-[40px] md:rounded-[32px] overflow-hidden flex flex-col pointer-events-auto"
+              className="relative bg-white w-full max-w-lg h-[90vh] md:h-auto md:max-h-[90vh] rounded-t-[40px] md:rounded-[40px] overflow-hidden flex flex-col pointer-events-auto"
             >
               {/* Header */}
-              <div className="px-6 py-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-20">
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white z-20">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[#1A1A1A] text-white flex items-center justify-center shadow-lg shadow-black/10">
+                  <div className="hidden md:flex w-12 h-12 rounded-2xl bg-[#1A1A1A] text-white items-center justify-center shadow-lg shadow-black/10">
                     <Tag className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-anton font-bold text-[#1A1A1A] tracking-tight uppercase">VOUCHER SYSTEM</h3>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Select your best offers</p>
+                    <h2 className="text-2xl font-bold font-anton text-[#1A1A1A] uppercase leading-none">VOUCHER SYSTEM</h2>
+                    <p className="text-gray-500 text-[10px] font-bold uppercase mt-2">
+                      Select Offers
+                    </p>
                   </div>
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 transition-all active:scale-95"
+                  className="p-4 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
                 >
-                  <X size={22} />
+                  <X className="w-5 h-5 text-gray-700" />
                 </button>
               </div>
 
@@ -168,12 +169,13 @@ export default function PromoSelectionModal({
               </div>
 
               {/* Footer */}
-              <div className="p-5 border-t border-gray-50 bg-gray-50/30">
+              <div className="p-3 md:p-4 bg-gray-50/30">
                 <button
                   onClick={onClose}
-                  className="w-full h-14 rounded-[20px] bg-[#1A1A1A] text-white font-bold text-lg hover:bg-black transition-all shadow-lg shadow-black/10"
+                  className="flex items-center justify-center gap-2 w-full h-14 rounded-[20px] md:rounded-[24px] bg-[#1A1A1A] text-white font-bold text-lg hover:bg-black transition-all shadow-lg shadow-black/10"
                 >
-                  Xong
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Done</span>
                 </button>
               </div>
             </div>

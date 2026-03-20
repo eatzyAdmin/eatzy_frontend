@@ -1,9 +1,10 @@
 'use client';
 
 import { motion } from '@repo/ui/motion';
-import { Menu, BookHeart, Search, ShoppingCart, Home } from '@repo/ui/icons';
+import { Menu, BookHeart, Search, ShoppingCart, Home, Truck } from '@repo/ui/icons';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/features/cart/hooks/useCart';
+import { useCurrentOrders } from '@/features/orders/hooks/useCurrentOrders';
 import dynamic from 'next/dynamic';
 
 // Dynamically import DeliveryLocationButton to avoid SSR issues with zustand persist
@@ -33,7 +34,9 @@ export default function HomeHeader({
   onLogoClick,
   showHomeIcon = false,
 }: HomeHeaderProps) {
-  const { totalItems } = useCart();
+  const { totalItems, carts } = useCart();
+  const { activeOrdersCount } = useCurrentOrders();
+  const cartCount = carts.length;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-3 md:p-6">
@@ -123,10 +126,24 @@ export default function HomeHeader({
               : 'bg-white/10 border-white/20 hover:bg-white/20'
               }`}
           >
-            <BookHeart className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} strokeWidth={2.4} />
+            <div className="relative">
+              <Truck className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} strokeWidth={2.4} />
+
+            </div>
             <span className={`text-md font-semibold font-anton uppercase ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
               Current Orders
             </span>
+            {activeOrdersCount > 0 && (
+              <motion.span
+                key={`orders-badge-${activeOrdersCount}`}
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                className="absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1 rounded-full bg-[var(--primary)] text-[12px] leading-[20px] text-black font-black border border-white/60 flex items-center justify-center shadow-sm tabular-nums"
+              >
+                {activeOrdersCount}
+              </motion.span>
+            )}
           </motion.button>
 
           {/* Search - hide when in search mode */}
@@ -169,7 +186,7 @@ export default function HomeHeader({
               className={`relative rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
                 ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
                 : 'bg-white/10 border-white/20 hover:bg-white/20'
-                } ${totalItems > 0 ? 'px-3 w-auto h-10 md:h-10 gap-2' : 'w-10 h-10 md:w-10 md:h-10'}`}
+                } ${cartCount > 0 ? 'px-3 w-auto h-10 md:h-10 gap-2' : 'w-10 h-10 md:w-10 md:h-10'}`}
             >
               <CartButtonContent hideSearchIcon={hideSearchIcon} />
             </motion.button>
@@ -181,26 +198,27 @@ export default function HomeHeader({
 }
 
 function CartButtonContent({ hideSearchIcon }: { hideSearchIcon: boolean }) {
-  const { totalItems, totalPrice } = useCart();
+  const { totalItems, totalPrice, carts } = useCart();
+  const cartCount = carts.length;
   const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
     setPulse(true);
     const t = setTimeout(() => setPulse(false), 300);
     return () => clearTimeout(t);
-  }, [totalItems]);
+  }, [cartCount]);
 
   return (
     <>
       <motion.div animate={pulse ? { scale: [1, 1.15, 1] } : {}} transition={{ duration: 0.3 }} className="relative flex items-center">
         <ShoppingCart strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
-        {totalItems > 0 && (
-          <motion.span key={totalItems} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 300 }} className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--primary)] text-[10px] leading-[18px] text-black font-bold border border-white/60 flex items-center justify-center">
-            {totalItems}
+        {cartCount > 0 && (
+          <motion.span key={cartCount} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 300 }} className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--primary)] text-[10px] leading-[18px] text-black font-bold border border-white/60 flex items-center justify-center">
+            {cartCount}
           </motion.span>
         )}
       </motion.div>
-      {totalItems > 0 && (
+      {cartCount > 0 && (
         <div className={`hidden md:flex items-center text-sm font-bold ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`}>
           {new Intl.NumberFormat('vi-VN').format(totalPrice)} đ
         </div>
