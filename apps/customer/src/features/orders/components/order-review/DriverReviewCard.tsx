@@ -69,6 +69,8 @@ export function DriverReviewCard({
               className="object-cover opacity-60 grayscale contrast-125 scale-110 group-hover/header:scale-100 transition-transform duration-[4s] ease-out"
             />
 
+            <div className="absolute inset-0 backdrop-blur-sm bg-black/5 z-0" />
+
             <div className="absolute top-0 right-0 w-48 h-48 bg-lime-500/15 rounded-full -mr-24 -mt-24 blur-3xl" />
 
             <div className="relative z-10 h-full p-5 md:p-8 flex items-center gap-4 md:gap-6">

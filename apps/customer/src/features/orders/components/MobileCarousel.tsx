@@ -26,7 +26,7 @@ export function MobileCarousel({ children, singleFocus = false }: MobileCarousel
         {children.map((child, idx) => (
           <div
             key={idx}
-            className={`snap-center shrink-0 flex items-stretch justify-center py-4 ${singleFocus ? "w-full" : "w-[calc(100vw-48px)]"
+            className={`snap-center shrink-0 flex items-stretch justify-center py-4 pb-2 ${singleFocus ? "w-full" : "w-[calc(100vw-48px)]"
               }`}
           >
             <div className="w-full">

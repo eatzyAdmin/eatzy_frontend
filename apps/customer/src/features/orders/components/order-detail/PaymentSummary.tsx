@@ -3,8 +3,8 @@ import type { OrderResponse } from "@repo/types";
 
 export function PaymentSummary({ order }: { order: OrderResponse }) {
   return (
-    <div className="bg-white rounded-[40px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100/50 shrink-0">
-      <div className="px-6 pt-6 ob-2 border-b border-gray-50 flex items-center gap-2.5 bg-gray-50/30">
+    <div className="bg-white rounded-[28px] md:rounded-[40px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100/50 shrink-0">
+      <div className="px-6 pt-4 md:pt-6 ob-2 flex items-center gap-2.5">
         <FileText className="w-5 h-5 text-gray-400" />
         <h4 className="font-bold text-[#1A1A1A]">Thông tin thanh toán</h4>
       </div>

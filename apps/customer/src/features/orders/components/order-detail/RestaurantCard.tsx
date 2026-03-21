@@ -39,7 +39,7 @@ export function RestaurantCard({ restaurant }: { restaurant: any }) {
 
         <div className="space-y-1.5">
           <div className="flex flex-col">
-            <span className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em] mb-0.5">Cửa hàng</span>
+            <span className="hidden md:block text-[9px] font-black text-white/50 uppercase tracking-[0.2em] mb-0.5">Cửa hàng</span>
             <h3 className="font-anton text-2xl text-white uppercase leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] line-clamp-1">{restaurant.name}</h3>
           </div>
           <div className="flex items-center gap-2 pt-1 group/visit">

@@ -91,14 +91,13 @@ export default function OrderDetailDrawer({
             {/* Header */}
             <div className="bg-white px-6 py-5 md:px-8 md:py-6 md:border-b md:border-gray-100 flex items-center justify-between md:shadow-sm shrink-0 z-20">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-lime-50 border border-lime-100 flex items-center justify-center shrink-0">
+                <div className="hidden md:flex w-12 h-12 rounded-2xl bg-lime-50 border border-lime-100 items-center justify-center shrink-0">
                   <ClipboardList className="w-6 h-6 text-lime-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl md:text-2xl font-anton font-bold text-[#1A1A1A] leading-tight uppercase">ORDER DETAILS</h3>
-                  <div className="text-sm font-medium text-gray-500 mt-0.5 flex items-center gap-2">
-                    <span className="opacity-60 uppercase tracking-widest text-[10px] font-black">Order ID:</span>
-                    <span className="font-bold text-lime-600">#{order.id}</span>
+                  <h3 className="text-2xl md:text-2xl font-anton font-bold text-[#1A1A1A] leading-tight uppercase">ORDER DETAILS</h3>
+                  <div className="text-gray-500 text-xs font-semibold mt-0.5 flex items-center gap-2">
+                    <span>Order ID: #{order.id}</span>
                   </div>
                 </div>
               </div>
@@ -184,7 +183,7 @@ export default function OrderDetailDrawer({
                       </div>
 
                       {/* Mobile Layout - Unified Scroll (Requested Order) */}
-                      <div className="md:hidden flex-1 overflow-y-auto no-scrollbar flex flex-col gap-4 p-3">
+                      <div className="md:hidden flex-1 overflow-y-auto no-scrollbar flex flex-col gap-3 md:gap-4 p-3">
                         {isCancelled && <CancellationAlert reason={order.cancellationReason} />}
 
                         {/* 1. Swipeable Carousel for Restaurant & Driver */}

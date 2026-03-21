@@ -29,7 +29,12 @@ export function useHomePage() {
   const [filter, setFilter] = useState('All recipes');
 
   // 1. Get Categories
-  const { data: categoriesData, isLoading: isCategoriesLoading } = useRestaurantTypes();
+  const {
+    data: categoriesData,
+    isLoading: isCategoriesLoading,
+    isError: isCategoriesError,
+    refetch: refetchCategories
+  } = useRestaurantTypes();
 
   const categories = categoriesData || [];
   const activeCategory = categories[activeCategoryIndex];
@@ -189,6 +194,8 @@ export function useHomePage() {
 
     // Status
     isCategoriesLoading,
+    isCategoriesError,
+    refetchCategories,
     isRestaurantsLoading,
     isFetchingNextPage,
     hasNextPage: hasNextPage || false,

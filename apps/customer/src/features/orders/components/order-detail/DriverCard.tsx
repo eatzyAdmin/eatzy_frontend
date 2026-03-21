@@ -36,7 +36,7 @@ export function DriverCard({ driver }: { driver: any }) {
                   href={`tel:${driver.phoneNumber}`}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  className="w-9 h-9 rounded-full bg-lime-50 border border-lime-100 flex items-center justify-center text-lime-600 shadow-sm"
+                  className="hidden md:flex w-9 h-9 rounded-full bg-lime-50 border border-lime-100 items-center justify-center text-lime-600 shadow-sm"
                 >
                   <Phone className="w-4 h-4" />
                 </motion.a>
@@ -45,20 +45,23 @@ export function DriverCard({ driver }: { driver: any }) {
           </div>
         </div>
 
-        <div className="w-[38%] flex flex-col justify-between py-1">
-          <div className="flex flex-col">
+        <div className="w-[38%] flex flex-col justify-center md:justify-between py-1">
+          <div className="hidden md:flex flex-col">
             <span className="font-anton text-[22px] text-[#1A1A1A] leading-none mb-0.5">{driver.completedTrips || "0"}</span>
             <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Đánh giá</span>
           </div>
-          <div className="h-px w-full bg-gray-100 my-1.5" />
+          <div className="hidden md:block h-px w-full bg-gray-100 my-1.5" />
           <div className="flex flex-col">
             <div className="flex items-center gap-1 leading-none mb-0.5">
               <span className="font-anton text-[22px] text-[#1A1A1A]">{parseFloat(driver.averageRating || "5.0").toFixed(2)}</span>
               <Star className="w-3.5 h-3.5 fill-[#1A1A1A] text-[#1A1A1A] -mt-0.5" />
             </div>
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Xếp hạng</span>
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">
+              <span className="hidden md:inline">Xếp hạng</span>
+              <span className="inline md:hidden">{driver.completedTrips || "0"} Đánh giá</span>
+            </span>
           </div>
-          <div className="h-px w-full bg-gray-100 my-1.5" />
+          <div className="h-px w-full bg-gray-100 my-3 md:my-1.5" />
           <div className="flex flex-col leading-tight">
             <span className="font-anton text-[18px] text-[#1A1A1A] leading-none tracking-tight">{driver.vehicleLicensePlate || "---"}</span>
             <span className="text-[9px] text-gray-500 font-bold truncate max-w-full">

@@ -282,7 +282,7 @@ export default function TransactionDetailDrawer({
                           <OrderDetailDrawerShimmer />
                         </div>
                       ) : order ? (
-                        <div className="flex flex-col gap-4 p-3 bg-[#F8F9FA]">
+                        <div className="flex flex-col gap-3 md:gap-4 p-3 bg-[#F8F9FA]">
                           {order.orderStatus === "CANCELLED" && <CancellationAlert reason={order.cancellationReason} />}
 
                           <MobileCarousel singleFocus>
