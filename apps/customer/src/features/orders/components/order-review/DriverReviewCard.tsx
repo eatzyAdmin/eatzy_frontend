@@ -53,13 +53,13 @@ export function DriverReviewCard({
         exit={{ opacity: 0, y: -20 }}
         className="h-full flex-1"
       >
-        <div className={`${isReviewed ? "bg-white/95" : "bg-white/40"} backdrop-blur-xl rounded-[40px] md:rounded-[44px] shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-full overflow-hidden relative group`} style={{ transform: 'translateZ(0)' }}>
+        <div className={`${isReviewed ? "bg-white/95" : "bg-white/40"} backdrop-blur-xl rounded-[40px] md:rounded-[48px] shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-full overflow-hidden relative group`} style={{ transform: 'translateZ(0)' }}>
           {/* subtle pattern overlay */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none grayscale mix-blend-multiply">
             <ImageWithFallback src="" alt="Texture" placeholderMode="horizontal" fill className="object-cover" />
           </div>
 
-          <div className="relative h-36 md:h-52 shrink-0 overflow-hidden bg-gray-900 group/header">
+          <div className="relative h-36 md:h-52 shrink-0 overflow-hidden bg-gray-900 group/header rounded-b-[40px] md:rounded-b-[48px]">
             {/* Background Texture Image - Brighter and clearer */}
             <ImageWithFallback
               src=""
@@ -69,7 +69,7 @@ export function DriverReviewCard({
               className="object-cover opacity-60 grayscale contrast-125 scale-110 group-hover/header:scale-100 transition-transform duration-[4s] ease-out"
             />
 
-            <div className="absolute inset-0 backdrop-blur-sm bg-black/5 z-0" />
+            <div className="absolute inset-0 backdrop-blur-sm bg-black/5 z-0 rounded-b-[40px] md:rounded-b-[48px]" />
 
             <div className="absolute top-0 right-0 w-48 h-48 bg-lime-500/15 rounded-full -mr-24 -mt-24 blur-3xl" />
 
@@ -115,10 +115,10 @@ export function DriverReviewCard({
             </div>
           </div>
 
-          <div className="p-4 md:p-8 flex flex-col relative z-20">
+          <div className="flex-1 bg-white p-4 md:p-8 flex flex-col relative z-20 rounded-b-[40px] md:rounded-b-[48px]">
             {!isReviewed ? (
               <>
-                <div className="mb-8">
+                <div className="mb-4 md:mb-8">
                   <h4 className="font-anton text-lg md:text-2xl text-black uppercase leading-tight mb-2">Was he friendly?</h4>
                   <p className="text-[11px] text-gray-400 font-medium italic">Your rating ensures high-quality logistical standards.</p>
                 </div>
@@ -145,7 +145,7 @@ export function DriverReviewCard({
                   ))}
                 </div>
 
-                <div className="relative mb-4 md:mb-8">
+                <div className="relative mb-3 md:mb-8">
                   <textarea
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
@@ -167,7 +167,7 @@ export function DriverReviewCard({
                 </motion.button>
               </>
             ) : (
-              <div className="flex flex-col h-auto relative">
+              <div className="flex-1 flex flex-col relative">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-lime-500/10 rounded-full -mr-16 -mt-16 blur-3xl opacity-50" />
 
                 <div className="flex items-center gap-3 mb-10">
@@ -195,7 +195,7 @@ export function DriverReviewCard({
                   </div>
                 </div>
 
-                <div className="relative flex items-center justify-center text-center px-4 py-4 md:py-6">
+                <div className="flex-1 relative flex items-center justify-center text-center px-4 py-4 md:py-6">
                   <Quote className="w-12 h-12 text-black/5 absolute top-0 left-0 -translate-x-4 -translate-y-4" />
                   <p className="text-black text-base md:text-lg font-medium leading-relaxed relative z-10 font-serif italic max-w-sm">
                     &quot;{comment || "Prompt logistical delivery. Exceptional service."}&quot;

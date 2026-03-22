@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { ArrowLeft, Star, Heart, CheckCircle2, ChevronRight, Store } from "@repo/ui/icons";
+import { ArrowLeft, Star, Heart, CheckCircle2, ChevronRight, ChevronLeft, Store, Truck } from "@repo/ui/icons";
 import { useOrderDetail } from "@/features/orders/hooks/useOrderDetail";
 import { useReview } from "@/features/orders/hooks/useReview";
 import { RestaurantReviewCard } from "@/features/orders/components/order-review/RestaurantReviewCard";
 import { DriverReviewCard } from "@/features/orders/components/order-review/DriverReviewCard";
+import { RestaurantReviewShimmer } from "@/features/orders/components/order-review/RestaurantReviewShimmer";
+import { DriverReviewShimmer } from "@/features/orders/components/order-review/DriverReviewShimmer";
 import { OrderReviewTabShimmer } from "@repo/ui";
 import { useLoading } from "@repo/ui";
 
@@ -16,6 +18,8 @@ export default function OrderReviewPage() {
   const router = useRouter();
   const orderId = Number(params.id);
   const { hide } = useLoading();
+
+  const [activeTab, setActiveTab] = useState<'restaurant' | 'driver'>('restaurant');
 
   const { order, isLoading: isOrderLoading, fetchOrder } = useOrderDetail();
 
@@ -88,6 +92,16 @@ export default function OrderReviewPage() {
     }
   }, [restaurantReview, driverReview]);
 
+  // Auto-select tab if one is reviewed
+  useEffect(() => {
+    if (isReviewsLoading) return;
+    if (isRestaurantReviewed && !isDriverReviewed) {
+      setActiveTab('driver');
+    } else if (!isRestaurantReviewed && isDriverReviewed) {
+      setActiveTab('restaurant');
+    }
+  }, [isRestaurantReviewed, isDriverReviewed, isReviewsLoading]);
+
   const isLoading = isOrderLoading || isReviewsLoading || !order;
 
   return (
@@ -132,55 +146,184 @@ export default function OrderReviewPage() {
 
           <div className="h-px w-full my-3 md:my-4" />
 
-          {/* Review Cards Grid */}
-          <div className="pb-24 max-w-5xl mx-auto">
+          {/* Review Cards Area */}
+          <div className="mx-auto w-full md:block">
             {isLoading ? (
-              <div className="py-10">
-                <OrderReviewTabShimmer />
+              <div className="w-full">
+                {/* DESKTOP LOADING: Dual-column Grid */}
+                <div className="hidden md:block max-w-[1200px] mx-auto px-8 py-10">
+                  <div className="grid grid-cols-2 gap-12 items-stretch">
+                    <RestaurantReviewShimmer />
+                    <DriverReviewShimmer />
+                  </div>
+                </div>
+
+                {/* MOBILE LOADING: Focused Shimmer Area (Vertically Centered) */}
+                <div className="md:hidden min-h-[calc(100vh-250px)] flex flex-col justify-center">
+                  <div className="px-0">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={activeTab}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        {activeTab === 'restaurant' ? (
+                          <RestaurantReviewShimmer />
+                        ) : (
+                          <DriverReviewShimmer />
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </div>
               </div>
             ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-stretch">
-                  <div className="w-full h-full flex flex-col">
+              <div className="w-full">
+                {/* DESKTOP VIEW: Dual-column Grid (md and up) */}
+                <div className="hidden md:block max-w-[1200px] mx-auto px-8">
+                  <div className="grid grid-cols-2 gap-12 items-stretch">
+                    <div className="w-full h-full flex flex-col">
+                      <RestaurantReviewCard
+                        restaurant={restaurant}
+                        isReviewed={isRestaurantReviewed}
+                        rating={restaurantRating}
+                        setRating={setRestaurantRating}
+                        hoveredRating={hoveredRestaurantRating}
+                        setHoveredRating={setHoveredRestaurantRating}
+                        comment={restaurantComment}
+                        setComment={setRestaurantComment}
+                        onSubmit={handleReviewRestaurant}
+                        isSubmitting={isSubmitting}
+                      />
+                    </div>
 
-                    <RestaurantReviewCard
-                      restaurant={restaurant}
-                      isReviewed={isRestaurantReviewed}
-                      rating={restaurantRating}
-                      setRating={setRestaurantRating}
-                      hoveredRating={hoveredRestaurantRating}
-                      setHoveredRating={setHoveredRestaurantRating}
-                      comment={restaurantComment}
-                      setComment={setRestaurantComment}
-                      onSubmit={handleReviewRestaurant}
-                      isSubmitting={isSubmitting}
-                    />
+                    <div className="w-full h-full flex flex-col">
+                      <DriverReviewCard
+                        driver={driver}
+                        isReviewed={isDriverReviewed}
+                        rating={driverRating}
+                        setRating={setDriverRating}
+                        hoveredRating={hoveredDriverRating}
+                        setHoveredRating={setHoveredDriverRating}
+                        comment={driverComment}
+                        setComment={setDriverComment}
+                        onSubmit={handleReviewDriver}
+                        isSubmitting={isSubmitting}
+                      />
+                    </div>
                   </div>
 
-                  <div className="w-full h-full flex flex-col">
-                    <DriverReviewCard
-                      driver={driver}
-                      isReviewed={isDriverReviewed}
-                      rating={driverRating}
-                      setRating={setDriverRating}
-                      hoveredRating={hoveredDriverRating}
-                      setHoveredRating={setHoveredDriverRating}
-                      comment={driverComment}
-                      setComment={setDriverComment}
-                      onSubmit={handleReviewDriver}
-                      isSubmitting={isSubmitting}
-                    />
+                  {/* Desktop Bottom Note */}
+                  <div className="my-12 flex flex-col items-center text-center opacity-30">
+                    <CheckCircle2 className="w-8 h-8 text-gray-500 mb-4" />
+                    <span className="text-sm font-bold max-w-xs leading-relaxed">
+                      Your feedback helps us maintain high quality standards for the Eatzy community
+                    </span>
                   </div>
                 </div>
 
-                {/* Bottom Note */}
-                <div className="mt-20 flex flex-col items-center text-center opacity-30">
-                  <CheckCircle2 className="w-8 h-8 text-gray-500 mb-4" />
-                  <span className="text-sm font-bold max-w-xs leading-relaxed">
-                    Your feedback helps us maintain high quality standards for the Eatzy community
-                  </span>
+                {/* MOBILE VIEW: BottomNav-style Carousel (Vertically Centered) */}
+                <div className="md:hidden min-h-[calc(100vh-250px)] flex flex-col justify-center">
+                  {/* Fixed Bottom Switcher */}
+                  <div className="fixed bottom-2 left-0 right-0 z-50 flex justify-center pointer-events-none px-4">
+                    <motion.div
+                      initial={{ y: 50, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      className="pointer-events-auto backdrop-blur-xl bg-white/40 border border-white/40 rounded-[32px] px-3 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.15)] border-white/20 flex items-center justify-center gap-1.5"
+                    >
+                      {/* Restaurant Tab Item */}
+                      <motion.button
+                        key="orders-mobile"
+                        initial={false}
+                        whileTap={{ scale: 0.94 }}
+                        transition={{ type: "spring", stiffness: 180, damping: 10 }}
+                        onClick={() => setActiveTab('restaurant')}
+                        className="flex flex-col items-center justify-center outline-none select-none h-[60px] min-w-[64px]"
+                      >
+                        <div className={`flex items-center justify-center rounded-full transition-all duration-300 relative z-10 w-12 h-12
+                                ${activeTab === 'restaurant'
+                            ? "bg-black text-white shadow-md scale-110"
+                            : "text-gray-400 active:bg-gray-200/50 active:scale-95"
+                          }`}
+                        >
+                          <div className="relative">
+                            <Store className="w-6 h-6" strokeWidth={2.5} />
+                          </div>
+                        </div>
+                        <span className={`text-[10px] font-bold whitespace-nowrap text-gray-400 relative z-20 transition-all duration-300 ${activeTab === 'restaurant' ? 'mt-1' : 'mt-[-5px]'}`}>
+                          Cửa hàng
+                        </span>
+                      </motion.button>
+
+                      {/* Driver Tab Item */}
+                      <motion.button
+                        key="driver-mobile"
+                        initial={false}
+                        whileTap={{ scale: 0.94 }}
+                        transition={{ type: "spring", stiffness: 180, damping: 10 }}
+                        onClick={() => setActiveTab('driver')}
+                        className="flex flex-col items-center justify-center outline-none select-none h-[60px] min-w-[64px]"
+                      >
+                        <div className={`flex items-center justify-center rounded-full transition-all duration-300 relative z-10 w-12 h-12
+                                ${activeTab === 'driver'
+                            ? "bg-black text-white shadow-md scale-110"
+                            : "text-gray-400 active:bg-gray-200/50 active:scale-95"
+                          }`}
+                        >
+                          <div className="relative">
+                            <Truck className="w-6 h-6" strokeWidth={2.5} />
+                          </div>
+                        </div>
+                        <span className={`text-[10px] font-bold whitespace-nowrap text-gray-400 relative z-20 transition-all duration-300 ${activeTab === 'driver' ? 'mt-1' : 'mt-[-5px]'}`}>
+                          Tài xế
+                        </span>
+                      </motion.button>
+                    </motion.div>
+                  </div>
+
+                  {/* Shadow-safe Locked Carousel (Individual card centering) */}
+                  <div className="-mx-4 px-4 -my-20 py-20 overflow-hidden touch-none">
+                    <motion.div
+                      animate={{ x: activeTab === 'restaurant' ? "0%" : "calc(-100% - 40px)" }}
+                      transition={{ type: "spring", stiffness: 280, damping: 32 }}
+                      className="flex gap-[40px] items-center"
+                    >
+                      {/* Restaurant Page Section */}
+                      <div className="w-full flex-shrink-0 px-0">
+                        <RestaurantReviewCard
+                          restaurant={restaurant}
+                          isReviewed={isRestaurantReviewed}
+                          rating={restaurantRating}
+                          setRating={setRestaurantRating}
+                          hoveredRating={hoveredRestaurantRating}
+                          setHoveredRating={setHoveredRestaurantRating}
+                          comment={restaurantComment}
+                          setComment={setRestaurantComment}
+                          onSubmit={handleReviewRestaurant}
+                          isSubmitting={isSubmitting}
+                        />
+                      </div>
+
+                      {/* Driver Page Section */}
+                      <div className="w-full flex-shrink-0 px-0">
+                        <DriverReviewCard
+                          driver={driver}
+                          isReviewed={isDriverReviewed}
+                          rating={driverRating}
+                          setRating={setDriverRating}
+                          hoveredRating={hoveredDriverRating}
+                          setHoveredRating={setHoveredDriverRating}
+                          comment={driverComment}
+                          setComment={setDriverComment}
+                          onSubmit={handleReviewDriver}
+                          isSubmitting={isSubmitting}
+                        />
+                      </div>
+                    </motion.div>
+                  </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>

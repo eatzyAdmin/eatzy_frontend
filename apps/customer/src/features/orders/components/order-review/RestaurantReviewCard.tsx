@@ -36,13 +36,13 @@ export function RestaurantReviewCard({
         exit={{ opacity: 0, y: -20 }}
         className="h-full flex-1"
       >
-        <div className={`${isReviewed ? "bg-white/95" : "bg-white/40"} backdrop-blur-xl rounded-[40px] md:rounded-[44px] shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-full overflow-hidden relative group`} style={{ transform: 'translateZ(0)' }}>
+        <div className={`${isReviewed ? "bg-white/95" : "bg-white/40"} backdrop-blur-xl rounded-[40px] md:rounded-[48px] border-4 border-transparent shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-full overflow-hidden relative group`} style={{ transform: 'translateZ(0)' }}>
           {/* subtle pattern overlay */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none grayscale mix-blend-multiply">
+          {/* <div className="absolute inset-0 opacity-[0.03] pointer-events-none grayscale mix-blend-multiply">
             <ImageWithFallback src="" alt="Texture" placeholderMode="horizontal" fill className="object-cover" />
-          </div>
+          </div> */}
 
-          <div className="relative h-36 md:h-52 shrink-0 overflow-hidden">
+          <div className="relative h-36 md:h-52 shrink-0 overflow-hidden bg-gray-900 group/header rounded-b-[40px] md:rounded-b-[48px]">
             <ImageWithFallback
               src={restaurant.imageUrl || ""}
               alt={restaurant.name}
@@ -50,7 +50,7 @@ export function RestaurantReviewCard({
               placeholderMode="horizontal"
               className="object-cover scale-110 group-hover:scale-100 transition-transform duration-[2s]"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20 rounded-b-[40px] md:rounded-b-[48px]" />
 
             <div className="relative z-10 h-full p-5 md:p-8 flex flex-col justify-between">
               <div className="flex justify-between items-start">
@@ -70,14 +70,10 @@ export function RestaurantReviewCard({
             </div>
           </div>
 
-          <div className="p-4 md:p-8 flex flex-col relative z-20">
+          <div className="flex-1 bg-white p-4 md:p-8 flex flex-col relative z-20 rounded-b-[40px] md:rounded-b-[48px]">
             {!isReviewed ? (
               <>
-                <div className="mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="w-8 h-px bg-black" />
-                    <span className="text-[10px] font-anton text-gray-400 uppercase tracking-[0.3em]">Crating Flavor</span>
-                  </div>
+                <div className="mb-4 md:mb-8">
                   <h4 className="font-anton text-lg md:text-2xl text-black uppercase leading-tight mb-2">How was the meal?</h4>
                   <p className="text-[11px] text-gray-400 font-medium italic">Your feedback helps us refine the culinary series.</p>
                 </div>
@@ -104,7 +100,7 @@ export function RestaurantReviewCard({
                   ))}
                 </div>
 
-                <div className="relative mb-4 md:mb-8">
+                <div className="relative mb-3 md:mb-8">
                   <textarea
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
@@ -126,7 +122,7 @@ export function RestaurantReviewCard({
                 </motion.button>
               </>
             ) : (
-              <div className="flex flex-col h-auto relative">
+              <div className="flex-1 flex flex-col relative">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-lime-500/10 rounded-full -mr-16 -mt-16 blur-3xl opacity-50" />
 
                 <div className="flex items-center gap-3 mb-10">
@@ -154,7 +150,7 @@ export function RestaurantReviewCard({
                   </div>
                 </div>
 
-                <div className="relative flex items-center justify-center text-center px-4 py-4 md:py-6">
+                <div className="flex-1 relative flex items-center justify-center text-center px-4 py-4 md:py-6">
                   <Quote className="w-12 h-12 text-black/5 absolute top-0 left-0 -translate-x-4 -translate-y-4" />
                   <p className="text-black text-base md:text-lg font-medium leading-relaxed relative z-10 font-serif italic max-w-sm">
                     &quot;{comment || "An exceptional dining series. Highly recommended."}&quot;

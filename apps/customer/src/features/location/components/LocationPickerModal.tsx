@@ -570,7 +570,7 @@ export default function LocationPickerModal({
                   animate={{ y: 0, opacity: 1 }}
                   className="absolute top-0 inset-x-0 z-20"
                 >
-                  <div className="bg-[#F7F7F7] rounded-b-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] flex flex-col">
+                  <div className="bg-[#F7F7F7]/70 backdrop-blur-sm rounded-b-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] flex flex-col">
                     {/* Header */}
                     <div className="px-3 pt-3 pb-0 flex items-center justify-between">
                       <div>
@@ -581,7 +581,7 @@ export default function LocationPickerModal({
                       </div>
                       <button
                         onClick={onClose}
-                        className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 active:scale-90 transition-transform"
+                        className="w-10 h-10 rounded-full bg-gray-100 shadow-sm flex items-center justify-center text-gray-500 active:scale-90 transition-transform"
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -600,7 +600,7 @@ export default function LocationPickerModal({
                           onChange={(e) => handleSearchChange(e.target.value)}
                           onKeyDown={handleSearchKeyDown}
                           placeholder="Search address, building, street..."
-                          className="w-full h-14 pl-14 pr-12 rounded-[22px] bg-slate-50 border-2 border-white focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 outline-none transition-all text-lg font-bold font-anton text-gray-900 placeholder:text-gray-300 shadow-[inset_0_0_20px_rgba(0,0,0,0.06)]"
+                          className="w-full h-14 pl-14 pr-12 rounded-[22px] bg-slate-50/60 border-2 border-white focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 outline-none transition-all text-lg font-bold font-anton text-gray-900 placeholder:text-gray-300 shadow-[inset_0_0_20px_rgba(0,0,0,0.06)]"
                         />
                         {searchQuery && (
                           <button

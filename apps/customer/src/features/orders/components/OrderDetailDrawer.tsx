@@ -34,15 +34,17 @@ export default function OrderDetailDrawer({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showReviewPrompt, setShowReviewPrompt] = useState(false);
+  const [canStartShimmer, setCanStartShimmer] = useState(false);
 
   useEffect(() => {
     if (open) {
       setIsLoading(true);
       setShowReviewPrompt(false);
+      setCanStartShimmer(false); // Reset shimmer animation state
       const timer = setTimeout(() => {
         setIsLoading(false);
-        // Delay 1.5s after loading is done to show review prompt
-        const promptTimer = setTimeout(() => setShowReviewPrompt(true), 1500);
+        // Delay 0.9s after loading is done to show review prompt
+        const promptTimer = setTimeout(() => setShowReviewPrompt(true), 500);
         return () => clearTimeout(promptTimer);
       }, 600);
       return () => clearTimeout(timer);
@@ -94,16 +96,17 @@ export default function OrderDetailDrawer({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 100, damping: 18 }}
-            className="fixed z-[70] left-0 right-0 bottom-0 h-[92vh] md:h-[90vh] rounded-t-[40px] md:rounded-t-[48px] bg-[#F8F9FA] border-t border-gray-100 overflow-hidden shadow-2xl flex flex-col isolate shadow-black/10"
+            className="fixed z-[70] left-0 right-0 bottom-0 h-[96vh] md:h-[90vh] rounded-t-[40px] md:rounded-t-[48px] bg-[#F8F9FA] border-t border-gray-100 overflow-hidden shadow-2xl flex flex-col isolate shadow-black/10"
             style={{
               transform: 'translateZ(0)',
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
               maskImage: 'linear-gradient(white, white)'
             }}
+            onAnimationComplete={() => setCanStartShimmer(true)}
           >
             {/* Header */}
-            <div className="bg-white px-6 py-5 md:px-8 md:py-6 md:border-b md:border-gray-100 flex items-center justify-between md:shadow-sm shrink-0 z-20">
+            <div className="bg-[#F8F9FA] md:bg-white px-6 py-5 md:px-8 md:py-6 border-b border-gray-100 flex items-center justify-between md:shadow-sm shrink-0 z-20">
               <div className="flex items-center gap-4">
                 <div className="hidden md:flex w-12 h-12 rounded-2xl bg-lime-50 border border-lime-100 items-center justify-center shrink-0">
                   <ClipboardList className="w-6 h-6 text-lime-600" />
@@ -146,7 +149,7 @@ export default function OrderDetailDrawer({
                   whileHover={{ scale: 1.06 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={onClose}
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-700 hover:bg-gray-200 transition-all duration-300"
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 shadow md:shadow-none hover:text-gray-700 hover:bg-gray-200 transition-all duration-300"
                 >
                   <X className="w-5 h-5" />
                 </motion.button>
@@ -169,7 +172,7 @@ export default function OrderDetailDrawer({
                         initial={{ scale: 0.98, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.4, delay: 0.1 }}
-                        whileTap={{ scale: 0.97 }}
+                        whileTap={{ scale: 0.92 }}
                         onClick={() => {
                           router.push(`/orders/${order.id}/review`);
                         }}
@@ -190,7 +193,7 @@ export default function OrderDetailDrawer({
             {/* Content Area */}
             <div className="flex-1 overflow-hidden min-h-0 flex flex-col md:pt-0">
               {isLoading ? (
-                <OrderDetailDrawerShimmer />
+                <OrderDetailDrawerShimmer shouldAnimate={canStartShimmer} />
               ) : (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -247,7 +250,7 @@ export default function OrderDetailDrawer({
                         <motion.button
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
-                          whileTap={{ scale: 0.97 }}
+                          whileTap={{ scale: 0.92 }}
                           transition={{ duration: 0.4 }}
                           onClick={() => router.push(`/orders/${order.id}/review`)}
                           className="flex flex-col items-center justify-center gap-0.5"
