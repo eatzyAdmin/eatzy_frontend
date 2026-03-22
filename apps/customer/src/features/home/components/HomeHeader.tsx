@@ -38,8 +38,33 @@ export default function HomeHeader({
   const { activeOrdersCount } = useCurrentOrders();
   const cartCount = carts.length;
 
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const direction = currentScrollY > lastScrollY ? 'down' : 'up';
+
+      if (direction === 'down' && currentScrollY > 80) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 p-3 md:p-6">
+    <motion.header
+      initial={{ y: 0 }}
+      animate={{ y: isVisible ? 0 : -100 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="fixed top-0 left-0 right-0 z-50 p-3 md:p-6"
+    >
       <div className="flex items-center justify-between">
         {/* Left Section */}
         <div className="flex items-center gap-2 md:gap-4">
@@ -193,7 +218,7 @@ export default function HomeHeader({
           )}
         </motion.div>
       </div>
-    </header>
+    </motion.header>
   );
 }
 

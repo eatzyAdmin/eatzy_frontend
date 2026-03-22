@@ -25,7 +25,7 @@ export default function OrderDetailDrawerShimmer() {
   };
 
   const RestaurantCardShimmer = () => (
-    <div className="bg-white rounded-[40px] shadow-[0_4px_25px_rgba(0,0,0,0.06)] border border-gray-100/50 overflow-hidden flex flex-col min-h-[160px] h-full relative">
+    <div className="bg-white rounded-[36px] md:rounded-[40px] shadow-[0_4px_25px_rgba(0,0,0,0.06)] border border-gray-100/50 overflow-hidden flex flex-col min-h-[160px] relative">
       <div className="absolute inset-0 bg-gray-900 overflow-hidden">
         <motion.div className="w-full h-full" variants={shimmerVariants} initial="initial" animate="animate" style={darkShimmerStyle} />
       </div>
@@ -94,25 +94,25 @@ export default function OrderDetailDrawerShimmer() {
   );
 
   const OrderItemsListShimmer = () => (
-    <div className="bg-white rounded-[40px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100/50">
-      <div className="px-8 py-6 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
+    <div className="bg-white rounded-[28px] md:rounded-[40px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100/50 min-h-[300px]">
+      <div className="px-6 md:px-8 py-4 md:py-6 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
         <div className="flex items-center gap-3">
-          <Package className="w-6 h-6 text-gray-400" />
-          <h4 className="text-xl md:text-lg text-[#1A1A1A] font-bold">Chi tiết món ăn</h4>
+          <Package className="w-5 h-5 md:w-6 md:h-6 text-gray-400" />
+          <h4 className="text-lg md:text-lg text-[#1A1A1A] font-bold">Chi tiết món ăn</h4>
         </div>
         <div className="px-3 py-1 bg-[#1A1A1A] text-white rounded-lg text-xs font-bold">
           <motion.div className="h-3 w-8 bg-white/20 rounded" variants={shimmerVariants} initial="initial" animate="animate" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%)', backgroundSize: '200% 100%' }} />
         </div>
       </div>
 
-      <div className="p-3">
-        {[1, 2].map(i => (
-          <div key={i} className="flex items-center justify-between p-3.5 md:p-4">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-[14px] bg-gray-100 flex items-center justify-center font-anton text-gray-300 italic">
-                <motion.div className="h-4 w-4 bg-gray-200 rounded" variants={shimmerVariants} initial="initial" animate="animate" style={shimmerStyle} />
+      <div className="p-1 md:p-3 pt-0 md:pt-3">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="flex items-center justify-between p-3.5 md:p-4 rounded-[20px]">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="w-10 h-10 rounded-[14px] bg-gray-100 flex items-center justify-center font-anton text-[#1A1A1A] text-lg opacity-40">
+                <div className="h-4 w-4 bg-gray-200 rounded" />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 flex-1 min-w-0">
                 <motion.div className="h-4 w-40 bg-gray-200 rounded" variants={shimmerVariants} initial="initial" animate="animate" style={{ background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)', backgroundSize: '200% 100%' }} />
                 <motion.div className="h-2.5 w-24 bg-gray-100 rounded" variants={shimmerVariants} initial="initial" animate="animate" style={shimmerStyle} />
               </div>
@@ -136,9 +136,9 @@ export default function OrderDetailDrawerShimmer() {
         <div className="h-px bg-gray-200/50 my-2" />
         <div className="flex justify-between items-center pt-2">
           <span className="font-bold text-[#1A1A1A] text-base">Tổng thanh toán</span>
-          <div className="flex flex-col items-end gap-2">
-            <motion.div className="h-10 w-32 bg-[var(--primary)]/10 rounded" variants={shimmerVariants} initial="initial" animate="animate" style={shimmerStyle} />
-            <div className="flex items-center gap-1 text-[10px] text-lime-600 font-bold uppercase tracking-widest bg-lime-50 px-2 py-0.5 rounded-md border border-lime-100 opacity-60">
+          <div className="flex flex-col items-end">
+            <div className="h-10 w-32 bg-[var(--primary)]/5 rounded-xl border border-[var(--primary)]/10" />
+            <div className="mt-1 flex items-center gap-1 text-[10px] text-lime-600 font-bold uppercase tracking-widest bg-lime-50 px-2 py-0.5 rounded-md border border-lime-100 opacity-60">
               Đã thanh toán
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function OrderDetailDrawerShimmer() {
   );
 
   const LogisticsInfoShimmer = () => (
-    <div className="bg-white rounded-[40px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100/50">
+    <div className="bg-white rounded-[40px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100/50 min-h-[180px]">
       <div className="px-6 pt-6 pb-2 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
         <div className="flex items-center gap-2.5">
           <Navigation className="w-5 h-5 text-gray-400" />
@@ -184,7 +184,7 @@ export default function OrderDetailDrawerShimmer() {
   );
 
   const PaymentSummaryShimmer = () => (
-    <div className="bg-white rounded-[40px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100/50">
+    <div className="bg-white rounded-[40px] overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.03)] border border-gray-100/50 min-h-[150px]">
       <div className="px-6 pt-6 pb-2 border-b border-gray-50 flex items-center gap-2.5 bg-gray-50/30">
         <FileText className="w-5 h-5 text-gray-400" />
         <h4 className="font-bold text-[#1A1A1A]">Thông tin thanh toán</h4>
@@ -217,6 +217,25 @@ export default function OrderDetailDrawerShimmer() {
     </div>
   );
 
+  const OrderNotesShimmer = () => (
+    <div className="bg-[#FFF9E6] p-6 rounded-[28px] md:rounded-[40px] border border-[#FFE8A3]/50 shrink-0">
+      <div className="flex items-center gap-2.5 mb-3 text-amber-700/30">
+        <FileText className="w-4.5 h-4.5" />
+        <div className="h-3 w-32 bg-amber-200/40 rounded" />
+      </div>
+      <div className="h-4 w-full bg-amber-200/20 rounded" />
+    </div>
+  );
+
+  const SafetyDisclaimerShimmer = () => (
+    <div className="bg-gradient-to-r from-lime-50 to-white border border-lime-100/50 p-4 rounded-[24px] flex items-center gap-3 shrink-0">
+      <div className="w-8 h-8 rounded-full bg-lime-100 flex items-center justify-center shrink-0">
+        <ShieldCheck className="w-4 h-4 text-lime-200" />
+      </div>
+      <div className="h-3 w-48 bg-lime-100/30 rounded" />
+    </div>
+  );
+
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-[#F8F9FA]">
       <div className="hidden md:grid md:grid-cols-[62%_38%] h-full overflow-hidden">
@@ -233,15 +252,32 @@ export default function OrderDetailDrawerShimmer() {
         </div>
       </div>
 
-      <div className="md:hidden flex-1 overflow-y-auto no-scrollbar flex flex-col gap-4 p-3 bg-[#F8F9FA]">
-        <div className="snap-center shrink-0 w-full flex items-center justify-center py-4">
-          <div className="w-full">
-            <RestaurantCardShimmer />
+      <div className="md:hidden flex-1 overflow-y-auto no-scrollbar flex flex-col gap-3 p-3 bg-[#F8F9FA] pb-20">
+        <div className="w-full shrink-0">
+          <div className="flex overflow-x-hidden gap-4 -mx-4 px-4 py-6 -my-6">
+            <div className="w-full shrink-0 py-2 pt-0">
+              <RestaurantCardShimmer />
+            </div>
+            <div className="w-full shrink-0 py-2 pt-0">
+              <DriverCardShimmer />
+            </div>
+          </div>
+          <div className="flex justify-center gap-2 mt-0">
+            <div className="h-1.5 w-6 bg-[var(--primary)]/30 rounded-full" />
+            <div className="h-1.5 w-1.5 bg-gray-200 rounded-full" />
           </div>
         </div>
-        <OrderItemsListShimmer />
-        <LogisticsInfoShimmer />
-        <PaymentSummaryShimmer />
+
+        <div className="shrink-0 flex flex-col gap-3">
+          <OrderItemsListShimmer />
+          <LogisticsInfoShimmer />
+          <PaymentSummaryShimmer />
+        </div>
+
+        <div className="flex flex-col gap-6 mb-10 shrink-0">
+          <OrderNotesShimmer />
+          <SafetyDisclaimerShimmer />
+        </div>
       </div>
     </div>
   );

@@ -29,7 +29,7 @@ export function DriverReviewCard({
 }: DriverReviewCardProps) {
   if (!driver) {
     return (
-      <div className="bg-white/40 backdrop-blur-xl rounded-[40px] md:rounded-[44px] shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-auto md:h-full overflow-hidden p-8 md:p-12 items-center justify-center text-center relative min-h-[400px] md:min-h-[500px]">
+      <div className="bg-white/40 backdrop-blur-xl rounded-[40px] md:rounded-[44px] shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-auto overflow-hidden p-8 md:p-12 items-center justify-center text-center relative">
         {/* subtle pattern overlay */}
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none grayscale mix-blend-multiply">
           <ImageWithFallback src="" alt="Texture" placeholderMode="horizontal" fill className="object-cover" />
@@ -51,9 +51,9 @@ export function DriverReviewCard({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="h-full"
+        className="h-full flex-1"
       >
-        <div className={`${isReviewed ? "bg-white/95" : "bg-white/40"} backdrop-blur-xl rounded-[40px] md:rounded-[44px] shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-auto md:h-full overflow-hidden relative group`} style={{ transform: 'translateZ(0)' }}>
+        <div className={`${isReviewed ? "bg-white/95" : "bg-white/40"} backdrop-blur-xl rounded-[40px] md:rounded-[44px] shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-full overflow-hidden relative group`} style={{ transform: 'translateZ(0)' }}>
           {/* subtle pattern overlay */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none grayscale mix-blend-multiply">
             <ImageWithFallback src="" alt="Texture" placeholderMode="horizontal" fill className="object-cover" />
@@ -97,7 +97,7 @@ export function DriverReviewCard({
 
               {/* Driver Details */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="hidden md:flex items-center gap-3 mb-2">
                   <div className="px-3 py-1 rounded-full bg-white/10 border border-white/10 text-white backdrop-blur-md">
                     <Bike className="w-3.5 h-3.5" />
                   </div>
@@ -115,19 +115,15 @@ export function DriverReviewCard({
             </div>
           </div>
 
-          <div className="p-4 md:p-8 flex-1 flex flex-col relative z-20">
+          <div className="p-4 md:p-8 flex flex-col relative z-20">
             {!isReviewed ? (
               <>
                 <div className="mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="w-8 h-px bg-black" />
-                    <span className="text-[10px] font-anton text-gray-400 uppercase tracking-[0.3em]">Personnel Review</span>
-                  </div>
                   <h4 className="font-anton text-lg md:text-2xl text-black uppercase leading-tight mb-2">Was he friendly?</h4>
                   <p className="text-[11px] text-gray-400 font-medium italic">Your rating ensures high-quality logistical standards.</p>
                 </div>
 
-                <div className="flex items-center gap-1 md:gap-2 mb-4 md:mb-10 p-3 md:p-4 bg-black/5 rounded-[28px] md:rounded-[32px] justify-center relative">
+                <div className="flex items-center gap-1 md:gap-2 mb-4 md:mb-6 p-3 md:p-4 bg-black/5 rounded-[28px] md:rounded-[32px] justify-center relative">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <motion.button
                       key={star}
@@ -154,7 +150,7 @@ export function DriverReviewCard({
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Feedback for the delivery partner..."
-                    className="w-full bg-white/60 backdrop-blur-md border-2 border-white rounded-[28px] md:rounded-[32px] p-5 md:p-6 text-sm text-black placeholder:text-gray-300 focus:outline-none focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 focus:bg-white/90 transition-all resize-none min-h-[120px] md:min-h-[140px] shadow-[inset_0_0_20px_rgba(0,0,0,0.09)]"
+                    className="w-full bg-white/60 backdrop-blur-md border-2 border-white rounded-[28px] md:rounded-[32px] p-5 md:p-6 text-sm text-black placeholder:text-gray-300 focus:outline-none focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 focus:bg-white/90 transition-all resize-none min-h-[100px] md:min-h-[120px] shadow-[inset_0_0_20px_rgba(0,0,0,0.09)]"
                   />
                   <div className="absolute top-4 right-6 text-[10px] font-anton text-gray-200 uppercase">Input / Log</div>
                 </div>
@@ -171,7 +167,7 @@ export function DriverReviewCard({
                 </motion.button>
               </>
             ) : (
-              <div className="flex flex-col h-full relative">
+              <div className="flex flex-col h-auto relative">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-lime-500/10 rounded-full -mr-16 -mt-16 blur-3xl opacity-50" />
 
                 <div className="flex items-center gap-3 mb-10">
@@ -185,7 +181,7 @@ export function DriverReviewCard({
                 </div>
 
                 <div className="mb-10 text-center md:text-left">
-                  <span className="text-[10px] font-anton text-gray-400 uppercase tracking-[0.4em] mb-4 block">Service Rating</span>
+                  <span className="text-[10px] font-anton text-gray-400 uppercase tracking-[0.4em] mb-2 block">Service Rating</span>
                   <div className="flex items-center justify-center md:justify-start gap-4">
                     <span className="font-anton text-[60px] md:text-[80px] text-black leading-none tracking-tighter shadow-sm">{rating}.0</span>
                     <div className="flex flex-col">
@@ -199,8 +195,8 @@ export function DriverReviewCard({
                   </div>
                 </div>
 
-                <div className="relative flex-1 flex items-center justify-center text-center px-4">
-                  <Quote className="w-16 h-16 text-black/5 absolute top-0 left-0 -translate-x-4 -translate-y-4" />
+                <div className="relative flex items-center justify-center text-center px-4 py-4 md:py-6">
+                  <Quote className="w-12 h-12 text-black/5 absolute top-0 left-0 -translate-x-4 -translate-y-4" />
                   <p className="text-black text-base md:text-lg font-medium leading-relaxed relative z-10 font-serif italic max-w-sm">
                     &quot;{comment || "Prompt logistical delivery. Exceptional service."}&quot;
                   </p>

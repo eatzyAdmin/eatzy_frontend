@@ -73,12 +73,14 @@ export function useOrderHistory(params?: {
   });
 
   const orders = query.data || [];
+  const { isLoading: isAuthLoading } = useAuth();
+  const isLoading = query.isLoading || (isAuthLoading && !query.data);
 
   return {
     orders,
-    isLoading: query.isLoading,
+    isLoading,
     isError: query.isError,
-    error: query.error,
+    error: query.error as Error | null,
     refetch: query.refetch,
     totalOrders: orders.length,
   };

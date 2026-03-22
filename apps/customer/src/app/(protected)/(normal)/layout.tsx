@@ -30,12 +30,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isRestaurantDetail = pathname?.startsWith("/restaurants/") ?? false;
   const isOrderHistory = pathname?.startsWith("/order-history") ?? false;
   const isFavorites = pathname?.startsWith("/favorites") ?? false;
+  const isReviewPage = pathname?.includes("/review") ?? false;
   const isProfile = pathname?.startsWith("/profile") ?? false;
   const [isRecommendedMode, setIsRecommendedMode] = useState(false);
 
   // Combine modes for layout and animation purposes
   const effectiveSearchMode = isSearchMode || isRecommendedMode;
-  const shouldSlideHeader = effectiveSearchMode || isOrderHistory || isFavorites;
+  const shouldSlideHeader = effectiveSearchMode || isOrderHistory || isFavorites || isReviewPage;
   const isSearchBarCompact = !isHeaderVisible && effectiveSearchMode;
 
   useEffect(() => {
@@ -124,8 +125,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className={`pointer-events-none fixed inset-x-0 top-0 h-16 md:h-20 z-[20] max-md:[mask-image:linear-gradient(to_bottom,black_70%,transparent)] ${(isOrderHistory || isFavorites) ? "bg-[#F7F7F7]/95 backdrop-blur-md" : "backdrop-blur-xl"
-                } ${(isRestaurantDetail || isOrderHistory || isFavorites) ? "hidden md:block" : ""}`}
+              className={`pointer-events-none fixed inset-x-0 top-0 h-16 md:h-20 z-[20] max-md:[mask-image:linear-gradient(to_bottom,black_70%,transparent)] ${(isOrderHistory || isFavorites || isReviewPage) ? "bg-[#F7F7F7]/95 backdrop-blur-md" : "backdrop-blur-xl"
+                } ${(isRestaurantDetail || isOrderHistory || isFavorites || isReviewPage) ? "hidden md:block" : ""}`}
             />
           )}
         </AnimatePresence>
@@ -137,14 +138,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -100, opacity: 0 }}
               transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
-              className={(isRestaurantDetail || isOrderHistory || isFavorites) ? "hidden md:block" : ""}
+              className={(isRestaurantDetail || isOrderHistory || isFavorites || isReviewPage) ? "hidden md:block" : ""}
             >
               <HomeHeader
                 onMenuClick={() => setMenuOpen(true)}
                 onFavoritesClick={() => setOrdersOpen(true)}
                 onSearchClick={() => setSearchOpen(true)}
                 onCartClick={() => setCartOpen(true)}
-                hideSearchIcon={shouldSlideHeader || isRestaurantDetail || isFavorites || isProfile}
+                hideSearchIcon={shouldSlideHeader || isRestaurantDetail || isFavorites || isReviewPage || isProfile}
                 hideCart={isRestaurantDetail}
                 showHomeIcon={isMobile}
                 onLogoClick={() => {
@@ -179,7 +180,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           activeFilters={filters}
         />
         {children}
-        {!isRestaurantDetail && !effectiveSearchMode && <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />}
+        {!isRestaurantDetail && !effectiveSearchMode && !isReviewPage && <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />}
         <DeliveryLocationButton variant="listener" />
       </div>
     </BottomNavProvider>

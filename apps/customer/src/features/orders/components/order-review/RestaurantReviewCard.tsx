@@ -34,9 +34,9 @@ export function RestaurantReviewCard({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="h-full"
+        className="h-full flex-1"
       >
-        <div className={`${isReviewed ? "bg-white/95" : "bg-white/40"} backdrop-blur-xl rounded-[40px] md:rounded-[44px] shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-auto md:h-full overflow-hidden relative group`} style={{ transform: 'translateZ(0)' }}>
+        <div className={`${isReviewed ? "bg-white/95" : "bg-white/40"} backdrop-blur-xl rounded-[40px] md:rounded-[44px] shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-full overflow-hidden relative group`} style={{ transform: 'translateZ(0)' }}>
           {/* subtle pattern overlay */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none grayscale mix-blend-multiply">
             <ImageWithFallback src="" alt="Texture" placeholderMode="horizontal" fill className="object-cover" />
@@ -70,7 +70,7 @@ export function RestaurantReviewCard({
             </div>
           </div>
 
-          <div className="p-4 md:p-8 flex-1 flex flex-col relative z-20">
+          <div className="p-4 md:p-8 flex flex-col relative z-20">
             {!isReviewed ? (
               <>
                 <div className="mb-8">
@@ -82,7 +82,7 @@ export function RestaurantReviewCard({
                   <p className="text-[11px] text-gray-400 font-medium italic">Your feedback helps us refine the culinary series.</p>
                 </div>
 
-                <div className="flex items-center gap-1 md:gap-2 mb-4 md:mb-10 p-3 md:p-4 bg-black/5 rounded-[28px] md:rounded-[32px] justify-center relative">
+                <div className="flex items-center gap-1 md:gap-2 mb-4 md:mb-6 p-3 md:p-4 bg-black/5 rounded-[28px] md:rounded-[32px] justify-center relative">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <motion.button
                       key={star}
@@ -109,7 +109,7 @@ export function RestaurantReviewCard({
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Describe your dining experience..."
-                    className="w-full bg-white/60 backdrop-blur-md border-2 border-white rounded-[28px] md:rounded-[32px] p-5 md:p-6 text-sm text-black placeholder:text-gray-300 focus:outline-none focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 focus:bg-white/90 transition-all resize-none min-h-[120px] md:min-h-[140px] shadow-[inset_0_0_20px_rgba(0,0,0,0.09)]"
+                    className="w-full bg-white/60 backdrop-blur-md border-2 border-white rounded-[28px] md:rounded-[32px] p-5 md:p-6 text-sm text-black placeholder:text-gray-300 focus:outline-none focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 focus:bg-white/90 transition-all resize-none min-h-[100px] md:min-h-[120px] shadow-[inset_0_0_20px_rgba(0,0,0,0.09)]"
                   />
                   <div className="absolute top-4 right-6 text-[10px] font-anton text-gray-200 uppercase">Text / Feed</div>
                 </div>
@@ -126,7 +126,7 @@ export function RestaurantReviewCard({
                 </motion.button>
               </>
             ) : (
-              <div className="flex flex-col h-full relative">
+              <div className="flex flex-col h-auto relative">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-lime-500/10 rounded-full -mr-16 -mt-16 blur-3xl opacity-50" />
 
                 <div className="flex items-center gap-3 mb-10">
@@ -140,7 +140,7 @@ export function RestaurantReviewCard({
                 </div>
 
                 <div className="mb-10 text-center md:text-left">
-                  <span className="text-[10px] font-anton text-gray-400 uppercase tracking-[0.4em] mb-4 block">Satisfaction Level</span>
+                  <span className="text-[10px] font-anton text-gray-400 uppercase tracking-[0.4em] mb-2 block">Satisfaction Level</span>
                   <div className="flex items-center justify-center md:justify-start gap-4">
                     <span className="font-anton text-[60px] md:text-[80px] text-black leading-none tracking-tighter shadow-sm">{rating}.0</span>
                     <div className="flex flex-col">
@@ -154,8 +154,8 @@ export function RestaurantReviewCard({
                   </div>
                 </div>
 
-                <div className="relative flex-1 flex items-center justify-center text-center px-4">
-                  <Quote className="w-16 h-16 text-black/5 absolute top-0 left-0 -translate-x-4 -translate-y-4" />
+                <div className="relative flex items-center justify-center text-center px-4 py-4 md:py-6">
+                  <Quote className="w-12 h-12 text-black/5 absolute top-0 left-0 -translate-x-4 -translate-y-4" />
                   <p className="text-black text-base md:text-lg font-medium leading-relaxed relative z-10 font-serif italic max-w-sm">
                     &quot;{comment || "An exceptional dining series. Highly recommended."}&quot;
                   </p>
