@@ -5,6 +5,7 @@ import "./globals.css";
 import Providers from "./providers";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import SplashScreen from "@/components/SplashScreen";
+import StatusBarHandler from "@/components/StatusBarHandler";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const bebasNeue = Bebas_Neue({
@@ -42,8 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "transparent",
-  colorScheme: "dark light",
+  themeColor: "#F7F7F7",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -60,6 +60,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} ${inter.variable} ${antonio.variable} ${bebasNeue.variable} ${oswald.variable} ${pathwayGothic.variable} ${fjallaOne.variable} antialiased`}>
         <Providers>
+          <StatusBarHandler />
           <SplashScreen />
           {children}
           <PwaInstallPrompt />
