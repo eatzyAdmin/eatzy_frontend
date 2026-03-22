@@ -149,13 +149,13 @@ export default function DeliveryLocationButton({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setIsModalOpen(true)}
-          className={`flex items-center gap-2 px-3 py-2 rounded-2xl md:rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all ${className}`}
+          className={`w-fit max-w-full flex items-center gap-2 px-3 py-2 rounded-2xl md:rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all ${className}`}
         >
-          <MapPin className="w-4 h-4 text-lime-400" />
-          <span className="text-sm font-bold text-white truncate w-full md:max-w-[260px]">
+          <MapPin className="w-4 h-4 text-lime-400 flex-shrink-0" />
+          <span className="text-sm font-bold text-white truncate flex-1 min-w-0 text-left">
             {isLoading ? "Đang tải..." : displayName}
           </span>
-          <ChevronDown className="w-4 h-4 text-white/60" />
+          <ChevronDown className="w-4 h-4 text-white/60 flex-shrink-0" />
         </motion.button>
       );
     }
