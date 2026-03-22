@@ -130,6 +130,23 @@ body {
     scrollbar-width: none;
   }
 
+  /* Safe Area Utilities for PWA/Mobile */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .top-safe {
+    top: env(safe-area-inset-top);
+  }
+
+  .bottom-safe {
+    bottom: env(safe-area-inset-bottom);
+  }
+
   .font-anton {
     font-family: 'EatzyMixedFont' !important;
   }
