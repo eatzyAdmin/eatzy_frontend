@@ -123,7 +123,7 @@ export default function OrderReviewPage() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => router.back()}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center group flex-shrink-0"
+              className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center z-20 group flex-shrink-0"
             >
               <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
             </motion.button>

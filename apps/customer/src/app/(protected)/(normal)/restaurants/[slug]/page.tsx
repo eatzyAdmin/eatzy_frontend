@@ -237,7 +237,7 @@ export default function RestaurantDetailPage() {
               </div>
 
               {/* Right Column - Main Image & Menu (Scrollable independently on desktop) */}
-              <div ref={rightColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pl-2 shrink-0 px-3 md:px-0">
+              <div ref={rightColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pl-2 shrink-0 px-1.5 md:px-0">
                 {/* Main Hero Image with Save Button - Desktop Only */}
                 <RestaurantHero
                   restaurant={restaurant}

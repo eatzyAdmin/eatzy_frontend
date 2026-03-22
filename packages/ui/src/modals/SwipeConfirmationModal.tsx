@@ -190,12 +190,12 @@ export function SwipeConfirmationModal({
             )}
             <motion.div className="p-6 border-b border-white/10 flex items-center justify-between relative z-10" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
               <div className="flex items-center gap-3">
-                <motion.div className={`mr-4 p-3 rounded-2xl shadow-[inset_0_0_10px_6px_rgba(255,255,255,0.2)] bg-white/10 border border-white/20 ${theme.bg}`} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+                <motion.div className={`hidden md:block mr-4 p-3 rounded-2xl shadow-[inset_0_0_10px_6px_rgba(255,255,255,0.2)] bg-white/10 border border-white/20 ${theme.bg}`} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
                   {icon ?? <IconComponent className={`${theme.accentSolid} drop-shadow-sm`} size={24} strokeWidth={3.0} />}
                 </motion.div>
                 <h3 className="text-xl font-bold text-gray-800 tracking-tight drop-shadow-sm">{title}</h3>
               </div>
-              <motion.button onClick={onClose} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.4)] transition-all duration-300 group" disabled={isCompleted || isProcessing} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+              <motion.button onClick={onClose} className="p-2 rounded-2xl bg-white/5 hover:bg-white/10 shadow-[inset_0_0_12px_8px_rgba(255,255,255,0.4)] transition-all duration-300 group" disabled={isCompleted || isProcessing} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
                 <X size={18} className="text-gray-600 group-hover:text-gray-800 transition-colors" />
               </motion.button>
             </motion.div>

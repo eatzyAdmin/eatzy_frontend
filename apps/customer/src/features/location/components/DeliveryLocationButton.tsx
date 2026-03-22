@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { MapPin, ChevronDown, Navigation, Loader2 } from "@repo/ui/icons";
 import { useDeliveryLocationStore } from "@/store/deliveryLocationStore";
@@ -41,7 +41,13 @@ export default function DeliveryLocationButton({
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Store
-  const { selectedLocation, setSelectedLocation, isManuallySelected } = useDeliveryLocationStore();
+  const {
+    selectedLocation,
+    setSelectedLocation,
+    isManuallySelected,
+    lastSelectedAt,
+    clearSelectedLocation
+  } = useDeliveryLocationStore();
 
   // Get user's current location as fallback
   const { location: userLocation, isLoading: isLocationLoading } = useUserLocation();
@@ -49,8 +55,15 @@ export default function DeliveryLocationButton({
   // Initialize location on first load
   useEffect(() => {
     const initLocation = async () => {
-      // If already has selected location, use it
-      if (selectedLocation) {
+      const { selectedLocation, isManuallySelected, lastSelectedAt, clearSelectedLocation } = useDeliveryLocationStore.getState();
+
+      // Check if manual selection has expired (1.5 hours = 5400000ms)
+      const isExpired = lastSelectedAt && (Date.now() - lastSelectedAt > 1.5 * 60 * 60 * 1000);
+
+      if (isManuallySelected && isExpired) {
+        clearSelectedLocation();
+        // Force re-fetch from GPS
+      } else if (selectedLocation) {
         setIsInitializing(false);
         return;
       }
@@ -111,8 +124,19 @@ export default function DeliveryLocationButton({
 
   // Determine display text
   const displayAddress = selectedLocation?.address || "Đang xác định...";
-  const displayName = selectedLocation?.placeName || displayAddress.split(",")[0];
+
+  // Format address similarly to DistanceWarningModal: 3 parts, no purely numeric parts
+  const formattedAddress = useMemo(() => {
+    if (!selectedLocation?.address) return "Đang xác định...";
+    const parts = selectedLocation.address.split(',').map(s => s.trim());
+    // Filter out postal codes or pure numbers
+    const filteredParts = parts.filter(s => !/^\d{5}$/.test(s) && !/^\d+$/.test(s));
+    // Take first 3 valid segments
+    return filteredParts.slice(0, 3).join(', ');
+  }, [selectedLocation?.address]);
+
   const isLoading = isInitializing || isLocationLoading;
+  const displayName = isLoading ? "Đang tải..." : formattedAddress;
 
   // ======== Render Variants ========
 
@@ -128,7 +152,7 @@ export default function DeliveryLocationButton({
           className={`flex items-center gap-2 px-3 py-2 rounded-2xl md:rounded-xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all ${className}`}
         >
           <MapPin className="w-4 h-4 text-lime-400" />
-          <span className="text-sm font-semibold text-white truncate max-w-[180px]">
+          <span className="text-sm font-bold text-white truncate w-full md:max-w-[260px]">
             {isLoading ? "Đang tải..." : displayName}
           </span>
           <ChevronDown className="w-4 h-4 text-white/60" />

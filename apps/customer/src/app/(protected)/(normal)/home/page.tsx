@@ -26,6 +26,8 @@ import { mapMagazineToRestaurantWithMenu } from '@/features/search/utils/mappers
 import type { RestaurantWithMenu } from '@/features/search/hooks/useSearch';
 import { DeliveryLocationButton, useDeliveryLocation } from '@/features/location';
 import { useMobileBackHandler } from '@/hooks/useMobileBackHandler';
+import { useDistanceWarning } from '@/features/home/hooks/useDistanceWarning';
+import { DistanceWarningHome } from '@/features/home/components';
 
 export default function HomePage() {
   const {
@@ -56,8 +58,9 @@ export default function HomePage() {
   useMobileBackHandler(showRecommended, () => setShowRecommended(false));
   useMobileBackHandler(showAllCategories, () => setShowAllCategories(false));
   // Use delivery location for API calls (selected by user or GPS fallback)
-  const { location: deliveryLocation, isLoading: isLocationLoading } = useDeliveryLocation();
+  const { location: deliveryLocation, isLoading: isLocationLoading, openLocationPicker } = useDeliveryLocation();
   const locationCoords = deliveryLocation;
+
 
   const {
     restaurants: apiRestaurants,
@@ -118,6 +121,13 @@ export default function HomePage() {
     loadMore,
     totalResults,
   } = useSearch();
+
+  // Distance Warning Logic
+  const { showDistanceWarning, setShowDistanceWarning, distance } = useDistanceWarning({
+    isSearchMode,
+    showRecommended,
+    deliveryLocation
+  });
 
   // Expose clearSearch to window for menu navigation
   useEffect(() => {
@@ -207,7 +217,8 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100vh', transition: { delay: 0.15, duration: 0.8, ease: [0.33, 1, 0.68, 1] } }}
             transition={{ duration: 0.6 }}
-            className="fixed z-50 left-3 right-3 md:hidden top-[9vh]"
+            className={`fixed left-3 right-3 top-[9vh] md:top-6 md:left-[196px] md:right-auto md:w-auto transition-all duration-300 ${showDistanceWarning ? 'z-[110]' : 'z-50 md:hidden'
+              }`}
           >
             <DeliveryLocationButton variant="compact" />
           </motion.div>
@@ -463,6 +474,16 @@ export default function HomePage() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Distance Warning Alert */}
+      <DistanceWarningHome
+        isOpen={showDistanceWarning}
+        distance={distance}
+        onClose={() => setShowDistanceWarning(false)}
+        onChangeAddress={() => {
+          openLocationPicker();
+        }}
+      />
     </div>
   );
 }

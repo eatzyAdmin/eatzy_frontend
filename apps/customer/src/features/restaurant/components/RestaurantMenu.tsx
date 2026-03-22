@@ -59,7 +59,7 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-1.5 md:gap-4">
               {dishes.map((d) => {
                 const count = getDishCount(d.id);
                 const cartItem = getCartItemForDish(d.id);

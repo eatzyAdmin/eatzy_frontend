@@ -25,13 +25,13 @@ export const RestaurantRating: React.FC<RestaurantRatingProps> = ({
         animate={{ scale: 1 }}
         whileTap={{ scale: 0.94 }}
         onClick={onClick}
-        className="flex items-center bg-lime-50 border border-lime-100 shadow-sm rounded-[14px] px-1 py-1 gap-2 whitespace-nowrap flex-shrink-0"
+        className="flex items-center bg-primary border border-lime-200 shadow-md md:shadow-sm rounded-[15px] px-1 py-1 gap-2 whitespace-nowrap flex-shrink-0"
       >
         <div className="w-6 h-6 rounded-[10px] bg-[#1A1A1A] flex items-center justify-center shadow-sm">
           <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
         </div>
         <div className="flex items-center gap-1">
-          <span className="text-[15px] font-anton text-[#1A1A1A] leading-none pt-0.5">{formattedRating}</span>
+          <span className="text-[15px] font-anton font-bold text-[#1A1A1A] leading-none pt-0.5">{formattedRating}</span>
           <ChevronRight className="w-3 h-3 text-gray-300" />
         </div>
       </motion.button>

@@ -36,7 +36,7 @@ export function RestaurantReviewCard({
         exit={{ opacity: 0, y: -20 }}
         className="h-full flex-1"
       >
-        <div className={`${isReviewed ? "bg-white/95" : "bg-white/40"} backdrop-blur-xl rounded-[40px] md:rounded-[48px] border-4 border-transparent shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-full overflow-hidden relative group`} style={{ transform: 'translateZ(0)' }}>
+        <div className={`${isReviewed ? "bg-white/95" : "bg-white/40"} backdrop-blur-xl rounded-[40px] md:rounded-[48px] border-4 border-transparent shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/40 flex flex-col h-full min-h-[500px] md:min-h-0 overflow-hidden relative group`} style={{ transform: 'translateZ(0)' }}>
           {/* subtle pattern overlay */}
           {/* <div className="absolute inset-0 opacity-[0.03] pointer-events-none grayscale mix-blend-multiply">
             <ImageWithFallback src="" alt="Texture" placeholderMode="horizontal" fill className="object-cover" />

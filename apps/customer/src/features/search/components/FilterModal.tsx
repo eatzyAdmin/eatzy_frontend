@@ -31,7 +31,7 @@ const MAX_PRICE = 500000; // 500k for food app
 const SORT_OPTIONS = [
   { id: 'recommended', label: 'Đề xuất', icon: Sparkles },
   { id: 'cheapest', label: 'Giá rẻ nhất', icon: Tag },
-  { id: 'bestseller', label: 'Bán chạy nhất', icon: Flame },
+  { id: 'bestseller', label: 'Bán chạy', icon: Flame },
   { id: 'nearest', label: 'Gần nhất', icon: MapPin },
   { id: 'rating', label: 'Đánh giá tốt', icon: Star },
 ];
@@ -215,7 +215,7 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
                           </div>
 
                           {/* Label */}
-                          <span className={`flex-1 text-[12px] md:text-[15px] leading-tight font-bold tracking-tight transition-all whitespace-nowrap ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
+                          <span className={`flex-1 text-[14px] md:text-[15px] leading-tight font-bold tracking-tight transition-all whitespace-nowrap ${active ? "text-[#1A1A1A]" : "text-gray-500 group-hover:text-gray-700"}`}>
                             {opt.label}
                           </span>
 

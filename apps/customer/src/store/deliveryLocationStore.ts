@@ -17,6 +17,9 @@ interface DeliveryLocationState {
   // Whether user has manually selected a location
   isManuallySelected: boolean;
 
+  // Timestamp of the last manual selection
+  lastSelectedAt: number | null;
+
   // Actions
   setSelectedLocation: (location: DeliveryLocation) => void;
   clearSelectedLocation: () => void;
@@ -35,17 +38,20 @@ export const useDeliveryLocationStore = create<DeliveryLocationState>()(
     (set) => ({
       selectedLocation: null,
       isManuallySelected: false,
+      lastSelectedAt: null,
 
       setSelectedLocation: (location) =>
         set({
           selectedLocation: location,
           isManuallySelected: true,
+          lastSelectedAt: Date.now(),
         }),
 
       clearSelectedLocation: () =>
         set({
           selectedLocation: null,
           isManuallySelected: false,
+          lastSelectedAt: null,
         }),
 
       updateAddress: (address, placeName) =>
