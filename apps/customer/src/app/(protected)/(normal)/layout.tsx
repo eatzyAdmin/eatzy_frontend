@@ -152,6 +152,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 hideSearchIcon={shouldSlideHeader || isRestaurantDetail || isFavorites || isReviewPage || isProfile}
                 hideCart={isRestaurantDetail}
                 showHomeIcon={isMobile}
+                disableScrollHide={isProfile}
                 onLogoClick={() => {
                   if (pathname === '/home' && !isSearchMode && !isRecommendedMode) return;
 

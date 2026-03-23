@@ -22,6 +22,7 @@ interface HomeHeaderProps {
   hideCart?: boolean;
   onLogoClick?: () => void;
   showHomeIcon?: boolean;
+  disableScrollHide?: boolean;
 }
 
 export default function HomeHeader({
@@ -33,6 +34,7 @@ export default function HomeHeader({
   hideCart = false,
   onLogoClick,
   showHomeIcon = false,
+  disableScrollHide = false,
 }: HomeHeaderProps) {
   const { totalItems, carts } = useCart();
   const { activeOrdersCount } = useCurrentOrders();
@@ -54,9 +56,14 @@ export default function HomeHeader({
       setLastScrollY(currentScrollY);
     };
 
+    if (disableScrollHide) {
+      setIsVisible(true);
+      return;
+    }
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, disableScrollHide]);
 
   return (
     <motion.header
