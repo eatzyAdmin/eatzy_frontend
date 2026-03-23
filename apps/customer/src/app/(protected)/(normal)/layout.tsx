@@ -14,13 +14,17 @@ import BottomNav from "@/features/navigation/components/BottomNav";
 import { BottomNavProvider } from "@/features/navigation/context/BottomNavContext";
 import { useMobileExitGuard } from "@/hooks/useMobileExitGuard";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { useUIStore } from "@/store/uiStore";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   useMobileExitGuard();
-  const [cartOpen, setCartOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [ordersOpen, setOrdersOpen] = useState(false);
+  const { 
+    isRecommendedMode, setRecommendedMode, 
+    isCartOpen: cartOpen, setCartOpen, 
+    isOrdersDrawerOpen: ordersOpen, setOrdersDrawerOpen, 
+    isMenuOpen: menuOpen, setMenuOpen,
+    isSearchOpen: searchOpen, setSearchOpen
+  } = useUIStore();
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   const searchParams = useSearchParams();
@@ -32,8 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isFavorites = pathname?.startsWith("/favorites") ?? false;
   const isReviewPage = pathname?.includes("/review") ?? false;
   const isProfile = pathname?.startsWith("/profile") ?? false;
-  const [isRecommendedMode, setIsRecommendedMode] = useState(false);
-
+  
   // Combine modes for layout and animation purposes
   const effectiveSearchMode = isSearchMode || isRecommendedMode;
   const shouldSlideHeader = effectiveSearchMode || isOrderHistory || isFavorites || isReviewPage;
@@ -47,14 +50,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     const handleRecommendedMode = (e: Event) => {
       const customEvent = e as CustomEvent<{ active: boolean }>;
-      setIsRecommendedMode(customEvent.detail.active);
+      setRecommendedMode(customEvent.detail.active);
     };
 
     window.addEventListener('searchHeaderVisibility', handleHeaderVisibility);
     window.addEventListener('recommendedModeChange', handleRecommendedMode);
 
     // Custom event to open orders drawer from anywhere (e.g. from toast)
-    const handleOpenOrders = () => setOrdersOpen(true);
+    const handleOpenOrders = () => setOrdersDrawerOpen(true);
     window.addEventListener('openOrdersDrawer', handleOpenOrders);
 
     // Custom event to open cart overlay from anywhere (SearchOverlay bottom buttons)
@@ -67,7 +70,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       window.removeEventListener('openOrdersDrawer', handleOpenOrders);
       window.removeEventListener('openCart', handleOpenCart);
     };
-  }, []);
+  }, [setRecommendedMode, setOrdersDrawerOpen, setCartOpen]);
 
   useEffect(() => {
     if (!shouldSlideHeader && !isProfile) {
@@ -78,9 +81,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Reset recommended mode if we move away from home
     if (pathname !== "/home" && isRecommendedMode) {
-      setIsRecommendedMode(false);
+      setRecommendedMode(false);
     }
-  }, [pathname, isRecommendedMode]);
+  }, [pathname, isRecommendedMode, setRecommendedMode]);
 
   const handleSearch = (query: string, filters?: { minPrice?: number; maxPrice?: number; sort?: string; category?: string | null }) => {
     performSearch(query, filters);
@@ -88,7 +91,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isSearchMode) setSearchOpen(false);
-  }, [isSearchMode]);
+  }, [isSearchMode, setSearchOpen]);
 
   // Handle body scroll locking when any overlay is open
   useEffect(() => {
@@ -142,7 +145,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             >
               <HomeHeader
                 onMenuClick={() => setMenuOpen(true)}
-                onFavoritesClick={() => setOrdersOpen(true)}
+                onFavoritesClick={() => setOrdersDrawerOpen(true)}
                 onSearchClick={() => setSearchOpen(true)}
                 onCartClick={() => setCartOpen(true)}
                 hideSearchIcon={shouldSlideHeader || isRestaurantDetail || isFavorites || isReviewPage || isProfile}
@@ -168,7 +171,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
         <CartOverlay open={cartOpen} onClose={() => setCartOpen(false)} />
         <ProtectedMenuOverlay open={menuOpen} onClose={() => setMenuOpen(false)} />
-        <CurrentOrdersDrawer open={ordersOpen} onClose={() => setOrdersOpen(false)} />
+        <CurrentOrdersDrawer open={ordersOpen} onClose={() => setOrdersDrawerOpen(false)} />
         <SearchOverlay
           open={searchOpen}
           onClose={() => setSearchOpen(false)}
@@ -180,7 +183,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           activeFilters={filters}
         />
         {children}
-        {!isRestaurantDetail && !effectiveSearchMode && !isReviewPage && <BottomNav onCurrentOrdersClick={() => setOrdersOpen(true)} isOrdersOpen={ordersOpen} />}
+        {!isRestaurantDetail && !effectiveSearchMode && !isReviewPage && <BottomNav onCurrentOrdersClick={() => setOrdersDrawerOpen(true)} isOrdersOpen={ordersOpen} />}
         <DeliveryLocationButton variant="listener" />
       </div>
     </BottomNavProvider>

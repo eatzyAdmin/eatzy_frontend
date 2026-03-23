@@ -6,6 +6,7 @@ import { MapPin, ChevronDown, Navigation, Loader2 } from "@repo/ui/icons";
 import { useDeliveryLocationStore } from "@/store/deliveryLocationStore";
 import { useUserLocation, DEFAULT_LOCATION_HCMC } from "@repo/hooks";
 import dynamic from "next/dynamic";
+import { useUIStore } from "@/store/uiStore";
 
 // Dynamic import to avoid SSR issues with modal
 const LocationPickerModal = dynamic(
@@ -36,8 +37,10 @@ export default function DeliveryLocationButton({
   variant = "home",
   className = "",
 }: DeliveryLocationButtonProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSavedAddressesModalOpen, setIsSavedAddressesModalOpen] = useState(false);
+  const { 
+    isLocationPickerOpen: isModalOpen, setLocationPickerOpen: setIsModalOpen,
+    isSavedAddressesOpen: isSavedAddressesModalOpen, setSavedAddressesOpen: setIsSavedAddressesModalOpen 
+  } = useUIStore();
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Store
