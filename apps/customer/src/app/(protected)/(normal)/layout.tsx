@@ -15,8 +15,9 @@ import { BottomNavProvider } from "@/features/navigation/context/BottomNavContex
 import { useMobileExitGuard } from "@/hooks/useMobileExitGuard";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useUIStore } from "@/store/uiStore";
+import { Suspense } from "react";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+function LayoutContent({ children }: { children: React.ReactNode }) {
   useMobileExitGuard();
   const { 
     isRecommendedMode, setRecommendedMode, 
@@ -187,5 +188,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <DeliveryLocationButton variant="listener" />
       </div>
     </BottomNavProvider>
+  );
+}
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <LayoutContent>
+        {children}
+      </LayoutContent>
+    </Suspense>
   );
 }

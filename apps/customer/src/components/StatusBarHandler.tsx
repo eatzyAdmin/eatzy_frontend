@@ -1,11 +1,11 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useUIStore } from '@/store/uiStore';
 import { useSearch } from '@/features/search/hooks/useSearch';
 
-export default function StatusBarHandler() {
+function StatusBarLogic() {
   const pathname = usePathname();
   const { isSearchMode } = useSearch();
   const { 
@@ -52,4 +52,12 @@ export default function StatusBarHandler() {
   ]);
 
   return null;
+}
+
+export default function StatusBarHandler() {
+  return (
+    <Suspense fallback={null}>
+      <StatusBarLogic />
+    </Suspense>
+  );
 }
