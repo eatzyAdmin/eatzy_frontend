@@ -2,7 +2,7 @@
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { X, Trash, CheckCircle2, Store, Loader2, ShoppingBag, Pencil, Check, Compass } from "@repo/ui/icons";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useLoading, CartOverlayShimmer } from "@repo/ui";
 import { useCart, cartKeys } from "../hooks/useCart";
@@ -30,6 +30,15 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedRestIds, setSelectedRestIds] = useState<Set<number>>(new Set());
   const setActiveRestaurant = useCartStore((s) => s.setActiveRestaurant);
+ 
+  const sortedCarts = useMemo(() => {
+    return [...carts].sort((a, b) => {
+      const isAClosed = !!a.restaurant.status && a.restaurant.status !== 'OPEN';
+      const isBClosed = !!b.restaurant.status && b.restaurant.status !== 'OPEN';
+      if (isAClosed === isBClosed) return 0;
+      return isAClosed ? 1 : -1;
+    });
+  }, [carts]);
 
   const toggleSelection = (cartId: number) => {
     const next = new Set(selectedRestIds);
@@ -171,7 +180,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                 ) : (
                   <motion.div layout className="space-y-2 md:space-y-3">
                     <AnimatePresence mode="popLayout" initial={false}>
-                      {carts.map(cart => (
+                      {sortedCarts.map(cart => (
                         <CartItemCard
                           key={cart.id}
                           cart={cart}
@@ -185,7 +194,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                       ))}
                     </AnimatePresence>
 
-                    {carts.length >= 4 && (
+                    {sortedCarts.length >= 4 && (
                       <div className="py-8 flex items-center justify-center gap-4 opacity-30 mt-4">
                         <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-16" />
                         <div className="flex flex-col items-center gap-1.5">

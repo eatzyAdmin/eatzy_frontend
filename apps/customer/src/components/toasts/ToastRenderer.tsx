@@ -19,6 +19,7 @@ export type ToastActionType =
   | "cart_add"
   | "profile_update_success"
   | "profile_update_error"
+  | "store_closed"
   | "error";
 
 export interface ExtendedToastOptions extends SileoOptions {
@@ -314,6 +315,39 @@ export function renderCustomDescription(opts: ExtendedToastOptions) {
             <p className="text-white/50 text-[12px] font-medium leading-snug">
               {String(opts.description || "Thông tin của bạn đã được lưu lại")}
             </p>
+          </div>
+        </div>
+      );
+
+    case "store_closed":
+      return (
+        <div className="flex items-center gap-4 py-1">
+          <motion.div
+            animate={{ x: [-2, 2, -2, 2, 0] }}
+            transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+            className="w-12 h-12 bg-red-500/20 rounded-2xl flex items-center justify-center border border-red-500/30 shrink-0 shadow-lg shadow-red-500/10"
+          >
+            <div className="relative">
+              <Store className="w-7 h-7 text-red-500" strokeWidth={2.5} />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-slate-900 flex items-center justify-center"
+              >
+                <div className="w-1.5 h-1.5 bg-white rounded-full" />
+              </motion.div>
+            </div>
+          </motion.div>
+          <div className="flex flex-col flex-1 text-left min-w-0">
+            <span className="font-semibold text-[17px] leading-tight text-red-500 tracking-tight">
+              Nhà hàng tạm đóng cửa
+            </span>
+            <span className="text-white/50 text-[12px] leading-snug truncate mt-0.5">
+              {String(opts.description || "Vui lòng chọn quán khác hoặc quay lại sau nhé!")}
+            </span>
+          </div>
+          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center opacity-30">
+            <ChevronRight className="w-4 h-4 text-white" />
           </div>
         </div>
       );

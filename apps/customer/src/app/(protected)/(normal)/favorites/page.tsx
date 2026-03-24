@@ -79,13 +79,22 @@ export default function FavoritesPage() {
 
   // Filter by search query
   const filteredRestaurants = useMemo(() => {
-    if (!actualSearchQuery) return favoriteRestaurants;
+    let result = favoriteRestaurants;
+    if (actualSearchQuery) {
+      const query = actualSearchQuery.toLowerCase();
+      result = favoriteRestaurants.filter((restaurant) =>
+        restaurant.name.toLowerCase().includes(query) ||
+        restaurant.description?.toLowerCase().includes(query)
+      );
+    }
 
-    const query = actualSearchQuery.toLowerCase();
-    return favoriteRestaurants.filter((restaurant) =>
-      restaurant.name.toLowerCase().includes(query) ||
-      restaurant.description?.toLowerCase().includes(query)
-    );
+    // Sort closed to the end
+    return [...result].sort((a, b) => {
+      const isAClosed = a.status !== 'OPEN';
+      const isBClosed = b.status !== 'OPEN';
+      if (isAClosed === isBClosed) return 0;
+      return isAClosed ? 1 : -1;
+    });
   }, [favoriteRestaurants, actualSearchQuery]);
 
   const handleRestaurantClick = (restaurant: Restaurant) => {

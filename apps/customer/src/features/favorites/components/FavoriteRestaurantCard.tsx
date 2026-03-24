@@ -4,6 +4,7 @@ import { motion } from "@repo/ui/motion";
 import { ImageWithFallback, useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
 import { MapPin, Star, Heart, Loader2, Store } from "@repo/ui/icons";
 import type { Restaurant } from "@repo/types";
+import { sileo } from "@/components/DynamicIslandToast";
 
 export default function FavoriteRestaurantCard({
   restaurant,
@@ -24,10 +25,23 @@ export default function FavoriteRestaurantCard({
     clearHover,
   } = useHoverHighlight<HTMLDivElement>();
 
+  const isClosed = !!restaurant.status && restaurant.status !== 'OPEN';
+
+  const handleCardClick = () => {
+    if (isClosed) {
+      sileo.error({
+        actionType: "store_closed",
+        description: restaurant.name,
+      });
+      return;
+    }
+    onClick();
+  };
+
   return (
     <motion.div
       ref={containerRef}
-      whileHover={{ y: -6, scale: 1.02 }}
+      whileHover={!isClosed ? { y: -6, scale: 1.02 } : {}}
       whileTap={{ scale: 0.98 }}
       transition={{
         type: "spring",
@@ -35,25 +49,29 @@ export default function FavoriteRestaurantCard({
         damping: 30,
         mass: 1
       }}
-      onClick={onClick}
-      onMouseEnter={(e) =>
-        moveHighlight(e, {
-          borderRadius: 40,
-          backgroundColor: "rgba(255,255,255,0.05)",
-          opacity: 1,
-          scaleEnabled: false,
-        })
-      }
-      onMouseMove={(e) =>
-        moveHighlight(e, {
-          borderRadius: 40,
-          backgroundColor: "rgba(255,255,255,0.05)",
-          opacity: 1,
-          scaleEnabled: false,
-        })
-      }
+      onClick={handleCardClick}
+      onMouseEnter={(e) => {
+        if (!isClosed) {
+          moveHighlight(e, {
+            borderRadius: 40,
+            backgroundColor: "rgba(255,255,255,0.05)",
+            opacity: 1,
+            scaleEnabled: false,
+          });
+        }
+      }}
+      onMouseMove={(e) => {
+        if (!isClosed) {
+          moveHighlight(e, {
+            borderRadius: 40,
+            backgroundColor: "rgba(255,255,255,0.05)",
+            opacity: 1,
+            scaleEnabled: false,
+          });
+        }
+      }}
       onMouseLeave={clearHover}
-      className="group relative w-full aspect-[4/5] md:aspect-[7/8] pt-1 cursor-pointer"
+      className={`group relative w-full aspect-[4/5] md:aspect-[7/8] pt-1 ${isClosed ? 'cursor-default' : 'cursor-pointer'}`}
     >
       {/* Background & Body (Clipped for image/gradients) */}
       <div className="absolute inset-0 overflow-hidden rounded-[32px] md:rounded-[40px] shadow-[0_0_15px_rgba(0,0,0,0.08)] md:shadow-[0_0_25px_rgba(0,0,0,0.10)] z-0">
@@ -174,7 +192,7 @@ export default function FavoriteRestaurantCard({
             stiffness: 200,
             damping: 20
           }}
-          className="absolute right-[-8px] md:right-[-9.5px] top-16 md:top-20 z-[60] flex items-center gap-2 bg-red-600 backdrop-blur-sm pl-4 md:pl-5 pr-5 md:pr-7 py-2 md:py-2.5 shadow-[0_8px_16px_rgba(0,0,0,0.3)] border-y border-l border-white/30 text-white rounded-l-2xl group-hover:translate-x-1 transition-all"
+          className="absolute right-[-8px] md:right-[-9.5px] top-16 md:top-20 z-[20] flex items-center gap-2 bg-red-600 backdrop-blur-sm pl-4 md:pl-5 pr-5 md:pr-7 py-2 md:py-2.5 shadow-[0_8px_16px_rgba(0,0,0,0.3)] border-y border-l border-white/30 text-white rounded-l-2xl group-hover:translate-x-1 transition-all"
         >
           <Store className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-white" strokeWidth={3} />
           <span className="text-[11px] md:text-[14px] font-black font-anton uppercase tracking-[0.1em] drop-shadow-sm">

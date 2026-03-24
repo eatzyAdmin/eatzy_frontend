@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ImageWithFallback, RestaurantDetailShimmer, FloatingRestaurantCartShimmer } from "@repo/ui";
-import { ChevronLeft, ChevronRight, Star, MapPin, Loader2 } from "@repo/ui/icons";
+import { ChevronLeft, ChevronRight, Star, MapPin, Loader2, Store } from "@repo/ui/icons";
 import { RestaurantVouchers, MobileRestaurantVouchers } from "@/features/restaurant/components/RestaurantVouchers";
 import { useRestaurantShippingInfo } from "@/features/restaurant/hooks/useRestaurantShippingInfo";
 import { motion, AnimatePresence } from "@repo/ui/motion";
@@ -18,6 +18,7 @@ import { useFavorites } from "@/features/favorites/hooks/useFavorites";
 import { RestaurantHeader } from "@/features/restaurant/components/RestaurantHeader";
 import { RestaurantShipping } from "@/features/restaurant/components/RestaurantShipping";
 import { RestaurantRating } from "@/features/restaurant/components/RestaurantRating";
+import StoreClosedModal from "@/features/restaurant/components/StoreClosedModal";
 import { RestaurantIllustration } from "@/features/restaurant/components/RestaurantIllustration";
 import { RestaurantHero } from "@/features/restaurant/components/RestaurantHero";
 import { RestaurantMenu } from "@/features/restaurant/components/RestaurantMenu";
@@ -107,6 +108,16 @@ export default function RestaurantDetailPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerDish, setDrawerDish] = useState<Dish | null>(null);
   const [isReviewsOpen, setIsReviewsOpen] = useState(false);
+  const [showClosedModal, setShowClosedModal] = useState(false);
+
+  // Handle Closed Modal vs Distance Warning Priority
+  useEffect(() => {
+    if (!isApiLoading && restaurant && restaurant.status !== 'OPEN') {
+      setShowClosedModal(true);
+      // Priority: Hide distance warning if store is closed
+      if (showWarning) setShowWarning(false);
+    }
+  }, [restaurant?.status, isApiLoading, showWarning, setShowWarning]);
 
   useEffect(() => {
     const rightCol = rightColumnRef.current;
@@ -152,11 +163,36 @@ export default function RestaurantDetailPage() {
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
       <FlyToCartLayer ghosts={ghosts} />
+
+      {/* Mobile Closed Fixed Drawer */}
+      {restaurant.status !== 'OPEN' && (
+        <motion.div
+          initial={{ y: -80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="fixed top-0 left-0 w-full h-[72px] bg-red-600 z-[300] rounded-b-[30px] shadow-lg flex items-center justify-between px-4 pr-6 md:hidden"
+        >
+          <button
+            onClick={() => router.back()}
+            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white active:scale-90 transition-transform"
+          >
+            <ChevronLeft size={24} strokeWidth={3} />
+          </button>
+
+          <div className="flex items-center gap-2.5">
+            <span className="text-[14px] font-bold uppercase tracking-tight text-white drop-shadow-sm pt-0.5">
+              Nhà hàng tạm đóng cửa
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Store size={18} strokeWidth={3} className="text-white" />
+            </div>
+          </div>
+        </motion.div>
+      )}
       {/* Back button - Fixed position */}
       {/* Mobile Back Button - Strictly md:hidden */}
       <button
         onClick={() => router.back()}
-        className="fixed top-4 left-4 z-40 w-10 h-10 rounded-full bg-white/80 backdrop-blur-xl shadow-md border border-gray-100 md:hidden flex items-center justify-center group active:scale-95 transition-all"
+        className={`fixed top-4 left-4 z-40 w-10 h-10 rounded-full bg-white/80 backdrop-blur-xl shadow-md border border-gray-100 md:hidden flex items-center justify-center group active:scale-95 transition-all ${restaurant.status !== 'OPEN' ? 'hidden' : ''}`}
       >
         <ChevronLeft className="w-6 h-6 text-[#1A1A1A]" />
       </button>
@@ -181,6 +217,7 @@ export default function RestaurantDetailPage() {
                   favorited={favorited}
                   isMutating={isMutating}
                   onToggleFavorite={toggleFavorite}
+                  status={restaurant.status}
                 />
 
                 {/* Restaurant Title & Info */}
@@ -262,6 +299,13 @@ export default function RestaurantDetailPage() {
                   isUpdating={isUpdating}
                   sectionRefs={sectionRefs}
                   onDishClick={(d) => {
+                    if (restaurant.status !== 'OPEN') {
+                      sileo.error({
+                        actionType: "store_closed",
+                        description: restaurant.name,
+                      });
+                      return;
+                    }
                     setDrawerDish(d);
                     setDrawerOpen(true);
                   }}
@@ -341,18 +385,29 @@ export default function RestaurantDetailPage() {
         }}
       />
       <ReviewsModal restaurant={restaurant} isOpen={isReviewsOpen} onClose={() => setIsReviewsOpen(false)} />
-      {!isApiLoading && restaurant && <FloatingRestaurantCart restaurantId={restaurant.id} restaurantName={restaurant.name} />}
+      {!isApiLoading && restaurant && restaurant.status === 'OPEN' && (
+        <FloatingRestaurantCart 
+          restaurantId={restaurant.id} 
+          restaurantName={restaurant.name} 
+        />
+      )}
 
       <DistanceWarningModal
-        isOpen={showWarning}
+        isOpen={showWarning && restaurant?.status === 'OPEN'}
         onClose={() => setShowWarning(false)}
         maxDistance={maxDistance}
-        currentDistance={distance}
+        currentDistance={distance || 0}
         currentAddress={selectedLocation?.address}
         onSelectLocation={() => {
           setShowWarning(false);
           window.dispatchEvent(new CustomEvent('openLocationPicker'));
         }}
+      />
+
+      <StoreClosedModal
+        isOpen={showClosedModal}
+        onClose={() => setShowClosedModal(false)}
+        restaurantName={restaurant?.name || ""}
       />
     </div>
   );

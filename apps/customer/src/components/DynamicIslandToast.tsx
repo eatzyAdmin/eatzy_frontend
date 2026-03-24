@@ -25,8 +25,12 @@ const WrappedSileo = {
     });
   },
   error: (opts: ExtendedToastOptions) => {
+    let fixedTitle = opts.title;
+    if (opts.actionType === "store_closed") fixedTitle = "Nhà hàng tạm đóng cửa";
+
     return originalSileo.error({
       ...opts,
+      title: fixedTitle,
       description: renderCustomDescription(opts) || opts.description,
     });
   },

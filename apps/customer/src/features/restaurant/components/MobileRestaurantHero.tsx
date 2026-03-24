@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
-import { Star, Loader2 } from "@repo/ui/icons";
+import { motion } from "@repo/ui/motion";
+import { Star, Loader2, Store, ChevronLeft } from "@repo/ui/icons";
 import { ImageWithFallback } from "@repo/ui";
 import type { Restaurant } from "@repo/types";
+import { useRouter } from "next/navigation";
 
 interface MobileRestaurantHeroProps {
   coverImageUrl?: string;
@@ -12,6 +13,7 @@ interface MobileRestaurantHeroProps {
   favorited: boolean;
   isMutating: boolean;
   onToggleFavorite: (id: number, name: string) => void;
+  status?: string;
 }
 
 export const MobileRestaurantHero: React.FC<MobileRestaurantHeroProps> = ({
@@ -20,8 +22,12 @@ export const MobileRestaurantHero: React.FC<MobileRestaurantHeroProps> = ({
   numericRestaurantId,
   favorited,
   isMutating,
-  onToggleFavorite
+  onToggleFavorite,
+  status
 }) => {
+  const router = useRouter();
+  const isClosed = !!status && status !== 'OPEN';
+
   return (
     <div className="absolute top-0 left-0 w-full h-[160px] z-0 md:hidden border-none outline-none ring-0 -mb-1">
       <div className="relative w-full h-full overflow-hidden">
@@ -30,8 +36,13 @@ export const MobileRestaurantHero: React.FC<MobileRestaurantHeroProps> = ({
           alt={restaurantName}
           fill
           placeholderMode="horizontal"
-          className="object-cover"
+          className={`object-cover transition-transform duration-700 ${isClosed ? 'grayscale brightness-75' : ''}`}
         />
+
+        {isClosed && (
+          <div className="absolute inset-0 bg-primary/20 mix-blend-color z-[1] pointer-events-none" />
+        )}
+
 
         {/* Gradient for text blend */}
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F7F7F7] via-[#F7F7F7]/80 to-transparent" />

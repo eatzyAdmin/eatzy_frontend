@@ -6,6 +6,7 @@ export type CartRestaurant = {
   id: number;
   name: string;
   address?: string;
+  status?: string;
 };
 
 export type CartCustomer = {
