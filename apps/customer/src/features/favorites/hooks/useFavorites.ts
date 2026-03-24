@@ -7,12 +7,12 @@ import { useCallback } from "react";
 import { sileo } from "@/components/DynamicIslandToast";
 
 export function useFavorites() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const queryClient = useQueryClient();
   const isLoggedIn = !!user?.id;
 
   // Fetch all favorites for current user (uses backend auth context)
-  const { data: favorites = [], isLoading } = useQuery({
+  const { data: favorites = [], isLoading: isQueryLoading } = useQuery({
     queryKey: ["favorites", "my"],
     queryFn: async () => {
       const response = await favoriteApi.getMyFavorites();
@@ -20,6 +20,8 @@ export function useFavorites() {
     },
     enabled: isLoggedIn,
   });
+
+  const isLoading = isAuthLoading || (isLoggedIn && isQueryLoading);
 
   const isFavorite = useCallback(
     (restaurantId: number) => {

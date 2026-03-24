@@ -126,9 +126,9 @@ export default function SavedAddressesModal({
                 className="relative bg-[#F8F9FA] w-full max-w-full md:max-w-2xl h-[85vh] md:h-[90vh] max-h-full md:max-h-[800px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20 rounded-t-[40px] pointer-events-auto"
               >
                 {/* Header */}
-                <div className="bg-white px-4 md:px-8 py-4 md:py-6 border-b border-gray-100 flex items-center justify-between sticky top-0 z-20 shadow-sm/50">
+                <div className="bg-white px-6 md:px-8 py-6 md:py-6 border-b border-gray-100 flex items-center justify-between sticky top-0 z-20 shadow-sm/50">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-lime-50 border border-lime-100 flex items-center justify-center">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-lime-50 border border-lime-100 hidden md:flex items-center justify-center">
                       <MapPin className="w-5 h-5 md:w-6 md:h-6 text-lime-600" />
                     </div>
                     <div>

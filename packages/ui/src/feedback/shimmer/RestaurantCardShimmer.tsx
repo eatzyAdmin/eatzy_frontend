@@ -90,7 +90,7 @@ const RestaurantCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
             </div>
 
             {/* Metrics Row */}
-            <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4">
               <motion.div className="h-6 md:h-8 w-16 md:w-20 bg-white/20 rounded-md" variants={shimmerVariants} initial="initial" animate="animate" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.2) 75%)', backgroundSize: '200% 100%' }} />
               <div className="w-px h-6 bg-white/10" />
               <motion.div className="h-6 md:h-8 w-16 md:w-20 bg-white/20 rounded-md" variants={shimmerVariants} initial="initial" animate="animate" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.2) 75%)', backgroundSize: '200% 100%' }} />

@@ -99,11 +99,12 @@ export default function OrdersPage() {
       } else {
         throw new Error(response.message || 'Failed to confirm order');
       }
-    } catch (error) {
+    } catch (error: any) {
       showNotification({
-        message: 'Không thể xác nhận đơn hàng. Vui lòng thử lại.',
+        message: 'Lỗi xác nhận đơn hàng',
+        format: error?.message || 'Vui lòng kiểm tra lại kết nối hoặc thử lại sau.',
         type: 'error',
-        autoHideDuration: 3000
+        autoHideDuration: 5000
       });
     }
   };
@@ -122,11 +123,12 @@ export default function OrdersPage() {
       } else {
         throw new Error(response.message || 'Failed to reject order');
       }
-    } catch (error) {
+    } catch (error: any) {
       showNotification({
-        message: 'Không thể từ chối đơn hàng. Vui lòng thử lại.',
+        message: 'Lỗi từ chối đơn hàng',
+        format: error?.message || 'Vui lòng kiểm tra lại kết nối hoặc thử lại sau.',
         type: 'error',
-        autoHideDuration: 3000
+        autoHideDuration: 5000
       });
     }
   };
@@ -145,11 +147,12 @@ export default function OrdersPage() {
       } else {
         throw new Error(response.message || 'Failed to complete order');
       }
-    } catch (error) {
+    } catch (error: any) {
       showNotification({
-        message: 'Không thể hoàn thành đơn hàng. Vui lòng thử lại.',
+        message: 'Lỗi trạng thái đơn hàng',
+        format: error?.message || 'Vui lòng kiểm tra lại kết nối hoặc thử lại sau.',
         type: 'error',
-        autoHideDuration: 3000
+        autoHideDuration: 5000
       });
     }
   };

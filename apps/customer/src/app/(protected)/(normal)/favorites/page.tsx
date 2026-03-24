@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "@repo/ui/motion";
 import { ArrowLeft, Heart, Search, X, Store, CheckCircle2, Compass } from "@repo/ui/icons";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useLoading, RestaurantCardShimmer } from "@repo/ui";
-import type { Restaurant, FavoriteResponse } from "@repo/types";
+import type { Restaurant, FavoriteResponse, RestaurantStatus } from "@repo/types";
 import FavoriteRestaurantCard from "@/features/favorites/components/FavoriteRestaurantCard";
 import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
@@ -72,7 +72,7 @@ export default function FavoritesPage() {
       averageRating: f.restaurant.averageRating,
       slug: f.restaurant.slug,
       imageUrl: f.restaurant.imageUrl,
-      status: 'OPEN',
+      status: (f.restaurant.status as RestaurantStatus) || 'OPEN',
       categories: f.restaurant.restaurantTypes?.map(t => ({ id: String(t.id), name: t.name })) || [],
     }));
   }, [favorites]);

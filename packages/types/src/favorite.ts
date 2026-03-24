@@ -18,10 +18,10 @@ export interface FavoriteResponse {
     description: string;
     averageRating: number;
     imageUrl?: string;
+    status?: string;
     restaurantTypes?: {
       id: number;
       name: string;
     }[];
   };
 }
-

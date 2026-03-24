@@ -1,4 +1,4 @@
-import type { Restaurant, Dish, MenuCategory, RestaurantMagazine } from '@repo/types';
+import type { Restaurant, Dish, MenuCategory, RestaurantMagazine, RestaurantStatus } from '@repo/types';
 import type { RestaurantWithMenu } from '../hooks/useSearch';
 
 /**
@@ -57,7 +57,7 @@ export function mapMagazineToRestaurantWithMenu(
     name: magazine.name,
     slug: magazine.slug,
     categories: [],
-    status: 'OPEN',
+    status: (magazine.status as RestaurantStatus) || 'OPEN',
     rating: magazine.averageRating || 0,
     address: magazine.address,
     description: magazine.description,

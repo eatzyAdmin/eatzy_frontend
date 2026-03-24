@@ -147,6 +147,7 @@ export type RestaurantMagazine = {
   distance?: number; // in km
   avatarUrl?: string;
   coverImageUrl?: string;
+  status?: string;
   category?: MagazineCategory[];
 
   // Personalized ranking scores (only set if user is logged in)

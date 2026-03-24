@@ -15,47 +15,57 @@ function StatusBarLogic() {
   
   const [currentColor, setCurrentColor] = useState('#F7F7F7');
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const prevPathnameRef = useRef(pathname);
 
   useEffect(() => {
-    // Determine the theme color based on current route and overlay states
     const isHomeRoute = pathname === '/' || pathname === '/home';
     
-    // Check if any overlay is open
-    const isAnyOverlayOpen = 
+    // Check if any "Main" overlay is open (ones that should have a light status bar)
+    const isMainOverlayOpen = 
       isCartOpen || 
       isOrdersDrawerOpen || 
       isLocationPickerOpen || 
       isSavedAddressesOpen || 
-      isMenuOpen ||
-      isSearchOpen;
+      isMenuOpen;
 
-    // Dark bar only on Home, NOT in search/recommended modes, and NOT when overlays are open
+    // Dark bar only on Home, NOT in search/recommended modes, and NOT when main overlays are open
+    // NOTE: isSearchOpen (the overlay) is EXCLUDED so it stays dark on Home
     const targetIsDark = 
       isHomeRoute && 
       !isSearchMode && 
       !isRecommendedMode && 
-      !isAnyOverlayOpen;
+      !isMainOverlayOpen;
 
     const targetColor = targetIsDark ? '#262626' : '#F7F7F7';
     
-    // Clear existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    // Determine if this is a page navigation or just an overlay toggle
+    const isNavigation = prevPathnameRef.current !== pathname;
+    prevPathnameRef.current = pathname;
 
-    // Delay the update by 0.6 seconds
-    timeoutRef.current = setTimeout(() => {
-      setCurrentColor(targetColor);
-      
-      // Update theme-color meta tag
+    const updateStatusBar = (color: string) => {
+      setCurrentColor(color);
       let metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (!metaThemeColor) {
         metaThemeColor = document.createElement('meta');
         metaThemeColor.setAttribute('name', 'theme-color');
         document.head.appendChild(metaThemeColor);
       }
-      metaThemeColor.setAttribute('content', targetColor);
-    }, 600);
+      metaThemeColor.setAttribute('content', color);
+    };
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    if (isNavigation) {
+      // Instant update for navigation
+      updateStatusBar(targetColor);
+    } else {
+      // Delayed update for overlays/modals (0.6s to match animation)
+      timeoutRef.current = setTimeout(() => {
+        updateStatusBar(targetColor);
+      }, 600);
+    }
 
     return () => {
       if (timeoutRef.current) {
