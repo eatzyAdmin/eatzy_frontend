@@ -35,7 +35,8 @@ export function mapOrderResponseToDriverHistoryOrder(res: OrderResponse): Driver
       name: item.dish.name,
       price: item.priceAtPurchase,
       quantity: item.quantity,
-      restaurantId: res.restaurant.id.toString()
+      restaurantId: res.restaurant.id.toString(),
+      orderItemOptions: item.orderItemOptions,
     })),
     subtotal: res.subtotal,
     fee: res.deliveryFee,

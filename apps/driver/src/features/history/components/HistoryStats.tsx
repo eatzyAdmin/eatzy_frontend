@@ -3,7 +3,8 @@
 import { useMemo } from "react";
 import { formatVnd } from "@repo/lib";
 import { DriverHistoryOrder } from "@repo/types";
-import { Wallet, Bike } from "@repo/ui/icons";
+import { Wallet, Bike, ChevronRight } from "@repo/ui/icons";
+import { motion } from "@repo/ui/motion";
 
 export default function HistoryStats({ orders }: { orders: DriverHistoryOrder[] }) {
   const stats = useMemo(() => {
@@ -20,26 +21,40 @@ export default function HistoryStats({ orders }: { orders: DriverHistoryOrder[] 
   }, [orders]);
 
   return (
-    <div className="grid grid-cols-2 gap-3 mb-2">
-      <div className="bg-[var(--primary)] rounded-[24px] p-4 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-3 opacity-20 rotate-12">
-          <Wallet className="w-16 h-16" />
+    <div className="grid grid-cols-2 gap-2 mb-2">
+      {/* Total Income Card */}
+      <div
+        className="bg-[#1A1A1A] rounded-[26px] p-5 text-white shadow-md shadow-black/5 relative overflow-hidden border border-white/5"
+      >
+        <div className="absolute -top-4 -right-4 p-4 opacity-[0.12] rotate-12">
+          <Wallet className="w-24 h-24" />
         </div>
         <div className="relative z-10">
-          <p className="text-white/80 text-xs font-bold mb-1 uppercase tracking-wider">Tổng thu nhập</p>
-          <h3 className="text-2xl font-bold font-anton tracking-wide">
+          <div className="flex items-center gap-1.5 mb-2">
+            <p className="text-white/40 text-[13px] font-bold uppercase tracking-tight">
+              Tổng Thu nhập
+            </p>
+          </div>
+          <h3 className="text-2xl font-black font-anton tracking-tight text-[var(--primary)]">
             {formatVnd(stats.income)}
           </h3>
         </div>
       </div>
 
-      <div className="bg-white rounded-[24px] p-4 text-[#1A1A1A] border border-gray-100 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-3 opacity-[0.08] rotate-12 text-[#1A1A1A]">
-          <Bike className="w-16 h-16" />
+      {/* Trips Card */}
+      <div
+        className="bg-white rounded-[26px] p-5 text-[#1A1A1A] border-2 border-white shadow-sm relative overflow-hidden"
+      >
+        <div className="absolute -top-4 -right-4 p-4 opacity-[0.06] rotate-12">
+          <Bike className="w-24 h-24" />
         </div>
         <div className="relative z-10">
-          <p className="text-gray-500 text-xs font-bold mb-1 uppercase tracking-wider">Số chuyến xe</p>
-          <h3 className="text-3xl font-bold font-anton tracking-wide text-[#1A1A1A]">
+          <div className="flex items-center gap-1.5 mb-2">
+            <p className="text-gray-400 text-[13px] font-bold uppercase tracking-tight">
+              Tổng Chuyến xe
+            </p>
+          </div>
+          <h3 className="text-3xl font-black font-anton tracking-tight text-[#1A1A1A]">
             {stats.trips}
           </h3>
         </div>

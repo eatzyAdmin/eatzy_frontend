@@ -1,25 +1,26 @@
 "use client";
 
-import { useEffect, useState, useRef, TouchEvent, WheelEvent } from "react";
-import { motion, useScroll, AnimatePresence } from "@repo/ui/motion";
-import { TextShimmer, TransactionCardShimmer } from "@repo/ui";
+import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "@repo/ui/motion";
+import { TransactionCardShimmer } from "@repo/ui";
 import { useInfiniteScroll } from "@repo/hooks";
 import WalletOverview from "@/features/wallet/components/WalletOverview";
 import TransactionCard from "@/features/wallet/components/TransactionCard";
-import TopUpDrawer from "@/features/wallet/components/TopUpDrawer";
-import WithdrawDrawer from "@/features/wallet/components/WithdrawDrawer";
+import WalletManageView from "@/features/wallet/components/WalletManageView";
 import TransactionDetailDrawer from "@/features/wallet/components/TransactionDetailDrawer";
-import { History, Wallet, ArrowUpRight, ArrowDownLeft, ChevronUp, CheckCircle2 } from "@repo/ui/icons";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Search, Inbox, ChevronUp, CheckCircle2, Wallet, Bike, X, ArrowLeft, History, ArrowUpRight, ArrowDownLeft, LayoutGrid } from "@repo/ui/icons";
 import { useWallet } from "@/features/wallet/hooks/useWallet";
 import { useWalletTransactions } from "@/features/wallet/hooks/useWalletTransactions";
-import { DriverWalletTransaction, WalletTransactionType } from "@repo/types";
+import { DriverWalletTransaction } from "@repo/types";
+import { useRouter } from "next/navigation";
 
 import { useBottomNav } from "../context/BottomNavContext";
 
 export default function WalletPage() {
+  const router = useRouter();
   const { setIsVisible } = useBottomNav();
-  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
-  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+  const [isManageViewOpen, setIsManageViewOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<DriverWalletTransaction | null>(null);
   const [isTransactionDrawerOpen, setIsTransactionDrawerOpen] = useState(false);
   const [filterType, setFilterType] = useState<'ALL' | 'IN' | 'OUT'>('ALL');
@@ -37,7 +38,16 @@ export default function WalletPage() {
 
   const isLoading = isWalletLoading || isTransactionsLoading;
 
-  // Auto-load more when scrolling to bottom
+  // Toggle bottom nav when entering manage view
+  useEffect(() => {
+    if (isManageViewOpen) {
+      setIsVisible(false);
+    } else {
+      setIsVisible(true);
+    }
+  }, [isManageViewOpen, setIsVisible]);
+
+  // Auto-load more
   const { sentinelRef } = useInfiniteScroll({
     hasMore: hasNextPage,
     isLoadingMore: isFetchingNextPage,
@@ -52,282 +62,230 @@ export default function WalletPage() {
     containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+
+  const handleScroll = () => {
+    const container = containerRef.current;
+    if (!container || isManageViewOpen) return;
+
+    const currentScrollY = container.scrollTop;
+    const diff = currentScrollY - lastScrollY.current;
+    lastScrollY.current = currentScrollY;
+
+    if (Math.abs(diff) < 3) return;
+
+    // 1. Bottom Nav visibility
+    if (diff > 5 && currentScrollY > 20) {
+      setIsVisible(false);
+    } else if (diff < -5) {
+      setIsVisible(true);
+    }
+
+    // 2. Scroll to top button visibility (threshold 400px)
+    if (diff > 0 || currentScrollY < 400) {
+      setShowScrollToTop(false);
+    } else if (diff < -20) {
+      setShowScrollToTop(true);
+    }
+  };
+
+  const scrollToTop = () => {
+    containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleTransactionClick = (tx: DriverWalletTransaction) => {
     setSelectedTransaction(tx);
     setIsTransactionDrawerOpen(true);
   };
 
-  // Scroll animation state
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const [showScrollToTop, setShowScrollToTop] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollY } = useScroll({ container: containerRef });
-
-  // Gesture checking state
-  const gestureState = useRef({ startY: 0, startScrollTop: 0 });
-  const lastWheelTime = useRef<number>(0);
-
-  const handleTouchStart = (e: TouchEvent) => {
-    if (!containerRef.current) return;
-    gestureState.current = {
-      startY: e.touches[0].clientY,
-      startScrollTop: containerRef.current.scrollTop
-    };
+  // Fluid transition properties (Original feel)
+  const pageTransition = {
+    type: "spring",
+    damping: 25,
+    stiffness: 180,
+    mass: 0.8
   };
-
-  const handleTouchMove = (e: TouchEvent) => {
-    if (!containerRef.current) return;
-    const currentY = e.touches[0].clientY;
-    const diff = currentY - gestureState.current.startY;
-    const { startScrollTop } = gestureState.current;
-
-    // Scroll Down Gesture (diff < 0)
-    if (diff < -10 && isHeaderVisible) {
-      setIsHeaderVisible(false);
-    }
-
-    // Scroll Up Gesture (diff > 0)
-    else if (diff > 10 && !isHeaderVisible) {
-      // Only trigger if we started at the top of the list (with slight buffer)
-      if (startScrollTop < 2) {
-        setIsHeaderVisible(true);
-      }
-    }
-  };
-
-  const handleWheel = (e: WheelEvent) => {
-    if (!containerRef.current) return;
-    const isAtTop = containerRef.current.scrollTop <= 0;
-    const now = Date.now();
-    const timeDiff = now - lastWheelTime.current;
-    lastWheelTime.current = now;
-
-    // DeltaY > 0 is Down
-    if (e.deltaY > 0 && isHeaderVisible) {
-      setIsHeaderVisible(false);
-    }
-    // DeltaY < 0 is Up
-    else if (e.deltaY < 0 && !isHeaderVisible) {
-      if (isAtTop) {
-        // Only reveal if this is a fresh gesture (gap > 200ms from last event)
-        // This filters out momentum/inertia arriving at the top
-        if (timeDiff > 200) {
-          setIsHeaderVisible(true);
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    return scrollY.on("change", (latest) => {
-      const velocity = scrollY.getVelocity();
-
-      // --- Scroll To Top Button Logic ---
-      // Hide button when near top
-      if (latest < 100) {
-        if (showScrollToTop) setShowScrollToTop(false);
-        setIsVisible(true); // Always show nav at top
-      } else {
-        // Show when scrolling UP, Hide when scrolling DOWN
-        if (velocity < -20) {
-          if (!showScrollToTop) setShowScrollToTop(true);
-          setIsVisible(true);
-        } else if (velocity > 20) {
-          if (showScrollToTop) setShowScrollToTop(false);
-          setIsVisible(false);
-        }
-      }
-    });
-  }, [scrollY, showScrollToTop, setIsVisible]);
-
-  const scrollToTop = () => {
-    setIsHeaderVisible(true);
-    // Use timeout to ensure state update processes before scrolling (if needed) 
-    // or just scroll immediately. With overflow-hidden logic, hidden -> visible unlocks/locks?
-    // If we set Visible -> List becomes Locked (Overflow Hidden).
-    // So scrollToTop might fail if it's locked?
-    // Actually, if it's locked, scrollTo will work programmatically, but user can't scroll.
-    // However, header appearing pushes list down.
-    // We should scroll 0.
-    containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7] relative">
-      {/* Sticky Header */}
-      <div className="flex-none sticky top-0 z-40 bg-[#F7F7F7]/95 backdrop-blur-xl transition-all duration-300 border-none shadow-none ring-0">
-        <motion.div
-          initial={false}
-          animate={{
-            height: isHeaderVisible ? "auto" : 0,
-            opacity: isHeaderVisible ? 1 : 0,
-            marginBottom: isHeaderVisible ? 24 : 0
-          }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="overflow-hidden px-5"
-        >
-          {/* Add padding top only if visible to avoid jumpiness when animating height */}
-          <div className={`${isHeaderVisible ? "pt-5" : "pt-0"}`}>
-            {/* <h1
-              className="text-4xl font-bold font-anton text-[#1A1A1A] leading-tight ml-2 mb-2"
-              style={{ fontFamily: 'var(--font-anton), sans-serif', letterSpacing: '0.01em' }}
+    <div className="flex flex-col h-full bg-[#F7F7F7] relative overflow-hidden">
+      <AnimatePresence initial={false}>
+        {!isManageViewOpen ? (
+          <motion.div
+            key="wallet-main"
+            initial={{ x: '-30%', opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: '-100%', opacity: 0 }}
+            transition={pageTransition}
+            className="flex flex-col h-full w-full absolute inset-0"
+          >
+            <div
+              className="flex flex-col h-full overflow-y-auto no-scrollbar scroll-smooth"
+              ref={containerRef}
+              onScroll={handleScroll}
             >
-              WALLET
-            </h1> */}
+              <div className="max-w-2xl mx-auto px-3 w-full relative">
 
-            {isLoading && !wallet ? (
-              <div className="relative overflow-hidden rounded-[32px] bg-[#1A1A1A] text-white p-6 shadow-xl shadow-black/10">
-                {/* Background decoration */}
-                <div className="absolute top-0 right-0 p-8 opacity-10">
-                  <Wallet className="w-32 h-32 text-white" />
+                {/* Title and Header Area - Replicating History Pattern */}
+                <div className="flex items-center gap-4 py-3 pb-0 pt-3">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => router.back()}
+                    className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center flex-shrink-0"
+                  >
+                    <ArrowLeft className="w-5 h-5 text-gray-700" />
+                  </motion.button>
+                  <div>
+                    <h1
+                      className="text-[32px] font-bold leading-tight text-[#1A1A1A]"
+                      style={{
+                        fontStretch: "condensed",
+                        letterSpacing: "-0.01em",
+                        fontFamily: "var(--font-anton), var(--font-sans)",
+                      }}
+                    >
+                      WALLET & PAYMENTS
+                    </h1>
+                    <p className="text-sm font-medium text-gray-500 mt-0.5">
+                      Manage your earnings and balance
+                    </p>
+                  </div>
                 </div>
 
-                <div className="relative z-10">
-                  <p className="text-white/60 text-sm font-medium mb-1">Số dư khả dụng</p>
-                  <TextShimmer width={180} height={40} rounded="md" color="rgba(255,255,255,0.2)" className="mb-6" />
+                {/* Wallet Balance Card Area */}
+                <div className="pt-5 pb-3">
+                  <WalletOverview
+                    balance={wallet?.balance || 0}
+                    onManage={() => setIsManageViewOpen(true)}
+                    isLoading={isLoading && !wallet}
+                  />
+                </div>
 
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-white/10 rounded-2xl p-3 backdrop-blur-md">
-                      <p className="text-white/60 text-xs mb-1">Thu nhập hôm nay</p>
-                      <TextShimmer width={100} height={28} rounded="md" color="rgba(255,255,255,0.2)" />
+                {/* 
+                   Sticky Toolbar (Header + Filters) 
+                   Standard sticky behavior without custom momentum logic
+                */}
+                <div className="sticky top-0 z-40 bg-[#F7F7F7]/95 backdrop-blur-md -mx-3 px-3 py-4 mb-0 [mask-image:linear-gradient(to_bottom,black_90%,transparent)]">
+                  <div className="flex flex-col gap-3">
+
+                    {/* Activity Title */}
+                    <div className="px-2">
+                      <h3 className="text-[17px] font-bold text-[#1A1A1A] flex items-center gap-2">
+                        <div className="bg-gray-200/50 p-2 rounded-xl">
+                          <History className="w-4 h-4 text-gray-700" />
+                        </div>
+                        Activity History
+                      </h3>
                     </div>
-                    <div className="bg-white/10 rounded-2xl p-3 backdrop-blur-md">
-                      <p className="text-white/60 text-xs mb-1">Đang xử lý</p>
-                      <TextShimmer width={100} height={28} rounded="md" color="rgba(255,255,255,0.2)" />
+
+                    {/* Filter Chips - Translated and Stylized */}
+                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => handleFilterChange('ALL')}
+                        className={`px-4 py-2 rounded-full text-[11px] font-bold transition-all flex items-center gap-2 whitespace-nowrap ${filterType === 'ALL'
+                          ? "bg-[#1A1A1A] text-white shadow-md shadow-black/10"
+                          : "bg-gray-100 text-gray-500 hover:text-[var(--primary)]"
+                          }`}
+                      >
+                        <LayoutGrid className={`w-3.5 h-3.5 ${filterType === 'ALL' ? "text-white" : "text-gray-500"}`} strokeWidth={2.4} />
+                        All
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => handleFilterChange('IN')}
+                        className={`px-4 py-2 rounded-full text-[11px] font-bold transition-all flex items-center gap-2 whitespace-nowrap ${filterType === 'IN'
+                          ? "bg-[var(--primary)] text-white shadow-md shadow-[var(--primary)]/20"
+                          : "bg-gray-100 text-gray-500 hover:text-[var(--primary)]"
+                          }`}
+                      >
+                        <ArrowDownLeft className={`w-3.5 h-3.5 ${filterType === 'IN' ? "text-white" : "text-gray-500"}`} strokeWidth={2.4} />
+                        Income
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => handleFilterChange('OUT')}
+                        className={`px-4 py-2 rounded-full text-[11px] font-bold transition-all flex items-center gap-2 whitespace-nowrap ${filterType === 'OUT'
+                          ? "bg-red-500 text-white shadow-md shadow-red-500/20"
+                          : "bg-gray-100 text-gray-500 hover:text-red-500"
+                          }`}
+                      >
+                        <ArrowUpRight className={`w-3.5 h-3.5 ${filterType === 'OUT' ? "text-white" : "text-gray-500"}`} strokeWidth={2.4} />
+                        Outcome
+                      </motion.button>
                     </div>
                   </div>
+                </div>
 
-                  <div className="flex gap-3">
-                    <div className="flex-1 bg-white/10 text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 backdrop-blur-md">
-                      <div className="bg-green-500/20 p-1 rounded-full">
-                        <ArrowDownLeft className="w-4 h-4 text-green-400" />
-                      </div>
-                      Nạp tiền
-                    </div>
-                    <div className="flex-1 bg-[var(--primary)] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[var(--primary)]/30">
-                      <div className="bg-white/20 p-1 rounded-full">
-                        <ArrowUpRight className="w-4 h-4 text-white" />
-                      </div>
-                      Rút tiền
-                    </div>
+                {/* Transactions List */}
+                <div className="pb-32 pt-0">
+                  <div className="space-y-2">
+                    {isLoading && transactions.length === 0 ? (
+                      <TransactionCardShimmer cardCount={6} />
+                    ) : (
+                      <>
+                        {transactions.map((tx: DriverWalletTransaction) => (
+                          <div key={tx.id}>
+                            <TransactionCard transaction={tx} onClick={() => handleTransactionClick(tx)} />
+                          </div>
+                        ))}
+
+                        {transactions.length === 0 ? (
+                          <EmptyState
+                            icon={Inbox}
+                            title="Chưa có giao dịch nào"
+                            description={
+                              filterType === 'ALL'
+                                ? "Bạn chưa thực hiện giao dịch nào trong khoảng thời gian này."
+                                : "Không tìm thấy giao dịch nào trong phân loại này."
+                            }
+                            className="py-12"
+                          />
+                        ) : (
+                          <>
+                            {/* Sentinel for infinite scroll - Zero height to avoid breaking the list rhythm */}
+                            <div ref={sentinelRef} className="h-0" />
+
+                            {/* Loading shimmer appended directly to the list container for seamless flow */}
+                            {isFetchingNextPage && (
+                              <TransactionCardShimmer cardCount={2} />
+                            )}
+
+                            {!hasNextPage && !isFetchingNextPage && (
+                              <div className="pb-12 pt-6 flex items-center justify-center gap-4 opacity-40">
+                                <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                                <div className="flex flex-col items-center gap-2 text-gray-400">
+                                  <CheckCircle2 className="w-4 h-4" />
+                                  <span className="text-[12px] font-bold uppercase tracking-widest font-anton">End of list</span>
+                                </div>
+                                <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
-            ) : (
-              <WalletOverview
-                stats={{
-                  availableBalance: wallet?.balance || 0,
-                  pendingBalance: 0, // Backend might not support this yet
-                  todayEarnings: 0, // Backend might not support this yet
-                  totalWithdrawn: 0
-                }}
-                onTopUp={() => setIsTopUpOpen(true)}
-                onWithdraw={() => setIsWithdrawOpen(true)}
-              />
-            )}
-          </div>
-        </motion.div>
-
-        {/* Section Title - Always visible to anchor list */}
-        <motion.div
-          className="px-5 pb-3 flex items-center justify-between bg-inherit"
-          animate={{ paddingTop: isHeaderVisible ? 0 : 20 }}
-        >
-          <h3 className="text-lg font-bold text-[#1A1A1A] flex items-center gap-2">
-            <div className="bg-gray-200 p-1.5 rounded-lg">
-              <History className="w-4 h-4 text-gray-600" />
             </div>
-            Lịch sử giao dịch
-          </h3>
-        </motion.div>
+          </motion.div>
+        ) : (
+          <WalletManageView
+            key="wallet-manage"
+            balance={wallet?.balance || 0}
+            onBack={() => setIsManageViewOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-        {/* Filter Chips */}
-        <div className="px-5 pb-4 flex gap-2 overflow-x-auto no-scrollbar bg-inherit">
-          <button
-            onClick={() => handleFilterChange('ALL')}
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${filterType === 'ALL' ? 'bg-[#1A1A1A] text-white shadow-lg shadow-black/10' : 'bg-gray-100 text-gray-500'}`}
-          >
-            <History className="w-3.5 h-3.5" />
-            Tất cả
-          </button>
-          <button
-            onClick={() => handleFilterChange('IN')}
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${filterType === 'IN' ? 'bg-[var(--primary)] text-white shadow-lg shadow-[var(--primary)]/30' : 'bg-gray-100 text-gray-500'}`}
-          >
-            <ArrowDownLeft className="w-3.5 h-3.5" />
-            Tiền vào
-          </button>
-          <button
-            onClick={() => handleFilterChange('OUT')}
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${filterType === 'OUT' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'bg-gray-100 text-gray-500'}`}
-          >
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            Tiền ra
-          </button>
-        </div>
-      </div>
-
-      {/* Transaction List */}
-      <div
-        ref={containerRef}
-        className={`flex-1 px-3 pb-32 pt-2 scroll-smooth ${isHeaderVisible ? 'overflow-hidden' : 'overflow-y-auto'}`}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onWheel={handleWheel}
-      >
-        <div className="space-y-2">
-          {isLoading ? (
-            // Increased card count to prevent scroll jumping when filtering
-            <TransactionCardShimmer cardCount={8} />
-          ) : (
-            <>
-              <AnimatePresence mode="popLayout">
-                {transactions.map((tx: DriverWalletTransaction, index: number) => (
-                  <motion.div key={tx.id}>
-                    <TransactionCard transaction={tx} onClick={() => handleTransactionClick(tx)} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-
-              {transactions.length === 0 ? (
-                <div className="text-center py-10 text-gray-400 text-sm">Chưa có giao dịch nào</div>
-              ) : (
-                <>
-                  {/* Sentinel for infinite scroll */}
-                  <div ref={sentinelRef} />
-
-                  {/* Loading shimmer when fetching more */}
-                  {isFetchingNextPage && (
-                    <div className="py-4">
-                      <TransactionCardShimmer cardCount={2} />
-                    </div>
-                  )}
-
-                  {/* End of list indicator */}
-                  {!hasNextPage && !isFetchingNextPage && (
-                    <div className="py-12 flex items-center justify-center gap-4 opacity-60">
-                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
-                        </div>
-                        <span className="text-[14px] font-bold text-gray-400 uppercase font-anton">End of list</span>
-                      </div>
-                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
-                    </div>
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Scroll To Top Floating Button */}
       <AnimatePresence>
-        {showScrollToTop && (
+        {showScrollToTop && !isManageViewOpen && (
           <motion.button
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -335,25 +293,28 @@ export default function WalletPage() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={scrollToTop}
-            className="absolute bottom-24 right-5 p-3 bg-[var(--primary)] text-white rounded-full shadow-lg shadow-[var(--primary)]/30 z-50 transition-colors"
+            className="fixed bottom-28 right-5 p-3.5 bg-[var(--primary)] text-white rounded-full shadow-xl shadow-[var(--primary)]/30 z-50"
           >
-            <ChevronUp className="w-6 h-6" />
+            <ChevronUp className="w-6 h-6" strokeWidth={3} />
           </motion.button>
         )}
       </AnimatePresence>
-
-      <TopUpDrawer open={isTopUpOpen} onClose={() => setIsTopUpOpen(false)} />
-      <WithdrawDrawer
-        open={isWithdrawOpen}
-        onClose={() => setIsWithdrawOpen(false)}
-        balance={wallet?.balance || 0}
-      />
 
       <TransactionDetailDrawer
         open={isTransactionDrawerOpen}
         transaction={selectedTransaction}
         onClose={() => setIsTransactionDrawerOpen(false)}
       />
+
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }

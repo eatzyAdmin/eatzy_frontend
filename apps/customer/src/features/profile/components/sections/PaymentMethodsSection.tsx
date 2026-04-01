@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "@repo/ui/motion";
+import { motion, AnimatePresence } from "@repo/ui/motion";
 import {
   Wallet, ArrowUpRight, ArrowDownLeft, ShieldCheck,
   History as TransactionsIcon, CreditCard, Plus, ArrowRight,
@@ -34,7 +34,11 @@ const formatDate = (dateString: string) => {
   }).format(new Date(dateString));
 };
 
-export default function PaymentMethodsSection() {
+interface PaymentMethodsSectionProps {
+  onOpenManage?: (type: 'TOPUP' | 'WITHDRAW') => void;
+}
+
+export default function PaymentMethodsSection({ onOpenManage }: PaymentMethodsSectionProps) {
   const {
     wallet,
     transactions,
@@ -100,22 +104,12 @@ export default function PaymentMethodsSection() {
     }
   };
 
-  const getTransactionColor = (type: string, status: string) => {
-    if (status === WalletTransactionStatus.FAILED) return "text-red-500 bg-red-50 border-red-100";
-    if (status === WalletTransactionStatus.PENDING) return "text-amber-500 bg-amber-50 border-amber-100";
-
-    const isCredit = WALLET_CREDIT_TYPES.includes(type as any);
-    return isCredit
-      ? "text-lime-600 bg-lime-50 border-lime-100"
-      : "text-blue-600 bg-blue-50 border-blue-100";
+  const handleOpenManage = (type: 'TOPUP' | 'WITHDRAW') => {
+    onOpenManage?.(type);
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-4 md:space-y-12"
-    >
+    <div className="space-y-4 md:space-y-12">
       {/* Integrated Header & Balance */}
       <div className="flex flex-col gap-4 md:gap-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 md:gap-8 md:pb-8 border-b border-gray-100">
@@ -132,7 +126,7 @@ export default function PaymentMethodsSection() {
                   {isLoading ? (
                     <div className="h-10 md:h-[56px] w-40 md:w-64 bg-gray-100 rounded-2xl animate-pulse" />
                   ) : wallet ? (
-                    showBalance ? wallet.balance.toLocaleString('vi-VN') : '••••••'
+                    showBalance ? Math.floor(wallet.balance).toLocaleString('vi-VN') : '••••••'
                   ) : '0'}
                 </h2>
                 {!isLoading && <span className="text-2xl font-anton uppercase mb-1">VNĐ</span>}
@@ -154,7 +148,10 @@ export default function PaymentMethodsSection() {
 
             {/* Top Right Action Button */}
             <div className="absolute top-0 right-0">
-              <button className="px-4 py-2 bg-lime-400 font-bold text-black text-[12px] rounded-tr-[32px] rounded-bl-[32px] shadow-lg active:scale-90 transition-all flex items-center gap-1.5">
+              <button
+                onClick={() => handleOpenManage('TOPUP')}
+                className="px-4 py-2 bg-lime-400 font-bold text-black text-[12px] rounded-tr-[32px] rounded-bl-[32px] shadow-lg active:scale-90 transition-all flex items-center gap-1.5"
+              >
                 <Plus size={14} strokeWidth={3} />
                 Nạp tiền
               </button>
@@ -167,7 +164,7 @@ export default function PaymentMethodsSection() {
                   <TextShimmer width={150} height={40} rounded="xl" backgroundColor="bg-white/10" className="shrink-0" />
                 ) : (
                   <>
-                    <h2 className="text-4xl font-anton">{wallet ? (showBalance ? wallet.balance.toLocaleString('vi-VN') : '••••••') : '0'}</h2>
+                    <h2 className="text-4xl font-anton">{wallet ? (showBalance ? Math.floor(wallet.balance).toLocaleString('vi-VN') : '••••••') : '0'}</h2>
                     <span className="text-lg font-anton text-lime-500">VNĐ</span>
                     <button onClick={() => setShowBalance(!showBalance)} className="ml-2 p-2 bg-white/10 rounded-xl">
                       {showBalance ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -179,7 +176,10 @@ export default function PaymentMethodsSection() {
           </div>
 
           <div className="hidden md:flex items-center justify-center md:justify-start gap-2">
-            <button className="px-6 py-3.5 bg-[#1A1A1A] text-white font-anton text-xs uppercase tracking-wider rounded-2xl hover:bg-lime-500 hover:text-black transition-all shadow-lg active:scale-95 flex items-center gap-2">
+            <button
+              onClick={() => handleOpenManage('TOPUP')}
+              className="px-6 py-3.5 bg-[#1A1A1A] text-white font-anton text-xs uppercase tracking-wider rounded-2xl hover:bg-lime-500 hover:text-black transition-all shadow-lg active:scale-95 flex items-center gap-2"
+            >
               <Plus size={16} />
               Nạp tiền
             </button>
@@ -234,55 +234,46 @@ export default function PaymentMethodsSection() {
                       className={`flex items-center gap-3 md:gap-4 py-4 md:py-5 px-1 md:px-4 transition-all duration-300 rounded-[32px] cursor-pointer hover:bg-slate-100/70 hover:shadow-md active:scale-[0.98]`}
                       onClick={() => handleTransactionClick(tx)}
                     >
-                      {/* Column 1: Icon */}
                       <div className="relative shrink-0">
                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl md:rounded-2xl border border-slate-100 flex items-center justify-center bg-white shadow-sm ring-4 ring-slate-50/30">
                           <Icon className={`w-5 h-5 md:w-6 md:h-6 ${isCredit ? "text-primary" : "text-slate-600"}`} />
                         </div>
                       </div>
 
-                      {/* Column 2: Basic Info (Left) */}
                       <div className="flex-1 min-w-0 flex flex-col">
                         <h4 className="text-[15px] md:text-[16px] font-bold text-slate-900 truncate tracking-tight">
                           {tx.description || "Giao dịch Eatzy"}
                         </h4>
-
                         <p className="text-[11px] md:text-[12px] text-slate-400 font-medium mt-0.5">
                           {formatDate(tx.transactionDate)}
                         </p>
-
-                        {/* Mobile specific balance after */}
                         <div className="flex md:hidden items-center mt-1 opacity-60">
                           <span className="text-[11px] text-slate-500 font-medium">
                             Số dư: <span className="font-bold text-slate-600">
-                              {showBalance ? `${tx.balanceAfter.toLocaleString('vi-VN')}đ` : '••••••'}
+                              {showBalance ? `${Math.floor(tx.balanceAfter).toLocaleString('vi-VN')}đ` : '••••••'}
                             </span>
                           </span>
                         </div>
                       </div>
 
-                      {/* Column 3: Balance After (Targeted to align with the bottom row info) */}
                       <div className="hidden lg:flex shrink-0 w-[220px] justify-end pt-8 whitespace-nowrap ml-4">
                         <div className="flex items-center gap-1.5 opacity-70">
                           <Wallet size={12} className="text-slate-400" />
                           <span className="text-[12px] text-slate-400 font-medium">
                             Balance After: <span className="font-bold text-slate-500">
-                              {showBalance ? `${tx.balanceAfter.toLocaleString('vi-VN')}đ` : '••••••'}
+                              {showBalance ? `${Math.floor(tx.balanceAfter).toLocaleString('vi-VN')}đ` : '••••••'}
                             </span>
                           </span>
                         </div>
                       </div>
 
-                      {/* Column 4: Amount & Status (Right Aligned) */}
                       <div className="text-right flex flex-col justify-end shrink-0 min-w-fit md:min-w-[120px] md:ml-12">
                         <div className="text-[17px] font-bold text-slate-900 tracking-tight">
-                          {isCredit ? '+' : ''}{tx.amount.toLocaleString('vi-VN')}đ
+                          {isCredit ? '+' : ''}{Math.floor(tx.amount).toLocaleString('vi-VN')}đ
                         </div>
                         <p className={`text-[12px] font-bold mt-0.5 ${statusColor}`}>
                           {statusText}
                         </p>
-
-                        {/* Payment Source Style inspired by requested design */}
                         <div className="flex md:hidden items-center justify-end gap-1.5 mt-1 opacity-60">
                           <div className="w-4 h-4 rounded-full bg-blue-50 flex items-center justify-center">
                             <Wallet size={10} className="text-lime-500" />
@@ -302,13 +293,9 @@ export default function PaymentMethodsSection() {
             })
           )}
 
-          {/* Infinite Scroll Elements */}
           {!isLoading && transactions.length > 0 && (
             <div className="w-full">
-              {/* Sentinel for infinite scroll */}
               <div ref={sentinelRef} className="h-4" />
-
-              {/* Loading more shimmers */}
               {isFetchingTransactions && (
                 <div className="flex flex-col">
                   {[1, 2].map((i, idx) => (
@@ -319,8 +306,6 @@ export default function PaymentMethodsSection() {
                   ))}
                 </div>
               )}
-
-              {/* End of list indicator (Driver app style) */}
               {!hasNextPage && !isFetchingTransactions && (
                 <div className="py-2 md:pb-12 md:pt-4 flex items-center justify-center gap-4 opacity-60">
                   <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
@@ -350,6 +335,6 @@ export default function PaymentMethodsSection() {
         open={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
       />
-    </motion.div>
+    </div>
   );
 }

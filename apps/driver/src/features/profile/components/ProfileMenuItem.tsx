@@ -17,7 +17,7 @@ export default function ProfileMenuItem({ icon, label, subLabel, onClick, isDest
     <motion.button
       whileTap={{ scale: 0.98, backgroundColor: "rgba(0,0,0,0.02)" }}
       onClick={onClick}
-      className="w-full flex items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] mb-3 last:mb-0"
+      className="w-full flex items-center justify-between p-4 bg-white rounded-3xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
     >
       <div className="flex items-center gap-4">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDestructive ? 'bg-red-50 text-red-500' : 'bg-gray-50 text-gray-600'}`}>

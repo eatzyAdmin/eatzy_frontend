@@ -1,74 +1,73 @@
-import { useState, useCallback, useEffect } from "react";
+"use client";
+
+import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { walletApi } from "@repo/api";
 import { WalletResponse, WalletTransactionResponse, ResultPaginationDTO } from "@repo/types";
 
 export const useCustomerWalletTransactions = () => {
-  const [wallet, setWallet] = useState<WalletResponse | null>(null);
-  const [transactionsRes, setTransactionsRes] = useState<ResultPaginationDTO<WalletTransactionResponse[]> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFetchingTransactions, setIsFetchingTransactions] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [walletRes, transRes] = await Promise.all([
-        walletApi.getMyWallet(),
-        walletApi.getMyWalletTransactions({ page: 0, size: 20, sort: "transactionDate,desc" })
-      ]);
+  // 1. Core Wallet Balance Query
+  const { 
+    data: wallet, 
+    isLoading: isWalletLoading,
+    refetch: refreshWallet,
+    error: walletError 
+  } = useQuery<WalletResponse | undefined>({
+    queryKey: ["customer", "wallet", "me"],
+    queryFn: async () => {
+      const res = await walletApi.getMyWallet();
+      return res.data;
+    },
+    staleTime: 30 * 1000, // Cache for 30 seconds
+  });
 
-      if (walletRes.data) {
-        setWallet(walletRes.data);
-      }
-      if (transRes.data) {
-        setTransactionsRes(transRes.data);
-      }
-    } catch (err: any) {
-      setError(err.message || "Không thể tải dữ liệu ví");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // 2. Transactions Infinite Query
+  const {
+    data: transactionsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isTransactionsLoading,
+    refetch: refreshTransactions,
+    error: transactionsError
+  } = useInfiniteQuery<ResultPaginationDTO<WalletTransactionResponse[]>>({
+    queryKey: ["customer", "wallet", "transactions"],
+    queryFn: async ({ pageParam = 0 }) => {
+      const res = await walletApi.getMyWalletTransactions({ 
+        page: pageParam as number, 
+        size: 20, 
+        sort: "transactionDate,desc" 
+      });
+      return res.data!;
+    },
+    getNextPageParam: (lastPage) => {
+      const { page, pages } = lastPage.meta;
+      return page < pages - 1 ? page + 1 : undefined;
+    },
+    initialPageParam: 0,
+    staleTime: 60 * 1000, // Cache transactions for 60 seconds
+  });
 
-  const fetchMoreTransactions = useCallback(async (page: number) => {
-    setIsFetchingTransactions(true);
-    try {
-      const transRes = await walletApi.getMyWalletTransactions({ page, size: 20, sort: "transactionDate,desc" });
-      if (transRes.data) {
-        setTransactionsRes(prev => {
-          if (!prev) return transRes.data!;
-          return {
-            ...transRes.data!,
-            result: [...prev.result, ...transRes.data!.result]
-          };
-        });
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsFetchingTransactions(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const hasNextPage = transactionsRes ? transactionsRes.meta.page < transactionsRes.meta.pages - 1 : false;
+  // Combine data
+  const transactions = transactionsData?.pages.flatMap(page => page.result) || [];
+  const isLoading = isWalletLoading || isTransactionsLoading;
+  const error = (walletError || transactionsError) ? "Không thể tải dữ liệu ví" : null;
 
   return {
-    wallet,
-    transactions: transactionsRes?.result || [],
-    meta: transactionsRes?.meta,
+    wallet: wallet ?? null,
+    transactions,
     isLoading,
-    isFetchingTransactions,
+    isFetchingTransactions: isFetchingNextPage,
     hasNextPage,
     error,
-    refresh: fetchData,
+    refresh: () => {
+      refreshWallet();
+      refreshTransactions();
+    },
     fetchMoreTransactions: () => {
-      if (hasNextPage && !isFetchingTransactions) {
-        fetchMoreTransactions(transactionsRes!.meta.page + 1);
+      if (hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
       }
     }
   };

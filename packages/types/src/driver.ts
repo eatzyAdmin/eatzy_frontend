@@ -157,6 +157,14 @@ export interface DriverHistoryOrder {
     quantity: number;
     restaurantId: string;
     imageUrl?: string;
+    orderItemOptions?: {
+      id: number;
+      menuOption: {
+        id: number;
+        name: string;
+        priceAdjustment: number;
+      };
+    }[];
   }[];
   subtotal: number;
   fee: number;

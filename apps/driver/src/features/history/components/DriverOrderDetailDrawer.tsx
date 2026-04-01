@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { X, MapPin, Package } from "@repo/ui/icons";
+import { X, MapPin, Package, Ticket } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
 import { DriverHistoryOrder } from "@repo/types";
 
@@ -40,7 +40,11 @@ export default function DriverOrderDetailDrawer({
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <div>
                 <h2 className="text-2xl font-bold font-anton text-[#1A1A1A]">ORDER DETAILS</h2>
-                <p className="text-[10px] font-bold text-gray-400 uppercase mt-1">{order.code} • {new Date(order.createdAt || "").toLocaleDateString("vi-VN")}</p>
+                <div className="text-gray-500 text-xs font-semibold mt-0.5 flex items-center gap-2">
+                  <span>Order ID: {order.code}</span>
+                  <span className="opacity-30">•</span>
+                  <span>{new Date(order.createdAt || "").toLocaleDateString("vi-VN")}</span>
+                </div>
               </div>
               <button onClick={onClose} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
                 <X className="w-5 h-5 text-gray-700" />
@@ -48,23 +52,23 @@ export default function DriverOrderDetailDrawer({
             </div>
 
             {/* Scrollable Content */}
-            <div className="overflow-y-auto p-6 px-5 space-y-8">
+            <div className="overflow-y-auto p-4 px-3 space-y-4 no-scrollbar">
               {/* Stats Row */}
               <div className="flex items-center justify-between bg-gray-900 p-5 rounded-[28px] shadow-xl shadow-black/5">
                 <div className="text-center flex-1 border-r border-white/10 px-2">
-                  <div className="text-[9px] text-white/40 font-semibold uppercase tracking-[0.2em] mb-1">Thu nhập</div>
+                  <div className="text-[9px] text-white/40 font-semibold uppercase tracking-[0.2em] mb-1">Income</div>
                   <div className="text-lg font-bold text-[var(--primary)] font-anton leading-none">
                     {formatVnd(order.earnings)}
                   </div>
                 </div>
                 <div className="text-center flex-1 border-r border-white/10 px-2">
-                  <div className="text-[9px] text-white/40 font-semibold uppercase tracking-[0.2em] mb-1">Khoảng cách</div>
+                  <div className="text-[9px] text-white/40 font-semibold uppercase tracking-[0.2em] mb-1">Distance</div>
                   <div className="text-lg font-bold text-white font-anton leading-none">
                     {order.distance}km
                   </div>
                 </div>
                 <div className="text-center flex-1 px-2">
-                  <div className="text-[9px] text-white/40 font-semibold uppercase tracking-[0.2em] mb-1">Loại đơn</div>
+                  <div className="text-[9px] text-white/40 font-semibold uppercase tracking-[0.2em] mb-1">Order Type</div>
                   <div className="text-sm font-bold text-white font-anton leading-none uppercase">
                     Food
                   </div>
@@ -77,29 +81,44 @@ export default function DriverOrderDetailDrawer({
                   <div className="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
                     <MapPin className="w-5 h-5" />
                   </div>
-                  <h3 className="text-lg font-bold font-anton text-[#1A1A1A]">DELIVERY ROUTE</h3>
+                  <h3 className="text-xl font-black font-anton text-[#1A1A1A]">DELIVERY ROUTE</h3>
                 </div>
 
-                <div className="relative pl-3 space-y-6">
-                  <div className="absolute left-[17px] top-4 bottom-16 w-0.5 bg-gray-100 border-l-[2px] border-dashed border-gray-300" />
-
-                  {/* Pickup */}
-                  <div className="relative flex gap-5">
-                    <div className="relative z-10 w-3 h-3 rounded-full bg-white border-[3px] border-[var(--primary)] mt-1.5 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-1">Lấy tại</div>
-                      <div className="font-bold text-[#1A1A1A] text-sm truncate tracking-tight">{order.restaurantLocation?.name || "Restaurant"}</div>
-                      <div className="text-xs text-gray-500 mt-1 font-medium">{order.restaurantLocation?.address || "Address not available"}</div>
+                <div className="flex gap-4 mt-6">
+                  {/* Visual Route Indicator */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-lime-100 flex items-center justify-center shadow-sm flex-shrink-0 z-10">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[var(--primary)]" />
+                    </div>
+                    <div className="w-0.5 flex-grow border-l-2 border-dotted border-gray-300 my-1" />
+                    <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shadow-sm flex-shrink-0 z-10">
+                      <MapPin className="w-4 h-4 text-red-500" />
                     </div>
                   </div>
 
-                  {/* Dropoff */}
-                  <div className="relative flex gap-5">
-                    <div className="relative z-10 w-3 h-3 rounded-full bg-red-500 mt-1.5 shrink-0 shadow-sm ring-4 ring-red-50" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-1">Giao đến</div>
-                      <div className="font-bold text-[#1A1A1A] text-sm truncate tracking-tight">{order.customerName}</div>
-                      <div className="text-xs text-gray-500 mt-1 font-medium">{order.deliveryLocation?.address}</div>
+                  {/* Route Addresses */}
+                  <div className="flex-1 flex flex-col justify-between py-0.5 min-h-[110px]">
+                    {/* Pickup */}
+                    <div>
+                      <div className="text-xs font-bold text-[var(--primary)] uppercase tracking-wide mb-1 flex items-center justify-between">
+                        <span>Nhà hàng</span>
+                      </div>
+                      <div className="font-bold text-[#1A1A1A] text-sm mb-0.5 line-clamp-1">
+                        {order.restaurantLocation?.name || "Đang cập nhật"}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium line-clamp-1">
+                        {order.restaurantLocation?.address || "Đang cập nhật địa chỉ"}
+                      </div>
+                    </div>
+
+                    {/* Dropoff */}
+                    <div className="mt-4">
+                      <div className="text-xs font-bold text-red-500 uppercase tracking-wide mb-1 flex items-center justify-between">
+                        <span>Điểm giao</span>
+                      </div>
+                      <div className="font-bold text-[#1A1A1A] text-sm mb-0.5 line-clamp-2">
+                        {order.deliveryLocation?.address}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -107,49 +126,82 @@ export default function DriverOrderDetailDrawer({
 
               {/* Items Section */}
               <div className="bg-white rounded-[32px] p-5 shadow-sm border-2 border-gray-200">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
-                    <Package className="w-5 h-5" />
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
+                      <Package className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-xl font-black font-anton text-[#1A1A1A]">ORDER INVENTORY</h3>
                   </div>
-                  <h3 className="text-lg font-bold font-anton text-[#1A1A1A]">ORDER INVENTORY</h3>
+                  <span className="text-xs font-bold bg-[#1A1A1A] text-white px-3 py-1 rounded-lg">
+                    {order.items.length} món
+                  </span>
                 </div>
 
-                {order.items.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between group">
-                    <div className="flex gap-4 items-center">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center font-anton font-bold text-[var(--primary)] text-md">
-                        {item.quantity}x
+                <div className="space-y-1">
+                  {order.items.map((item) => (
+                    <div key={item.id} className="group flex items-center justify-between py-3.5 rounded-[20px] transition-colors duration-200 hover:bg-gray-50/50">
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="w-10 h-10 rounded-[14px] bg-gray-100 text-[#1A1A1A] font-anton font-bold text-lg flex items-center justify-center shadow-sm flex-shrink-0 transition-transform group-hover:scale-105">
+                          {item.quantity}x
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-bold text-[#1A1A1A] text-sm transition-colors line-clamp-1 leading-tight">{item.name}</div>
+                          {item.orderItemOptions && item.orderItemOptions.length > 0 && (
+                            <div className="mt-0.5 text-[10px] md:text-[11px] text-gray-400 font-medium line-clamp-2 leading-relaxed italic">
+                              {Array.from(new Set(item.orderItemOptions
+                                .map((opt) => opt.menuOption?.name)))
+                                .join(", ")}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <span className="text-sm font-bold text-[#1A1A1A] tracking-tight">{item.name}</span>
+                      <span className="font-bold text-[#1A1A1A] text-sm tabular-nums ml-2 whitespace-nowrap">{formatVnd(item.price)}</span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-400 font-anton">{formatVnd(item.price)}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
 
-                <div className="h-px bg-gray-200/70 my-2" />
+                <div className="h-px bg-gray-100 my-4" />
 
-                <div className="space-y-2.5 pt-1">
-                  <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    <span>Tạm tính</span>
-                    <span className="text-gray-600 text-sm font-bold">{formatVnd(order.subtotal)}</span>
+                <div className="space-y-3.5 px-1">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-500 font-medium">Tạm tính</span>
+                    <span className="font-bold text-gray-900">{formatVnd(order.subtotal)}</span>
                   </div>
-                  <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    <span>Phí giao hàng</span>
-                    <span className="text-gray-600 text-sm font-bold">{formatVnd(order.fee)}</span>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-500 font-medium">Phí giao hàng</span>
+                    <span className="font-bold text-gray-900">{formatVnd(order.fee)}</span>
                   </div>
+
                   {order.discount > 0 && (
-                    <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                      <span>Discount {order.voucherCode ? `(${order.voucherCode})` : ''}</span>
-                      <span className="text-sm font-bold">-{formatVnd(order.discount)}</span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between items-center text-sm font-bold text-red-500">
+                        <div className="flex items-center gap-1.5">
+                          <Ticket className="w-3.5 h-3.5" />
+                          <span>Khuyến mãi</span>
+                        </div>
+                        <span>-{formatVnd(order.discount)}</span>
+                      </div>
+                      {order.voucherCode && (
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-red-50 text-red-500 border border-red-100 rounded-md">
+                            {order.voucherCode}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
 
-                <div className="h-px bg-gray-200/70 my-2" />
+                <div className="h-px bg-gray-200/50 my-4" />
 
-                <div className="flex justify-between items-center pt-1">
-                  <span className="text-sm font-black text-[#1A1A1A] uppercase tracking-widest">Total Amount</span>
-                  <span className="text-2xl font-bold font-anton text-[var(--primary)] drop-shadow-sm">{formatVnd(order.total)}</span>
+                <div className="flex justify-between items-center pt-2 px-1">
+                  <span className="font-bold text-[#1A1A1A] text-base">Tổng thanh toán</span>
+                  <div className="flex flex-col items-end">
+                    <span className="font-anton text-[26px] text-[var(--primary)] leading-none whitespace-nowrap drop-shadow-sm">
+                      {formatVnd(order.total)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -196,6 +248,15 @@ export default function DriverOrderDetailDrawer({
               </div>
             </div>
           </motion.div>
+          <style jsx>{`
+            .no-scrollbar::-webkit-scrollbar {
+              display: none;
+            }
+            .no-scrollbar {
+              -ms-overflow-style: none;
+              scrollbar-width: none;
+            }
+          `}</style>
         </>
       )}
     </AnimatePresence>

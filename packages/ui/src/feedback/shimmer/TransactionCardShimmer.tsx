@@ -17,74 +17,71 @@ const TransactionCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
 
   // Card animation variants
   const cardVariants = {
-    initial: { opacity: 0, y: 20, scale: 0.95 },
-    animate: { opacity: 1, y: 0, scale: 1 },
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
   };
 
-  // Shimmer card component matching TransactionCard structure
+  // Shimmer card component matching TransactionCard structure 1:1
   const ShimmerCard = ({ index }: { index: number }) => {
     return (
       <motion.div
-        className="bg-white p-4 rounded-2xl flex items-center justify-between shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 mb-3"
+        className="bg-white p-4 rounded-[24px] flex items-center justify-between shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100"
         variants={cardVariants}
         initial="initial"
         animate="animate"
         transition={{
-          delay: index * 0.1,
-          duration: 0.6,
-          type: "spring",
-          damping: 15,
-          stiffness: 100,
+          delay: index * 0.05,
+          duration: 0.4,
         }}
       >
         {/* Left: Icon + Info */}
         <div className="flex items-center gap-3">
-          {/* Icon circle */}
+          {/* Icon circle matching TransactionCard w-10 h-10 rounded-full */}
           <motion.div
-            className="w-10 h-10 rounded-full bg-gray-200"
+            className="w-10 h-10 rounded-full bg-gray-100/80 shrink-0"
             variants={shimmerVariants}
             initial="initial"
             animate="animate"
             style={{
-              background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
+              background: 'linear-gradient(90deg, #f3f4f6 25%, #ffffff 50%, #f3f4f6 75%)',
               backgroundSize: '200% 100%',
             }}
           />
-          <div className="flex flex-col gap-1">
-            {/* Description */}
+          <div className="flex flex-col gap-1.5 min-w-0">
+            {/* Description shimmer block */}
             <motion.div
-              className="h-3.5 w-32 bg-gray-200 rounded"
+              className="h-3.5 w-32 bg-gray-100/80 rounded-md"
               variants={shimmerVariants}
               initial="initial"
               animate="animate"
               style={{
-                background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
+                background: 'linear-gradient(90deg, #f3f4f6 25%, #ffffff 50%, #f3f4f6 75%)',
                 backgroundSize: '200% 100%',
               }}
             />
-            {/* Date time */}
+            {/* Date time shimmer block */}
             <motion.div
-              className="h-3 w-24 bg-gray-100 rounded"
+              className="h-2.5 w-24 bg-gray-50 rounded-md"
               variants={shimmerVariants}
               initial="initial"
               animate="animate"
               style={{
-                background: 'linear-gradient(90deg, #f3f4f6 25%, rgba(255,255,255,0.8) 50%, #f3f4f6 75%)',
+                background: 'linear-gradient(90deg, #f9fafb 25%, #ffffff 50%, #f9fafb 75%)',
                 backgroundSize: '200% 100%',
               }}
             />
           </div>
         </div>
 
-        {/* Right: Amount */}
-        <div className="text-right">
+        {/* Right: Amount block matching font-anton height */}
+        <div className="text-right shrink-0">
           <motion.div
-            className="h-4 w-20 bg-gray-200 rounded mb-1"
+            className="h-5 w-24 bg-gray-100/80 rounded-lg"
             variants={shimmerVariants}
             initial="initial"
             animate="animate"
             style={{
-              background: 'linear-gradient(90deg, #e5e7eb 25%, rgba(255,255,255,0.8) 50%, #e5e7eb 75%)',
+              background: 'linear-gradient(90deg, #f3f4f6 25%, #ffffff 50%, #f3f4f6 75%)',
               backgroundSize: '200% 100%',
             }}
           />
@@ -93,8 +90,10 @@ const TransactionCardShimmer = ({ cardCount = 3 }: { cardCount?: number }) => {
     );
   };
 
+  // We return a Fragment with mapped cards and a gap wrapper for when it's the ONLY thing rendered.
+  // When appended to a list, we use a utility class to handle the gap between the list items.
   return (
-    <div className="w-full">
+    <div className="flex flex-col gap-2 w-full">
       {Array.from({ length: cardCount }, (_, index) => (
         <ShimmerCard key={`transaction-shimmer-${index}`} index={index} />
       ))}

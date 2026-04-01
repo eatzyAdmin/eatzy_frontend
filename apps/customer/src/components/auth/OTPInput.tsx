@@ -64,7 +64,7 @@ export default function OTPInput({ length = 6, value, onChange, error }: OTPInpu
 
   return (
     <div className="w-full">
-      <div className="flex gap-2 md:gap-3 justify-center">
+      <div className="flex gap-2 md:gap-3 justify-center items-center">
         {Array.from({ length }).map((_, index) => {
           const isFilled = !!value[index];
           const isFocused = focusedIndex === index;
@@ -89,15 +89,15 @@ export default function OTPInput({ length = 6, value, onChange, error }: OTPInpu
                 onPaste={handlePaste}
                 onFocus={() => setFocusedIndex(index)}
                 onBlur={() => setFocusedIndex(null)}
-                className={`w-12 h-16 md:w-16 md:h-20 text-center text-4xl font-anton border-0 border-b-4 transition-all duration-500 ${error
-                  ? "border-red-500 text-red-500 bg-red-50/30"
+                className={`w-[46px] h-[46px] md:w-16 md:h-16 text-center text-2xl md:text-3xl font-black rounded-[18px] md:rounded-[24px] transition-all duration-300 shadow-[inset_0_0_20px_rgba(0,0,0,0.06)] outline-none ${error
+                  ? "bg-red-50 text-red-500 ring-2 ring-red-500/10"
                   : isFocused
-                    ? "border-lime-500 bg-lime-50/30 scale-105"
+                    ? "bg-white ring-[5px] ring-blue-500/20 scale-105"
                     : isFilled
-                      ? "border-black bg-white"
-                      : "border-gray-100 bg-transparent hover:border-gray-300 placeholder:text-gray-200"
-                  } focus:outline-none focus:ring-0`}
-                placeholder="0"
+                      ? "bg-white text-black ring-1 ring-gray-100"
+                      : "bg-slate-50 text-gray-400 hover:bg-white hover:ring-1 hover:ring-gray-100"
+                  }`}
+                placeholder="•"
               />
             </motion.div>
           );
@@ -108,7 +108,7 @@ export default function OTPInput({ length = 6, value, onChange, error }: OTPInpu
         <motion.p
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-3 text-sm text-[var(--danger)] text-center font-medium"
+          className="mt-4 text-[10px] text-red-500 text-center font-bold uppercase tracking-widest"
         >
           {error}
         </motion.p>
@@ -116,4 +116,3 @@ export default function OTPInput({ length = 6, value, onChange, error }: OTPInpu
     </div>
   );
 }
-

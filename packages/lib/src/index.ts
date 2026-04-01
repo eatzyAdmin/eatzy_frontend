@@ -4,3 +4,4 @@ export * from "./auth/loginSchema";
 export * from "./currency";
 export * from "./auth/registerSchema";
 export * from "./time";
+export { z } from "zod";

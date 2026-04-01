@@ -40,17 +40,12 @@ export default function ProfilePage() {
 
   return (
     <div className="h-full overflow-y-auto bg-[#F7F7F7] pb-40 scroll-smooth">
-      {/* Header Title */}
-      {/* <div className="px-6 pt-4 pb-4">
-        <h1 className="text-4xl font-bold font-anton text-[#1A1A1A]">PROFILE</h1>
-      </div> */}
-
-      <div className="px-5 pt-5 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 space-y-8 pt-10">
         {/* Main Card */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+           initial={{ opacity: 0, scale: 0.9 }}
+           animate={{ opacity: 1, scale: 1 }}
+           transition={{ duration: 0.5 }}
         >
           <DriverProfileCard profile={displayProfile} />
         </motion.div>
@@ -62,7 +57,7 @@ export default function ProfilePage() {
           transition={{ duration: 0.4, delay: 0.1 }}
         >
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 pl-2">Tài khoản</h3>
-          <div>
+          <div className="space-y-1">
             <ProfileMenuItem icon={<User className="w-5 h-5" />} label="Thông tin cá nhân" subLabel="Chỉnh sửa hồ sơ" />
             <ProfileMenuItem icon={<Bike className="w-5 h-5" />} label="Phương tiện" subLabel={mockDriverProfile.vehicleType} />
             <ProfileMenuItem icon={<CreditCard className="w-5 h-5" />} label="Tài khoản ngân hàng" subLabel="Techcombank **** 8829" />
@@ -76,7 +71,7 @@ export default function ProfilePage() {
           transition={{ duration: 0.4, delay: 0.2 }}
         >
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 pl-2">Ứng dụng</h3>
-          <div>
+          <div className="space-y-1">
             <ProfileMenuItem icon={<Bell className="w-5 h-5" />} label="Cài đặt thông báo" />
             <ProfileMenuItem icon={<ShieldCheck className="w-5 h-5" />} label="Bảo mật & Quyền riêng tư" />
             <ProfileMenuItem icon={<HelpCircle className="w-5 h-5" />} label="Trung tâm trợ giúp" />

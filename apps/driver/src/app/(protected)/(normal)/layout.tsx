@@ -1,61 +1,56 @@
 "use client";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "@repo/ui/motion";
-import { Home, History, Wallet, User } from "@repo/ui/icons";
 
-import { NormalLoadingProvider, useNormalLoading, NormalLoadingOverlay } from "./context/NormalLoadingContext";
+import { useRouter, usePathname } from "next/navigation";
+import { motion } from "@repo/ui/motion";
+import { Home, History, Wallet, User, Settings as SettingsIcon } from "@repo/ui/icons";
+
+import { NormalLoadingProvider, NormalLoadingOverlay } from "./context/NormalLoadingContext";
 import { BottomNavProvider, useBottomNav } from "./context/BottomNavContext";
 
 function Navigation() {
   const pathname = usePathname();
+  const router = useRouter();
   const tabs = [
-    { id: "home", label: "Home", href: "/home", Icon: Home },
-    { id: "history", label: "History", href: "/history", Icon: History },
-    { id: "wallet", label: "Wallet", href: "/wallet", Icon: Wallet },
-    { id: "profile", label: "Profile", href: "/profile", Icon: User },
+    { name: "History", id: "history", path: "/history", icon: History },
+    { name: "Wallet", id: "wallet", path: "/wallet", icon: Wallet },
+    { name: "Home", id: "home", path: "/home", icon: Home },
+    { name: "Settings", id: "settings", path: "/settings", icon: SettingsIcon },
+    { name: "Profile", id: "profile", path: "/profile", icon: User },
   ];
 
   return (
-    <nav className="pointer-events-auto mx-auto flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white p-2 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
-      {tabs.map(({ id, label, href, Icon }) => {
-        const active = pathname === href;
+    <div className="pointer-events-auto backdrop-blur-xl text-black rounded-[32px] border border-white/40 px-2 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/20 flex items-center justify-between">
+      {tabs.map((tab) => {
+        const isActive = tab.path === "/home" ? (pathname === "/home" || pathname === "/") : pathname?.includes(tab.path);
+
         return (
-          <Link
-            key={id}
-            href={href}
-            className={`group relative flex h-14 items-center justify-center overflow-hidden rounded-full transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${active ? "flex-[2.5]" : "flex-1"
-              }`}
+          <motion.button
+            key={tab.id}
+            initial={false}
+            whileTap={{ scale: 0.94 }}
+            transition={{ type: "spring", stiffness: 180, damping: 10 }}
+            onClick={() => router.replace(tab.path)}
+            className="flex flex-col items-center justify-center flex-1 h-[60px] gap-0 outline-none select-none"
           >
-            {/* Background pill */}
-            <div
-              className={`absolute inset-0 transition-colors duration-500 ${active ? "bg-[var(--primary)]" : "bg-transparent group-hover:bg-gray-50"
-                }`}
-            />
-
-            {/* Content */}
-            <div className={`relative z-10 flex items-center justify-center gap-2 px-2 ${active ? "text-white" : "text-gray-400"}`}>
-              <Icon size={24} strokeWidth={active ? 2.5 : 2} className="shrink-0" />
-
-              <AnimatePresence mode="wait">
-                {active && (
-                  <motion.span
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: "auto" }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.2, delay: 0.1 }}
-                    className="whitespace-nowrap font-bold text-sm overflow-hidden font-anton tracking-wide"
-                    style={{ fontFamily: 'var(--font-anton), sans-serif' }}
-                  >
-                    {label}
-                  </motion.span>
-                )}
-              </AnimatePresence>
+            <div className={`flex items-center justify-center rounded-full transition-all duration-300 relative z-10
+              ${tab.id === 'home'
+                ? (isActive ? 'w-14 h-14 mx-3 bg-black text-white shadow-lg scale-110' : 'w-14 h-14 mx-3 bg-white/20 text-gray-400 shadow-md scale-110')
+                : (isActive ? 'w-12 h-12 bg-black text-white shadow-md scale-110' : 'w-12 h-12 text-gray-400 active:bg-gray-200/50 active:scale-95')
+              }`}
+            >
+              <div className="relative">
+                <tab.icon className={tab.id === 'home' ? "w-7 h-7" : "w-6 h-6"} strokeWidth={2.5} />
+              </div>
             </div>
-          </Link>
+            {tab.id !== 'home' && (
+              <span className={`text-[10px] font-bold whitespace-nowrap text-gray-400 relative z-20 transition-all duration-300 ${isActive ? 'mt-1' : 'mt-[-5px]'}`}>
+                {tab.name}
+              </span>
+            )}
+          </motion.button>
         );
       })}
-    </nav>
+    </div>
   );
 }
 
@@ -64,10 +59,10 @@ function AnimatedNavigation() {
 
   return (
     <motion.div
-      initial={{ y: 0, x: "-50%" }}
+      initial={{ y: 200, x: "-50%" }}
       animate={{ y: isVisible ? 0 : 200, x: "-50%" }}
-      transition={{ duration: isVisible ? 0.4 : 0.8, ease: [0.33, 1, 0.68, 1] }} // Smooth cubic bezier
-      className="absolute bottom-3 left-1/2 w-[94%] max-w-xl"
+      transition={{ duration: 0.5, type: 'spring', damping: 20 }}
+      className="fixed bottom-2 left-1/2 w-[94%] max-w-xl z-[50] pointer-events-none"
     >
       <Navigation />
     </motion.div>
@@ -81,9 +76,7 @@ export default function NormalLayout({ children }: { children: React.ReactNode }
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0">{children}</div>
           <NormalLoadingOverlay />
-          <div className="pointer-events-none absolute inset-0 z-50">
-            <AnimatedNavigation />
-          </div>
+          <AnimatedNavigation />
         </div>
       </BottomNavProvider>
     </NormalLoadingProvider>

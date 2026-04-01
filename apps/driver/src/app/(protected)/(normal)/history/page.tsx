@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef, TouchEvent, WheelEvent } from "react";
-import { motion, AnimatePresence, useScroll } from "@repo/ui/motion";
-import { Search, Inbox, ChevronUp, CheckCircle2, Wallet, Bike } from "@repo/ui/icons";
-import { TextShimmer, HistoryCardShimmer } from "@repo/ui";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "@repo/ui/motion";
+import { Search, Inbox, ChevronUp, CheckCircle2, Wallet, Bike, X, ArrowLeft } from "@repo/ui/icons";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { HistoryCardShimmer } from "@repo/ui";
 import { useInfiniteScroll } from "@repo/hooks";
 import type { DriverHistoryOrder } from "@repo/types";
-import HistoryStats from "@/features/history/components/HistoryStats";
 import HistoryFilter from "@/features/history/components/HistoryFilter";
 import DriverHistoryCard from "@/features/history/components/DriverHistoryCard";
 import DriverOrderDetailDrawer from "@/features/history/components/DriverOrderDetailDrawer";
@@ -15,6 +16,7 @@ import { useBottomNav } from "../context/BottomNavContext";
 import { useDriverOrderHistory } from "@/features/history/hooks/useDriverOrderHistory";
 
 export default function HistoryPage() {
+  const router = useRouter();
   const { setIsVisible } = useBottomNav();
   const [filter, setFilter] = useState<"ALL" | "DELIVERED" | "CANCELLED">("ALL");
   const [selectedOrder, setSelectedOrder] = useState<DriverHistoryOrder | null>(null);
@@ -25,7 +27,6 @@ export default function HistoryPage() {
   const {
     orders,
     isLoading,
-    refetch,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage
@@ -33,6 +34,43 @@ export default function HistoryPage() {
     status: filter,
     search: actualSearchQuery
   });
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+
+  // Auto-hide bottom nav on scroll and handle Scroll To Top button visibility
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const currentScrollY = container.scrollTop;
+      const diff = currentScrollY - lastScrollY.current;
+      lastScrollY.current = currentScrollY;
+
+      if (Math.abs(diff) < 3) return;
+
+      // 1. Bottom Nav visibility
+      if (diff > 5 && currentScrollY > 20) {
+        setIsVisible(false);
+      } else if (diff < -5) {
+        setIsVisible(true);
+      }
+
+      // 2. Scroll to top button visibility
+      if (diff > 0 || currentScrollY < 400) {
+        // Hide immediately on ANY downward scroll or when near top
+        setShowScrollToTop(false);
+      } else if (diff < -20) {
+        // Only show on SIGNIFICANT upward scroll
+        setShowScrollToTop(true);
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [setIsVisible]);
 
   // Auto-load more when scrolling to bottom
   const { sentinelRef } = useInfiniteScroll({
@@ -42,98 +80,6 @@ export default function HistoryPage() {
     onLoadMore: fetchNextPage,
     rootMargin: '300px',
   });
-
-  // Scroll animation state
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const [showScrollToTop, setShowScrollToTop] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollY } = useScroll({ container: containerRef });
-
-  // Gesture checking state
-  const gestureState = useRef({ startY: 0, startScrollTop: 0 });
-  const lastWheelTime = useRef<number>(0);
-
-  const handleTouchStart = (e: TouchEvent) => {
-    if (!containerRef.current) return;
-    gestureState.current = {
-      startY: e.touches[0].clientY,
-      startScrollTop: containerRef.current.scrollTop
-    };
-  };
-
-  const handleTouchMove = (e: TouchEvent) => {
-    if (!containerRef.current) return;
-    const currentY = e.touches[0].clientY;
-    const diff = currentY - gestureState.current.startY;
-    const { startScrollTop } = gestureState.current;
-
-    // Scroll Down Gesture (diff < 0)
-    if (diff < -10 && isHeaderVisible) {
-      setIsHeaderVisible(false);
-    }
-
-    // Scroll Up Gesture (diff > 0)
-    else if (diff > 10 && !isHeaderVisible) {
-      // Only trigger if we started at the top of the list (with slight buffer)
-      if (startScrollTop < 2) {
-        setIsHeaderVisible(true);
-      }
-    }
-  };
-
-  const handleWheel = (e: WheelEvent) => {
-    if (!containerRef.current) return;
-    const isAtTop = containerRef.current.scrollTop <= 0;
-    const now = Date.now();
-    const timeDiff = now - lastWheelTime.current;
-    lastWheelTime.current = now;
-
-    // DeltaY > 0 is Down
-    if (e.deltaY > 0 && isHeaderVisible) {
-      setIsHeaderVisible(false);
-    }
-    // DeltaY < 0 is Up
-    else if (e.deltaY < 0 && !isHeaderVisible) {
-      if (isAtTop) {
-        // Only reveal if this is a fresh gesture (gap > 200ms from last event)
-        // This filters out momentum/inertia arriving at the top
-        if (timeDiff > 200) {
-          setIsHeaderVisible(true);
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    return scrollY.on("change", (latest) => {
-      const velocity = scrollY.getVelocity();
-
-      // --- Scroll To Top Button Logic ---
-      // Hide button when near top
-      if (latest < 100) {
-        if (showScrollToTop) setShowScrollToTop(false);
-        setIsVisible(true); // Always show nav at top
-      } else {
-        // Show when scrolling UP, Hide when scrolling DOWN
-        if (velocity < -20) {
-          if (!showScrollToTop) setShowScrollToTop(true);
-          setIsVisible(true);
-        } else if (velocity > 20) {
-          if (showScrollToTop) setShowScrollToTop(false);
-          setIsVisible(false);
-        }
-      }
-    });
-  }, [scrollY, showScrollToTop, setIsVisible]);
-
-  const scrollToTop = () => {
-    setIsHeaderVisible(true);
-    containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-
-
-  const filteredOrders = orders; // Filtering is now handled by the hook
 
   const handleOrderClick = (order: DriverHistoryOrder) => {
     setSelectedOrder(order);
@@ -147,172 +93,171 @@ export default function HistoryPage() {
   const handleFilterChange = (newFilter: "ALL" | "DELIVERED" | "CANCELLED") => {
     if (newFilter === filter) return;
     setFilter(newFilter);
-    containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       setActualSearchQuery(searchInputValue);
-      containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
+  const scrollToTop = () => {
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7] relative">
-      {/* Sticky Header - Z-index high to stay above content */}
-      <div className="flex-none sticky top-0 z-40 bg-[#F7F7F7]/95 backdrop-blur-xl border-none shadow-none ring-0 transition-all duration-300">
-        <motion.div
-          initial={false}
-          animate={{
-            height: isHeaderVisible ? "auto" : 0,
-            opacity: isHeaderVisible ? 1 : 0,
-            marginBottom: isHeaderVisible ? 16 : 0
-          }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="overflow-hidden px-5"
-        >
-          {/* Add padding top only if visible to avoid jumpiness when animating height */}
-          <div className={`${isHeaderVisible ? "pt-2" : "pt-0"}`}>
-            {/* <h1
-              className="text-4xl font-bold font-anton text-[#1A1A1A] leading-tight mb-1"
-              style={{ fontFamily: 'var(--font-anton), sans-serif', letterSpacing: '0.01em' }}
+    <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
+      {/* 
+        Main Scroll Container - Contains Header and List
+        Mirrors Customer App Order History mobile architecture
+      */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto no-scrollbar"
+      >
+        <div className="max-w-2xl mx-auto px-3 relative">
+
+          {/* Header Area (Scrollable) - Mobile style like Customer App */}
+          <div className="flex items-center gap-4 py-3 pb-0 pt-3">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => router.back()}
+              className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 transition-all flex items-center justify-center group flex-shrink-0"
             >
-              HISTORY
-            </h1>
-            <p className="text-gray-500 text-sm font-medium">Lịch sử hoạt động của bạn</p> */}
-
-            {/* Stats */}
-            <div className="mt-4">
-              {isLoading ? (
-                <div className="grid grid-cols-2 gap-3 mb-2">
-                  {/* Income shimmer */}
-                  <div className="bg-[var(--primary)] rounded-[24px] p-4 text-white shadow-md shadow-[var(--primary)]/30 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-3 opacity-20 rotate-12">
-                      <Wallet className="w-16 h-16" />
-                    </div>
-                    <div className="relative z-10">
-                      <p className="text-white/80 text-xs font-semibold mb-1 uppercase tracking-wider">Tổng thu nhập</p>
-                      <TextShimmer width={120} height={32} rounded="md" color="rgba(255,255,255,0.3)" />
-                    </div>
-                  </div>
-
-                  {/* Trips shimmer */}
-                  <div className="bg-white rounded-[24px] p-4 text-[#1A1A1A] border border-gray-100 shadow-sm relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-3 opacity-[0.08] rotate-12 text-[#1A1A1A]">
-                      <Bike className="w-16 h-16" />
-                    </div>
-                    <div className="relative z-10">
-                      <p className="text-gray-500 text-xs font-semibold mb-1 uppercase tracking-wider">Số chuyến xe</p>
-                      <TextShimmer width={60} height={36} rounded="md" />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <HistoryStats orders={orders} />
-              )}
+              <ArrowLeft className="w-5 h-5 text-gray-700" />
+            </motion.button>
+            <div>
+              <h1
+                className="text-[32px] font-bold leading-tight text-[#1A1A1A]"
+                style={{
+                  fontStretch: "condensed",
+                  letterSpacing: "-0.01em",
+                  fontFamily: "var(--font-anton), var(--font-sans)",
+                }}
+              >
+                ORDERS HISTORY
+              </h1>
+              <p className="text-sm font-medium text-gray-500 mt-0.5">
+                Manage and track your past orders
+              </p>
             </div>
           </div>
-        </motion.div>
 
-        {/* Search & Filter Container - Always Visible but connects smoothly */}
-        <motion.div
-          className="px-5 pb-2"
-          animate={{ paddingTop: isHeaderVisible ? 0 : 20 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="relative mb-4">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Tìm theo ID hoặc Nhà hàng... (Nhấn Enter)"
-              value={searchInputValue}
-              onChange={(e) => setSearchInputValue(e.target.value)}
-              onKeyDown={handleSearch}
-              className="w-full bg-white rounded-2xl pl-11 pr-4 py-3 text-sm font-medium text-[#1A1A1A] placeholder:text-gray-400 shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all"
-            />
-          </div>
-          <HistoryFilter current={filter} onChange={handleFilterChange} />
-        </motion.div>
-      </div>
+          {/* 
+             Sticky Toolbar (Search & Filters)
+             Standard sticky behavior without custom momentum logic
+          */}
+          <div className="sticky top-0 z-40 bg-[#F7F7F7]/95 backdrop-blur-md -mx-3 px-3 py-4 mb-2 [mask-image:linear-gradient(to_bottom,black_90%,transparent)]">
+            <div className="flex flex-col gap-4">
 
-      {/* Scrollable Content Area */}
-      <div
-        ref={containerRef}
-        className={`flex-1 px-3 pb-32 pt-2 scroll-smooth ${isHeaderVisible ? 'overflow-hidden' : 'overflow-y-auto'}`}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onWheel={handleWheel}
-      >
-        {/* Orders List */}
-        <div className="space-y-3">
-          {isLoading ? (
-            <HistoryCardShimmer cardCount={2} />
-          ) : (
-            <>
-              <AnimatePresence mode="popLayout">
-                {filteredOrders.length > 0 ? (
-                  filteredOrders.map((order, index) => (
-                    <motion.div
-                      key={order.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <DriverHistoryCard
-                        order={order}
-                        onClick={() => handleOrderClick(order)}
-                      />
-                    </motion.div>
-                  ))
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex flex-col items-center justify-center py-10 text-center"
+              {/* Search Bar - Preserved your original style classes */}
+              <div className="relative group">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[var(--primary)] transition-colors pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search by ID or Restaurant..."
+                  value={searchInputValue}
+                  onChange={(e) => setSearchInputValue(e.target.value)}
+                  onKeyDown={handleSearch}
+                  className="w-full bg-slate-50 border-2 border-white focus:border-[var(--primary)]/20 rounded-3xl py-4 pl-14 pr-12 text-lg font-bold font-anton text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/5 transition-all shadow-[inset_0_0_20px_rgba(0,0,0,0.09)]"
+                />
+                {searchInputValue && (
+                  <button
+                    onClick={() => {
+                      setSearchInputValue("");
+                      setActualSearchQuery("");
+                      scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-gray-200/50 hover:bg-gray-200 text-gray-500 hover:text-gray-700 flex items-center justify-center transition-all"
                   >
-                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
-                      <Inbox className="w-10 h-10" />
-                    </div>
-                    <h3 className="text-lg font-bold text-[#1A1A1A]">Không tìm thấy đơn hàng</h3>
-                    <p className="text-gray-500 text-sm max-w-[200px]">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
-                  </motion.div>
+                    <X className="w-4 h-4" />
+                  </button>
                 )}
-              </AnimatePresence>
+              </div>
 
-              {filteredOrders.length > 0 && (
-                <>
-                  {/* Sentinel for infinite scroll */}
-                  <div ref={sentinelRef} />
+              {/* History Filter */}
+              <HistoryFilter current={filter} onChange={handleFilterChange} />
+            </div>
+          </div>
 
-                  {/* Loading shimmer when fetching more */}
-                  {isFetchingNextPage && (
-                    <div className="py-4">
+          {/* Orders List Area */}
+          <div className="space-y-2 pb-32">
+            {isLoading && orders.length === 0 ? (
+              <HistoryCardShimmer cardCount={3} />
+            ) : (
+              <>
+                <AnimatePresence mode="popLayout">
+                  {orders.length > 0 ? (
+                    orders.map((order, index) => (
+                      <motion.div
+                        key={order.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <DriverHistoryCard
+                          order={order}
+                          onClick={() => handleOrderClick(order)}
+                        />
+                      </motion.div>
+                    ))
+                  ) : (actualSearchQuery || filter !== "ALL") ? (
+                    <EmptyState
+                      icon={Inbox}
+                      title="Không tìm thấy chuyến đi"
+                      description={
+                        actualSearchQuery
+                          ? "Không có chuyến xe nào phù hợp với tìm kiếm của bạn"
+                          : "Không có chuyến xe nào trong phân loại này"
+                      }
+                      className="py-24"
+                    />
+                  ) : (
+                    <EmptyState
+                      icon={Bike}
+                      title="Bạn chưa có chuyến xe nào"
+                      description="Hãy bắt đầu nhận đơn để tích lũy lịch sử hoạt động của bạn nhé!"
+                      buttonText="Trang chủ"
+                      onButtonClick={() => router.push('/home')}
+                      className="py-12"
+                    />
+                  )}
+                </AnimatePresence>
+
+                {orders.length > 0 && (
+                  <>
+                    {/* Sentinel for infinite scroll */}
+                    <div ref={sentinelRef} className="h-4" />
+
+                    {/* Loading shimmer when fetching more */}
+                    {isFetchingNextPage && (
                       <HistoryCardShimmer cardCount={1} />
-                    </div>
-                  )}
+                    )}
 
-                  {/* End of list indicator */}
-                  {!hasNextPage && !isFetchingNextPage && (
-                    <div className="py-12 flex items-center justify-center gap-4 opacity-60">
-                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-gray-400" />
+                    {/* End of list indicator */}
+                    {!hasNextPage && !isFetchingNextPage && (
+                      <div className="pb-12 pt-6 flex items-center justify-center gap-4 opacity-40">
+                        <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
+                        <div className="flex flex-col items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-gray-400" />
+                          <span className="text-[14px] font-bold text-gray-400 uppercase font-anton tracking-wider">End of list</span>
                         </div>
-                        <span className="text-[14px] font-bold text-gray-400 uppercase font-anton">End of list</span>
+                        <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
                       </div>
-                      <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent w-20" />
-                    </div>
-                  )}
-                </>
-              )}
-            </>
-          )}
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Scroll To Top Floating Button */}
+      {/* Floating Scroll To Top Button */}
       <AnimatePresence>
         {showScrollToTop && (
           <motion.button
@@ -322,19 +267,29 @@ export default function HistoryPage() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={scrollToTop}
-            className="absolute bottom-24 right-5 p-3 bg-[var(--primary)] text-white rounded-full shadow-lg shadow-[var(--primary)]/30 z-50 transition-colors"
+            className="fixed bottom-28 right-5 p-3 bg-[var(--primary)] text-white rounded-full shadow-lg shadow-[var(--primary)]/30 z-50 transition-colors"
           >
-            <ChevronUp className="w-6 h-6" />
+            <ChevronUp className="w-6 h-6" strokeWidth={3} />
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Detail Drawer - Always Rendered, Controlled by 'open' prop */}
+      {/* Detail Drawer */}
       <DriverOrderDetailDrawer
         order={selectedOrder}
         open={isDrawerOpen}
         onClose={handleCloseDrawer}
       />
+
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }
