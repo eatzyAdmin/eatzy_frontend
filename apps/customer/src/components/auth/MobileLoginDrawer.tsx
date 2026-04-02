@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "@repo/ui/motion";
-import { ChevronRight, ShieldCheck, Eye, EyeOff } from "@repo/ui/icons";
+import { ChevronRight, Key, Eye, EyeOff } from "@repo/ui/icons";
 import { useZodForm, loginSchema, type LoginFormData } from "@repo/lib";
 import { useRouter } from "next/navigation";
 import { sileo } from "@/components/DynamicIslandToast";
@@ -10,11 +10,13 @@ import { useLoading } from "@repo/ui";
 
 interface MobileLoginDrawerProps {
   onSignUpClick: () => void;
+  onForgotClick: () => void;
   onSubmit: (data: LoginFormData) => Promise<void>;
   isLoading: boolean;
+  error?: string | null;
 }
 
-export default function MobileLoginDrawer({ onSignUpClick, onSubmit, isLoading }: MobileLoginDrawerProps) {
+export default function MobileLoginDrawer({ onSignUpClick, onForgotClick, onSubmit, isLoading, error }: MobileLoginDrawerProps) {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -31,7 +33,7 @@ export default function MobileLoginDrawer({ onSignUpClick, onSubmit, isLoading }
       initial={{ y: "100%" }}
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
-      transition={{ type: "spring", damping: 30, stiffness: 150, delay: 0.1 }}
+      transition={{ type: "spring", damping: 30, stiffness: 150 }}
       className="relative z-10 w-full bg-white rounded-t-[48px] p-10 flex flex-col shadow-[0_-20px_60px_rgba(0,0,0,0.15)] max-h-[85vh] overflow-y-auto no-scrollbar"
     >
       {/* Drawer Header */}
@@ -49,6 +51,18 @@ export default function MobileLoginDrawer({ onSignUpClick, onSubmit, isLoading }
       <div className="mb-10">
         <h1 className="text-5xl font-black text-gray-900 tracking-tighter">Log in</h1>
       </div>
+
+      {/* API Error Message Display */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-100/50 text-red-600 rounded-[24px] text-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-2 shadow-sm">
+          <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+            <span className="text-red-500 font-black text-xs">!</span>
+          </div>
+          <div className="flex justify-center items-center">
+            <p className="font-bold text-red-600 mt-0.5 leading-tight">{error}</p>
+          </div>
+        </div>
+      )}
 
       <form
         onSubmit={form.handleSubmit(onSubmit)}
@@ -75,7 +89,7 @@ export default function MobileLoginDrawer({ onSignUpClick, onSubmit, isLoading }
         <div className="space-y-3">
           <div className="relative">
             <div className="absolute left-2 top-2 bottom-2 p-4 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 z-10">
-              <ShieldCheck size={16} strokeWidth={3.0} />
+              <Key size={16} strokeWidth={3.0} />
             </div>
             <input
               type={showPassword ? "text" : "password"}
@@ -97,7 +111,7 @@ export default function MobileLoginDrawer({ onSignUpClick, onSubmit, isLoading }
           <div className="flex justify-end px-4">
             <button
               type="button"
-              onClick={() => router.push("/forgot-password")}
+              onClick={onForgotClick}
               className="text-[11px] font-bold text-gray-400 hover:text-black transition-all flex items-center gap-1 uppercase tracking-widest group"
             >
               <span>Forgot password</span>

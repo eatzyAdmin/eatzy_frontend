@@ -11,6 +11,8 @@ type OnboardingState = {
   reset: () => void;
   validSteps: Partial<Record<OnboardingStepId, boolean>>;
   setStepValid: (id: OnboardingStepId, valid: boolean) => void;
+  isSubmitting: boolean;
+  submitApplication: (router: any) => Promise<void>;
 };
 
 const OnboardingContext = createContext<OnboardingState | null>(null);
@@ -20,6 +22,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   const [stepIndex, setStepIndex] = useState<number>(initialIdx);
   const [data, setData] = useState<DriverOnboardingData>({ driverProfileStatus: 'DRAFT' });
   const [validSteps, setValidSteps] = useState<Partial<Record<OnboardingStepId, boolean>>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const setField = useCallback((key: keyof DriverOnboardingData, value: unknown) => {
     setData((prev) => ({ ...prev, [key]: value }));
@@ -27,6 +30,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
   const next = useCallback(() => setStepIndex((i) => Math.min(i + 1, ONBOARDING_STEPS.length - 1)), []);
   const back = useCallback(() => setStepIndex((i) => Math.max(i - 1, 0)), []);
+  
   const setStepById = useCallback((id: OnboardingStepId) => {
     const idx = ONBOARDING_STEPS.findIndex((x) => x.id === id);
     const otpIdx = ONBOARDING_STEPS.findIndex((x) => x.id === 'otp');
@@ -36,15 +40,27 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }
     setStepIndex(Math.max(0, idx));
   }, [data.isPhoneVerified]);
+
   const setStepValid = useCallback((id: OnboardingStepId, valid: boolean) => {
     setValidSteps((prev) => ({ ...prev, [id]: valid }));
   }, []);
+
   const reset = useCallback(() => {
     setStepIndex(0);
     setData({ driverProfileStatus: 'DRAFT' });
     setValidSteps({});
+    setIsSubmitting(false);
   }, []);
 
+  const submitApplication = useCallback(async (router: any) => {
+    setIsSubmitting(true);
+    // Simulate encryption and transmission
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setField('submittedAt', new Date().toISOString());
+    setField('applicationStatus', 'PENDING_REVIEW');
+    setIsSubmitting(false);
+    router.push('/pending-review');
+  }, [setField]);
 
   const guardedNext = useCallback(() => {
     const current = ONBOARDING_STEPS[stepIndex]?.id;
@@ -52,7 +68,21 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     if (validSteps[current] !== true) return;
     next();
   }, [stepIndex, data.isPhoneVerified, validSteps, next]);
-  const value = useMemo<OnboardingState>(() => ({ stepIndex, data, setField, next: guardedNext, back, setStepById, reset, validSteps, setStepValid }), [stepIndex, data, guardedNext, back, setStepById, reset, setField, validSteps, setStepValid]);
+
+  const value = useMemo<OnboardingState>(() => ({ 
+    stepIndex, 
+    data, 
+    setField, 
+    next: guardedNext, 
+    back, 
+    setStepById, 
+    reset, 
+    validSteps, 
+    setStepValid,
+    isSubmitting,
+    submitApplication
+  }), [stepIndex, data, guardedNext, back, setStepById, reset, setField, validSteps, setStepValid, isSubmitting, submitApplication]);
+
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
 }
 

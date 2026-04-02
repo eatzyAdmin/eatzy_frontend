@@ -13,7 +13,7 @@ export default function WalletOverview({
   onManage: () => void;
   isLoading?: boolean;
 }) {
-  const [showBalance, setShowBalance] = useState(true);
+  const [showBalance, setShowBalance] = useState(false);
 
   return (
     <div className="w-full bg-[#1A1A1A] rounded-[32px] p-6 text-white relative overflow-hidden shadow-sm">

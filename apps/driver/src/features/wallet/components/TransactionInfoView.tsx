@@ -17,6 +17,7 @@ import {
   getWalletTransactionTypeLabel
 } from "@repo/types";
 
+import { useMemo } from "react";
 import { useNotification } from "@repo/ui";
 
 interface TransactionInfoViewProps {
@@ -32,7 +33,7 @@ export default function TransactionInfoView({
 }: TransactionInfoViewProps) {
   const { showNotification } = useNotification();
   // Determine if transaction is positive (credit) based on backend types
-  const isPositive = isWalletCreditType(transaction.type);
+  const isPositive = useMemo(() => isWalletCreditType(transaction.type), [transaction.type]);
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(transaction.id);
@@ -44,7 +45,8 @@ export default function TransactionInfoView({
   };
 
   // Get specific details based on backend transaction type
-  const getDetails = (tx: DriverWalletTransaction) => {
+  const details = useMemo(() => {
+    const tx = transaction;
     switch (tx.type) {
       case WalletTransactionType.DELIVERY_EARNING:
         return {
@@ -126,11 +128,15 @@ export default function TransactionInfoView({
           ]
         };
     }
-  };
+  }, [transaction]);
 
-  const details = getDetails(transaction);
-  const orderId = transaction.referenceId ? parseInt(transaction.referenceId) : null;
-  const hasLinkedOrder = !isNaN(orderId || NaN) && orderId !== null;
+  const { orderId, hasLinkedOrder } = useMemo(() => {
+    const id = transaction.referenceId ? parseInt(transaction.referenceId) : null;
+    return {
+      orderId: id,
+      hasLinkedOrder: !isNaN(id || NaN) && id !== null
+    };
+  }, [transaction.referenceId]);
 
   return (
     <div className="flex flex-col h-full bg-white">

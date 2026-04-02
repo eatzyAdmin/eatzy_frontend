@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useZodForm, z } from "@repo/lib";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { Mail, ArrowLeft, ShieldCheck, User, Phone, CheckCircle, ChevronRight, Calendar } from "@repo/ui/icons";
+import { ArrowLeft, Key, User, Phone, CheckCircle, ChevronRight, Calendar } from "@repo/ui/icons";
 import { useLoading } from "@repo/ui";
 import { useRouter } from "next/navigation";
 import { sileo } from "@/components/DynamicIslandToast";
@@ -92,8 +92,8 @@ export default function MobileRegisterDrawer({ onBackToLogin }: MobileRegisterDr
             <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <div className="relative">
-                  <div className="absolute left-2 top-2 bottom-2 w-11 h-11 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 z-10 box-content">
-                    <Mail size={16} strokeWidth={3} />
+                  <div className="absolute left-2 top-2 bottom-2 w-12 h-12 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 z-10 box-content">
+                    <span className="font-extrabold text-sm">@</span>
                   </div>
                   <input
                     type="email"
@@ -245,7 +245,7 @@ export default function MobileRegisterDrawer({ onBackToLogin }: MobileRegisterDr
                 <div className="space-y-2">
                   <div className="relative">
                     <div className="absolute left-2 top-2 bottom-2 w-11 h-11 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 z-10 box-content">
-                      <ShieldCheck size={16} strokeWidth={3} />
+                      <Key size={16} strokeWidth={3} />
                     </div>
                     <input
                       type="password"
@@ -261,7 +261,7 @@ export default function MobileRegisterDrawer({ onBackToLogin }: MobileRegisterDr
                 <div className="space-y-2">
                   <div className="relative">
                     <div className="absolute left-2 top-2 bottom-2 w-11 h-11 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 z-10 box-content">
-                      <ShieldCheck size={16} strokeWidth={3} />
+                      <Key size={16} strokeWidth={3} />
                     </div>
                     <input
                       type="password"

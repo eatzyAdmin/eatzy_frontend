@@ -1,4 +1,3 @@
-import { useState } from "react";
 import AuthInput from "./AuthInput";
 import { ChevronRight } from "@repo/ui/icons";
 
@@ -49,10 +48,9 @@ export default function CustomerLoginForm({
       )}
 
       <form onSubmit={handleSubmit(handleFormSubmit)} noValidate className="space-y-6">
-        {/* Input Fields - Clean and Modern */}
         <div className="space-y-4">
           <AuthInput
-            label="Email Address"
+            label="Email"
             type="email"
             placeholder="name@example.com"
             error={errors.email?.message}
@@ -68,6 +66,7 @@ export default function CustomerLoginForm({
               autoComplete="current-password"
               {...register("password")}
             />
+
             <div className="flex justify-end px-2">
               <button
                 type="button"

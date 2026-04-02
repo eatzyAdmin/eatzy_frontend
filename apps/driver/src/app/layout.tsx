@@ -40,9 +40,7 @@ export default function RootLayout({
     <html lang="vi">
       <body className={`${inter.className} ${inter.variable} ${antonio.variable} antialiased text-[#1A1A1A] bg-[#F7F7F7]`}>
         <Providers>
-          <SplashScreen />
           {children}
-          <PwaInstallPrompt />
         </Providers>
       </body>
     </html>

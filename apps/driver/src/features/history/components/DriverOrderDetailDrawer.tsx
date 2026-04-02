@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "@repo/ui/motion";
 import { X, MapPin, Package, Ticket } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
 import { DriverHistoryOrder } from "@repo/types";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 interface DriverOrderDetailDrawerProps {
   order: DriverHistoryOrder | null;
@@ -16,6 +17,8 @@ export default function DriverOrderDetailDrawer({
   open,
   onClose,
 }: DriverOrderDetailDrawerProps) {
+  useMobileBackHandler(open, onClose);
+
   if (!order) return null;
 
   return (

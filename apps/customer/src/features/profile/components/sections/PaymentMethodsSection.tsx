@@ -53,7 +53,7 @@ export default function PaymentMethodsSection({ onOpenManage }: PaymentMethodsSe
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<WalletTransactionResponse | null>(null);
-  const [showBalance, setShowBalance] = useState(true);
+  const [showBalance, setShowBalance] = useState(false);
 
   const { sentinelRef } = useInfiniteScroll({
     hasMore: hasNextPage,

@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useZodForm, z } from "@repo/lib";
+import { useZodForm, z, emailVerificationSchema, type EmailVerificationData } from "@repo/lib";
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { ArrowLeft, Key, CheckCircle, ChevronRight, Lock } from "@repo/ui/icons";
-import { useLoading } from "@repo/ui";
+import { Mail, ArrowLeft, Key, CheckCircle, ChevronRight } from "@repo/ui/icons";
 import { useRouter } from "next/navigation";
 import OTPInput from "./OTPInput";
-import { emailVerificationSchema, type EmailVerificationData } from "@repo/lib";
+import AuthInput from "./AuthInput";
 
 interface MobileForgotPasswordDrawerProps {
   onBackToLogin: () => void;
@@ -90,45 +89,40 @@ export default function MobileForgotPasswordDrawer({ onBackToLogin }: MobileForg
             className="space-y-6"
           >
             <div className="mb-2">
-              <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Lost Key?</h1>
-              <p className="text-gray-400 font-medium text-sm mt-2 italic">Enter your email to receive a code.</p>
+              <h1 className="text-4xl font-black text-gray-900 tracking-tighter leading-none">Lost Key?</h1>
+              <p className="text-gray-400 font-medium text-sm mt-2 italic">Enter your email to reset access key.</p>
             </div>
 
             <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="pb-4">
-              <div className="space-y-2">
-                <div className="relative">
-                  <div className="absolute left-2 top-2 bottom-2 w-11 h-11 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 z-10 box-content">
-                    <span className="font-extrabold text-sm">@</span>
-                  </div>
-                  <input
-                    type="email"
-                    placeholder="e-mail address"
-                    {...emailForm.register("email")}
-                    className="w-full h-[60px] bg-gray-100 border border-transparent focus:border-gray-100 focus:bg-white rounded-full pl-16 pr-4 text-base font-bold text-gray-900 transition-all focus:ring-4 focus:ring-gray-100/50 placeholder:text-gray-300 placeholder:italic"
-                  />
-                </div>
-                {emailForm.formState.errors.email && (
-                  <p className="text-[10px] text-red-500 font-bold ml-6 uppercase">{emailForm.formState.errors.email.message}</p>
-                )}
+              <div className="space-y-4">
+                <AuthInput
+                  type="email"
+                  placeholder="e-mail address"
+                  icon={<span className="font-extrabold text-sm">@</span>}
+                  error={emailForm.formState.errors.email?.message}
+                  {...emailForm.register("email")}
+                />
               </div>
 
               <div className="mt-8">
                 <button
                   type="submit"
                   disabled={isLoading || !emailForm.formState.isValid}
-                  className={`w-full h-16 rounded-full font-black text-lg transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98] ${(isLoading || !emailForm.formState.isValid)
-                    ? "bg-gray-100 text-gray-300 cursor-not-allowed"
-                    : "bg-black text-white hover:bg-zinc-800 shadow-[0_15px_40px_rgba(0,0,0,0.15)]"
+                  className={`w-full h-16 rounded-full font-black text-lg transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98] ${isLoading
+                    ? "bg-gray-100 text-black cursor-not-allowed"
+                    : !emailForm.formState.isValid
+                      ? "bg-gray-100 text-gray-300 cursor-not-allowed"
+                      : "bg-black text-white hover:bg-zinc-800 shadow-[0_15px_40px_rgba(0,0,0,0.15)]"
                     }`}
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-3">
                       <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                      <span className="text-black/60 text-sm">Sending Code...</span>
+                      <span className="text-black/60 text-sm">Sending...</span>
                     </div>
                   ) : (
                     <>
-                      <span className="tracking-tight">Send Code</span>
+                      <span className="tracking-tight text-lg">Send Code</span>
                       <ChevronRight size={20} strokeWidth={3} />
                     </>
                   )}
@@ -155,19 +149,26 @@ export default function MobileForgotPasswordDrawer({ onBackToLogin }: MobileForg
                 <ArrowLeft size={12} />
                 <span>Change Email</span>
               </button>
-              <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Verify Identity</h1>
-              <p className="text-gray-400 font-medium text-sm mt-2 italic">Validation code sent to {email}</p>
+              <h1 className="text-4xl font-black text-gray-900 tracking-tighter leading-none">Validation</h1>
+              <p className="text-gray-400 font-medium text-sm mt-2 italic px-2">Verification code sent to {email}</p>
             </div>
 
             <div className="flex flex-col items-center space-y-6">
               <OTPInput value={otp} onChange={setOtp} error={otpError} />
 
+              <div className="text-center">
+                  <p className="text-xs text-gray-400 font-medium italic mb-2">Didn&apos;t receive the pulse?</p>
+                  <button className="text-[11px] font-bold text-lime-600 hover:text-lime-700 transition-all tracking-tight border-b border-lime-200/50">Resend Code</button>
+              </div>
+
               <button
                 onClick={handleOTPVerify}
                 disabled={isLoading || otp.length !== 6}
-                className={`w-full h-16 rounded-full font-black text-lg transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98] ${(isLoading || otp.length !== 6)
-                  ? "bg-gray-100 text-gray-300 cursor-not-allowed"
-                  : "bg-black text-white hover:bg-zinc-800 shadow-[0_15px_40px_rgba(0,0,0,0.15)]"
+                className={`w-full h-16 rounded-full font-black text-lg transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98] ${isLoading
+                  ? "bg-gray-100 text-black cursor-not-allowed"
+                  : otp.length !== 6
+                    ? "bg-gray-100 text-gray-300 cursor-not-allowed"
+                    : "bg-black text-white hover:bg-zinc-800 shadow-[0_15px_40px_rgba(0,0,0,0.15)]"
                   }`}
               >
                 {isLoading ? (
@@ -177,7 +178,7 @@ export default function MobileForgotPasswordDrawer({ onBackToLogin }: MobileForg
                   </div>
                 ) : (
                   <>
-                    <span className="tracking-tight">Verify & Continue</span>
+                    <span className="tracking-tight text-lg">Verify & Continue</span>
                     <ChevronRight size={20} strokeWidth={3} />
                   </>
                 )}
@@ -196,66 +197,48 @@ export default function MobileForgotPasswordDrawer({ onBackToLogin }: MobileForg
             className="space-y-6"
           >
             <div className="mb-2">
-              <h1 className="text-4xl font-black text-gray-900 tracking-tighter">New Security</h1>
+              <h1 className="text-4xl font-black text-gray-900 tracking-tighter leading-none">New Password</h1>
               <p className="text-gray-400 font-medium text-sm mt-2 italic">Set a strong password for your account.</p>
             </div>
 
             <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)} className="pb-4">
-              <div className="space-y-3">
-                {/* Password Capsule */}
-                <div className="space-y-2">
-                  <div className="relative">
-                    <div className="absolute left-2 top-2 bottom-2 w-11 h-11 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 z-10 box-content">
-                      <Key size={16} strokeWidth={3} />
-                    </div>
-                    <input
-                      type="password"
-                      placeholder="new password"
-                      {...passwordForm.register("password")}
-                      className="w-full h-[60px] bg-gray-100 border border-transparent focus:border-gray-100 focus:bg-white rounded-full pl-16 pr-4 text-base font-bold text-gray-900 transition-all focus:ring-4 focus:ring-gray-100/50 placeholder:text-gray-300 placeholder:italic"
-                    />
-                  </div>
-                  {passwordForm.formState.errors.password && (
-                    <p className="text-[10px] text-red-500 font-bold ml-6 uppercase">{passwordForm.formState.errors.password.message}</p>
-                  )}
-                </div>
+              <div className="space-y-4">
+                <AuthInput
+                  type="password"
+                  placeholder="New password"
+                  icon={<Key size={16} strokeWidth={3} />}
+                  error={passwordForm.formState.errors.password?.message}
+                  {...passwordForm.register("password")}
+                />
 
-                {/* Confirm Password Capsule */}
-                <div className="space-y-2">
-                  <div className="relative">
-                    <div className="absolute left-2 top-2 bottom-2 w-11 h-11 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 z-10 box-content">
-                      <Key size={16} strokeWidth={3} />
-                    </div>
-                    <input
-                      type="password"
-                      placeholder="confirm new password"
-                      {...passwordForm.register("confirmPassword")}
-                      className="w-full h-[60px] bg-gray-100 border border-transparent focus:border-gray-100 focus:bg-white rounded-full pl-16 pr-4 text-base font-bold text-gray-900 transition-all focus:ring-4 focus:ring-gray-100/50 placeholder:text-gray-300 placeholder:italic"
-                    />
-                  </div>
-                  {passwordForm.formState.errors.confirmPassword && (
-                    <p className="text-[10px] text-red-500 font-bold ml-6 uppercase">{passwordForm.formState.errors.confirmPassword.message}</p>
-                  )}
-                </div>
+                <AuthInput
+                  type="password"
+                  placeholder="Confirm password"
+                  icon={<Key size={16} strokeWidth={3} />}
+                  error={passwordForm.formState.errors.confirmPassword?.message}
+                  {...passwordForm.register("confirmPassword")}
+                />
               </div>
 
               <div className="mt-8">
                 <button
                   type="submit"
                   disabled={isLoading || !passwordForm.formState.isValid}
-                  className={`w-full h-16 rounded-full font-black text-lg transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98] ${(isLoading || !passwordForm.formState.isValid)
-                    ? "bg-gray-100 text-gray-300 cursor-not-allowed"
-                    : "bg-black text-white hover:bg-zinc-800 shadow-[0_15px_40px_rgba(0,0,0,0.15)]"
+                  className={`w-full h-16 rounded-full font-black text-lg transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98] ${isLoading
+                    ? "bg-gray-100 text-black cursor-not-allowed"
+                    : !passwordForm.formState.isValid
+                      ? "bg-gray-100 text-gray-300 cursor-not-allowed"
+                      : "bg-black text-white hover:bg-zinc-800 shadow-[0_15px_40px_rgba(0,0,0,0.15)]"
                     }`}
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-3">
                       <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                      <span className="text-black/60 text-sm">Updating Password...</span>
+                      <span className="text-black/60 text-sm">Updating...</span>
                     </div>
                   ) : (
                     <>
-                      <span className="tracking-tight">Update Password</span>
+                      <span className="tracking-tight text-lg">Update password</span>
                       <ChevronRight size={20} strokeWidth={3} />
                     </>
                   )}
@@ -273,18 +256,18 @@ export default function MobileForgotPasswordDrawer({ onBackToLogin }: MobileForg
             animate={{ opacity: 1, scale: 1 }}
             className="flex flex-col items-center justify-center py-12 space-y-8"
           >
-            <div className="w-24 h-24 bg-lime-500 rounded-full flex items-center justify-center shadow-[0_20px_50px_rgba(120,200,65,0.3)]">
+            <div className="w-24 h-24 bg-lime-500 rounded-[32px] flex items-center justify-center shadow-[0_20px_50px_rgba(120,200,65,0.3)]">
               <CheckCircle size={48} className="text-white" strokeWidth={2.5} />
             </div>
 
             <div className="text-center space-y-2">
-              <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Secure!</h1>
-              <p className="text-gray-400 font-medium italic">Your password has been successfully updated.</p>
+              <h1 className="text-4xl font-black text-gray-900 tracking-tighter mb-2">Secure!</h1>
+              <p className="text-gray-400 font-medium italic">Your password has been updated successfully.</p>
             </div>
 
             <button
               onClick={onBackToLogin}
-              className="w-full h-16 bg-black text-white rounded-full font-black text-lg shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:bg-zinc-800 transition-all active:scale-95"
+              className="w-full h-16 bg-black text-white rounded-full font-black text-lg shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:bg-zinc-800 transition-all active:scale-95 tracking-tight"
             >
               Sign In Now
             </button>
@@ -303,10 +286,10 @@ export default function MobileForgotPasswordDrawer({ onBackToLogin }: MobileForg
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
       transition={{ type: "spring", damping: 30, stiffness: 150 }}
-      className="relative z-10 w-full bg-white rounded-t-[48px] p-10 flex flex-col shadow-[0_-20px_60px_rgba(0,0,0,0.15)] max-h-[90vh] overflow-y-auto no-scrollbar"
+      className="relative z-10 w-full bg-white rounded-t-[48px] p-10 flex flex-col shadow-[0_-20px_60px_rgba(0,0,0,0.15)] max-h-[90vh] overflow-y-auto no-scrollbar outline-none"
     >
-      <div className="flex items-center justify-between mb-8">
-        <span className="text-gray-400 font-bold text-sm tracking-tight opacity-60">Eat Eatzy, eat easy!</span>
+      <div className="flex items-center justify-between mb-10">
+        <span className="text-gray-400 font-bold text-sm tracking-tight opacity-60">Drive Eatzy, Earn Easy!</span>
         {(currentStep as string) !== "success" && (
           <button
             onClick={onBackToLogin}

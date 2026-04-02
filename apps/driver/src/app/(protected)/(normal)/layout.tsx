@@ -3,7 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "@repo/ui/motion";
 import { Home, History, Wallet, User, Settings as SettingsIcon } from "@repo/ui/icons";
-
+import { useMobileExitGuard } from "@/hooks/useMobileExitGuard";
 import { NormalLoadingProvider, NormalLoadingOverlay } from "./context/NormalLoadingContext";
 import { BottomNavProvider, useBottomNav } from "./context/BottomNavContext";
 
@@ -62,7 +62,7 @@ function AnimatedNavigation() {
       initial={{ y: 200, x: "-50%" }}
       animate={{ y: isVisible ? 0 : 200, x: "-50%" }}
       transition={{ duration: 0.5, type: 'spring', damping: 20 }}
-      className="fixed bottom-2 left-1/2 w-[94%] max-w-xl z-[50] pointer-events-none"
+      className="fixed bottom-2 left-1/2 w-[95.5%] max-w-xl z-[50] pointer-events-none"
     >
       <Navigation />
     </motion.div>
@@ -70,6 +70,8 @@ function AnimatedNavigation() {
 }
 
 export default function NormalLayout({ children }: { children: React.ReactNode }) {
+  useMobileExitGuard();
+
   return (
     <NormalLoadingProvider>
       <BottomNavProvider>

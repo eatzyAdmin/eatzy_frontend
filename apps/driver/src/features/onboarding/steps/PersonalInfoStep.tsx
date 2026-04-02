@@ -1,12 +1,13 @@
 "use client";
-import { FloatingLabelInput, CustomSelect, CalendarDatePicker } from "@repo/ui";
 import { useOnboardingStore } from "../store/useOnboardingStore";
-import { User } from "@repo/ui/icons";
-import { useForm } from "@repo/lib/form";
-import { zodResolver } from "@repo/lib/form";
+import { User, Mail, Calendar, MapPin, Building2 as City } from "@repo/ui/icons";
+import { useForm, zodResolver } from "@repo/lib/form";
 import { personalSchema, type PersonalData } from "../schemas/forms";
 import { VN_PROVINCES } from "../data/vn";
 import { useEffect } from "react";
+import AuthInput from "../../auth/components/AuthInput";
+import AuthSelect from "../../auth/components/AuthSelect";
+import AuthDatePicker from "../../auth/components/AuthDatePicker";
 
 export default function PersonalInfoStep() {
   const { data, setField, setStepValid } = useOnboardingStore();
@@ -21,66 +22,86 @@ export default function PersonalInfoStep() {
       city: data.city ?? "",
     },
   });
+  
   const watch = form.watch();
+  
   useEffect(() => {
     setStepValid("personal", !!form.formState.isValid);
   }, [form.formState.isValid, setStepValid]);
 
   return (
-    <div className="bg-white rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 overflow-hidden">
-      {/* Header - Matching OrderDetailsModal section header */}
-      <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
-        <div className="w-10 h-10 rounded-2xl bg-lime-100 flex items-center justify-center border border-lime-200">
-          <User className="w-5 h-5 text-lime-600" />
+    <div className="space-y-10 py-6">
+      {/* Header - Transparent Integration */}
+      <div className="flex flex-col items-center text-center gap-4">
+        <div className="w-20 h-20 rounded-[32px] bg-lime-100 flex items-center justify-center border-2 border-lime-200 shadow-sm mb-2">
+          <User className="w-8 h-8 text-lime-600" />
         </div>
         <div>
-          <h3 className="font-bold text-[#1A1A1A]">Thông tin cá nhân</h3>
-          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Personal Information</p>
+          <h3 className="text-4xl font-anton font-bold text-gray-900 uppercase tracking-tight leading-none">Personal Profile</h3>
+          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.3em] mt-3 italic">Identity Verification Protocol</p>
         </div>
       </div>
 
-      {/* Form Content */}
-      <div className="p-6 space-y-5">
-        <FloatingLabelInput
-          label="Họ và tên"
-          value={watch.fullName}
+      {/* Form Content - Frameless layout */}
+      <div className="space-y-8">
+        <AuthInput
+          label="Full Legal Name"
+          placeholder="As shown on ID"
+          icon={<User size={16} strokeWidth={3} />}
           error={form.formState.errors.fullName?.message}
-          {...form.register("fullName", { onChange: (e: React.ChangeEvent<HTMLInputElement>) => setField("fullName", e.target.value) })}
+          {...form.register("fullName", { 
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setField("fullName", e.target.value) 
+          })}
         />
-        <CalendarDatePicker
-          label="Ngày sinh"
-          value={watch.dob || null}
-          onChange={(v) => {
-            const val = typeof v === 'string' ? v : (v ? (v as Date).toISOString().slice(0, 10) : '');
-            form.setValue("dob", val, { shouldValidate: true });
-            setField("dob", val);
-          }}
-          error={form.formState.errors.dob?.message}
-        />
-        <CustomSelect
-          label="Giới tính"
-          options={["Nam", "Nữ", "Khác"]}
-          value={(watch.gender === 'male' ? 'Nam' : watch.gender === 'female' ? 'Nữ' : 'Khác')}
-          onChange={(v: string) => {
-            const g = (v === 'Nam' ? 'male' : v === 'Nữ' ? 'female' : 'other') as "male" | "female" | "other";
-            form.setValue("gender", g, { shouldValidate: true });
-            setField("gender", g);
-          }}
-        />
-        <FloatingLabelInput
-          label="Địa chỉ"
-          value={watch.address}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <AuthDatePicker
+            label="Date of Birth"
+            placeholder="YYYY-MM-DD"
+            icon={<Calendar size={16} strokeWidth={3} />}
+            value={watch.dob}
+            onChange={(v) => {
+              form.setValue("dob", v, { shouldValidate: true });
+              setField("dob", v);
+            }}
+            error={form.formState.errors.dob?.message}
+          />
+          
+          <AuthSelect
+            label="Gender Identity"
+            placeholder="Select gender"
+            icon={<User size={16} strokeWidth={3} />}
+            options={["Nam", "Nữ", "Khác"]}
+            value={(watch.gender === 'male' ? 'Nam' : watch.gender === 'female' ? 'Nữ' : 'Khác')}
+            onChange={(v: string) => {
+              const g = (v === 'Nam' ? 'male' : v === 'Nữ' ? 'female' : 'other') as "male" | "female" | "other";
+              form.setValue("gender", g, { shouldValidate: true });
+              setField("gender", g);
+            }}
+          />
+        </div>
+
+        <AuthInput
+          label="Residential Address"
+          placeholder="Street, District"
+          icon={<MapPin size={16} strokeWidth={3} />}
           error={form.formState.errors.address?.message}
-          {...form.register("address", { onChange: (e: React.ChangeEvent<HTMLInputElement>) => setField("address", e.target.value) })}
+          {...form.register("address", { 
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => setField("address", e.target.value) 
+          })}
         />
-        <CustomSelect
-          label="Tỉnh/Thành phố"
+
+        <AuthSelect
+          label="Province / City"
+          placeholder="Select operation city"
+          icon={<City size={16} strokeWidth={3} />}
           options={VN_PROVINCES}
           value={watch.city || undefined}
           onChange={(v: string) => {
             form.setValue("city", v, { shouldValidate: true });
             setField("city", v);
           }}
+          error={form.formState.errors.city?.message}
         />
       </div>
     </div>

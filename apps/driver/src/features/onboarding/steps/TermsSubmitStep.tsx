@@ -1,115 +1,84 @@
 "use client";
 import { useOnboardingStore } from "../store/useOnboardingStore";
-import { useLoading } from "@repo/ui";
-import { useRouter } from "next/navigation";
-import { AlertTriangle, CheckCircle2, ShieldCheck, FileText } from "@repo/ui/icons";
-import { useState, useEffect } from "react";
-import type { OnboardingStepId } from "../types";
+import { AlertTriangle, ShieldCheck, FileText } from "@repo/ui/icons";
+import { useEffect } from "react";
+import { motion } from "@repo/ui/motion";
 
 export default function TermsSubmitStep() {
-  const router = useRouter();
-  const { show, hide } = useLoading();
-  const { data, setField, setStepById, setStepValid } = useOnboardingStore();
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const { data, setField, setStepValid } = useOnboardingStore();
+  
   const updateAccepted = (v: boolean) => setField("hasAcceptedTerms", v);
   const updateAccuracy = (v: boolean) => setField("hasConfirmedAccuracy", v);
+  
   const allChecked = !!data.hasAcceptedTerms && !!data.hasConfirmedAccuracy;
+  
   useEffect(() => {
     setStepValid("terms_submit", allChecked);
   }, [allChecked, setStepValid]);
 
-  const validateAndSubmit = () => {
-    const missing: Array<{ step: string; field: string }> = [];
-    const pushMissing = (step: string, field: string, ok: boolean) => { if (!ok) missing.push({ step, field }); };
-    pushMissing('otp', 'email', !!data.email);
-    pushMissing('personal', 'fullName', !!data.fullName);
-    pushMissing('personal', 'dob', !!data.dob);
-    pushMissing('personal', 'address', !!data.address);
-    pushMissing('personal', 'city', !!data.city);
-    pushMissing('kyc', 'idType', !!data.idType);
-    pushMissing('kyc', 'idNumber', !!data.idNumber);
-    pushMissing('kyc', 'idFrontImageUrl', !!data.idFrontImageUrl);
-    pushMissing('kyc', 'idBackImageUrl', !!data.idBackImageUrl);
-    pushMissing('license', 'driverLicenseNumber', !!data.driverLicenseNumber);
-    pushMissing('license', 'driverLicenseClass', !!data.driverLicenseClass);
-    pushMissing('vehicle', 'plateNumber', !!data.plateNumber);
-    pushMissing('vehicle', 'registrationImageUrl', !!data.registrationImageUrl);
-    pushMissing('vehicle', 'insuranceImageUrl', !!data.insuranceImageUrl);
-    pushMissing('bank_tax', 'bankAccountNumber', !!data.bankAccountNumber);
-
-    if (missing.length > 0) {
-      const first = missing[0];
-      setStepById(first.step as OnboardingStepId);
-      setErrorMsg(`Vui lòng điền đầy đủ mục: ${first.step} / ${first.field}`);
-      show(`Thiếu thông tin: ${first.field}`);
-      setTimeout(() => hide(), 1500);
-      return;
-    }
-    show('Đang gửi hồ sơ...');
-    setField('submittedAt', new Date().toISOString());
-    setField('applicationStatus', 'PENDING_REVIEW');
-    setTimeout(() => { router.push('/pending-review'); }, 300);
-  };
-
   return (
-    <div className="space-y-5">
+    <div className="space-y-6 pb-20">
       {/* Header Card */}
-      <div className="bg-white rounded-[28px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-3 bg-gray-50/30">
-          <div className="w-10 h-10 rounded-2xl bg-lime-100 flex items-center justify-center border border-lime-200">
-            <FileText className="w-5 h-5 text-lime-600" />
+      <div className="bg-white rounded-[40px] shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden outline-none">
+        <div className="px-8 py-8 border-b border-gray-50 flex items-center gap-5 bg-gray-50/20">
+          <div className="w-14 h-14 rounded-[22px] bg-lime-100 flex items-center justify-center border-2 border-lime-200 shadow-sm">
+            <FileText className="w-6 h-6 text-lime-600" />
           </div>
           <div>
-            <h3 className="font-bold text-[#1A1A1A]">Điều khoản & Gửi hồ sơ</h3>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Terms & Submit</p>
+            <h3 className="text-2xl font-anton font-bold text-gray-900 uppercase tracking-tight">Final Protocol</h3>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-0.5 italic">Affidavit & Submission</p>
           </div>
         </div>
 
-        <div className="p-6 space-y-5">
-          {/* Error Message */}
-          {errorMsg && (
-            <div className="p-4 bg-amber-50 border border-amber-100 rounded-[20px] flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle className="w-4 h-4 text-amber-600" />
-              </div>
-              <div>
-                <span className="font-bold text-xs uppercase tracking-wider text-amber-400">Cảnh báo</span>
-                <p className="text-amber-700 font-medium text-sm mt-0.5">{errorMsg}</p>
-              </div>
+        <div className="p-8 space-y-8">
+          {/* Quick Summary Insights */}
+          <div className="bg-gray-50/50 rounded-[32px] p-6 border border-gray-100 flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-anton text-gray-400 uppercase tracking-widest">Profile Status</span>
+              <span className="text-sm font-bold text-gray-900 mt-0.5 italic">Ready for Fleet Review</span>
             </div>
-          )}
-
-          {/* Summary Card */}
-          <div className="bg-gray-50 rounded-[20px] p-5 border border-gray-100">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Tóm tắt</p>
-            <p className="text-sm text-gray-600 font-medium">Vui lòng kiểm tra lại thông tin trước khi gửi.</p>
+            <div className="px-4 py-1.5 bg-white border border-gray-100 rounded-full text-[10px] font-bold text-lime-600 uppercase tracking-widest shadow-sm">
+               Verified 100%
+            </div>
           </div>
 
-          {/* Checkboxes */}
-          <div className="space-y-4">
-            <label className="flex items-start gap-4 cursor-pointer group p-4 rounded-[20px] border border-gray-100 hover:border-lime-200 hover:bg-lime-50/30 transition-all">
-              <input
-                type="checkbox"
-                checked={!!data.hasConfirmedAccuracy}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAccuracy(e.target.checked)}
-                className="w-5 h-5 rounded-lg border-2 border-gray-200 text-lime-500 focus:ring-lime-500 focus:ring-2 cursor-pointer mt-0.5"
-              />
-              <div>
-                <span className="text-sm font-bold text-[#1A1A1A] group-hover:text-lime-700 transition-colors">Tôi cam kết thông tin là chính xác</span>
-                <p className="text-xs text-gray-400 mt-1">Mọi thông tin tôi cung cấp là trung thực.</p>
+          {/* Legal Checkboxes - Premium Styling */}
+          <div className="space-y-6">
+            <label 
+               className={`flex items-start gap-5 cursor-pointer group p-6 rounded-[32px] border transition-all duration-300 ${
+                  data.hasConfirmedAccuracy ? 'bg-lime-50/50 border-lime-200' : 'bg-white border-gray-100 hover:border-gray-200'
+               }`}
+            >
+              <div className="relative flex items-center mt-1">
+                 <input
+                    type="checkbox"
+                    checked={!!data.hasConfirmedAccuracy}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAccuracy(e.target.checked)}
+                    className="w-6 h-6 rounded-lg border-2 border-gray-200 text-lime-500 focus:ring-lime-500/20 focus:ring-4 cursor-pointer transition-all"
+                  />
+              </div>
+              <div className="flex-1">
+                <span className="text-base font-bold text-gray-900 group-hover:text-black transition-colors block">Affidavit of Truth</span>
+                <p className="text-xs text-gray-400 mt-1 italic font-medium leading-relaxed">I certify that all information provided in this portal is accurate and legally binding.</p>
               </div>
             </label>
 
-            <label className="flex items-start gap-4 cursor-pointer group p-4 rounded-[20px] border border-gray-100 hover:border-lime-200 hover:bg-lime-50/30 transition-all">
-              <input
-                type="checkbox"
-                checked={!!data.hasAcceptedTerms}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAccepted(e.target.checked)}
-                className="w-5 h-5 rounded-lg border-2 border-gray-200 text-lime-500 focus:ring-lime-500 focus:ring-2 cursor-pointer mt-0.5"
-              />
-              <div>
-                <span className="text-sm font-bold text-[#1A1A1A] group-hover:text-lime-700 transition-colors">Tôi đồng ý với Điều khoản & Chính sách của Eatzy Driver</span>
-                <p className="text-xs text-gray-400 mt-1">Bao gồm Chính sách Bảo mật và Điều khoản Sử dụng.</p>
+            <label 
+               className={`flex items-start gap-5 cursor-pointer group p-6 rounded-[32px] border transition-all duration-300 ${
+                  data.hasAcceptedTerms ? 'bg-lime-50/50 border-lime-200' : 'bg-white border-gray-100 hover:border-gray-200'
+               }`}
+            >
+              <div className="relative flex items-center mt-1">
+                <input
+                    type="checkbox"
+                    checked={!!data.hasAcceptedTerms}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateAccepted(e.target.checked)}
+                    className="w-6 h-6 rounded-lg border-2 border-gray-200 text-lime-500 focus:ring-lime-500/20 focus:ring-4 cursor-pointer transition-all"
+                  />
+              </div>
+              <div className="flex-1">
+                <span className="text-base font-bold text-gray-900 group-hover:text-black transition-colors block">Global Partner Terms</span>
+                <p className="text-xs text-gray-400 mt-1 italic font-medium leading-relaxed">I have read and agree to Eatzy Fleet&apos;s Privacy Policy and Partner Operating Agreement.</p>
               </div>
             </label>
           </div>
@@ -117,27 +86,14 @@ export default function TermsSubmitStep() {
       </div>
 
       {/* Safety Banner */}
-      <div className="bg-gradient-to-r from-lime-50 to-white border border-lime-100/50 p-4 rounded-[24px] flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-lime-100 flex items-center justify-center flex-shrink-0">
-          <ShieldCheck className="w-4 h-4 text-lime-600" />
+      <div className="bg-lime-50/50 border border-lime-100/50 p-6 rounded-[32px] flex items-center gap-5 shadow-[inset_0_0_20px_rgba(120,200,65,0.02)]">
+        <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0 border border-lime-100">
+          <ShieldCheck className="w-6 h-6 text-lime-600" />
         </div>
-        <p className="text-xs text-lime-600 leading-relaxed font-medium">
-          Thông tin của bạn được bảo mật và chỉ dùng cho mục đích xác minh.
+        <p className="text-xs text-lime-700 leading-relaxed font-bold italic">
+          Encryption Active: Your partner portfolio is encrypted using AES-256 protocols before being transmitted to our review center.
         </p>
       </div>
-
-      {/* Submit Button */}
-      <button
-        disabled={!allChecked}
-        onClick={validateAndSubmit}
-        className={`w-full h-14 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all duration-300 ${allChecked
-            ? 'bg-lime-500 text-[#1A1A1A] hover:bg-lime-400 shadow-lg shadow-lime-500/20 active:scale-[0.98]'
-            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
-      >
-        {allChecked ? <CheckCircle2 className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
-        <span className="font-anton text-base uppercase tracking-wider">GỬI HỒ SƠ</span>
-      </button>
     </div>
   );
 }

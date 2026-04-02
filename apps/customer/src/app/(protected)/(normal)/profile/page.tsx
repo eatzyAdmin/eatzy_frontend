@@ -54,23 +54,28 @@ export default function ProfilePage() {
     return () => clearTimeout(timer);
   }, [hide]);
 
-  // Handle header and bottom nav visibility based on sub-page state
+  // Handle header, bottom nav, and modal-open class visibility based on sub-page state
   useEffect(() => {
-    if (activeMobileSection) {
-      // Hide global elements
+    const isSubPageOpen = activeMobileSection !== null || walletView !== 'main';
+    
+    if (isSubPageOpen) {
+      // Hide global elements and block app exit guard
       setBottomNavVisible(false);
+      document.body.classList.add('modal-open');
       window.dispatchEvent(new CustomEvent('searchHeaderVisibility', { detail: { visible: false } }));
     } else {
-      // Show global elements
+      // Show global elements and re-enable app exit guard
       setBottomNavVisible(true);
+      document.body.classList.remove('modal-open');
       window.dispatchEvent(new CustomEvent('searchHeaderVisibility', { detail: { visible: true } }));
     }
 
     return () => {
       setBottomNavVisible(true);
+      document.body.classList.remove('modal-open');
       window.dispatchEvent(new CustomEvent('searchHeaderVisibility', { detail: { visible: true } }));
     };
-  }, [activeMobileSection, setBottomNavVisible]);
+  }, [activeMobileSection, walletView, setBottomNavVisible]);
 
   const handleLogout = () => {
     confirm({

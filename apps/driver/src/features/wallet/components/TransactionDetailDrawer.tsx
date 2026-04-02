@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { DriverWalletTransaction } from "@repo/types";
 import { useOrderDetail } from "@/features/history/hooks/useOrderDetail";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 import TransactionInfoView from "./TransactionInfoView";
 import LinkedOrderView from "./LinkedOrderView";
 
@@ -18,6 +19,12 @@ export default function TransactionDetailDrawer({
 }) {
   const [view, setView] = useState<'info' | 'order'>('info');
   const { order, isLoading, fetchOrder, clearOrder } = useOrderDetail();
+
+  // Layered mobile back handling: 
+  // 1. Back from drawer content to closed
+  useMobileBackHandler(open, onClose);
+  // 2. Back from order view to info view
+  useMobileBackHandler(open && view === 'order', () => setView('info'));
 
   // Reset view and clear order when drawer closes or transaction changes
   useEffect(() => {
@@ -56,8 +63,8 @@ export default function TransactionDetailDrawer({
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 18, stiffness: 100 }}
-            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-[40px] overflow-hidden h-[92vh] max-h-[92vh] flex flex-col shadow-2xl"
+            transition={{ type: "spring", damping: 20, stiffness: 120, mass: 0.8 }}
+            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-[40px] overflow-hidden h-[90vh] max-h-[90vh] flex flex-col shadow-[0_-8px_30px_rgb(0,0,0,0.12)] will-change-transform"
           >
             <div className="relative flex-1 overflow-hidden">
               <AnimatePresence mode="wait">

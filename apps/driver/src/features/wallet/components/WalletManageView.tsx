@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { ChevronLeft, X, MoreHorizontal } from "@repo/ui/icons";
 import { useState, useEffect, useMemo } from "react";
+import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 interface WalletManageViewProps {
   balance: number;
@@ -11,6 +12,7 @@ interface WalletManageViewProps {
 }
 
 export default function WalletManageView({ balance, onBack, defaultType = 'TOPUP' }: WalletManageViewProps) {
+  useMobileBackHandler(true, onBack);
   const [activeType, setActiveType] = useState<'TOPUP' | 'WITHDRAW'>(defaultType);
   const [amount, setAmount] = useState<string>("0");
   const [shakeKey, setShakeKey] = useState(0);
@@ -93,7 +95,7 @@ export default function WalletManageView({ balance, onBack, defaultType = 'TOPUP
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={pageTransition}
-      className="fixed inset-0 z-[100] bg-white flex flex-col pt-2 overflow-hidden shadow-2xl"
+      className="fixed inset-0 z-[100] bg-[#F7F7F7] flex flex-col pt-2 overflow-hidden shadow-2xl"
     >
       {/* Header */}
       <div className="flex items-center justify-between px-2 h-14">
@@ -117,7 +119,7 @@ export default function WalletManageView({ balance, onBack, defaultType = 'TOPUP
 
       {/* Tabs */}
       <div className="flex justify-center mt-4 px-12">
-        <div className="bg-gray-100 p-0.5 rounded-full flex items-center w-full max-w-[280px]">
+        <div className="bg-gray-200/30 p-0.5 rounded-full flex items-center w-full max-w-[280px]">
           <button
             onClick={() => setActiveType('TOPUP')}
             className={`flex-1 py-3 rounded-full text-[15px] font-bold transition-all ${activeType === 'TOPUP'
@@ -205,7 +207,7 @@ export default function WalletManageView({ balance, onBack, defaultType = 'TOPUP
           disabled={!canContinue}
           className={`w-full py-3.5 rounded-3xl text-[18px] font-bold tracking-tight transition-all ${canContinue
             ? 'bg-[var(--primary)] text-white shadow shadow-blue-500/10'
-            : 'bg-gray-100 text-gray-300 shadow-none'
+            : 'bg-gray-200/30 text-gray-300 shadow-none'
             }`}
         >
           Continue
@@ -218,7 +220,7 @@ export default function WalletManageView({ balance, onBack, defaultType = 'TOPUP
               key={amt}
               whileTap={flashTap}
               onClick={() => setAmount(amt.toString())}
-              className="flex-1 py-2 rounded-2xl bg-gray-100 text-gray-700 font-extrabold text-[12px] transition-colors active:bg-gray-200"
+              className="flex-1 py-2 rounded-2xl bg-gray-200/30 text-gray-700 font-extrabold text-[12px] transition-colors active:bg-gray-200"
             >
               {amt.toLocaleString('vi-VN')}
             </motion.button>
