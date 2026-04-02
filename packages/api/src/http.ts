@@ -99,6 +99,13 @@ http.interceptors.response.use(
           // Failed to get token
           isRefreshing = false;
           setAccessToken(null);
+
+          // Global redirect on auth failure
+          if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+            window.localStorage.setItem("auth_expired", "true");
+            window.location.href = '/login';
+          }
+
           return Promise.reject(error);
         }
       } catch (refreshError) {
@@ -106,6 +113,13 @@ http.interceptors.response.use(
         setAccessToken(null);
         // We might want to clear subscribers here too or reject them
         refreshSubscribers = [];
+
+        // Global redirect on auth failure
+        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+          window.localStorage.setItem("auth_expired", "true");
+          window.location.href = '/login';
+        }
+
         return Promise.reject(refreshError);
       }
     }

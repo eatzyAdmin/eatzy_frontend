@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { driverApi } from "@repo/api";
-import { useNotification } from "@repo/ui";
+import { sileo } from "@/components/DynamicIslandToast";
 import { IBackendRes } from "@repo/types";
 
 // ======== Types ========
@@ -46,7 +46,6 @@ export const driverStatusKeys = {
  */
 export function useDriverStatus(): UseDriverStatusResult {
   const queryClient = useQueryClient();
-  const { showNotification } = useNotification();
 
   // Query for fetching current status
   const query = useQuery({
@@ -76,19 +75,16 @@ export function useDriverStatus(): UseDriverStatusResult {
         queryClient.setQueryData(driverStatusKeys.myStatus(), data.status);
       }
       queryClient.invalidateQueries({ queryKey: driverStatusKeys.all });
-      showNotification({
-        message: "Bật kết nối thành công!",
-        type: "success",
-        format: "Bạn đã sẵn sàng nhận đơn hàng mới!",
-        autoHideDuration: 3000,
+      sileo.success({
+        title: "Đã kết nối trực tuyến!",
+        description: "Sẵn sàng nhận đơn. Chúc bạn một ngày hân hoan!",
+        duration: 3500,
       });
     },
     onError: (error: Error) => {
-      showNotification({
-        message: "Không thể bật kết nối",
-        type: "error",
-        format: error.message,
-        autoHideDuration: 3000,
+      sileo.error({
+        title: "Không thể kết nối",
+        description: error.message || "Đã có lỗi xảy ra, vui lòng thử lại sau.",
       });
     },
   });
@@ -107,19 +103,16 @@ export function useDriverStatus(): UseDriverStatusResult {
         queryClient.setQueryData(driverStatusKeys.myStatus(), data.status);
       }
       queryClient.invalidateQueries({ queryKey: driverStatusKeys.all });
-      showNotification({
-        message: "Đã tắt kết nối",
-        type: "success",
-        format: "Bạn tạm thời sẽ không nhận đơn hàng mới.",
-        autoHideDuration: 3000,
+      sileo.info({
+        title: "Đã tạm nghỉ kết nối",
+        description: "Nghỉ ngơi chút nhé, hẹn gặp lại bạn sớm!",
+        duration: 3500,
       });
     },
     onError: (error: Error) => {
-      showNotification({
-        message: "Không thể tắt kết nối",
-        type: "error",
-        format: error.message,
-        autoHideDuration: 3000,
+      sileo.error({
+        title: "Không thể ngắt kết nối",
+        description: error.message || "Đã có lỗi xảy ra, vui lòng thử lại sau.",
       });
     },
   });

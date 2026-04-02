@@ -189,44 +189,35 @@ export default function HistoryPage() {
               <HistoryCardShimmer cardCount={3} />
             ) : (
               <>
-                <AnimatePresence mode="popLayout">
-                  {orders.length > 0 ? (
-                    orders.map((order, index) => (
-                      <motion.div
-                        key={order.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <DriverHistoryCard
-                          order={order}
-                          onClick={() => handleOrderClick(order)}
-                        />
-                      </motion.div>
-                    ))
-                  ) : (actualSearchQuery || filter !== "ALL") ? (
-                    <EmptyState
-                      icon={Inbox}
-                      title="Không tìm thấy chuyến đi"
-                      description={
-                        actualSearchQuery
-                          ? "Không có chuyến xe nào phù hợp với tìm kiếm của bạn"
-                          : "Không có chuyến xe nào trong phân loại này"
-                      }
-                      className="py-24"
+                {orders.length > 0 ? (
+                  orders.map((order) => (
+                    <DriverHistoryCard
+                      key={order.id}
+                      order={order}
+                      onClick={() => handleOrderClick(order)}
                     />
-                  ) : (
-                    <EmptyState
-                      icon={Bike}
-                      title="Bạn chưa có chuyến xe nào"
-                      description="Hãy bắt đầu nhận đơn để tích lũy lịch sử hoạt động của bạn nhé!"
-                      buttonText="Trang chủ"
-                      onButtonClick={() => router.push('/home')}
-                      className="py-12"
-                    />
-                  )}
-                </AnimatePresence>
+                  ))
+                ) : (actualSearchQuery || filter !== "ALL") ? (
+                  <EmptyState
+                    icon={Inbox}
+                    title="Không tìm thấy chuyến đi"
+                    description={
+                      actualSearchQuery
+                        ? "Không có chuyến xe nào phù hợp với tìm kiếm của bạn"
+                        : "Không có chuyến xe nào trong phân loại này"
+                    }
+                    className="py-24"
+                  />
+                ) : (
+                  <EmptyState
+                    icon={Bike}
+                    title="Bạn chưa có chuyến xe nào"
+                    description="Hãy bắt đầu nhận đơn để tích lũy lịch sử hoạt động của bạn nhé!"
+                    buttonText="Trang chủ"
+                    onButtonClick={() => router.push('/home')}
+                    className="py-12"
+                  />
+                )}
 
                 {orders.length > 0 && (
                   <>

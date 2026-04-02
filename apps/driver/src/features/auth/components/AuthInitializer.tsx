@@ -8,7 +8,7 @@ import { sileo } from "@/components/DynamicIslandToast";
 const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/onboarding"];
 
 export const AuthInitializer = () => {
-  const { isError, isLoading } = useAuth();
+  const { isError, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -18,16 +18,21 @@ export const AuthInitializer = () => {
       return;
     }
 
-    // If auth failed (after retries) and we are not loading -> Redirect
-    if (isError && !isLoading) {
-      sileo.error({
-        title: "Phiên đăng nhập đã hết hạn",
-        description: "Vui lòng đăng nhập lại. Đang điều hướng đến trang đăng nhập...",
-        duration: 4000
-      });
+    // If auth failed OR we are confirmed not authenticated (after loading finished)
+    const isUnauthenticated = (isError || (!isAuthenticated && !isLoading));
+
+    if (isUnauthenticated) {
+      // Only show message if we're actually in an error state (token expired/invalid)
+      if (isError) {
+        sileo.error({
+          title: "Phiên đăng nhập đã hết hạn",
+          description: "Vui lòng đăng nhập lại. Đang điều hướng đến trang đăng nhập...",
+          duration: 4000
+        });
+      }
       router.replace("/login");
     }
-  }, [isError, isLoading, pathname, router]);
+  }, [isError, isLoading, isAuthenticated, pathname, router]);
 
   return null;
 };

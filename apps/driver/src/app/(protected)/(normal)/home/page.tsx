@@ -9,7 +9,7 @@ import OnlineStatusBadge from "@/features/online/OnlineStatusBadge";
 import useOrderOffers from "@/features/orders/hooks/useOrderOffers";
 import OrderOfferModal from "@/features/orders/components/OrderOfferModal";
 import CurrentOrderPanel from "@/features/orders/components/CurrentOrderPanel";
-import { LocateFixed, Bike } from "@repo/ui/icons";
+import { LocateFixed, Bike, Search } from "@repo/ui/icons";
 import type { DriverActiveOrder } from "@repo/types";
 import { useDriverStatus } from "@/features/online/hooks/useDriverStatus";
 
@@ -37,20 +37,38 @@ export default function Page() {
   return (
     <div className="w-full h-full">
       <DriverMapView locateVersion={locateVersion} activeOrder={activeOrder} />
-      <div className="absolute left-4 right-4 bottom-[96px] space-y-3">
+      <div className="absolute left-4 right-4 bottom-[104px] space-y-3">
         <div className="flex items-center justify-between gap-3">
           <ConnectToggle online={online} onToggle={toggleStatus} className="" />
-          <motion.button whileTap={{ scale: 0.95 }} onClick={() => setLocateVersion((v) => v + 1)} className="bg-white shadow-xl w-12 h-12 rounded-2xl flex items-center justify-center border border-gray-200">
-            <LocateFixed className="w-6 h-6 text-[#1A1A1A]" />
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setLocateVersion((v) => v + 1)}
+            className="backdrop-blur-xl bg-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/40 border-white/20 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300"
+          >
+            <LocateFixed className="w-7 h-7 text-black" strokeWidth={2.5} />
           </motion.button>
         </div>
         {online && !activeOrder && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-white/85 backdrop-blur-xl border border-gray-200 shadow-[0_10px_40px_rgba(0,0,0,0.12)] p-4">
-            <div className="flex items-center gap-2 text-gray-700">
-              <div className="w-7 h-7 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-                <Bike className="w-4 h-4 text-emerald-600" />
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className="rounded-[28px] bg-white/20 backdrop-blur-xl border border-white/40 border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)] p-4 flex items-center justify-center overflow-hidden"
+          >
+            <div className="flex items-center gap-4 text-black">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
+                <Search className="w-6 h-6 text-black" strokeWidth={2.8} />
               </div>
-              <div className="text-sm font-medium">Đang tìm đơn hàng phù hợp...</div>
+              <div className="flex flex-col">
+                <div className="text-md font-bold tracking-tight leading-tight">
+                  Đang tìm kiếm đơn hàng...
+                </div>
+              </div>
+              <div className="ml-auto">
+                <div className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-lime-500"></span>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -61,9 +79,7 @@ export default function Page() {
         )}
       </div>
       <OnlineStatusBadge online={online} />
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute top-4 left-4 text-sm text-gray-700 bg-white/80 border border-gray-200 rounded-xl px-3 py-2 shadow">
-        <span className="font-semibold">Eatzy Driver</span>
-      </motion.div>
+
       <OrderOfferModal
         offer={currentOffer}
         countdown={countdown}

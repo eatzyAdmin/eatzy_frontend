@@ -181,7 +181,7 @@ export default function WalletPage() {
                     </div>
 
                     {/* Filter Chips - Translated and Stylized */}
-                    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                    <div className="flex justify-center gap-2 overflow-x-auto no-scrollbar pb-1">
                       <motion.button
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}

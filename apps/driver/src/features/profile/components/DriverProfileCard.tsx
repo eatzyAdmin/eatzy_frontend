@@ -7,12 +7,12 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export default function DriverProfileCard({ profile }: { profile: DriverProfile }) {
   const { user } = useAuth();
-  
+
   const displayName = user?.name || profile.name;
   const displayInfo = profile.licensePlate || "Chưa cập nhật biển số";
 
   return (
-    <div className="bg-white rounded-[32px] p-4 shadow-[0_8px_32px_rgba(0,0,0,0.03)] border border-gray-100/50 flex items-center gap-5 relative overflow-hidden group">
+    <div className="bg-white rounded-[32px] p-3 shadow-[0_8px_32px_rgba(0,0,0,0.03)] border border-gray-100/50 flex items-center gap-5 relative overflow-hidden group">
       {/* Abstract Background Accents */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--primary)]/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-[var(--primary)]/10 transition-all duration-700" />
 

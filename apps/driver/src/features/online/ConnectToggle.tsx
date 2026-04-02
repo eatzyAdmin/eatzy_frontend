@@ -21,12 +21,16 @@ export default function ConnectToggle({ online, onToggle, className }: { online:
   return (
     <motion.button
       onClick={requestToggle}
-      whileTap={{ scale: 0.97 }}
-      className={`rounded-2xl shadow-xl border text-sm font-medium flex items-center justify-center ${online ? "bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white border-[var(--primary)]/50 w-12 h-12" : "bg-white text-[#1A1A1A] border-gray-200 px-4 py-3"
+      whileTap={{ scale: 0.95 }}
+      className={`relative z-20 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/40 border-white/20 transition-all duration-300 flex items-center justify-center ${online
+        ? "bg-lime-500 text-black rounded-full w-14 h-14"
+        : "bg-white/20 text-black rounded-[32px] px-6 h-14"
         } ${className ?? ""}`}
     >
-      <Power size={18} />
-      {!online && (<span className="ml-2">Bật kết nối</span>)}
+      <div className={`flex items-center gap-3 ${online ? "" : "font-anton font-bold uppercase tracking-tighter text-lg"}`}>
+        <Power size={online ? 28 : 20} strokeWidth={3} className="text-black" />
+        {!online && (<span>Bật kết nối</span>)}
+      </div>
     </motion.button>
   );
 }

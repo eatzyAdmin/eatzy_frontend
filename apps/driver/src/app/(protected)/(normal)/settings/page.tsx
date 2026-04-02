@@ -59,7 +59,7 @@ export default function SettingsPage() {
         <div className="max-w-2xl mx-auto px-3 relative">
 
           {/* Header Area - Replicating History/Wallet Pattern */}
-          <div className="flex items-center gap-4 py-3 pb-0 pt-3">
+          {/* <div className="flex items-center gap-4 py-3 pb-0 pt-3">
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -83,7 +83,7 @@ export default function SettingsPage() {
                 Configure your application preferences
               </p>
             </div>
-          </div>
+          </div> */}
 
           {/* Content Area - Placeholder with EmptyState */}
           <div className="py-20">

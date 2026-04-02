@@ -20,7 +20,7 @@ export default function LoginPageContent() {
   const router = useRouter();
   const { hide, show } = useLoading();
   const { handleLogin, isLoading, error } = useLogin();
-  
+
   // Enable double-back-to-exit on mobile login page
   useMobileExitGuard();
 
@@ -41,6 +41,19 @@ export default function LoginPageContent() {
     checkViewport();
     window.addEventListener("resize", checkViewport);
     return () => window.removeEventListener("resize", checkViewport);
+  }, []);
+
+  // Handle session expiration message from Interceptor
+  useEffect(() => {
+    const isExpired = window.localStorage.getItem("auth_expired");
+    if (isExpired === "true") {
+      sileo.error({
+        title: "Phiên đăng nhập đã hết hạn",
+        description: "Vui lòng đăng nhập lại để tiếp tục nhé!",
+        duration: 5000,
+      });
+      window.localStorage.removeItem("auth_expired");
+    }
   }, []);
 
   const form = useZodForm<LoginFormData>({

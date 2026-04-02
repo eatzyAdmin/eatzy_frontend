@@ -69,14 +69,24 @@ function AnimatedNavigation() {
   );
 }
 
+import DriverHeader from "@/features/layout/components/DriverHeader";
+
 export default function NormalLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   useMobileExitGuard();
+
+  const isHome = pathname === "/home" || pathname === "/";
+  const isProfileOrSettings = pathname?.includes("/profile") || pathname?.includes("/settings");
+  const isNoHeader = pathname?.includes("/history") || pathname?.includes("/wallet");
 
   return (
     <NormalLoadingProvider>
       <BottomNavProvider>
-        <div className="fixed inset-0 overflow-hidden">
-          <div className="absolute inset-0">{children}</div>
+        <div className="fixed inset-0 overflow-hidden flex flex-col">
+          <DriverHeader />
+          <div className={`flex-1 relative overflow-hidden ${(isProfileOrSettings) ? "pt-8" : ""}`}>
+            {children}
+          </div>
           <NormalLoadingOverlay />
           <AnimatedNavigation />
         </div>
