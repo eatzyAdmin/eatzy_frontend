@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { orderApi } from "@repo/api";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { OrderResponse } from "@repo/types";
@@ -17,6 +17,8 @@ export interface UseOrderHistoryResult {
   isError: boolean;
   error: Error | null;
   refetch: () => void;
+  /** Hard refresh (reset to page 1 and bypass cache) */
+  refresh: () => Promise<void>;
   totalOrders: number;
 }
 
@@ -72,6 +74,18 @@ export function useOrderHistory(params?: {
     staleTime: 60 * 1000, // 1 minute
   });
 
+  const queryClient = useQueryClient();
+
+  /**
+   * Hard refresh: reset pagination and bypass cache
+   */
+  const refresh = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["orders", "history", "my"] }),
+      queryClient.invalidateQueries({ queryKey: ["orders", "current", "my"] }),
+    ]);
+  };
+
   const orders = query.data || [];
   const { isLoading: isAuthLoading } = useAuth();
   const isLoading = query.isLoading || (isAuthLoading && !query.data);
@@ -82,6 +96,7 @@ export function useOrderHistory(params?: {
     isError: query.isError,
     error: query.error as Error | null,
     refetch: query.refetch,
+    refresh,
     totalOrders: orders.length,
   };
 }

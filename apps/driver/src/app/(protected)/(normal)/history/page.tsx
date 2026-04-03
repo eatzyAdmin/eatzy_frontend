@@ -7,6 +7,7 @@ import { Search, Inbox, ChevronUp, CheckCircle2, Wallet, Bike, X, ArrowLeft } fr
 import { EmptyState } from "@/components/ui/EmptyState";
 import { HistoryCardShimmer } from "@repo/ui";
 import { useInfiniteScroll } from "@repo/hooks";
+import { useQueryClient } from "@tanstack/react-query";
 import type { DriverHistoryOrder } from "@repo/types";
 import HistoryFilter from "@/features/history/components/HistoryFilter";
 import DriverHistoryCard from "@/features/history/components/DriverHistoryCard";
@@ -14,6 +15,7 @@ import DriverOrderDetailDrawer from "@/features/history/components/DriverOrderDe
 
 import { useBottomNav } from "../context/BottomNavContext";
 import { useDriverOrderHistory } from "@/features/history/hooks/useDriverOrderHistory";
+import { PullToRefresh } from "@repo/ui";
 
 export default function HistoryPage() {
   const router = useRouter();
@@ -29,7 +31,9 @@ export default function HistoryPage() {
     isLoading,
     hasNextPage,
     fetchNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
+    refetch,
+    refresh
   } = useDriverOrderHistory({
     status: filter,
     search: actualSearchQuery
@@ -39,7 +43,7 @@ export default function HistoryPage() {
   const lastScrollY = useRef(0);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
 
-  // Auto-hide bottom nav on scroll and handle Scroll To Top button visibility
+  // ... rest of effects same ...
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -51,19 +55,15 @@ export default function HistoryPage() {
 
       if (Math.abs(diff) < 3) return;
 
-      // 1. Bottom Nav visibility
       if (diff > 5 && currentScrollY > 20) {
         setIsVisible(false);
       } else if (diff < -5) {
         setIsVisible(true);
       }
 
-      // 2. Scroll to top button visibility
       if (diff > 0 || currentScrollY < 400) {
-        // Hide immediately on ANY downward scroll or when near top
         setShowScrollToTop(false);
       } else if (diff < -20) {
-        // Only show on SIGNIFICANT upward scroll
         setShowScrollToTop(true);
       }
     };
@@ -72,7 +72,7 @@ export default function HistoryPage() {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [setIsVisible]);
 
-  // Auto-load more when scrolling to bottom
+  // ...rest same
   const { sentinelRef } = useInfiniteScroll({
     hasMore: hasNextPage,
     isLoadingMore: isFetchingNextPage,
@@ -109,42 +109,40 @@ export default function HistoryPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
-      {/* 
-        Main Scroll Container - Contains Header and List
-        Mirrors Customer App Order History mobile architecture
-      */}
-      <div
+      <PullToRefresh 
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto no-scrollbar"
+        onRefresh={refresh}
+        className="flex-1 no-scrollbar overflow-y-auto"
+        pullText="Kéo để cập nhật đơn hàng"
+        releaseText="Thả tay để cập nhật"
+        refreshingText="Đang cập nhật..."
       >
         <div className="max-w-2xl mx-auto px-3 relative">
-
-          {/* Header Area (Scrollable) - Mobile style like Customer App */}
-          <div className="flex items-center gap-4 py-3 pb-0 pt-3">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => router.back()}
-              className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 transition-all flex items-center justify-center group flex-shrink-0"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-700" />
-            </motion.button>
-            <div>
-              <h1
-                className="text-[32px] font-bold leading-tight text-[#1A1A1A]"
-                style={{
-                  fontStretch: "condensed",
-                  letterSpacing: "-0.01em",
-                  fontFamily: "var(--font-anton), var(--font-sans)",
-                }}
+            <div className="flex items-center gap-4 py-3 pb-0 pt-3">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => router.back()}
+                className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 transition-all flex items-center justify-center group flex-shrink-0"
               >
-                ORDERS HISTORY
-              </h1>
-              <p className="text-sm font-medium text-gray-500 mt-0.5">
-                Manage and track your past orders
-              </p>
+                <ArrowLeft className="w-5 h-5 text-gray-700" />
+              </motion.button>
+              <div>
+                <h1
+                  className="text-[32px] font-bold leading-tight text-[#1A1A1A]"
+                  style={{
+                    fontStretch: "condensed",
+                    letterSpacing: "-0.01em",
+                    fontFamily: "var(--font-anton), var(--font-sans)",
+                  }}
+                >
+                  ORDERS HISTORY
+                </h1>
+                <p className="text-sm font-medium text-gray-500 mt-0.5">
+                  Manage and track your past orders
+                </p>
+              </div>
             </div>
-          </div>
 
           {/* 
              Sticky Toolbar (Search & Filters)
@@ -246,7 +244,7 @@ export default function HistoryPage() {
             )}
           </div>
         </div>
-      </div>
+      </PullToRefresh>
 
       {/* Floating Scroll To Top Button */}
       <AnimatePresence>

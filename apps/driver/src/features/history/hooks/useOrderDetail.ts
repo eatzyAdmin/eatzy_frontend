@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { orderApi, mapOrderResponseToDriverHistoryOrder } from "@repo/api";
 import type { DriverHistoryOrder } from "@repo/types";
 
@@ -11,7 +11,9 @@ export interface UseOrderDetailResult {
     /** Error message if any occurred */
     error: string | null;
     /** Function to fetch order by ID */
-    fetchOrder: (orderId: number) => void;
+    fetchOrder: (orderId: number) => Promise<void>;
+    /** Hard refresh that returns a promise */
+    refresh: (orderId: number) => Promise<void>;
     /** Function to clear the current order */
     clearOrder: () => void;
 }
@@ -38,30 +40,32 @@ export function useOrderDetail(): UseOrderDetailResult {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchOrder = (orderId: number) => {
+    const fetchOrder = useCallback(async (orderId: number) => {
         setIsLoading(true);
         setError(null);
 
-        orderApi.getOrderById(orderId)
-            .then((response) => {
-                if (response.statusCode === 200 && response.data) {
-                    setOrder(mapOrderResponseToDriverHistoryOrder(response.data));
-                } else {
-                    setError("Failed to fetch order details");
-                }
-            })
-            .catch(() => {
-                setError("An error occurred while fetching order details");
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
-    };
+        try {
+            const response = await orderApi.getOrderById(orderId);
+            if (response.statusCode === 200 && response.data) {
+                setOrder(mapOrderResponseToDriverHistoryOrder(response.data));
+            } else {
+                setError("Failed to fetch order details");
+            }
+        } catch (err) {
+            setError("An error occurred while fetching order details");
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
-    const clearOrder = () => {
+    const refresh = useCallback(async (orderId: number) => {
+        await fetchOrder(orderId);
+    }, [fetchOrder]);
+
+    const clearOrder = useCallback(() => {
         setOrder(null);
         setError(null);
-    };
+    }, []);
 
-    return { order, isLoading, error, fetchOrder, clearOrder };
+    return { order, isLoading, error, fetchOrder, refresh, clearOrder };
 }

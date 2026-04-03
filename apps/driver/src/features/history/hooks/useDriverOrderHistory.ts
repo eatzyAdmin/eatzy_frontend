@@ -1,5 +1,5 @@
 "use client";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { orderApi, mapOrderResponseToDriverHistoryOrder } from "@repo/api";
 import type { DriverHistoryOrder } from "@repo/types";
 
@@ -25,6 +25,8 @@ export interface UseDriverOrderHistoryResult {
     error: Error | null;
     /** Function to refetch data */
     refetch: () => void;
+    /** Function to hard refresh (reset to page 1) */
+    refresh: () => Promise<void>;
     /** Total number of orders */
     total: number;
     /** Total number of pages */
@@ -109,6 +111,16 @@ export function useDriverOrderHistory(params?: UseDriverOrderHistoryParams): Use
         staleTime: 60 * 1000, // 1 minute
     });
 
+    const queryClient = useQueryClient();
+
+    const refresh = async () => {
+        await Promise.all([
+            queryClient.resetQueries({ queryKey: ["orders", "history", "driver"] }),
+            queryClient.invalidateQueries({ queryKey: ["driver-balance"] }),
+            new Promise(resolve => setTimeout(resolve, 800))
+        ]);
+    };
+
     // Flatten all pages into single array
     const orders = data?.pages.flatMap(page => page.items) || [];
 
@@ -120,6 +132,7 @@ export function useDriverOrderHistory(params?: UseDriverOrderHistoryParams): Use
         fetchNextPage,
         error: error as Error | null,
         refetch,
+        refresh,
         total: data?.pages[0]?.total || 0,
         pages: data?.pages[0]?.pages || 0
     };

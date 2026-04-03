@@ -84,7 +84,7 @@ export default function NormalLayout({ children }: { children: React.ReactNode }
       <BottomNavProvider>
         <div className="fixed inset-0 overflow-hidden flex flex-col">
           <DriverHeader />
-          <div className={`flex-1 relative overflow-hidden ${(isProfileOrSettings) ? "pt-8" : ""}`}>
+          <div className="flex-1 relative overflow-hidden">
             {children}
           </div>
           <NormalLoadingOverlay />

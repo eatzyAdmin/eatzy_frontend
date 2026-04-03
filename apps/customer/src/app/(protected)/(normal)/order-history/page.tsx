@@ -11,6 +11,7 @@ import { useOrderHistory } from "@/features/orders/hooks/useOrderHistory";
 import OrderHistoryCard from "@/features/orders/components/OrderHistoryCard";
 import OrderDetailDrawer from "@/features/orders/components/OrderDetailDrawer";
 import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
+import { PullToRefresh } from "@repo/ui";
 
 const statusFilters = [
   { value: "ALL", label: "Tất cả", icon: LayoutGrid },
@@ -27,7 +28,7 @@ export default function OrderHistoryPage() {
   const [selectedOrder, setSelectedOrder] = useState<OrderResponse | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const { orders, isLoading } = useOrderHistory({
+  const { orders, isLoading, refetch, refresh } = useOrderHistory({
     status: statusFilter,
     search: actualSearchQuery,
   });
@@ -36,6 +37,8 @@ export default function OrderHistoryPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const [isTopHeaderVisible, setIsTopHeaderVisible] = useState(true);
+
+
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -65,7 +68,6 @@ export default function OrderHistoryPage() {
     container.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       container.removeEventListener('scroll', handleScroll);
-      // Reset header visibility when leaving page
       window.dispatchEvent(new CustomEvent('searchHeaderVisibility', { detail: { visible: true } }));
     };
   }, [setIsVisible]);
@@ -86,7 +88,6 @@ export default function OrderHistoryPage() {
     setStatusFilter(newFilter);
   };
 
-  // Simple scroll to top when filtering/searching
   useEffect(() => {
     if (isLoading) return;
     scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
@@ -100,35 +101,39 @@ export default function OrderHistoryPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
-      {/* Scrollable Content */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
-        <div className="max-w-[1400px] mx-auto px-3 md:px-8">
-          {/* Page Title & Back Button (Scrollable) */}
-          <div className="flex items-center gap-4 py-3 pb-0 md:pt-20">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => router.back()}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center group flex-shrink-0"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
-            </motion.button>
-            <div>
-              <h1
-                className="text-[32px] md:text-[56px] font-bold leading-tight text-[#1A1A1A]"
-                style={{
-                  fontStretch: "condensed",
-                  letterSpacing: "-0.01em",
-                  fontFamily: "var(--font-anton), var(--font-sans)",
-                }}
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto no-scrollbar">
+        <PullToRefresh 
+          onRefresh={refresh}
+          pullText="Kéo để cập nhật đơn hàng"
+          releaseText="Thả tay để cập nhật"
+          refreshingText="Đang cập nhật..."
+        >
+          <div className="max-w-[1400px] mx-auto px-3 md:px-8">
+            <div className="flex items-center gap-4 py-3 pb-0 md:pt-20">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => router.back()}
+                className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center group flex-shrink-0"
               >
-                ORDERS HISTORY
-              </h1>
-              <p className="text-sm font-medium md:text-base text-gray-500 mt-1">
-                Manage and track your past orders
-              </p>
+                <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
+              </motion.button>
+              <div>
+                <h1
+                  className="text-[32px] md:text-[56px] font-bold leading-tight text-[#1A1A1A]"
+                  style={{
+                    fontStretch: "condensed",
+                    letterSpacing: "-0.01em",
+                    fontFamily: "var(--font-anton), var(--font-sans)",
+                  }}
+                >
+                  ORDERS HISTORY
+                </h1>
+                <p className="text-sm font-medium md:text-base text-gray-500 mt-1">
+                  Manage and track your past orders
+                </p>
+              </div>
             </div>
-          </div>
 
           {/* Sticky Toolbar (Search & Filters) */}
           <div
@@ -253,7 +258,8 @@ export default function OrderHistoryPage() {
             )}
           </div>
         </div>
-      </div>
+      </PullToRefresh>
+    </div>
 
       {/* Order Detail Drawer */}
       <OrderDetailDrawer

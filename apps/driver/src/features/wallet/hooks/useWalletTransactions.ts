@@ -1,5 +1,5 @@
 "use client";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { walletApi, mapWalletTransactionToDriverWalletTransaction } from "@repo/api";
 import type { DriverWalletTransaction } from "@repo/types";
 import { WALLET_CREDIT_TYPES, WALLET_DEBIT_TYPES } from "@repo/types";
@@ -26,6 +26,8 @@ export interface UseWalletTransactionsResult {
     error: Error | null;
     /** Refetch function */
     refetch: () => void;
+    /** Hard refresh (reset to page 1 and clear cache) */
+    refresh: () => Promise<void>;
     /** Total number of transactions */
     total: number;
 }
@@ -120,6 +122,15 @@ export function useWalletTransactions(params?: UseWalletTransactionsParams): Use
         staleTime: 30 * 1000, // 30 seconds
     });
 
+    const queryClient = useQueryClient();
+
+    /**
+     * Hard refresh: resets query state and starts from page 1
+     */
+    const refresh = async () => {
+        await queryClient.resetQueries({ queryKey: driverWalletKeys.transactions() });
+    };
+
     // Flatten all pages into single array
     const transactions = data?.pages.flatMap(page => page.items) || [];
 
@@ -131,6 +142,7 @@ export function useWalletTransactions(params?: UseWalletTransactionsParams): Use
         fetchNextPage,
         error: error as Error | null,
         refetch,
+        refresh,
         total: data?.pages[0]?.total || 0
     };
 }

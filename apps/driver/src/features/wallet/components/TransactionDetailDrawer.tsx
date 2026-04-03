@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { DriverWalletTransaction } from "@repo/types";
 import { useOrderDetail } from "@/features/history/hooks/useOrderDetail";
+import { useDriverOrderHistory } from "@/features/history/hooks/useDriverOrderHistory";
+import { useWalletTransactions } from "@/features/wallet/hooks/useWalletTransactions";
 import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 import TransactionInfoView from "./TransactionInfoView";
 import LinkedOrderView from "./LinkedOrderView";
@@ -18,7 +20,9 @@ export default function TransactionDetailDrawer({
   onClose: () => void;
 }) {
   const [view, setView] = useState<'info' | 'order'>('info');
-  const { order, isLoading, fetchOrder, clearOrder } = useOrderDetail();
+  const { order, isLoading, fetchOrder, refresh: refreshOrderDetail, clearOrder } = useOrderDetail();
+  const { refresh: refreshHistory } = useDriverOrderHistory();
+  const { refresh: refreshTransactions } = useWalletTransactions();
 
   // Layered mobile back handling: 
   // 1. Back from drawer content to closed
@@ -42,8 +46,19 @@ export default function TransactionDetailDrawer({
     fetchOrder(orderId);
   };
 
+  const orderId = transaction?.referenceId ? parseInt(transaction.referenceId) : null;
+
   const handleBackToInfo = () => {
     setView('info');
+  };
+
+  const handleRefreshOrder = async () => {
+    if (orderId) {
+      await Promise.all([
+        refreshOrderDetail(orderId),
+        new Promise((resolve) => setTimeout(resolve, 800)),
+      ]);
+    }
   };
 
   if (!transaction && !open) return null;
@@ -95,6 +110,7 @@ export default function TransactionDetailDrawer({
                     <LinkedOrderView
                       order={order}
                       isLoading={isLoading}
+                      onRefresh={handleRefreshOrder}
                       onBack={handleBackToInfo}
                       onClose={onClose}
                     />

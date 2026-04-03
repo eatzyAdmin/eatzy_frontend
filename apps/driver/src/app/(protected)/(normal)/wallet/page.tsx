@@ -14,6 +14,7 @@ import { useWallet } from "@/features/wallet/hooks/useWallet";
 import { useWalletTransactions } from "@/features/wallet/hooks/useWalletTransactions";
 import { DriverWalletTransaction } from "@repo/types";
 import { useRouter } from "next/navigation";
+import { PullToRefresh } from "@repo/ui";
 
 import { useBottomNav } from "../context/BottomNavContext";
 
@@ -25,18 +26,24 @@ export default function WalletPage() {
   const [isTransactionDrawerOpen, setIsTransactionDrawerOpen] = useState(false);
   const [filterType, setFilterType] = useState<'ALL' | 'IN' | 'OUT'>('ALL');
 
-  const { wallet, isLoading: isWalletLoading } = useWallet();
+  const { wallet, isLoading: isWalletLoading, refresh: refreshWallet } = useWallet();
   const {
     transactions,
     isLoading: isTransactionsLoading,
     hasNextPage,
     fetchNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
+    refresh: refreshTransactions
   } = useWalletTransactions({
     type: filterType
   });
 
   const isLoading = isWalletLoading || isTransactionsLoading;
+
+  const handleRefresh = () => {
+    // Explicitly return Promise<void> for TypeScript compatibility
+    return Promise.all([refreshWallet(), refreshTransactions()]).then(() => {});
+  };
 
   // Toggle bottom nav when entering manage view
   useEffect(() => {
@@ -109,7 +116,7 @@ export default function WalletPage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7] relative overflow-hidden">
+    <div className="flex flex-col h-screen bg-[#F7F7F7] relative overflow-hidden">
       <AnimatePresence initial={false}>
         {!isManageViewOpen ? (
           <motion.div
@@ -118,14 +125,21 @@ export default function WalletPage() {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '-100%', opacity: 0 }}
             transition={pageTransition}
-            className="flex flex-col h-full w-full absolute inset-0"
+            className="flex-1 flex flex-col relative h-full w-full"
           >
-            <div
-              className="flex flex-col h-full overflow-y-auto no-scrollbar scroll-smooth"
-              ref={containerRef}
-              onScroll={handleScroll}
+            <PullToRefresh 
+              onRefresh={handleRefresh} 
+              className="flex-1"
+              pullText="Kéo để cập nhật ví"
+              releaseText="Thả tay để cập nhật"
+              refreshingText="Đang cập nhật..."
             >
-              <div className="max-w-2xl mx-auto px-3 w-full relative">
+              <div
+                className="flex flex-col h-full overflow-y-auto no-scrollbar scroll-smooth"
+                ref={containerRef}
+                onScroll={handleScroll}
+              >
+                <div className="max-w-2xl mx-auto px-3 w-full relative">
 
                 {/* Title and Header Area - Replicating History Pattern */}
                 <div className="flex items-center gap-4 py-3 pb-0 pt-3">
@@ -224,7 +238,7 @@ export default function WalletPage() {
 
                 {/* Transactions List */}
                 <div className="pb-32 pt-0">
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {isLoading && transactions.length === 0 ? (
                       <TransactionCardShimmer cardCount={6} />
                     ) : (
@@ -272,14 +286,16 @@ export default function WalletPage() {
                     )}
                   </div>
                 </div>
+                </div>
               </div>
-            </div>
+            </PullToRefresh>
           </motion.div>
         ) : (
           <WalletManageView
             key="wallet-manage"
             balance={wallet?.balance || 0}
             onBack={() => setIsManageViewOpen(false)}
+            onRefresh={handleRefresh}
           />
         )}
       </AnimatePresence>
