@@ -3,6 +3,7 @@ import { IAddress } from "@repo/types";
 import { sileo } from "@/components/DynamicIslandToast";
 import { addressApi } from "@repo/api";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useCallback } from "react";
 
 export const useCustomerAddresses = () => {
   const queryClient = useQueryClient();
@@ -50,6 +51,13 @@ export const useCustomerAddresses = () => {
     }
   });
 
+  const refresh = useCallback(async () => {
+    await Promise.all([
+      queryClient.resetQueries({ queryKey: ["customer", "addresses", "me"] }),
+      new Promise((resolve) => setTimeout(resolve, 800)),
+    ]);
+  }, [queryClient]);
+
   return {
     addresses: data || [],
     isLoading,
@@ -62,5 +70,6 @@ export const useCustomerAddresses = () => {
     isUpdating: updateAddressMutation.isPending,
     deleteAddress: deleteAddressMutation.mutate,
     isDeleting: deleteAddressMutation.isPending,
+    refresh,
   };
 };

@@ -21,6 +21,8 @@ export interface UseCartResult {
   isError: boolean;
   error: Error | null;
   refetch: () => void;
+  /** Hard refresh */
+  refresh: () => Promise<void>;
   // Computed
   totalItems: number;
   totalPrice: number;
@@ -118,6 +120,13 @@ export function useCart(): UseCartResult {
     await deleteCartsMutation.mutateAsync([cartId]);
   }, [deleteCartsMutation]);
 
+  const refresh = useCallback(async () => {
+    await Promise.all([
+      queryClient.resetQueries({ queryKey: cartKeys.all }),
+      new Promise((resolve) => setTimeout(resolve, 800)),
+    ]);
+  }, [queryClient]);
+
   const deleteCarts = useCallback(async (cartIds: number[]) => {
     await deleteCartsMutation.mutateAsync(cartIds);
   }, [deleteCartsMutation]);
@@ -134,7 +143,8 @@ export function useCart(): UseCartResult {
     deleteCart,
     deleteCarts,
     isDeleting: deleteCartsMutation.isPending,
-    deletingCartIds: deleteCartsMutation.variables || [],
+    deletingCartIds: (deleteCartsMutation.variables as number[]) || [],
+    refresh,
   };
 }
 

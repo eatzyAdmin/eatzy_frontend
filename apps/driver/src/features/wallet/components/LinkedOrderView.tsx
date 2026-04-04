@@ -73,6 +73,7 @@ export default function LinkedOrderView({
         pullText="Kéo xuống để đóng"
         releaseText="Thả tay để đóng ngay"
         refreshingText="Đang đóng..."
+        usePortal={false}
       >
         <div className="p-4 px-3 space-y-4">
           {/* Stats Row */}

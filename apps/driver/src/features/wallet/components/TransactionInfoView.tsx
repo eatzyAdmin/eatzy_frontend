@@ -166,6 +166,7 @@ export default function TransactionInfoView({
         pullText="Kéo xuống để đóng"
         releaseText="Thả tay để đóng ngay"
         refreshingText="Đang đóng..."
+        usePortal={false}
       >
         <div className="p-6 px-4 space-y-6">
           {/* Stats Row */}

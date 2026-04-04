@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { getMyCustomerProfile, updateCustomerProfile } from "../api";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ResCustomerProfileDTO } from "@repo/types";
@@ -46,5 +47,11 @@ export const useCustomerProfile = () => {
     refetch,
     updateProfile: updateProfileMutation.mutate,
     isUpdating: updateProfileMutation.isPending,
+    refresh: useCallback(async () => {
+      await Promise.all([
+        queryClient.resetQueries({ queryKey: ["customer", "profile", "me"] }),
+        new Promise((resolve) => setTimeout(resolve, 800)),
+      ]);
+    }, [queryClient]),
   };
 };

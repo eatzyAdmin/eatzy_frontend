@@ -1,4 +1,5 @@
 "use client";
+import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { orderApi } from "@repo/api";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -76,15 +77,12 @@ export function useOrderHistory(params?: {
 
   const queryClient = useQueryClient();
 
-  /**
-   * Hard refresh: reset pagination and bypass cache
-   */
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["orders", "history", "my"] }),
-      queryClient.invalidateQueries({ queryKey: ["orders", "current", "my"] }),
+      queryClient.resetQueries({ queryKey: ["orders", "history", "my"] }),
+      new Promise((resolve) => setTimeout(resolve, 800)),
     ]);
-  };
+  }, [queryClient]);
 
   const orders = query.data || [];
   const { isLoading: isAuthLoading } = useAuth();

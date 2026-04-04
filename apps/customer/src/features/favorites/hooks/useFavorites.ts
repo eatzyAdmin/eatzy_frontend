@@ -112,6 +112,13 @@ export function useFavorites() {
     [addMutation.isPending, addMutation.variables, removeMutation.isPending, removeMutation.variables, getFavoriteId]
   );
 
+  const refresh = useCallback(async () => {
+    await Promise.all([
+      queryClient.resetQueries({ queryKey: ["favorites", "my"] }),
+      new Promise((resolve) => setTimeout(resolve, 800)),
+    ]);
+  }, [queryClient]);
+
   return {
     favorites,
     isLoading,
@@ -119,5 +126,6 @@ export function useFavorites() {
     toggleFavorite,
     isMutating: addMutation.isPending || removeMutation.isPending,
     isRestaurantMutating,
+    refresh,
   };
 }

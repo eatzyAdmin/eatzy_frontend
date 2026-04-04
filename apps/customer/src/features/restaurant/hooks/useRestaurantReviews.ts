@@ -1,9 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { reviewApi, type ReviewDTO } from '@repo/api';
 import type { ReviewDisplayItem } from '@repo/types';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 
 // ======== Query Keys ========
 
@@ -47,6 +47,7 @@ export interface UseRestaurantReviewsResult {
   isError: boolean;
   error: Error | null;
   refetch: () => void;
+  refresh: () => Promise<void>;
 }
 
 /**
@@ -61,6 +62,7 @@ export function useRestaurantReviews(
   } = {},
   options: UseRestaurantReviewsOptions = {}
 ): UseRestaurantReviewsResult {
+  const queryClient = useQueryClient();
   const { enabled = true } = options;
   const { search, rating, sort } = params;
   const isValidName = restaurantName !== null && restaurantName.length > 0;
@@ -125,5 +127,11 @@ export function useRestaurantReviews(
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,
+    refresh: useCallback(async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: restaurantReviewKeys.all }),
+        new Promise((resolve) => setTimeout(resolve, 800)),
+      ]);
+    }, [queryClient]),
   };
 }

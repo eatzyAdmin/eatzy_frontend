@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { restaurantApi } from '@repo/api';
 import type { RestaurantMagazine } from '@repo/types';
 import { useDeliveryLocationStore } from '@/store/deliveryLocationStore';
@@ -24,6 +24,7 @@ const getCategoryBackgroundImage = (slug: string) => {
 const PAGE_SIZE = 10;
 
 export function useHomePage() {
+  const queryClient = useQueryClient();
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
   const [activeRestaurantIndex, setActiveRestaurantIndex] = useState(0);
   const [filter, setFilter] = useState('All recipes');
@@ -170,6 +171,15 @@ export function useHomePage() {
     }
   }, [activeRestaurantIndex, handleRestaurantChange, restaurantsInCategory.length]);
 
+  const refresh = useCallback(async () => {
+    await Promise.all([
+      queryClient.resetQueries({ queryKey: ['restaurant-types', 'all'] }),
+      queryClient.resetQueries({ queryKey: ['restaurants', 'by-category'] }),
+      // Small delay to ensure UI feels like it's refreshing
+      new Promise(resolve => setTimeout(resolve, 800))
+    ]);
+  }, [queryClient]);
+
   return {
     // State
     categories,
@@ -185,6 +195,7 @@ export function useHomePage() {
     handleCategoryChange,
     handleRestaurantChange,
     handleFilterChange,
+    refresh,
 
     // Navigation
     goToNextCategory,

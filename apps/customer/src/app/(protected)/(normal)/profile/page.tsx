@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useSwipeConfirmation, useLoading } from "@repo/ui";
 import {
   User, CreditCard, ShieldCheck,
@@ -14,7 +14,9 @@ import ProfileMenuItem from "@/features/profile/components/ProfileMenuItem";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
+import { PullToRefresh } from "@repo/ui";
 import { useCustomerProfile } from "@/features/profile/hooks/useCustomerProfile";
+import { useCustomerAddresses } from "@/features/profile/hooks/useCustomerAddresses";
 import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
 import MagazineProfileContent from "@/features/profile/components/MagazineProfileContent";
@@ -22,14 +24,17 @@ import PersonalInfoSection from "@/features/profile/components/sections/Personal
 import SavedAddressesSection from "@/features/profile/components/sections/SavedAddressesSection";
 import PaymentMethodsSection from "@/features/profile/components/sections/PaymentMethodsSection";
 import WalletManageView from "@/features/profile/components/sections/WalletManageView";
+import { useCustomerWalletTransactions } from "@/features/profile/hooks/useCustomerWalletTransactions";
 
 type MobileSection = 'personal' | 'addresses' | 'payment';
 
 export default function ProfilePage() {
   const { confirm } = useSwipeConfirmation();
   const { show, hide } = useLoading();
-  const { user } = useAuth();
-  const { profile, isLoading: isProfileLoading } = useCustomerProfile();
+  const { user, refreshUser } = useAuth();
+  const { profile, isLoading: isProfileLoading, refresh: refreshProfile } = useCustomerProfile();
+  const { refresh: refreshAddresses } = useCustomerAddresses();
+  const { refresh: refreshWallet } = useCustomerWalletTransactions();
   const { handleLogout: performLogout } = useLogout();
   const { setIsVisible: setBottomNavVisible } = useBottomNav();
 
@@ -112,6 +117,16 @@ export default function ProfilePage() {
     mass: 0.8
   };
 
+  const handleSubPageRefresh = useCallback(async () => {
+    if (activeMobileSection === 'personal') {
+      await refreshProfile();
+    } else if (activeMobileSection === 'addresses') {
+      await refreshAddresses();
+    } else if (activeMobileSection === 'payment') {
+      await refreshWallet();
+    }
+  }, [activeMobileSection, refreshProfile, refreshAddresses, refreshWallet]);
+
   const renderSubPage = () => {
     if (!activeMobileSection) return null;
 
@@ -141,8 +156,15 @@ export default function ProfilePage() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '-100%', opacity: 0 }}
               transition={driverPageTransition}
-              className="absolute inset-0 bg-[#F7F7F7] overflow-y-auto no-scrollbar px-3 h-full w-full"
+              className="absolute inset-0 bg-[#F7F7F7] overflow-hidden px-3 h-full w-full"
             >
+              <PullToRefresh
+                onRefresh={handleSubPageRefresh}
+                className="flex-1 no-scrollbar overflow-visible"
+                pullText="Kéo để làm mới"
+                releaseText="Thả tay để làm mới"
+                refreshingText="Đang làm mới"
+              >
               <div className="max-w-xl mx-auto">
                 {/* Header style matched to favorites/order-history - Sticky */}
                 <div className="sticky top-0 z-50 bg-[#F7F7F7]/95 backdrop-blur-md py-4 mb-2 -mx-3 px-3 max-md:[mask-image:linear-gradient(to_bottom,black_90%,transparent)]">
@@ -174,7 +196,8 @@ export default function ProfilePage() {
                     />
                   )}
                 </div>
-              </div>
+                </div>
+              </PullToRefresh>
             </motion.div>
           )}
         </AnimatePresence>
@@ -206,74 +229,84 @@ export default function ProfilePage() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '-100%', opacity: 0 }}
               transition={driverPageTransition}
-              className="max-w-7xl mx-auto px-4 space-y-8 overflow-y-auto absolute inset-0 pt-[72px] pb-[120px]"
+              className="absolute inset-0"
             >
-              {/* Main Card */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
+              <PullToRefresh
+                onRefresh={refreshUser}
+                className="max-w-7xl mx-auto px-4 space-y-8 pt-[72px] pb-[120px] no-scrollbar overflow-visible"
+                pullText="Kéo để làm mới"
+                releaseText="Thả tay để làm mới"
+                refreshingText="Đang làm mới"
               >
-                <CustomerProfileCard profile={displayProfile} />
-              </motion.div>
+                <div className="space-y-8 pb-10">
+                  {/* Main Card */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <CustomerProfileCard profile={displayProfile} />
+                  </motion.div>
 
-              {/* Account Settings */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-              >
-                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 pl-2">Tài khoản</h3>
-                <div className="space-y-1">
-                  <ProfileMenuItem
-                    icon={<User className="w-5 h-5" />}
-                    label="Thông tin cá nhân"
-                    subLabel="Chỉnh sửa hồ sơ"
-                    onClick={() => setActiveMobileSection('personal')}
-                  />
-                  <ProfileMenuItem
-                    icon={<MapPin className="w-5 h-5" />}
-                    label="Địa chỉ đã lưu"
-                    subLabel="Nhà riêng, Công ty"
-                    onClick={() => setActiveMobileSection('addresses')}
-                  />
-                  <ProfileMenuItem
-                    icon={<CreditCard className="w-5 h-5" />}
-                    label="Ví & Thanh toán"
-                    subLabel="Nạp tiền, Lịch sử"
-                    onClick={() => setActiveMobileSection('payment')}
-                  />
+                  {/* Account Settings */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                  >
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 pl-2">Tài khoản</h3>
+                    <div className="space-y-1">
+                      <ProfileMenuItem
+                        icon={<User className="w-5 h-5" />}
+                        label="Thông tin cá nhân"
+                        subLabel="Chỉnh sửa hồ sơ"
+                        onClick={() => setActiveMobileSection('personal')}
+                      />
+                      <ProfileMenuItem
+                        icon={<MapPin className="w-5 h-5" />}
+                        label="Địa chỉ đã lưu"
+                        subLabel="Nhà riêng, Công ty"
+                        onClick={() => setActiveMobileSection('addresses')}
+                      />
+                      <ProfileMenuItem
+                        icon={<CreditCard className="w-5 h-5" />}
+                        label="Ví & Thanh toán"
+                        subLabel="Nạp tiền, Lịch sử"
+                        onClick={() => setActiveMobileSection('payment')}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* App Settings */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.2 }}
+                  >
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 pl-2">Ứng dụng</h3>
+                    <div className="space-y-1">
+                      <ProfileMenuItem icon={<Bell className="w-5 h-5" />} label="Cài đặt thông báo" />
+                      <ProfileMenuItem icon={<ShieldCheck className="w-5 h-5" />} label="Bảo mật & Quyền riêng tư" />
+                      <ProfileMenuItem icon={<HelpCircle className="w-5 h-5" />} label="Trung tâm trợ giúp" />
+                    </div>
+                  </motion.div>
+
+                  {/* Logout */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.3 }}
+                  >
+                    <ProfileMenuItem
+                      icon={<LogOut className="w-5 h-5" />}
+                      label="Đăng xuất"
+                      subLabel="v2.4.8"
+                      isDestructive
+                      onClick={handleLogout}
+                    />
+                  </motion.div>
                 </div>
-              </motion.div>
-
-              {/* App Settings */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-              >
-                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 pl-2">Ứng dụng</h3>
-                <div className="space-y-1">
-                  <ProfileMenuItem icon={<Bell className="w-5 h-5" />} label="Cài đặt thông báo" />
-                  <ProfileMenuItem icon={<ShieldCheck className="w-5 h-5" />} label="Bảo mật & Quyền riêng tư" />
-                  <ProfileMenuItem icon={<HelpCircle className="w-5 h-5" />} label="Trung tâm trợ giúp" />
-                </div>
-              </motion.div>
-
-              {/* Logout */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-              >
-                <ProfileMenuItem
-                  icon={<LogOut className="w-5 h-5" />}
-                  label="Đăng xuất"
-                  subLabel="v2.4.8"
-                  isDestructive
-                  onClick={handleLogout}
-                />
-              </motion.div>
+              </PullToRefresh>
             </motion.div>
           ) : (
             renderSubPage()

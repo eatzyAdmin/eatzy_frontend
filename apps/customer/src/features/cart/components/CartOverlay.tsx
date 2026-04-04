@@ -11,6 +11,7 @@ import { useCartStore } from "@repo/store";
 import CartItemCard from "./CartItemCard";
 import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
 
+import { PullToRefresh } from "@repo/ui";
 export default function CartOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   useMobileBackHandler(open, onClose);
 
@@ -21,7 +22,8 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
     deleteCart,
     deleteCarts,
     isDeleting: isDeletingCarts,
-    deletingCartIds
+    deletingCartIds,
+    refresh
   } = useCart();
 
   const queryClient = useQueryClient();
@@ -97,7 +99,14 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
             className="fixed z-[70] inset-y-0 right-0 w-full md:w-[480px] bg-[#F8F9FA] border-l border-gray-100 overflow-hidden md:rounded-l-[46px] shadow-2xl flex flex-col"
           >
             {/* Scrollable Container */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar relative">
+            <PullToRefresh
+              onRefresh={refresh}
+              className="flex-1 overflow-y-auto no-scrollbar relative"
+              pullText="Kéo để cập nhật giỏ hàng"
+              releaseText="Thả tay để làm mới"
+              refreshingText="Đang cập nhật..."
+              usePortal={false}
+            >
               {/* Header - Sticky with Mask Effect */}
               <div className="flex items-center justify-between p-5 md:p-6 text-[#1A1A1A] bg-[#F8F9FA]/95 backdrop-blur-md sticky top-0 z-20 flex-shrink-0 max-md:[mask-image:linear-gradient(to_bottom,black_90%,transparent)]">
                 <div className="flex flex-col gap-1">
@@ -207,7 +216,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                   </motion.div>
                 )}
               </div>
-            </div>
+            </PullToRefresh>
 
             {/* Bottom Actions - Clean Premium Delete Button */}
             <AnimatePresence>

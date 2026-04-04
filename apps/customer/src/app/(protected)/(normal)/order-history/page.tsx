@@ -101,14 +101,15 @@ export default function OrderHistoryPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto no-scrollbar">
-        <PullToRefresh 
-          onRefresh={refresh}
-          pullText="Kéo để cập nhật đơn hàng"
-          releaseText="Thả tay để cập nhật"
-          refreshingText="Đang cập nhật..."
-        >
-          <div className="max-w-[1400px] mx-auto px-3 md:px-8">
+      <PullToRefresh
+        ref={scrollContainerRef}
+        onRefresh={refresh}
+        className="flex-1 no-scrollbar"
+        pullText="Kéo để cập nhật đơn hàng"
+        releaseText="Thả tay để cập nhật"
+        refreshingText="Đang cập nhật..."
+      >
+        <div className="max-w-[1400px] mx-auto px-3 md:px-8">
             <div className="flex items-center gap-4 py-3 pb-0 md:pt-20">
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -206,21 +207,24 @@ export default function OrderHistoryPage() {
             ) : orders && orders.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-4 relative">
                 <AnimatePresence mode="popLayout">
-                  {orders.map((order: OrderResponse, index: number) => (
-                    <motion.div
-                      key={order.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      layout
-                    >
-                      <OrderHistoryCard
-                        order={order}
-                        onClick={() => handleOrderClick(order)}
-                      />
-                    </motion.div>
-                  ))}
+                  {orders.map((order: OrderResponse, index: number) => {
+                    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768;
+                    return (
+                      <motion.div
+                        key={order.id}
+                        initial={isDesktop ? { opacity: 0, y: 20 } : false}
+                        animate={isDesktop ? { opacity: 1, y: 0 } : false}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={isDesktop ? { duration: 0.3, delay: index * 0.05 } : { duration: 0 }}
+                        layout
+                      >
+                        <OrderHistoryCard
+                          order={order}
+                          onClick={() => handleOrderClick(order)}
+                        />
+                      </motion.div>
+                    );
+                  })}
                 </AnimatePresence>
               </div>
             ) : (actualSearchQuery || statusFilter !== "ALL") ? (
@@ -259,7 +263,6 @@ export default function OrderHistoryPage() {
           </div>
         </div>
       </PullToRefresh>
-    </div>
 
       {/* Order Detail Drawer */}
       <OrderDetailDrawer

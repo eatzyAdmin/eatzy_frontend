@@ -49,7 +49,7 @@ export default function ProfilePage() {
       onRefresh={handleRefresh}
       className="h-screen flex flex-col bg-[#F7F7F7]"
     >
-      <div className="h-full overflow-y-auto bg-[#F7F7F7] pb-40 scroll-smooth pt-[72px]">
+      <div className="min-h-full pb-40 scroll-smooth pt-[72px]">
         <div className="max-w-7xl mx-auto px-4 space-y-8">
           {/* Main Card */}
           <motion.div

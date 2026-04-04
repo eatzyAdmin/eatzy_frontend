@@ -1,9 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { restaurantDetailApi } from '@repo/api';
 import type { Dish, MenuCategory, Restaurant, RestaurantDetail, RestaurantMenu } from '@repo/types';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 
 // ======== Query Keys ========
 
@@ -191,6 +191,7 @@ export function useRestaurantWithMenu(
   slug: string | null,
   options: UseRestaurantDetailOptions = {}
 ) {
+  const queryClient = useQueryClient();
   const detailResult = useRestaurantDetailBySlug(slug, options);
 
   // Get restaurant ID from detail for menu fetch
@@ -217,9 +218,20 @@ export function useRestaurantWithMenu(
     // Actions
     refetchDetail: detailResult.refetch,
     refetchMenu: menuResult.refetch,
-    refetchAll: () => {
-      detailResult.refetch();
-      menuResult.refetch();
-    },
+    refreshAll: useCallback(async () => {
+      const promises: Promise<void>[] = [
+        queryClient.resetQueries({ queryKey: restaurantDetailKeys.all }),
+        new Promise((resolve) => setTimeout(resolve, 800)),
+      ];
+
+      if (restaurantId) {
+        promises.push(queryClient.resetQueries({ queryKey: ['vouchers', 'restaurant', restaurantId] }));
+        promises.push(queryClient.resetQueries({ queryKey: ['delivery-info', restaurantId] }));
+      } else if (slug) {
+        promises.push(queryClient.resetQueries({ queryKey: restaurantDetailKeys.bySlug(slug) }));
+      }
+
+      await Promise.all(promises);
+    }, [restaurantId, slug, queryClient]),
   };
 }

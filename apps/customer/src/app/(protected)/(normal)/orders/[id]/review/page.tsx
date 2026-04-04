@@ -11,7 +11,7 @@ import { DriverReviewCard } from "@/features/orders/components/order-review/Driv
 import { RestaurantReviewShimmer } from "@/features/orders/components/order-review/RestaurantReviewShimmer";
 import { DriverReviewShimmer } from "@/features/orders/components/order-review/DriverReviewShimmer";
 import { OrderReviewTabShimmer } from "@repo/ui";
-import { useLoading } from "@repo/ui";
+import { useLoading, PullToRefresh } from "@repo/ui";
 
 export default function OrderReviewPage() {
   const params = useParams();
@@ -54,6 +54,14 @@ export default function OrderReviewPage() {
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Scroll handler for header visibility
   useEffect(() => {
@@ -107,7 +115,17 @@ export default function OrderReviewPage() {
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
       {/* Header - Exactly like Favorites Page */}
-      <div id="review-scroll-container" className="flex-1 overflow-y-auto no-scrollbar">
+      <PullToRefresh
+        id="review-scroll-container"
+        onRefresh={async () => {
+          if (orderId) await fetchOrder(orderId);
+        }}
+        disabled={!isMobile}
+        className="flex-1 no-scrollbar"
+        pullText="Kéo để làm mới"
+        releaseText="Thả tay để làm mới"
+        refreshingText="Đang làm mới"
+      >
         <div className="max-w-[1400px] mx-auto px-3 md:px-4 md:px-8">
           <motion.div
             initial={false}
@@ -327,7 +345,7 @@ export default function OrderReviewPage() {
             )}
           </div>
         </div>
-      </div>
+      </PullToRefresh>
 
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar {

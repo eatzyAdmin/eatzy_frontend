@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useLoading, useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
+import { useLoading, useHoverHighlight, HoverHighlightOverlay, PullToRefresh } from "@repo/ui";
 import { sileo } from "@/components/DynamicIslandToast";
 import { useCheckout } from "@/features/checkout/hooks/useCheckout";
 import { useCreateOrder } from "@/features/checkout/hooks/useCreateOrder";
@@ -70,6 +70,7 @@ export default function CheckoutPage() {
     selectedLocation,
     isLoadingFee,
     distance,
+    refresh
   } = useCheckout();
 
   const {
@@ -244,7 +245,14 @@ export default function CheckoutPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7]">
-      <div ref={mainScrollRef} className="flex-1 overflow-y-auto md:overflow-hidden">
+      <PullToRefresh
+        onRefresh={refresh}
+        className="flex-1 overflow-y-auto md:overflow-hidden no-scrollbar"
+        pullText="Kéo để cập nhật thông tin thanh toán"
+        releaseText="Thả tay để cập nhật"
+        refreshingText="Đang cập nhật..."
+        ref={mainScrollRef as any}
+      >
         <div className="max-w-[1400px] mx-auto px-3 md:px-4 pt-4 md:pr-16 md:px-8 md:pt-4 h-full">
           <div className="md:hidden mb-6">
             <div className="flex flex-col gap-2">
@@ -551,7 +559,7 @@ export default function CheckoutPage() {
             />
           </div>
         </div>
-      </div>
+      </PullToRefresh>
 
       {/* Modals for Mobile Experience */}
       <LocationPickerModal

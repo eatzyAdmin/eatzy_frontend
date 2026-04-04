@@ -88,6 +88,7 @@ export default function TopUpDrawer({ open, onClose }: { open: boolean, onClose:
             <PullToRefresh
               onRefresh={handleRefresh}
               className="flex-1 overflow-hidden"
+              usePortal={false}
             >
               <div className="p-6 h-full overflow-y-auto no-scrollbar">
                 <AnimatePresence mode="wait">

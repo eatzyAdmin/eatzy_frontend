@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAccount } from "../api";
 import { useAuthStore } from "@repo/store";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 export const useAuth = () => {
   const { setUser, clearAuth } = useAuthStore();
@@ -47,5 +47,11 @@ export const useAuth = () => {
     error,
     isError,
     refetch,
+    refreshUser: useCallback(async () => {
+      await Promise.all([
+        refetch(),
+        new Promise((resolve) => setTimeout(resolve, 800)),
+      ]);
+    }, [refetch]),
   };
 };

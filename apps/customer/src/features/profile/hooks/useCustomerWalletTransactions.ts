@@ -61,9 +61,11 @@ export const useCustomerWalletTransactions = () => {
     isFetchingTransactions: isFetchingNextPage,
     hasNextPage,
     error,
-    refresh: () => {
-      refreshWallet();
-      refreshTransactions();
+    refresh: async () => {
+      await Promise.all([
+        queryClient.resetQueries({ queryKey: ["customer", "wallet"] }),
+        new Promise((resolve) => setTimeout(resolve, 800)),
+      ]);
     },
     fetchMoreTransactions: () => {
       if (hasNextPage && !isFetchingNextPage) {

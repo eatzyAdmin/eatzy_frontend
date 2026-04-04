@@ -2,6 +2,7 @@
 
 import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState, ReactNode, forwardRef, useImperativeHandle } from "react";
+import { createPortal } from "react-dom";
 import { ArrowDown, ArrowUp, RotateCcw } from "../icons";
 
 /**
@@ -25,7 +26,7 @@ const ThreeDots = () => (
   </div>
 );
 
-interface PullToRefreshProps {
+interface PullToRefreshProps extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   onRefresh: () => Promise<void>;
   pullThreshold?: number;
@@ -35,6 +36,7 @@ interface PullToRefreshProps {
   pullText?: string;
   releaseText?: string;
   refreshingText?: string;
+  usePortal?: boolean;
 }
 
 const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(({
@@ -46,12 +48,19 @@ const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(({
   position = 'top',
   pullText = "Pull to refresh",
   releaseText = "Release to refresh",
-  refreshingText = "Refreshing"
+  refreshingText = "Refreshing",
+  usePortal = true,
+  ...props
 }, ref) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasReachedThreshold, setHasReachedThreshold] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const pullY = useMotionValue(0);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useImperativeHandle(ref, () => containerRef.current!);
 
@@ -181,88 +190,111 @@ const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(({
     };
   }, [pullY, pullThreshold, isRefreshing, onRefresh, disabled, isTop]);
 
+  const indicatorContent = (
+    <motion.div
+      layout
+      initial={false}
+      animate={{
+        scale: hasReachedThreshold ? [1, 1.25, 1] : 1,
+        y: hasReachedThreshold ? (isTop ? [0, -12, 0] : [0, 12, 0]) : 0,
+        backgroundColor: isRefreshing || hasReachedThreshold ? '#1A1A1A' : '#FFFFFF',
+        color: isRefreshing || hasReachedThreshold ? '#FFFFFF' : '#1F2937'
+      }}
+      transition={{
+        layout: { type: "spring", stiffness: 300, damping: 25 },
+        backgroundColor: { duration: 0.4 },
+        color: { duration: 0.4 },
+        scale: { type: "spring", stiffness: 700, damping: 20 },
+        y: { type: "spring", stiffness: 700, damping: 20 }
+      }}
+      className="flex items-center gap-3 px-6 py-3.5 rounded-full shadow-[0_0_50px_rgba(0,0,0,0.18)] backdrop-blur-xl border border-gray-100/10"
+    >
+      <div className="flex items-center justify-center">
+        {isRefreshing ? (
+          <ThreeDots />
+        ) : (
+          <AnimatePresence mode="popLayout">
+            <motion.div
+              key={hasReachedThreshold ? 'rotate' : 'arrow'}
+              initial={{ scale: 0.2, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.2, opacity: 0 }}
+              className={`${hasReachedThreshold ? 'text-lime-400' : 'text-gray-400'}`}
+            >
+              {hasReachedThreshold ? (
+                <RotateCcw size={20} strokeWidth={3} />
+              ) : (
+                isTop ? <ArrowDown size={20} strokeWidth={3} /> : <ArrowUp size={20} strokeWidth={3} />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        )}
+      </div>
+
+      <AnimatePresence mode="popLayout">
+        {!isRefreshing && (
+          <motion.span
+            key={hasReachedThreshold ? 'release' : 'pull'}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="text-[14px] font-bold tracking-tight whitespace-nowrap"
+          >
+            {hasReachedThreshold ? releaseText : pullText}
+          </motion.span>
+        )}
+        {isRefreshing && (
+          <motion.span
+            key="refreshing"
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.92 }}
+            className="text-[14px] font-bold tracking-tight whitespace-nowrap text-lime-400"
+          >
+            {refreshingText}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+
   return (
     <div
       ref={containerRef}
       className={`relative w-full h-full overscroll-none overflow-y-auto ${className}`}
       style={{ touchAction: "pan-x pan-y" } as any}
+      {...props}
     >
-      <motion.div
-        className={`absolute left-0 right-0 flex justify-center pointer-events-none z-50 ${isTop ? 'top-[-48px]' : 'bottom-[-15px]'}`}
-        style={{
-          y: indicatorPos,
-          scale: indicatorScale,
-          opacity: indicatorOpacity,
-          width: indicatorWidth,
-          margin: "0 auto"
-        }}
-      >
-        <motion.div
-          layout
-          initial={false}
-          animate={{
-            scale: hasReachedThreshold ? [1, 1.25, 1] : 1,
-            y: hasReachedThreshold ? (isTop ? [0, -12, 0] : [0, 12, 0]) : 0,
-            backgroundColor: isRefreshing || hasReachedThreshold ? '#1A1A1A' : '#FFFFFF',
-            color: isRefreshing || hasReachedThreshold ? '#FFFFFF' : '#1F2937'
-          }}
-          transition={{
-            layout: { type: "spring", stiffness: 300, damping: 25 },
-            backgroundColor: { duration: 0.4 },
-            color: { duration: 0.4 },
-            scale: { type: "spring", stiffness: 700, damping: 20 },
-            y: { type: "spring", stiffness: 700, damping: 20 }
-          }}
-          className="flex items-center gap-3 px-6 py-3.5 rounded-full shadow-[0_0_50px_rgba(0,0,0,0.18)] backdrop-blur-xl border border-gray-100/10"
-        >
-          <div className="flex items-center justify-center">
-            {isRefreshing ? (
-              <ThreeDots />
-            ) : (
-              <AnimatePresence mode="popLayout">
-                <motion.div
-                  key={hasReachedThreshold ? 'rotate' : 'arrow'}
-                  initial={{ scale: 0.2, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.2, opacity: 0 }}
-                  className={`${hasReachedThreshold ? 'text-lime-400' : 'text-gray-400'}`}
-                >
-                  {hasReachedThreshold ? (
-                    <RotateCcw size={20} strokeWidth={3} />
-                  ) : (
-                    isTop ? <ArrowDown size={20} strokeWidth={3} /> : <ArrowUp size={20} strokeWidth={3} />
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            )}
-          </div>
-
-          <AnimatePresence mode="popLayout">
-            {!isRefreshing && (
-              <motion.span
-                key={hasReachedThreshold ? 'release' : 'pull'}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="text-[14px] font-bold tracking-tight whitespace-nowrap"
-              >
-                {hasReachedThreshold ? releaseText : pullText}
-              </motion.span>
-            )}
-            {isRefreshing && (
-              <motion.span
-                key="refreshing"
-                initial={{ opacity: 0, scale: 0.92 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.92 }}
-                className="text-[14px] font-bold tracking-tight whitespace-nowrap text-lime-400"
-              >
-                {refreshingText}
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </motion.div>
+      {mounted && (
+        usePortal ? createPortal(
+          <motion.div
+            className={`fixed left-0 right-0 flex justify-center pointer-events-none z-[999] ${isTop ? 'top-[-48px]' : 'bottom-[-15px]'}`}
+            style={{
+              y: indicatorPos,
+              scale: indicatorScale,
+              opacity: indicatorOpacity,
+              width: indicatorWidth,
+              margin: "0 auto"
+            }}
+          >
+            {indicatorContent}
+          </motion.div>,
+          document.body
+        ) : (
+          <motion.div
+            className={`absolute left-0 right-0 flex justify-center pointer-events-none z-[999] ${isTop ? 'top-[-48px]' : 'bottom-[-15px]'}`}
+            style={{
+              y: indicatorPos,
+              scale: indicatorScale,
+              opacity: indicatorOpacity,
+              width: indicatorWidth,
+              margin: "0 auto"
+            }}
+          >
+            {indicatorContent}
+          </motion.div>
+        )
+      )}
 
       <motion.div
         style={{ y: contentY }}

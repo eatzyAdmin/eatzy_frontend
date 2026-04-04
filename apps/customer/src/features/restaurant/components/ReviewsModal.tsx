@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Search, Star, Sparkles, CheckCircle2, MessageSquare, Map, Tag, ChefHat, ChevronDown, Loader2, ArrowLeft, AlertCircle, ShoppingBag } from "@repo/ui/icons";
-import { ImageWithFallback, ReviewItemShimmer } from "@repo/ui";
+import { ImageWithFallback, ReviewItemShimmer, PullToRefresh } from "@repo/ui";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import type { Restaurant } from "@repo/types";
 import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
@@ -43,7 +43,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
   }, [isSortOpen]);
 
   // Fetch reviews from API with filters
-  const { reviews, isFetching, isError, error } = useRestaurantReviews(restaurant.name || null, {
+  const { reviews, isFetching, isError, error, refresh } = useRestaurantReviews(restaurant.name || null, {
     search: activeSearch,
     rating: selectedRating,
     sort: sortBy
@@ -232,7 +232,14 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                 </div>
 
                 {/* Right Column - Scrollable Reviews */}
-                <div className="flex-1 overflow-y-auto px-3 md:pr-12 md:pl-8 py-0 md:py-6 relative bg-[#F7F7F7] md:bg-white no-scrollbar">
+                <PullToRefresh
+                  onRefresh={refresh}
+                  className="flex-1 overflow-y-auto px-3 md:pr-12 md:pl-8 py-0 md:py-6 relative bg-[#F7F7F7] md:bg-white no-scrollbar"
+                  pullText="Kéo để cập nhật đánh giá"
+                  releaseText="Thả tay để cập nhật"
+                  refreshingText="Đang tải đánh giá mới..."
+                  usePortal={false}
+                >
                   {/* Mobile Header - Profile Sub-header Style - Moved inside to enable blur/mask effects */}
                   <div className="md:hidden sticky top-0 z-50 bg-[#F7F7F7]/85 backdrop-blur-md py-3 mb-2 -mx-3 px-3 flex items-center justify-between shrink-0 max-md:[mask-image:linear-gradient(to_bottom,black_85%,transparent)]">
                     <div className="flex items-center gap-4 pl-1">
@@ -479,10 +486,10 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                           )}
                         </div>
                       )}
+                      </div>
                     </div>
-                  </div>
+                  </PullToRefresh>
                 </div>
-              </div>
             </motion.div>
           </div>
         </>

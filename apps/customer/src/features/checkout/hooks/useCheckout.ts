@@ -1,6 +1,6 @@
 "use client";
-import { useMemo, useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import type { Voucher, PaymentMethod } from "@repo/types";
 import { useRestaurantCart } from "@/features/cart/hooks/useCart";
 import { useCartStore } from "@repo/store";
@@ -13,6 +13,7 @@ type DiscountVoucher = Voucher & { discountType: DiscountType.PERCENTAGE | Disco
 type ShippingVoucher = Voucher & { discountType: DiscountType.FREESHIP };
 
 export function useCheckout() {
+  const queryClient = useQueryClient();
   // Get restaurantId from cart store (set when navigating to checkout)
   const activeRestaurantId = useCartStore((s) => s.activeRestaurantId);
   const restaurantId = activeRestaurantId ? Number(activeRestaurantId) : null;
@@ -272,6 +273,15 @@ export function useCheckout() {
     distance: deliveryFeeData?.distance || 0,
     // Helper
     isVoucherEligible: (voucher: Voucher) => isVoucherEligible(voucher, subtotal, new Date()),
+    refresh: useCallback(async () => {
+      if (!restaurantId) return;
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['restaurant-detail', restaurantId] }),
+        queryClient.invalidateQueries({ queryKey: ['delivery-fee', restaurantId] }),
+        queryClient.invalidateQueries({ queryKey: ['vouchers', 'restaurant', restaurantId] }),
+        new Promise((resolve) => setTimeout(resolve, 800)),
+      ]);
+    }, [restaurantId, queryClient]),
   };
 }
 

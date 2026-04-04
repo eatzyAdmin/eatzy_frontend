@@ -10,13 +10,14 @@ import type { Restaurant, FavoriteResponse, RestaurantStatus } from "@repo/types
 import FavoriteRestaurantCard from "@/features/favorites/components/FavoriteRestaurantCard";
 import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
+import { PullToRefresh } from "@repo/ui";
 
 export default function FavoritesPage() {
   const router = useRouter();
   const { hide, show } = useLoading();
   const [searchInputValue, setSearchInputValue] = useState("");
   const [actualSearchQuery, setActualSearchQuery] = useState("");
-  const { favorites, isLoading: isFavoritesLoading, toggleFavorite, isRestaurantMutating } = useFavorites();
+  const { favorites, isLoading: isFavoritesLoading, toggleFavorite, isRestaurantMutating, refresh } = useFavorites();
 
   const { setIsVisible } = useBottomNav();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -115,7 +116,14 @@ export default function FavoritesPage() {
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">
       {/* Scrollable Content */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
+      <PullToRefresh
+        ref={scrollContainerRef}
+        onRefresh={refresh}
+        className="flex-1 no-scrollbar"
+        pullText="Kéo để cập nhật yêu thích"
+        releaseText="Thả tay để cập nhật"
+        refreshingText="Đang cập nhật..."
+      >
         <div className="max-w-[1400px] mx-auto px-3 md:px-8">
           {/* Page Title & Back Button (Scrollable) */}
           <div className="flex items-center gap-4 py-3 pb-0 md:pt-20">
@@ -191,23 +199,26 @@ export default function FavoritesPage() {
             ) : filteredRestaurants.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4 relative">
                 <AnimatePresence mode="popLayout">
-                  {filteredRestaurants.map((restaurant, index) => (
-                    <motion.div
-                      key={restaurant.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      layout
-                    >
-                      <FavoriteRestaurantCard
-                        restaurant={restaurant}
-                        onClick={() => handleRestaurantClick(restaurant)}
-                        onRemove={() => toggleFavorite(restaurant.id, restaurant.name)}
-                        isLoading={isRestaurantMutating(restaurant.id)}
-                      />
-                    </motion.div>
-                  ))}
+                    {filteredRestaurants.map((restaurant, index) => {
+                      const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768;
+                      return (
+                        <motion.div
+                          key={restaurant.id}
+                          initial={isDesktop ? { opacity: 0, y: 20 } : false}
+                          animate={isDesktop ? { opacity: 1, y: 0 } : false}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          transition={isDesktop ? { duration: 0.3, delay: index * 0.05 } : { duration: 0 }}
+                          layout
+                        >
+                          <FavoriteRestaurantCard
+                            restaurant={restaurant}
+                            onClick={() => handleRestaurantClick(restaurant)}
+                            onRemove={() => toggleFavorite(restaurant.id, restaurant.name)}
+                            isLoading={isRestaurantMutating(restaurant.id)}
+                          />
+                        </motion.div>
+                      );
+                    })}
                 </AnimatePresence>
               </div>
             ) : favoriteRestaurants.length === 0 ? (
@@ -241,7 +252,7 @@ export default function FavoritesPage() {
             )}
           </div>
         </div>
-      </div>
+      </PullToRefresh>
     </div>
   );
 }
