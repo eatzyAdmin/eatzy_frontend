@@ -216,7 +216,7 @@ export default function HomePage() {
           <motion.div
             initial={{ opacity: 1, y: 0 }}
             exit={{ y: '100vh', transition: { delay: 0.15, duration: 0.8, ease: [0.33, 1, 0.68, 1] } }}
-            className="relative z-10 h-screen"
+            className={`relative h-screen ${showDistanceWarning ? 'z-[100]' : 'z-10'}`}
           >
             <PullToRefresh
               onRefresh={onRefresh}
@@ -380,6 +380,16 @@ export default function HomePage() {
                   </>
                 )}
               </div>
+
+              {/* Distance Warning Alert - Moved inside PullToRefresh to share stacking context with location button */}
+              <DistanceWarningHome
+                isOpen={showDistanceWarning}
+                distance={distance}
+                onClose={() => setShowDistanceWarning(false)}
+                onChangeAddress={() => {
+                  openLocationPicker();
+                }}
+              />
             </PullToRefresh>
           </motion.div>
         )}
@@ -485,15 +495,6 @@ export default function HomePage() {
         )}
       </AnimatePresence>
 
-      {/* Distance Warning Alert */}
-      <DistanceWarningHome
-        isOpen={showDistanceWarning}
-        distance={distance}
-        onClose={() => setShowDistanceWarning(false)}
-        onChangeAddress={() => {
-          openLocationPicker();
-        }}
-      />
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar {
           display: none;

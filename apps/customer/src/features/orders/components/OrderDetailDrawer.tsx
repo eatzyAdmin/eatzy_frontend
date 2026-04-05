@@ -189,93 +189,93 @@ export default function OrderDetailDrawer({
               </AnimatePresence>
             )}
 
-            {/* 3. Pull-To-Refresh Scrollable Area */}
-            <PullToRefresh
-              onRefresh={async () => { onClose(); }}
-              className="flex-1 no-scrollbar overflow-y-auto"
-              pullText="Kéo để đóng"
-              releaseText="Thả tay để đóng"
-              refreshingText="Đang đóng..."
-              usePortal={false}
-            >
-              <div className="flex-1 min-h-0 flex flex-col md:pt-0">
-                {isLoading ? (
-                  <OrderDetailDrawerShimmer shouldAnimate={canStartShimmer} />
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex-1 min-h-0 flex flex-col"
-                  >
-                    {/* Desktop Layout */}
-                    <div className="hidden md:grid md:grid-cols-[62%_38%] min-h-[calc(90vh-80px)]">
-                      {/* Left Column */}
-                      <div className="flex-1 flex flex-col gap-6 p-5 md:py-6 md:pl-16 md:pr-5">
+            {/* 3. Main Content Area - Split Scroll Containers for Desktop Independence */}
+            <div className="flex-1 min-h-0 relative h-full">
+              {/* Mobile Layout with Pull-To-Refresh */}
+              <div className="md:hidden h-full">
+                <PullToRefresh
+                  onRefresh={async () => { onClose(); }}
+                  className="h-full overflow-y-auto no-scrollbar"
+                  pullText="Kéo để đóng"
+                  releaseText="Thả tay để đóng"
+                  refreshingText="Đang đóng..."
+                  usePortal={false}
+                >
+                  <div className="flex flex-col gap-3 p-3 pb-20">
+                    {isLoading ? (
+                      <OrderDetailDrawerShimmer shouldAnimate={canStartShimmer} />
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex flex-col gap-3"
+                      >
                         {isCancelled && <CancellationAlert reason={order.cancellationReason} />}
+                        <MobileCarousel singleFocus>
+                          <RestaurantCard restaurant={restaurant} />
+                          <DriverCard driver={driver} />
+                        </MobileCarousel>
+                        <OrderItemsList order={order} />
+                        <LogisticsInfo order={order} />
+                        <PaymentSummary order={order} />
+                        <div className="flex flex-col gap-6 mt-4">
+                          {order.specialInstructions && <OrderNotes notes={order.specialInstructions} />}
+                          {reviewedBoth && showReviewPrompt && !isReviewLoading && (
+                            <motion.button
+                              whileTap={{ scale: 0.92 }}
+                              onClick={() => router.push(`/orders/${order.id}/review`)}
+                              className="flex flex-col items-center justify-center gap-0.5"
+                            >
+                              <span className="text-[17px] font-bold text-[#1A1A1A] tracking-tight">Cảm ơn bạn đã đánh giá!</span>
+                              <div className="flex items-center gap-1 text-lime-600">
+                                <span className="text-[13px] font-bold border-b-2 border-dashed border-lime-500/40 pb-0.5">Xem lại đánh giá của bạn</span>
+                                <ChevronRight className="w-4 h-4" strokeWidth={3} />
+                              </div>
+                            </motion.button>
+                          )}
+                          <SafetyDisclaimer />
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                </PullToRefresh>
+              </div>
 
+              {/* Desktop Layout - Truly Independent Columns */}
+              <div className="hidden md:grid md:grid-cols-[62%_38%] h-full overflow-hidden">
+                {isLoading ? (
+                  <div className="col-span-2 h-full">
+                    <OrderDetailDrawerShimmer shouldAnimate={canStartShimmer} />
+                  </div>
+                ) : (
+                  <>
+                    {/* Left Column - Independent Scroll */}
+                    <div className="h-full overflow-y-auto no-scrollbar bg-white p-5 md:py-6 md:pl-16 md:pr-5 scroll-smooth">
+                      <div className="flex flex-col gap-6">
+                        {isCancelled && <CancellationAlert reason={order.cancellationReason} />}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 shrink-0">
                           <RestaurantCard restaurant={restaurant} />
                           <DriverCard driver={driver} />
                         </div>
-
                         <OrderItemsList order={order} />
                         <SafetyDisclaimer />
+                        <div className="pb-10" /> {/* Extra spacing for better scroll end */}
                       </div>
+                    </div>
 
-                      {/* Right Column */}
-                      <div className="flex-1 flex flex-col gap-6 p-5 md:py-6 md:pl-6 md:pr-16 bg-[#F8F9FA]">
+                    {/* Right Column - Independent Scroll */}
+                    <div className="h-full overflow-y-auto no-scrollbar bg-[#F8F9FA] p-5 md:py-6 md:pl-6 md:pr-16 scroll-smooth">
+                      <div className="flex flex-col gap-6">
                         <LogisticsInfo order={order} />
                         <PaymentSummary order={order} />
                         {order.specialInstructions && <OrderNotes notes={order.specialInstructions} />}
+                        <div className="pb-10" />
                       </div>
                     </div>
-
-                    {/* Mobile Layout */}
-                    <div className="md:hidden flex flex-col gap-3 md:gap-4 p-3 pb-20">
-                      {isCancelled && <CancellationAlert reason={order.cancellationReason} />}
-
-                      {/* 1. Swipeable Carousel for Restaurant & Driver */}
-                      <MobileCarousel singleFocus>
-                        <RestaurantCard restaurant={restaurant} />
-                        <DriverCard driver={driver} />
-                      </MobileCarousel>
-
-                      {/* 2. Order Items List */}
-                      <OrderItemsList order={order} />
-
-                      {/* 3. Logistics info Route */}
-                      <LogisticsInfo order={order} />
-
-                      {/* 4. Payment Information */}
-                      <PaymentSummary order={order} />
-
-                      <div className="flex flex-col gap-6 mt-4">
-                        {order.specialInstructions && <OrderNotes notes={order.specialInstructions} />}
-
-                        {reviewedBoth && showReviewPrompt && !isReviewLoading && (
-                          <motion.button
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            whileTap={{ scale: 0.92 }}
-                            transition={{ duration: 0.4 }}
-                            onClick={() => router.push(`/orders/${order.id}/review`)}
-                            className="flex flex-col items-center justify-center gap-0.5"
-                          >
-                            <span className="text-[17px] font-bold text-[#1A1A1A] tracking-tight">Cảm ơn bạn đã đánh giá!</span>
-                            <div className="flex items-center gap-1 text-lime-600">
-                              <span className="text-[13px] font-bold border-b-2 border-dashed border-lime-500/40 pb-0.5">Xem lại đánh giá của bạn</span>
-                              <ChevronRight className="w-4 h-4" strokeWidth={3} />
-                            </div>
-                          </motion.button>
-                        )}
-
-                        <SafetyDisclaimer />
-                      </div>
-                    </div>
-                  </motion.div>
+                  </>
                 )}
               </div>
-            </PullToRefresh>
+            </div>
 
             {/* Micro-animations styles */}
             <style jsx>{`

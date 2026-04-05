@@ -128,18 +128,17 @@ export default function WalletPage() {
             className="flex-1 flex flex-col relative h-full w-full"
           >
             <PullToRefresh 
-              onRefresh={handleRefresh} 
-              className="flex-1"
-              pullText="Kéo để cập nhật ví"
-              releaseText="Thả tay để cập nhật"
-              refreshingText="Đang cập nhật..."
-            >
-              <div
-                className="flex flex-col h-full overflow-y-auto no-scrollbar scroll-smooth"
+                onRefresh={handleRefresh} 
+                className="flex-1 overflow-y-auto no-scrollbar md:overflow-visible scroll-smooth"
+                id="mobile-scroll-container"
+                pullText="Kéo để cập nhật ví"
+                releaseText="Thả tay để cập nhật"
+                refreshingText="Đang cập nhật..."
                 ref={containerRef}
                 onScroll={handleScroll}
               >
-                <div className="max-w-2xl mx-auto px-3 w-full relative">
+                <div className="flex flex-col md:grid md:grid-cols-[30%_70%] md:gap-8 min-h-full">
+                  <div className="max-w-2xl mx-auto px-3 w-full relative">
 
                 {/* Title and Header Area - Replicating History Pattern */}
                 <div className="flex items-center gap-4 py-3 pb-0 pt-3">
@@ -286,10 +285,10 @@ export default function WalletPage() {
                     )}
                   </div>
                 </div>
+                  </div>
                 </div>
-              </div>
-            </PullToRefresh>
-          </motion.div>
+              </PullToRefresh>
+            </motion.div>
         ) : (
           <WalletManageView
             key="wallet-manage"

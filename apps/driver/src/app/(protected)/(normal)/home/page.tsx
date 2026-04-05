@@ -37,13 +37,13 @@ export default function Page() {
   return (
     <div className="w-full h-full">
       <DriverMapView locateVersion={locateVersion} activeOrder={activeOrder} />
-      <div className="absolute left-4 right-4 bottom-[104px] space-y-3">
+      <div className="absolute left-4 right-4 bottom-[104px] space-y-3 pointer-events-none">
         <div className="flex items-center justify-between gap-3">
-          <ConnectToggle online={online} onToggle={toggleStatus} className="" />
+          <ConnectToggle online={online} onToggle={toggleStatus} className="pointer-events-auto" />
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setLocateVersion((v) => v + 1)}
-            className="backdrop-blur-xl bg-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/40 border-white/20 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300"
+            className="backdrop-blur-xl bg-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/40 border-white/20 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 pointer-events-auto"
           >
             <LocateFixed className="w-7 h-7 text-black" strokeWidth={2.5} />
           </motion.button>
@@ -52,7 +52,7 @@ export default function Page() {
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            className="rounded-[28px] bg-white/20 backdrop-blur-xl border border-white/40 border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)] p-4 flex items-center justify-center overflow-hidden"
+            className="rounded-[28px] bg-white/20 backdrop-blur-xl border border-white/40 border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)] p-4 flex items-center justify-center overflow-hidden pointer-events-auto"
           >
             <div className="flex items-center gap-4 text-black">
               <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
@@ -73,9 +73,11 @@ export default function Page() {
           </motion.div>
         )}
         {activeOrder && (
-          <CurrentOrderPanel
-            order={activeOrder}
-          />
+          <div className="pointer-events-auto">
+            <CurrentOrderPanel
+              order={activeOrder}
+            />
+          </div>
         )}
       </div>
       <OnlineStatusBadge online={online} />

@@ -62,7 +62,7 @@ export default function ProfilePage() {
   // Handle header, bottom nav, and modal-open class visibility based on sub-page state
   useEffect(() => {
     const isSubPageOpen = activeMobileSection !== null || walletView !== 'main';
-    
+
     if (isSubPageOpen) {
       // Hide global elements and block app exit guard
       setBottomNavVisible(false);
@@ -145,7 +145,7 @@ export default function ProfilePage() {
               key="wallet-manage"
               // Pass a dummy balance or rely on internally fetched balance in ManageView if needed
               // But for optimal UX with cache, ManageView can also use the same hook
-              balance={0} 
+              balance={0}
               onBack={() => setWalletView('main')}
               defaultType={walletView === 'topup' ? 'TOPUP' : 'WITHDRAW'}
             />
@@ -165,37 +165,37 @@ export default function ProfilePage() {
                 releaseText="Thả tay để làm mới"
                 refreshingText="Đang làm mới"
               >
-              <div className="max-w-xl mx-auto">
-                {/* Header style matched to favorites/order-history - Sticky */}
-                <div className="sticky top-0 z-50 bg-[#F7F7F7]/95 backdrop-blur-md py-4 mb-2 -mx-3 px-3 max-md:[mask-image:linear-gradient(to_bottom,black_90%,transparent)]">
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => setActiveMobileSection(null)}
-                      className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center group flex-shrink-0"
-                    >
-                      <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
-                    </button>
-                    <div>
-                      <h1 className="text-[32px] md:text-[56px] font-bold leading-tight text-[#1A1A1A] font-anton uppercase tracking-tight">
-                        {activeMobileSection === 'personal' ? "PERSONAL INFO" : activeMobileSection === 'addresses' ? "SAVED ADDRESSES" : "WALLET & PAYMENT"}
-                      </h1>
-                      <p className="text-sm font-medium md:text-base text-gray-500 mt-0.5">
-                        {activeMobileSection === 'personal' ? "Manage your biography and profile" : activeMobileSection === 'addresses' ? "Your delivery locations" : "Manage your balance and transactions"}
-                      </p>
+                <div className="max-w-xl mx-auto">
+                  {/* Header style matched to favorites/order-history - Sticky */}
+                  <div className="sticky top-0 z-50 bg-[#F7F7F7]/95 backdrop-blur-md py-4 mb-2 -mx-3 px-3 max-md:[mask-image:linear-gradient(to_bottom,black_90%,transparent)]">
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => setActiveMobileSection(null)}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center group flex-shrink-0"
+                      >
+                        <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
+                      </button>
+                      <div>
+                        <h1 className="text-[32px] md:text-[56px] font-bold leading-tight text-[#1A1A1A] font-anton uppercase tracking-tight">
+                          {activeMobileSection === 'personal' ? "PERSONAL INFO" : activeMobileSection === 'addresses' ? "SAVED ADDRESSES" : "WALLET & PAYMENT"}
+                        </h1>
+                        <p className="text-sm font-medium md:text-base text-gray-500 mt-0.5">
+                          {activeMobileSection === 'personal' ? "Manage your biography and profile" : activeMobileSection === 'addresses' ? "Your delivery locations" : "Manage your balance and transactions"}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Sub-page Content */}
-                <div className="pb-20">
-                  {activeMobileSection === 'personal' && <PersonalInfoSection profile={displayProfile} />}
-                  {activeMobileSection === 'addresses' && <SavedAddressesSection />}
-                  {activeMobileSection === 'payment' && (
-                    <PaymentMethodsSection
-                      onOpenManage={(type) => setWalletView(type === 'TOPUP' ? 'topup' : 'withdraw')}
-                    />
-                  )}
-                </div>
+                  {/* Sub-page Content */}
+                  <div className="pb-20">
+                    {activeMobileSection === 'personal' && <PersonalInfoSection profile={displayProfile} />}
+                    {activeMobileSection === 'addresses' && <SavedAddressesSection />}
+                    {activeMobileSection === 'payment' && (
+                      <PaymentMethodsSection
+                        onOpenManage={(type) => setWalletView(type === 'TOPUP' ? 'topup' : 'withdraw')}
+                      />
+                    )}
+                  </div>
                 </div>
               </PullToRefresh>
             </motion.div>
@@ -206,7 +206,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F7F7] pt-8 md:pt-20 pb-24 md:pb-0 overflow-hidden">
+    <div className="min-h-screen bg-[#F7F7F7] pt-8 md:pt-20 pb-40 md:pb-0 overflow-hidden">
 
       {/* Desktop Magazine View */}
       <div className="hidden md:block w-full px-4 lg:px-8">
@@ -238,7 +238,7 @@ export default function ProfilePage() {
                 releaseText="Thả tay để làm mới"
                 refreshingText="Đang làm mới"
               >
-                <div className="space-y-8 pb-10">
+                <div className="space-y-8 pb-32">
                   {/* Main Card */}
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}

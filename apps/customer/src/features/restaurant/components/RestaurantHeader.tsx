@@ -11,7 +11,7 @@ interface RestaurantHeaderProps {
 
 export const RestaurantHeader: React.FC<RestaurantHeaderProps> = ({ restaurant, children }) => {
   return (
-    <div className="flex-1 min-w-0 flex flex-col gap-2 md:gap-0">
+    <div className="flex-1 min-w-0 flex flex-col gap-2 md:pt-4 md:gap-0">
       <h1
         className="text-[24px] md:text-[62px] font-bold leading-[1.1] text-[#1A1A1A] md:mb-3 md:drop-shadow-none"
         style={{
