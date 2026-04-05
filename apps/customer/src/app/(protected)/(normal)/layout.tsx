@@ -19,10 +19,10 @@ import { Suspense } from "react";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   useMobileExitGuard();
-  const { 
-    isRecommendedMode, setRecommendedMode, 
-    isCartOpen: cartOpen, setCartOpen, 
-    isOrdersDrawerOpen: ordersOpen, setOrdersDrawerOpen, 
+  const {
+    isRecommendedMode, setRecommendedMode,
+    isCartOpen: cartOpen, setCartOpen,
+    isOrdersDrawerOpen: ordersOpen, setOrdersDrawerOpen,
     isMenuOpen: menuOpen, setMenuOpen,
     isSearchOpen: searchOpen, setSearchOpen
   } = useUIStore();
@@ -37,7 +37,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const isFavorites = pathname?.startsWith("/favorites") ?? false;
   const isReviewPage = pathname?.includes("/review") ?? false;
   const isProfile = pathname?.startsWith("/profile") ?? false;
-  
+
   // Combine modes for layout and animation purposes
   const effectiveSearchMode = isSearchMode || isRecommendedMode;
   const shouldSlideHeader = effectiveSearchMode || isOrderHistory || isFavorites || isReviewPage;

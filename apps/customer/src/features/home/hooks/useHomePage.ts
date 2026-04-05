@@ -11,14 +11,14 @@ import { useRestaurantTypes } from '@/features/restaurant/hooks/useRestaurantTyp
 const getCategoryBackgroundImage = (slug: string) => {
   // Mapping from static data or fallback
   const backgrounds: Record<string, string> = {
-    'pho': 'https://images.unsplash.com/photo-1582878826629-297527132b04?w=1600&q=80',
-    'sushi': 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=1600&q=80',
-    'barbecue': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1600&q=80',
-    'burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1600&q=80',
-    'pasta': 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=1600&q=80',
-    'breakfast': 'https://images.unsplash.com/photo-1533089862017-5614ec45e25a?w=1600&q=80',
+    'pho': 'https://images.unsplash.com/photo-1582878826629-297527132b04?w=1200&q=75',
+    'sushi': 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=1200&q=75',
+    'barbecue': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&q=75',
+    'burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1200&q=75',
+    'pasta': 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=1200&q=75',
+    'breakfast': 'https://images.unsplash.com/photo-1533089862017-5614ec45e25a?w=1200&q=75',
   };
-  return backgrounds[slug] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=80';
+  return backgrounds[slug] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=75';
 };
 
 const PAGE_SIZE = 10;

@@ -79,6 +79,7 @@ export default function OrderHistoryCard({ order, onClick }: { order: OrderRespo
           fill
           placeholderMode="horizontal"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+          sizes="(max-width: 768px) 160px, 400px"
         />
         {/* Gradients - Desktop Only Overlay Protection */}
         <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent" />

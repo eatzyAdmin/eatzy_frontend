@@ -76,6 +76,7 @@ export default function CartItemCard({
             fill
             placeholderMode="horizontal"
             className={`object-cover transition-transform duration-700 ease-out ${isClosed ? 'grayscale brightness-75' : 'md:group-hover:scale-110'}`}
+            sizes="144px"
           />
           <div className={`absolute inset-0 transition-all duration-700 ease-out ${isClosed ? 'bg-primary/10 mix-blend-color' : 'bg-black/5 md:group-hover:bg-black/0'}`} />
 

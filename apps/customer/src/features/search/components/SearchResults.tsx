@@ -1,8 +1,8 @@
 import { motion } from '@repo/ui/motion';
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useRef } from 'react';
 import type { RestaurantWithMenu } from '../hooks/useSearch';
 import { useBottomNav } from '@/features/navigation/context/BottomNavContext';
-import { MagazineLayout8Shimmer, InfiniteScrollContainer } from '@repo/ui';
+import { MagazineLayout8Shimmer, InfiniteScrollContainer, PullToRefresh } from '@repo/ui';
 import { useInfiniteScroll, useScrollVisibility } from '@repo/hooks';
 import MagazineLayout1 from './layouts/MagazineLayout1';
 import MagazineLayout2 from './layouts/MagazineLayout2';
@@ -34,6 +34,7 @@ interface Props {
   onLoadMore?: () => void;
   totalResults?: number;
   onShowRecommendations?: () => void;
+  onRefresh?: () => Promise<void>;
 }
 
 export default function SearchResults({
@@ -46,8 +47,10 @@ export default function SearchResults({
   onLoadMore,
   totalResults,
   onShowRecommendations,
+  onRefresh,
 }: Props) {
   const { setIsVisible } = useBottomNav();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Use reusable infinite scroll hook
   const { sentinelRef } = useInfiniteScroll({
@@ -62,6 +65,7 @@ export default function SearchResults({
   // Use reusable scroll visibility hook
   useScrollVisibility({
     hideThreshold: 100,
+    containerRef,
     onVisibilityChange: (visible) => {
       setIsVisible(visible);
       // Dispatch event for other components (like header)
@@ -140,63 +144,73 @@ export default function SearchResults({
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.4, delay: 0.2 }}
-      className="min-h-screen bg-[#F7F7F7] pt-28 md:pt-32 pb-20 px-3 md:px-6 magazine-scroll"
+    <PullToRefresh
+      ref={containerRef}
+      onRefresh={onRefresh || (async () => { })}
+      disabled={!onRefresh || isLoading}
+      pullText="Kéo để cập nhật kết quả"
+      releaseText="Thả để tìm kiếm lại"
+      refreshingText="Đang tìm kiếm..."
+      className="h-screen magazine-scroll"
     >
-      <div className="max-w-7xl mx-auto">
-        {/* Search header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-12 md:mb-20"
-        >
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-1 bg-black" />
-            <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Dispatch Selection</span>
-          </div>
-          <h1 className="text-5xl md:text-8xl font-anton font-bold text-black mb-4 uppercase tracking-tighter leading-none">
-            CURATED<br />DISCOVERIES
-          </h1>
-          {!isLoading ? (
-            <p className="text-xl md:text-2xl text-gray-500 font-medium italic">
-              Found <span className="font-anton text-black not-italic px-2 bg-amber-400 rounded-lg">{displayCount}</span> venues
-              matching <span className="text-black font-bold">&quot;{searchQuery}&quot;</span>
-            </p>
-          ) : (
-            <p className="text-xl md:text-2xl text-gray-500 font-medium italic">
-              Locating matches for <span className="text-black font-bold animate-pulse">&quot;{searchQuery}&quot;</span>...
-            </p>
-          )}
-        </motion.div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="min-h-screen bg-[#F7F7F7] pt-28 md:pt-32 pb-20 px-3 md:px-6"
+      >
+        <div className="max-w-7xl mx-auto">
+          {/* Search header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-12 md:mb-20"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-1 bg-black" />
+              <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Dispatch Selection</span>
+            </div>
+            <h1 className="text-5xl md:text-8xl font-anton font-bold text-black mb-4 uppercase tracking-tighter leading-none">
+              CURATED<br />DISCOVERIES
+            </h1>
+            {!isLoading ? (
+              <p className="text-xl md:text-2xl text-gray-500 font-medium italic">
+                Found <span className="font-anton text-black not-italic px-2 bg-amber-400 rounded-lg">{displayCount}</span> venues
+                matching <span className="text-black font-bold">&quot;{searchQuery}&quot;</span>
+              </p>
+            ) : (
+              <p className="text-xl md:text-2xl text-gray-500 font-medium italic">
+                Locating matches for <span className="text-black font-bold animate-pulse">&quot;{searchQuery}&quot;</span>...
+              </p>
+            )}
+          </motion.div>
 
-        {/* Results with Infinite Scroll Container */}
-        <InfiniteScrollContainer
-          sentinelRef={sentinelRef}
-          isLoading={isLoading}
-          isLoadingMore={isLoadingMore}
-          hasMore={hasMore}
-          isEmpty={!isLoading && filteredResults.length === 0}
-          totalResults={displayCount}
-          ShimmerComponent={MagazineLayout8Shimmer}
-          initialShimmerCount={3}
-          loadMoreShimmerCount={2}
-          endMessage={`Đã hiển thị tất cả ${displayCount} kết quả`}
-          EmptyComponent={EmptyResultState}
-        >
-          {filteredResults.map((item) => renderLayout(item))}
-        </InfiniteScrollContainer>
-      </div>
+          {/* Results with Infinite Scroll Container */}
+          <InfiniteScrollContainer
+            sentinelRef={sentinelRef}
+            isLoading={isLoading}
+            isLoadingMore={isLoadingMore}
+            hasMore={hasMore}
+            isEmpty={!isLoading && filteredResults.length === 0}
+            totalResults={displayCount}
+            ShimmerComponent={MagazineLayout8Shimmer}
+            initialShimmerCount={3}
+            loadMoreShimmerCount={2}
+            endMessage={`Đã hiển thị tất cả ${displayCount} kết quả`}
+            EmptyComponent={EmptyResultState}
+          >
+            {filteredResults.map((item) => renderLayout(item))}
+          </InfiniteScrollContainer>
+        </div>
 
-      <style jsx>{`
-        .magazine-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-        .magazine-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 9999px; }
-        .magazine-scroll { scrollbar-width: thin; }
-      `}</style>
-    </motion.div>
+        <style jsx>{`
+          .magazine-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+          .magazine-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 9999px; }
+          .magazine-scroll { scrollbar-width: thin; }
+        `}</style>
+      </motion.div>
+    </PullToRefresh>
   );
 }

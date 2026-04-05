@@ -21,6 +21,7 @@ export function RestaurantCard({ restaurant }: { restaurant: any }) {
           fill
           placeholderMode="horizontal"
           className="object-cover transition-transform duration-700 group-hover:scale-110"
+          sizes="(max-width: 768px) 100vw, 400px"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent" />

@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from "@repo/ui/motion";
 import { X, Tag, Truck, Loader2, CheckCircle } from "@repo/ui/icons";
 import type { Voucher } from "@repo/types";
 import PromoVoucherCard from "./PromoVoucherCard";
+import PromoVoucherCardShimmer, { PromoVoucherCardShimmerList } from "./PromoVoucherCardShimmer";
 import { useMobileBackHandler } from "@/hooks/useMobileBackHandler";
+import { PullToRefresh } from "@repo/ui";
 
 interface PromoSelectionModalProps {
   isOpen: boolean;
@@ -19,6 +21,7 @@ interface PromoSelectionModalProps {
   isLoadingVouchers?: boolean;
   currentOrderValue?: number;
   restaurant?: any;
+  onRefresh?: () => Promise<void>;
 }
 
 export default function PromoSelectionModal({
@@ -35,6 +38,7 @@ export default function PromoSelectionModal({
   isLoadingVouchers = false,
   currentOrderValue,
   restaurant,
+  onRefresh,
 }: PromoSelectionModalProps) {
   useMobileBackHandler(isOpen, onClose);
 
@@ -85,87 +89,95 @@ export default function PromoSelectionModal({
               </div>
 
               {/* Scrollable Body */}
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-10 custom-scrollbar">
-                {isLoadingVouchers ? (
-                  <div className="py-20 flex flex-col items-center justify-center text-gray-400 gap-3">
-                    <div className="w-10 h-10 border-3 border-gray-100 border-t-lime-500 rounded-full animate-spin" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-300">Checking offers...</span>
-                  </div>
-                ) : (
-                  <>
-                    {/* Shipping Section */}
-                    {shippingVouchers.length > 0 && (
-                      <div className="space-y-5">
-                        <div className="flex items-center gap-3 px-1">
-                          <div className="w-10 h-10 rounded-[18px] bg-blue-50 text-blue-600 flex items-center justify-center border border-lime-100 shadow-sm flex-shrink-0">
-                            <Truck size={20} strokeWidth={2.5} />
+              <div className="flex-1 overflow-hidden">
+                <PullToRefresh
+                  onRefresh={onRefresh || (async () => { })}
+                  className="h-full px-4 md:px-6 py-4 custom-scrollbar"
+                  pullText="Kéo để cập nhật voucher"
+                  releaseText="Thả để làm mới ngay"
+                  refreshingText="Đang tìm ưu đãi..."
+                  usePortal={false}
+                >
+                  <div className="space-y-10 pb-6">
+                    {isLoadingVouchers ? (
+                      <PromoVoucherCardShimmerList count={3} />
+                    ) : (
+                      <>
+                        {/* Shipping Section */}
+                        {shippingVouchers.length > 0 && (
+                          <div className="space-y-5">
+                            <div className="flex items-center gap-3 px-1">
+                              <div className="w-10 h-10 rounded-[18px] bg-blue-50 text-blue-600 flex items-center justify-center border border-lime-100 shadow-sm flex-shrink-0">
+                                <Truck size={20} strokeWidth={2.5} />
+                              </div>
+                              <div>
+                                <h4 className="text-[15px] font-bold text-[#1A1A1A] leading-none">Shipping Vouchers</h4>
+                              </div>
+                            </div>
+                            <div className="space-y-3">
+                              {[...shippingVouchers]
+                                .sort((a, b) => a.id === bestVoucherIds.shipping ? -1 : b.id === bestVoucherIds.shipping ? 1 : 0)
+                                .map((v) => {
+                                  const eligible = isVoucherEligible(v);
+                                  return (
+                                    <PromoVoucherCard
+                                      key={v.id}
+                                      voucher={v}
+                                      selected={selectedShippingVoucherId === v.id}
+                                      onSelect={() => setSelectedShippingVoucherId(selectedShippingVoucherId === v.id ? null : v.id)}
+                                      disabled={!eligible}
+                                      reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
+                                      isBest={bestVoucherIds.shipping === v.id}
+                                      currentOrderValue={currentOrderValue}
+                                      restaurantSlug={restaurant?.slug}
+                                    />
+                                  );
+                                })}
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="text-[15px] font-bold text-[#1A1A1A] leading-none">Shipping Vouchers</h4>
-                          </div>
-                        </div>
-                        <div className="space-y-3">
-                          {[...shippingVouchers]
-                            .sort((a, b) => a.id === bestVoucherIds.shipping ? -1 : b.id === bestVoucherIds.shipping ? 1 : 0)
-                            .map((v) => {
-                              const eligible = isVoucherEligible(v);
-                              return (
-                                <PromoVoucherCard
-                                  key={v.id}
-                                  voucher={v}
-                                  selected={selectedShippingVoucherId === v.id}
-                                  onSelect={() => setSelectedShippingVoucherId(selectedShippingVoucherId === v.id ? null : v.id)}
-                                  disabled={!eligible}
-                                  reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
-                                  isBest={bestVoucherIds.shipping === v.id}
-                                  currentOrderValue={currentOrderValue}
-                                  restaurantSlug={restaurant?.slug}
-                                />
-                              );
-                            })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Discount Section */}
-                    <div className="space-y-5">
-                      <div className="flex items-center gap-3 px-1">
-                        <div className="w-10 h-10 rounded-[18px] bg-lime-50 text-lime-600 flex items-center justify-center border border-lime-100 shadow-sm flex-shrink-0">
-                          <Tag size={20} strokeWidth={2.5} />
-                        </div>
-                        <div>
-                          <h4 className="text-[15px] font-bold text-[#1A1A1A] leading-none">Discount Vouchers</h4>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        {discountVouchers.length === 0 ? (
-                          <div className="py-12 text-center text-gray-400 bg-gray-50/50 rounded-[32px] border border-dashed border-gray-200">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-300">No vouchers available</p>
-                          </div>
-                        ) : (
-                          [...discountVouchers]
-                            .sort((a, b) => a.id === bestVoucherIds.discount ? -1 : b.id === bestVoucherIds.discount ? 1 : 0)
-                            .map((v) => {
-                              const eligible = isVoucherEligible(v);
-                              return (
-                                <PromoVoucherCard
-                                  key={v.id}
-                                  voucher={v}
-                                  selected={selectedDiscountVoucherId === v.id}
-                                  onSelect={() => setSelectedDiscountVoucherId(selectedDiscountVoucherId === v.id ? null : v.id)}
-                                  disabled={!eligible}
-                                  reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
-                                  isBest={bestVoucherIds.discount === v.id}
-                                  currentOrderValue={currentOrderValue}
-                                  restaurantSlug={restaurant?.slug}
-                                />
-                              );
-                            })
                         )}
-                      </div>
-                    </div>
-                  </>
-                )}
+
+                        {/* Discount Section */}
+                        <div className="space-y-5">
+                          <div className="flex items-center gap-3 px-1">
+                            <div className="w-10 h-10 rounded-[18px] bg-lime-50 text-lime-600 flex items-center justify-center border border-lime-100 shadow-sm flex-shrink-0">
+                              <Tag size={20} strokeWidth={2.5} />
+                            </div>
+                            <div>
+                              <h4 className="text-[15px] font-bold text-[#1A1A1A] leading-none">Discount Vouchers</h4>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            {discountVouchers.length === 0 ? (
+                              <div className="py-12 text-center text-gray-400 bg-gray-50/50 rounded-[32px] border border-dashed border-gray-200">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-300">No vouchers available</p>
+                              </div>
+                            ) : (
+                              [...discountVouchers]
+                                .sort((a, b) => a.id === bestVoucherIds.discount ? -1 : b.id === bestVoucherIds.discount ? 1 : 0)
+                                .map((v) => {
+                                  const eligible = isVoucherEligible(v);
+                                  return (
+                                    <PromoVoucherCard
+                                      key={v.id}
+                                      voucher={v}
+                                      selected={selectedDiscountVoucherId === v.id}
+                                      onSelect={() => setSelectedDiscountVoucherId(selectedDiscountVoucherId === v.id ? null : v.id)}
+                                      disabled={!eligible}
+                                      reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
+                                      isBest={bestVoucherIds.discount === v.id}
+                                      currentOrderValue={currentOrderValue}
+                                      restaurantSlug={restaurant?.slug}
+                                    />
+                                  );
+                                })
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </PullToRefresh>
               </div>
 
               {/* Footer */}

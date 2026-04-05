@@ -77,7 +77,7 @@ export function useDriverStatus(): UseDriverStatusResult {
       queryClient.invalidateQueries({ queryKey: driverStatusKeys.all });
       sileo.success({
         title: "Đã kết nối trực tuyến!",
-        description: "Sẵn sàng nhận đơn. Chúc bạn một ngày hân hoan!",
+        description: "Sẵn sàng nhận đơn. Chúc bạn một ngày tốt lành!",
         duration: 3500,
       });
     },

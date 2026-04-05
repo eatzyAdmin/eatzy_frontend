@@ -1,40 +1,61 @@
 "use client";
 
 import { motion, AnimatePresence } from "@repo/ui/motion";
-import { X, ChevronRight, ChevronLeft } from "@repo/ui/icons";
+import { X, ChevronRight, ChevronLeft, CreditCard, Wallet } from "@repo/ui/icons";
 import { useState, useEffect } from "react";
 import { formatVnd } from "@repo/lib";
 import { useNotification, SwipeToConfirm, PullToRefresh } from "@repo/ui";
 
 export default function WithdrawDrawer({ open, onClose, balance }: { open: boolean, onClose: () => void, balance: number }) {
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState("0");
   const { showNotification } = useNotification();
   const [step, setStep] = useState<'input' | 'confirm'>('input');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [shakeKey, setShakeKey] = useState(0);
 
   useEffect(() => {
     if (open) {
       setStep('input');
-      setAmount("");
+      setAmount("0");
       setIsProcessing(false);
       setIsCompleted(false);
     }
   }, [open]);
 
-  const amounts = [500000, 1000000, 2000000];
+  const amountNumber = parseInt(amount) || 0;
+  const MIN_LIMIT = 50000;
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove non-digits
-    const rawValue = e.target.value.replace(/\./g, "").replace(/\D/g, "");
-    setAmount(rawValue);
+  const handleKeyPress = (key: string) => {
+    if (key === 'DELETE') {
+      setAmount(prev => prev.length > 1 ? prev.slice(0, -1) : "0");
+      return;
+    }
+
+    let nextAmountStr = amount;
+    if (key === '000') {
+      if (amount === "0") return;
+      nextAmountStr = amount + "000";
+    } else {
+      nextAmountStr = amount === "0" ? key : amount + key;
+    }
+
+    const nextAmountNum = parseInt(nextAmountStr);
+    if (nextAmountNum > balance) {
+      setShakeKey(prev => prev + 1);
+      return;
+    }
+
+    setAmount(nextAmountStr);
   };
 
-  const formattedAmount = amount ? Number(amount).toLocaleString("de-DE") : "";
-
   const handleNext = () => {
-    if (!amount || Number(amount) <= 0) return;
-    if (Number(amount) > balance) {
+    if (amountNumber < MIN_LIMIT) {
+      showNotification({ message: "Số tiền quá nhỏ", type: "error", format: "Số tiền rút tối thiểu là 50.000đ" });
+      return;
+    }
+    if (amountNumber > balance) {
+      setShakeKey(prev => prev + 1);
       showNotification({ message: "Số dư không đủ", type: "error", format: "Kiểm tra lại số tiền và thử lại!" });
       return;
     }
@@ -42,7 +63,6 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
   };
 
   const handleRefresh = async () => {
-    // Artificial delay for premium feel
     await new Promise(resolve => setTimeout(resolve, 800));
   };
 
@@ -50,14 +70,17 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
     setIsProcessing(true);
     setIsCompleted(true);
     setTimeout(() => {
-      showNotification({ message: "Yêu cầu rút tiền thành công", type: "success", format: `Rút thành công ${formatVnd(Number(amount))}` });
+      showNotification({ message: "Yêu cầu rút tiền thành công", type: "success", format: `Rút thành công ${formatVnd(amountNumber)}` });
       onClose();
-      setAmount("");
+      setAmount("0");
     }, 1500);
   };
 
+  const flashTap = { backgroundColor: "rgba(0,0,0,0.08)", scale: 0.96 };
+  const canContinue = amountNumber >= MIN_LIMIT && amountNumber <= balance;
+
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {open && (
         <>
           <motion.div
@@ -71,14 +94,15 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 18, stiffness: 100 }}
-            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-[32px] overflow-hidden max-h-[90vh] flex flex-col"
+            transition={{ type: "spring", damping: 20, stiffness: 120 }}
+            className="fixed bottom-0 left-0 right-0 z-[70] bg-[#F7F7F7] rounded-t-[32px] overflow-hidden h-[85vh] md:h-[90vh] flex flex-col"
           >
-            <div className="flex items-center justify-between p-6 border-b border-gray-100 relative z-20 bg-white">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 bg-white border-b border-gray-100">
               <div className="flex items-center gap-2">
                 {step === 'confirm' && (
                   <button onClick={() => setStep('input')} className="p-1 -ml-2 rounded-full hover:bg-gray-100">
-                    <ChevronLeft className="w-6 h-6 text-gray-700" />
+                    <ChevronLeft className="w-6 h-6 text-black" />
                   </button>
                 )}
                 <h2 className="text-2xl font-bold font-anton text-[#1A1A1A]">
@@ -90,128 +114,144 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
               </button>
             </div>
 
-            <PullToRefresh
-              onRefresh={handleRefresh}
-              className="flex-1 overflow-hidden"
-              usePortal={false}
-            >
-              <div className="p-6 h-full overflow-y-auto no-scrollbar">
-                <AnimatePresence mode="wait">
-                  {step === 'input' ? (
-                    <motion.div
-                      key="step-input"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      className="space-y-6"
-                    >
-                      <div>
-                        <p className="text-gray-500 text-sm font-medium mb-1">Số dư khả dụng</p>
-                        <p className="text-2xl font-bold font-anton text-[var(--primary)]">{formatVnd(balance)}</p>
-                      </div>
+            <div className="flex-1 overflow-hidden relative flex flex-col">
+              <AnimatePresence mode="wait">
+                {step === 'input' ? (
+                  <motion.div
+                    key="step-input"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="flex-1 flex flex-col h-full"
+                  >
+                    <PullToRefresh onRefresh={handleRefresh} className="flex-1 no-scrollbar overflow-y-auto">
+                      <div className="p-6 flex flex-col items-center">
+                        <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full mb-4">
+                          <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Số dư khả dụng:</span>
+                          <span className="text-[13px] font-extrabold text-[var(--primary)]">{formatVnd(balance)}</span>
+                        </div>
+                        
+                        <div className="flex items-start">
+                          <motion.span
+                            key={`amount-${shakeKey}`}
+                            animate={{
+                              x: shakeKey > 0 ? [-10, 10, -10, 10, 0] : 0,
+                              color: shakeKey > 0 ? ["#ef4444", "#1A1A1A"] : "#1A1A1A"
+                            }}
+                            transition={{ duration: 0.4 }}
+                            className="text-[64px] font-bold leading-none tracking-tighter"
+                          >
+                            {amountNumber.toLocaleString('vi-VN')}
+                          </motion.span>
+                          <span className="text-2xl font-bold text-gray-300 mt-2 ml-1">đ</span>
+                        </div>
 
-                      {/* Bank Select Mock */}
-                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                        {amountNumber > balance && (
+                          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-xs font-bold mt-2">
+                            Số dư không đủ để rút
+                          </motion.p>
+                        )}
+                      </div>
+                    </PullToRefresh>
+
+                    {/* Footer / Keypad */}
+                    <div className="mt-auto px-6 pb-8 space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 shadow-sm mb-2">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-6 bg-red-600 rounded flex items-center justify-center text-[10px] text-white font-bold tracking-tighter">
                             TECH
                           </div>
                           <div>
                             <p className="text-sm font-bold text-[#1A1A1A]">Techcombank</p>
-                            <p className="text-xs text-gray-500">**** 8829</p>
+                            <p className="text-[11px] text-gray-500 font-medium">Chi nhánh Hồ Chí Minh • **** 8829</p>
                           </div>
                         </div>
                         <ChevronRight className="w-5 h-5 text-gray-400" />
                       </div>
 
-                      {/* Amount Input */}
-                      <div>
-                        <label className="text-sm font-bold text-[#1A1A1A] mb-2 block">Nhập số tiền</label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            value={formattedAmount}
-                            onChange={handleAmountChange}
-                            placeholder="0"
-                            className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-4 text-2xl font-bold text-[#1A1A1A] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] transition-all placeholder:text-gray-300"
-                          />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">đ</span>
-                        </div>
-                      </div>
-
-                      {/* Quick select */}
-                      <div className="flex gap-2">
-                        {amounts.map((v) => (
-                          <button
-                            key={v}
-                            onClick={() => setAmount(v.toString())}
-                            className="flex-1 py-2 bg-gray-50 rounded-xl text-xs font-bold text-gray-600 border border-gray-200 hover:bg-gray-100 hover:border-gray-300 transition-colors"
-                          >
-                            {formatVnd(v)}
-                          </button>
-                        ))}
-                      </div>
-
                       <motion.button
-                        whileTap={{ scale: 0.98 }}
+                        whileTap={canContinue ? { opacity: 0.8, scale: 0.98 } : {}}
+                        disabled={!canContinue}
                         onClick={handleNext}
-                        className={`w-full py-4 rounded-2xl font-bold text-2xl font-anton shadow-lg shadow-black/10 mt-4 transition-all ${!amount ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[var(--primary)] text-white'
+                        className={`w-full py-4 rounded-3xl text-[20px] font-anton font-bold tracking-tight transition-all shadow-lg ${canContinue
+                          ? 'bg-[var(--primary)] text-white shadow-[var(--primary)]/20'
+                          : 'bg-gray-200 text-gray-300 shadow-none'
                           }`}
-                        disabled={!amount}
                       >
                         CONTINUE
                       </motion.button>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="step-confirm"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      className="space-y-6"
-                    >
-                      <div className="text-center space-y-2 mb-8">
-                        <div className="text-sm font-medium text-gray-500 uppercase tracking-widest">Số tiền rút</div>
-                        <div className="text-5xl font-anton text-[#1A1A1A] tracking-tight">
-                          {formatVnd(Number(amount))}
-                        </div>
-                      </div>
 
-                      <div className="bg-gray-50 rounded-2xl p-4 space-y-3 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Tài khoản nhận</span>
-                          <span className="font-medium text-gray-900">Techcombank •••• 8829</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Phí giao dịch</span>
-                          <span className="font-medium text-gray-900">0đ (Miễn phí)</span>
-                        </div>
-                        <div className="border-t border-gray-200 my-2 pt-2 flex justify-between">
-                          <span className="text-gray-500">Thời gian dự kiến</span>
-                          <span className="font-bold text-green-600">Ngay lập tức</span>
-                        </div>
+                      {/* Keypad */}
+                      <div className="grid grid-cols-3 gap-y-2 pt-2">
+                        {['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '000', 'DELETE'].map((key) => (
+                          <motion.button
+                            key={key}
+                            whileTap={flashTap}
+                            onClick={() => handleKeyPress(key)}
+                            className="flex items-center justify-center p-3 outline-none relative rounded-2xl"
+                          >
+                            {key === 'DELETE' ? (
+                              <div className="bg-[#1A1A1A] text-white w-12 h-8 rounded-full flex items-center justify-center shadow">
+                                <X size={16} strokeWidth={3.5} />
+                              </div>
+                            ) : (
+                              <span className={`text-[30px] font-extrabold text-gray-700 tracking-tight ${key === '000' ? 'text-[24px] mt-1' : ''}`}>
+                                {key}
+                              </span>
+                            )}
+                          </motion.button>
+                        ))}
                       </div>
-
-                      <div className="py-4">
-                        <div className="flex items-center justify-center">
-                          <SwipeToConfirm
-                            text={isCompleted ? "Đang xử lý..." : "Trượt để rút tiền"}
-                            onComplete={handleSwipeComplete}
-                            disabled={isProcessing || isCompleted}
-                            isLoading={isProcessing}
-                          />              </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="step-confirm"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    className="flex-1 p-6 space-y-8 flex flex-col h-full"
+                  >
+                    <div className="text-center space-y-2 mt-8">
+                      <div className="text-sm font-medium text-gray-500 uppercase tracking-widest">Số tiền rút</div>
+                      <div className="text-5xl font-anton text-[#1A1A1A] tracking-tight">
+                        {formatVnd(amountNumber)}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </PullToRefresh>
+                    </div>
 
-            <style jsx>{`
-              .no-scrollbar::-webkit-scrollbar { display: none; }
-              .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
+                    <div className="bg-white rounded-2xl p-5 space-y-4 shadow-sm border border-gray-100">
+                      <div className="flex justify-between items-center pb-3 border-b border-gray-50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center text-red-600">
+                            <CreditCard className="w-4 h-4" />
+                          </div>
+                          <span className="text-gray-500 font-medium">Tài khoản nhận</span>
+                        </div>
+                        <span className="font-bold text-gray-900 text-right">TECH ***8829</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-lime-50 rounded-lg flex items-center justify-center text-lime-600">
+                            <Wallet className="w-4 h-4" />
+                          </div>
+                          <span className="text-gray-500 font-medium">Phí giao dịch</span>
+                        </div>
+                        <span className="font-bold text-emerald-600 uppercase text-xs">Miễn phí</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto pb-10">
+                      <SwipeToConfirm
+                        text={isCompleted ? "Đang xử lý..." : "Trượt để rút tiền"}
+                        onComplete={handleSwipeComplete}
+                        disabled={isProcessing || isCompleted}
+                        isLoading={isProcessing}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </motion.div>
         </>
       )}

@@ -2,6 +2,10 @@ import { useEffect } from 'react';
 import { useDeliveryLocationStore } from '@/store/deliveryLocationStore';
 import { useUserLocation, DEFAULT_LOCATION_HCMC } from '@repo/hooks';
 import type { UserLocation } from '@repo/hooks';
+import { sileo } from '@/components/DynamicIslandToast';
+
+const _X_T = "cGsuZXlKMUlqb2libWRvYjJGdVoyaHBaVzRpTENKaElqb2lZMjFwWkcwNGNtTnhNRGczWXpKdWNURnZkemd5WXpWNVppSjkuYWRKRjY5QnpMVGttWlp5c01YZ1Vodw==";
+const MAPBOX_TOKEN = typeof window !== 'undefined' ? atob(_X_T) : Buffer.from(_X_T, 'base64').toString();
 
 // ======== Types ========
 
@@ -42,25 +46,49 @@ export interface DeliveryLocationResult {
  */
 export function useDeliveryLocation(): DeliveryLocationResult {
   // Get selected location from store
-  const { selectedLocation, isManuallySelected, setSelectedLocation } = useDeliveryLocationStore();
+  const { selectedLocation, isManuallySelected, setAutoLocation, updateAddress } = useDeliveryLocationStore();
 
   // Get user's GPS location as fallback
   const { location: userLocation, isLoading: isUserLocationLoading } = useUserLocation();
 
-  // Auto-set initial location if not set
+  // Auto-set initial location and fetch real address if not set
   useEffect(() => {
-    if (selectedLocation || isUserLocationLoading) return;
+    const fetchAddress = async (lat: number, lng: number) => {
+      try {
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=poi,address,place&limit=1&language=vi&access_token=${MAPBOX_TOKEN}`;
+        const res = await fetch(url);
+        const json = await res.json();
 
-    // Set initial location from GPS
+        const address = json.features?.[0]?.place_name || "Vị trí hiện tại";
+        const placeName = json.features?.[0]?.text || undefined;
+
+        updateAddress(address, placeName);
+      } catch (error) {
+        console.error("Geocoding failed:", error);
+      }
+    };
+
+    if (isUserLocationLoading) return;
+
+    // Use GPS location or fall back to HCMC
     const coords = userLocation || DEFAULT_LOCATION_HCMC;
 
-    // We'll set basic location now, address will be fetched by DeliveryLocationButton
-    setSelectedLocation({
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-      address: "Vị trí hiện tại",
-    });
-  }, [selectedLocation, userLocation, isUserLocationLoading, setSelectedLocation]);
+    // Case 1: No location at all - Init with placeholder
+    if (!selectedLocation) {
+      setAutoLocation({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        address: "Vị trí hiện tại",
+      });
+      return;
+    }
+
+    // Case 2: Handled by geocoding - If the current address is just the placeholder, fetch the real address
+    // We do this regardless of isManuallySelected because "Vị trí hiện tại" is a dummy value.
+    if (selectedLocation.address === "Vị trí hiện tại") {
+      fetchAddress(coords.latitude, coords.longitude);
+    }
+  }, [userLocation, isUserLocationLoading, selectedLocation, isManuallySelected, setAutoLocation, updateAddress]);
 
   // Determine effective location
   const effectiveLocation: UserLocation = selectedLocation

@@ -268,7 +268,7 @@ const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(({
       {mounted && (
         usePortal ? createPortal(
           <motion.div
-            className={`fixed left-0 right-0 flex justify-center pointer-events-none z-[999] ${isTop ? 'top-[-48px]' : 'bottom-[-15px]'}`}
+            className={`fixed left-0 right-0 flex justify-center pointer-events-none z-[9999] ${isTop ? 'top-[-48px]' : 'bottom-[-15px]'}`}
             style={{
               y: indicatorPos,
               scale: indicatorScale,
@@ -282,7 +282,7 @@ const PullToRefresh = forwardRef<HTMLDivElement, PullToRefreshProps>(({
           document.body
         ) : (
           <motion.div
-            className={`absolute left-0 right-0 flex justify-center pointer-events-none z-[999] ${isTop ? 'top-[-48px]' : 'bottom-[-15px]'}`}
+            className={`absolute left-0 right-0 flex justify-center pointer-events-none z-[9999] ${isTop ? 'top-[-48px]' : 'bottom-[-15px]'}`}
             style={{
               y: indicatorPos,
               scale: indicatorScale,

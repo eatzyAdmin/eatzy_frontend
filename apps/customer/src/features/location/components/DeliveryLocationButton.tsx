@@ -55,55 +55,25 @@ export default function DeliveryLocationButton({
   // Get user's current location as fallback
   const { location: userLocation, isLoading: isLocationLoading } = useUserLocation();
 
-  // Initialize location on first load
+  // Initialize location on first load (handle expiration only)
   useEffect(() => {
-    const initLocation = async () => {
-      const { selectedLocation, isManuallySelected, lastSelectedAt, clearSelectedLocation } = useDeliveryLocationStore.getState();
+    const checkExpiration = () => {
+      const { isManuallySelected, lastSelectedAt, clearSelectedLocation } = useDeliveryLocationStore.getState();
 
-      // Check if manual selection has expired (1.5 hours = 5400000ms)
+      // Check if manual selection has expired (1.5 hours)
       const isExpired = lastSelectedAt && (Date.now() - lastSelectedAt > 1.5 * 60 * 60 * 1000);
 
       if (isManuallySelected && isExpired) {
         clearSelectedLocation();
-        // Force re-fetch from GPS
-      } else if (selectedLocation) {
-        setIsInitializing(false);
-        return;
       }
-
-      // Wait for user location
-      if (isLocationLoading) return;
-
-      const coords = userLocation || DEFAULT_LOCATION_HCMC;
-
-      // Reverse geocode to get address
-      try {
-        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${coords.longitude},${coords.latitude}.json?types=poi,address,place&limit=1&language=vi&access_token=${MAPBOX_TOKEN}`;
-        const res = await fetch(url);
-        const json = await res.json();
-
-        const address = json.features?.[0]?.place_name || "Vị trí hiện tại";
-        const placeName = json.features?.[0]?.text || undefined;
-
-        setSelectedLocation({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-          address,
-          placeName,
-        });
-      } catch {
-        setSelectedLocation({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-          address: "Vị trí hiện tại",
-        });
-      }
-
+      
       setIsInitializing(false);
     };
 
-    initLocation();
-  }, [userLocation, isLocationLoading, selectedLocation, setSelectedLocation]);
+    if (!isLocationLoading) {
+      checkExpiration();
+    }
+  }, [isLocationLoading]);
 
   // Global event listener to open modal from anywhere
   useEffect(() => {

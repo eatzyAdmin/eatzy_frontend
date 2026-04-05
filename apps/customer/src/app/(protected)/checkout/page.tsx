@@ -608,6 +608,7 @@ export default function CheckoutPage() {
         isLoadingVouchers={isLoadingVouchers}
         currentOrderValue={subtotal}
         restaurant={restaurant}
+        onRefresh={refresh}
       />
 
       <DistanceWarningModal

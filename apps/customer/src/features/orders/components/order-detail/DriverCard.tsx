@@ -22,7 +22,7 @@ export function DriverCard({ driver }: { driver: any }) {
         <div className="w-[78%] flex flex-col items-center justify-center text-center">
           <div className="relative">
             <div className="w-20 h-20 rounded-full border border-gray-100 overflow-hidden relative shadow-md">
-              <ImageWithFallback src={driver.avatarUrl || ""} alt={driver.name} fill className="object-cover" />
+              <ImageWithFallback src={driver.avatarUrl || ""} alt={driver.name} fill className="object-cover" sizes="80px" />
             </div>
             <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-pink-600 border-2 border-white flex items-center justify-center text-white shadow-md">
               <ShieldCheck className="w-3 h-3" />

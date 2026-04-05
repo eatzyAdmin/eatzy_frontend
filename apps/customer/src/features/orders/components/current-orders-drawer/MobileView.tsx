@@ -10,6 +10,7 @@ import CurrentOrderCard from "../CurrentOrderCard";
 import OrderDetailsContent from "./OrderDetailsContent";
 import OrderStatusSteps from "../OrderStatusSteps";
 import dynamic from "next/dynamic";
+import { PullToRefresh } from "@repo/ui";
 
 const OrderMapView = dynamic(() => import("@/features/orders/components/OrderMapView"), { ssr: false });
 
@@ -26,6 +27,7 @@ interface MobileViewProps {
   handleCancelOrder: () => void;
   handleConfirmCancel: (reason: string) => void;
   cancellationReasons: string[];
+  onRefresh: () => Promise<void>;
 }
 
 export default function MobileView({
@@ -40,7 +42,8 @@ export default function MobileView({
   setShowCancelReasons,
   handleCancelOrder,
   handleConfirmCancel,
-  cancellationReasons
+  cancellationReasons,
+  onRefresh,
 }: MobileViewProps) {
   const [isDetailMapVisible, setIsDetailMapVisible] = useState(false);
   const draggbleRef = useRef<HTMLDivElement>(null);
@@ -87,66 +90,74 @@ export default function MobileView({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 100, damping: 18 }}
-            className="flex-1 overflow-y-auto custom-scrollbar bg-[#F8F9FA]"
+            className="flex-1 overflow-hidden bg-[#F7F7F7]"
           >
-            {/* Mobile Header List - Sticky with Mask exactly like Profile */}
-            <div
-              className="bg-[#F8F9FA]/95 backdrop-blur-md py-3 mb-1 sticky top-0 z-20 px-4 max-md:[mask-image:linear-gradient(to_bottom,black_90%,transparent)]"
+            <PullToRefresh
+              onRefresh={onRefresh}
+              pullText="Kéo để cập nhật"
+              releaseText="Thả để cập nhật"
+              refreshingText="Đang cập nhật..."
+              disabled={isLoadingOrders}
+              className="h-full overflow-y-auto custom-scrollbar px-3 md:px-0"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={onClose}
-                    className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-700 group flex-shrink-0"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                  </button>
-                  <div className="flex flex-col">
-                    <h3
-                      className="text-[32px] font-bold leading-tight text-[#1A1A1A] uppercase"
-                      style={{
-                        fontStretch: "condensed",
-                        letterSpacing: "-0.01em",
-                        fontFamily: "var(--font-anton), var(--font-sans)",
-                      }}
+              {/* Mobile Header List - Sticky with Mask */}
+              <div className="bg-[#F7F7F7] backdrop-blur-md py-3 mb-1 sticky top-0 z-20 px-1 max-md:[mask-image:linear-gradient(to_bottom,black_90%,transparent)]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={onClose}
+                      className="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-700 group flex-shrink-0"
                     >
-                      Current Orders
-                    </h3>
-                    <div className="text-sm font-medium text-gray-500 mt-1">{orders.length} đơn hàng đang xử lý</div>
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    <div className="flex flex-col">
+                      <h3
+                        className="text-[32px] font-bold leading-tight text-[#1A1A1A] uppercase"
+                        style={{
+                          fontStretch: "condensed",
+                          letterSpacing: "-0.01em",
+                          fontFamily: "var(--font-anton), var(--font-sans)",
+                        }}
+                      >
+                        Current Orders
+                      </h3>
+                      <div className="text-sm font-medium text-gray-500 mt-1">{orders.length} đơn hàng đang xử lý</div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="px-3">
-              {isLoadingOrders ? (
-                <div className="pt-4 space-y-2">
-                  <CurrentOrderCardShimmer cardCount={1} />
-                </div>
-              ) : (
-                <div className="pt-4 space-y-2">
-                  {orders.length === 0 ? (
-                    <EmptyState
-                      icon={FileText}
-                      title="Chưa có đơn hàng nào"
-                      description="Hãy khám phá các nhà hàng xung quanh bạn nhé!"
-                      buttonText="Đặt món ngay"
-                      buttonIcon={Compass}
-                      onButtonClick={handleExplore}
-                      className="py-12"
-                    />
-                  ) : (
-                    orders.map(o => (
-                      <CurrentOrderCard
-                        key={o.id}
-                        order={o}
-                        onClick={() => handleOrderClick(o.id)}
+              {/* Order List Content */}
+              <div className="pt-2 pb-6">
+                {isLoadingOrders ? (
+                  <div className="space-y-2">
+                    <CurrentOrderCardShimmer cardCount={1} />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {orders.length === 0 ? (
+                      <EmptyState
+                        icon={FileText}
+                        title="Chưa có đơn hàng nào"
+                        description="Hãy khám phá các nhà hàng xung quanh bạn nhé!"
+                        buttonText="Đặt món ngay"
+                        buttonIcon={Compass}
+                        onButtonClick={handleExplore}
+                        className="py-12"
                       />
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
+                    ) : (
+                      orders.map(o => (
+                        <CurrentOrderCard
+                          key={o.id}
+                          order={o}
+                          onClick={() => handleOrderClick(o.id)}
+                        />
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </PullToRefresh>
           </motion.div>
         ) : (
           <motion.div
@@ -178,7 +189,7 @@ export default function MobileView({
             {/* Top Fixed Area (Hidden on drag) */}
             <motion.div
               style={{ y: topY }}
-              className="absolute top-0 inset-x-0 z-20 bg-white/95 backdrop-blur-md rounded-b-[40px] shadow-xl pb-1.5"
+              className="absolute top-0 inset-x-0 z-20 bg-[#F7F7F7] backdrop-blur-md rounded-b-[40px] shadow-xl pb-1.5"
             >
               <div className="px-3 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -224,7 +235,7 @@ export default function MobileView({
                   setDrawerY(540); // Minimize
                 }
               }}
-              className="absolute bottom-0 inset-x-0 z-30 bg-[#F8F9FA] rounded-t-[46px] shadow-[0_-20px_80px_rgba(0,0,0,0.2)] flex flex-col overflow-hidden h-[92vh]"
+              className="absolute bottom-0 inset-x-0 z-30 bg-[#F7F7F7] rounded-t-[46px] shadow-[0_-20px_80px_rgba(0,0,0,0.2)] flex flex-col overflow-hidden h-[92vh]"
               initial={{ y: "100%" }}
               animate={{ y: drawerY }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}

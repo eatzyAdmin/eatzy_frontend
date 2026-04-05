@@ -1,5 +1,5 @@
-"use client";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { orderApi } from "@repo/api";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { OrderResponse } from "@repo/types";
@@ -26,6 +26,7 @@ export interface UseCurrentOrdersResult {
   isError: boolean;
   error: Error | null;
   refetch: () => void;
+  refresh: () => Promise<void>;
   activeOrdersCount: number;
 }
 
@@ -44,6 +45,7 @@ export interface UseCurrentOrdersResult {
 export function useCurrentOrders(options: UseCurrentOrdersOptions = {}): UseCurrentOrdersResult {
   const { isDrawerOpen = false } = options;
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const isLoggedIn = !!user?.id;
 
   // Build filter for active statuses using Spring Filter syntax
@@ -76,12 +78,18 @@ export function useCurrentOrders(options: UseCurrentOrdersOptions = {}): UseCurr
 
   const orders = query.data || [];
 
+  const refresh = useCallback(async () => {
+    await queryClient.resetQueries({ queryKey: ["orders", "current", "my"] });
+
+  }, [queryClient]);
+
   return {
     orders,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,
+    refresh,
     activeOrdersCount: orders.length,
   };
 }

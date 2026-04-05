@@ -17,7 +17,7 @@ import MobileForgotPasswordDrawer from "@/components/auth/MobileForgotPasswordDr
 export default function LoginPageContent() {
   const router = useRouter();
   const { handleLogin, isLoading, error } = useLogin();
-  
+
   // Enable double-back-to-exit on mobile login page
   useMobileExitGuard();
 
@@ -37,7 +37,7 @@ export default function LoginPageContent() {
     if (isExpired === "true") {
       sileo.error({
         title: "Phiên đăng nhập đã hết hạn",
-        description: "Vui lòng đăng nhập lại để tiếp tục bữa tiệc hân hoan nhất!",
+        description: "Vui lòng đăng nhập lại để tiếp tục!",
         duration: 5000,
       });
       window.localStorage.removeItem("auth_expired");
@@ -97,8 +97,8 @@ export default function LoginPageContent() {
                     activeTab === "login"
                       ? "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop"
                       : activeTab === "register"
-                      ? "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=2053&auto=format&fit=crop"
-                      : "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop"
+                        ? "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=2053&auto=format&fit=crop"
+                        : "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop"
                   }
                   alt="Gourmet Mobile Hero"
                   fill

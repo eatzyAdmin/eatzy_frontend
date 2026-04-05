@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import type { Restaurant, Dish, MenuCategory, RestaurantMagazine } from '@repo/types';
 import { useSearchRestaurants } from './useSearchRestaurants';
@@ -30,6 +31,7 @@ export function useSearch() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
 
   // Local state
   // We remove localSearchQuery and hasSearched states because they conflict with the URL during router transitions.
@@ -111,6 +113,10 @@ export function useSearch() {
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   }, [router, searchParams, pathname]);
 
+  const refresh = useCallback(async () => {
+    await queryClient.resetQueries({ queryKey: ["restaurants", "nearby"] });
+  }, [queryClient]);
+
   // ===== Return =====
 
   return {
@@ -136,6 +142,7 @@ export function useSearch() {
     clearSearch,
     loadMore: fetchNextPage,
     refetch: refetchApi,
+    refresh,
 
     // Location
     userLocation: locationCoords,

@@ -1,8 +1,8 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { restaurantApi } from "@repo/api";
 import type { RestaurantMagazine, NearbyRestaurantsParams } from "@repo/types";
 import { sileo } from "@/components/DynamicIslandToast";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 
 // ======== Types ========
 
@@ -67,6 +67,7 @@ export function useSearchRestaurants(
   options: UseSearchRestaurantsOptions = {}
 ) {
   const { enabled = true, showErrorNotification = true } = options;
+  const queryClient = useQueryClient();
 
   // Validate params - check if we have valid location
   const hasValidLocation = params?.latitude !== undefined &&
@@ -167,6 +168,9 @@ export function useSearchRestaurants(
 
     // Actions
     refetch: query.refetch,
+    refresh: useCallback(async () => {
+      await queryClient.resetQueries({ queryKey: searchRestaurantsKeys.all });
+    }, [queryClient]),
   };
 }
 

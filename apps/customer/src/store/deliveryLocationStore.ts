@@ -22,6 +22,7 @@ interface DeliveryLocationState {
 
   // Actions
   setSelectedLocation: (location: DeliveryLocation) => void;
+  setAutoLocation: (location: DeliveryLocation) => void;
   clearSelectedLocation: () => void;
   updateAddress: (address: string, placeName?: string) => void;
 }
@@ -45,6 +46,13 @@ export const useDeliveryLocationStore = create<DeliveryLocationState>()(
           selectedLocation: location,
           isManuallySelected: true,
           lastSelectedAt: Date.now(),
+        }),
+
+      setAutoLocation: (location) =>
+        set({
+          selectedLocation: location,
+          isManuallySelected: false,
+          lastSelectedAt: null,
         }),
 
       clearSelectedLocation: () =>

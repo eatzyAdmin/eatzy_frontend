@@ -39,7 +39,7 @@ export default function Page() {
       <DriverMapView locateVersion={locateVersion} activeOrder={activeOrder} />
       <div className="absolute left-4 right-4 bottom-[104px] space-y-3 pointer-events-none">
         <div className="flex items-center justify-between gap-3">
-          <ConnectToggle online={online} onToggle={toggleStatus} className="pointer-events-auto" />
+          <ConnectToggle online={online} isLoading={isStatusLoading} onToggle={toggleStatus} className="pointer-events-auto" />
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setLocateVersion((v) => v + 1)}
@@ -80,7 +80,7 @@ export default function Page() {
           </div>
         )}
       </div>
-      <OnlineStatusBadge online={online} />
+      <OnlineStatusBadge online={online} isLoading={isStatusLoading} />
 
       <OrderOfferModal
         offer={currentOffer}

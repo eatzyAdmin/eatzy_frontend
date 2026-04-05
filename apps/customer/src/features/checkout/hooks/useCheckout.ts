@@ -276,10 +276,9 @@ export function useCheckout() {
     refresh: useCallback(async () => {
       if (!restaurantId) return;
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['restaurant-detail', restaurantId] }),
-        queryClient.invalidateQueries({ queryKey: ['delivery-fee', restaurantId] }),
-        queryClient.invalidateQueries({ queryKey: ['vouchers', 'restaurant', restaurantId] }),
-        new Promise((resolve) => setTimeout(resolve, 800)),
+        queryClient.resetQueries({ queryKey: ['restaurant-detail', restaurantId] }),
+        queryClient.resetQueries({ queryKey: ['delivery-fee', restaurantId] }),
+        queryClient.resetQueries({ queryKey: ['vouchers', 'restaurant', restaurantId] }),
       ]);
     }, [restaurantId, queryClient]),
   };

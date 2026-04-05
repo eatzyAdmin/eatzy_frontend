@@ -1,9 +1,10 @@
 import { motion } from '@repo/ui/motion';
 import { useEffect, useState, useRef } from 'react';
-import { MagazineLayout8Shimmer, InfiniteScrollContainer } from '@repo/ui';
-import { useInfiniteScroll } from '@repo/hooks';
+import { MagazineLayout8Shimmer, InfiniteScrollContainer, PullToRefresh } from '@repo/ui';
+import { useInfiniteScroll, useScrollVisibility } from '@repo/hooks';
 import { MapPin, Store } from '@repo/ui/icons';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { useBottomNav } from '@/features/navigation/context/BottomNavContext';
 import type { RestaurantWithMenu } from '@/features/search/hooks/useSearch';
 import MagazineLayout1 from '@/features/search/components/layouts/MagazineLayout1';
 import { useDeliveryLocationStore } from '@/store/deliveryLocationStore';
@@ -26,6 +27,7 @@ interface Props {
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
   totalResults?: number;
+  onRefresh?: () => Promise<void>;
 }
 
 export default function RecommendedSection({
@@ -35,7 +37,8 @@ export default function RecommendedSection({
   hasNextPage = false,
   onLoadMore,
   isLoadingMore = false,
-  totalResults
+  totalResults,
+  onRefresh,
 }: Props) {
   const { selectedLocation } = useDeliveryLocationStore();
   const currentAddress = selectedLocation?.address || "";
@@ -53,7 +56,7 @@ export default function RecommendedSection({
     let lastTime = Date.now();
 
     const handleWheel = (e: WheelEvent) => {
-      const container = containerRef.current?.parentElement;
+      const container = containerRef.current;
       if (!container) return;
 
       // If we are at the top of the SCROLLABLE CONTAINER and scrolling UP
@@ -76,51 +79,24 @@ export default function RecommendedSection({
       }
     };
 
-    const container = containerRef.current?.parentElement;
+    const container = containerRef.current;
     if (container) {
       container.addEventListener('wheel', handleWheel);
       return () => container.removeEventListener('wheel', handleWheel);
     }
   }, [onBackToHome]);
 
-  useEffect(() => {
-    let ticking = false;
-
-    const handleScroll = () => {
-      const container = containerRef.current?.parentElement;
-      if (!container) return;
-
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = container.scrollTop;
-
-          if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-            setIsHeaderVisible(false);
-          } else if (currentScrollY < lastScrollY.current) {
-            setIsHeaderVisible(true);
-          }
-
-          lastScrollY.current = currentScrollY;
-          ticking = false;
-        });
-
-        ticking = true;
-      }
-    };
-
-    const container = containerRef.current?.parentElement;
-    if (container) {
-      container.addEventListener('scroll', handleScroll, { passive: true });
-      return () => container.removeEventListener('scroll', handleScroll);
-    }
-  }, []);
-
-  // Notify parent about scroll state - reusing the same event as SearchResults
-  useEffect(() => {
-    window.dispatchEvent(new CustomEvent('searchHeaderVisibility', {
-      detail: { visible: isHeaderVisible }
-    }));
-  }, [isHeaderVisible]);
+  const { setIsVisible } = useBottomNav();
+  useScrollVisibility({
+    hideThreshold: 100,
+    containerRef,
+    onVisibilityChange: (visible) => {
+      setIsVisible(visible);
+      window.dispatchEvent(new CustomEvent('searchHeaderVisibility', {
+        detail: { visible }
+      }));
+    },
+  });
 
   // Use reusable infinite scroll hook
   const { sentinelRef } = useInfiniteScroll({
@@ -137,99 +113,96 @@ export default function RecommendedSection({
     const props = { restaurant, dishes, menuCategories };
 
     switch (layoutType) {
-      case 1:
-        return <MagazineLayout1 key={restaurant.id} {...props} />;
-      case 2:
-        return <MagazineLayout2 key={restaurant.id} {...props} />;
-      case 3:
-        return <MagazineLayout3 key={restaurant.id} {...props} />;
-      case 4:
-        return <MagazineLayout4 key={restaurant.id} {...props} />;
-      case 5:
-        return <MagazineLayout5 key={restaurant.id} {...props} />;
-      case 6:
-        return <MagazineLayout6 key={restaurant.id} {...props} />;
-      case 7:
-        return <MagazineLayout7 key={restaurant.id} {...props} />;
-      case 8:
-        return <MagazineLayout8 key={restaurant.id} {...props} />;
-      case 9:
-        return <MagazineLayout9 key={restaurant.id} {...props} />;
-      case 10:
-        return <MagazineLayout10 key={restaurant.id} {...props} />;
-      case 11:
-        return <MagazineLayout11 key={restaurant.id} {...props} />;
-      default:
-        return <MagazineLayout1 key={restaurant.id} {...props} />;
+      case 1: return <MagazineLayout1 key={restaurant.id} {...props} />;
+      case 2: return <MagazineLayout2 key={restaurant.id} {...props} />;
+      case 3: return <MagazineLayout3 key={restaurant.id} {...props} />;
+      case 4: return <MagazineLayout4 key={restaurant.id} {...props} />;
+      case 5: return <MagazineLayout5 key={restaurant.id} {...props} />;
+      case 6: return <MagazineLayout6 key={restaurant.id} {...props} />;
+      case 7: return <MagazineLayout7 key={restaurant.id} {...props} />;
+      case 8: return <MagazineLayout8 key={restaurant.id} {...props} />;
+      case 9: return <MagazineLayout9 key={restaurant.id} {...props} />;
+      case 10: return <MagazineLayout10 key={restaurant.id} {...props} />;
+      case 11: return <MagazineLayout11 key={restaurant.id} {...props} />;
+      default: return <MagazineLayout1 key={restaurant.id} {...props} />;
     }
   };
 
   return (
-    <motion.div
+    <PullToRefresh
       ref={containerRef}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1] }}
-      className="min-h-screen bg-[#F7F7F7] pt-24 pb-20 px-3 md:pt-32 md:px-6 magazine-scroll"
+      onRefresh={onRefresh || (async () => { })}
+      disabled={!onRefresh || isLoading}
+      pullText="Kéo để cập nhật món ngon"
+      releaseText="Thả để làm mới gợi ý"
+      refreshingText="Đang tìm món mới..."
+      className="h-screen magazine-scroll"
     >
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-12 md:mb-20"
-        >
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-1 bg-black" />
-            <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Curated For You</span>
-          </div>
-          <h1 className="text-5xl md:text-8xl font-anton font-bold text-black mb-4 uppercase tracking-tighter leading-none">
-            DINING<br />RECOMMENDATIONS
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-500 font-medium italic">
-            Elite selections <span className="font-anton text-black not-italic px-2 bg-amber-400 rounded-lg">near your location</span>
-          </p>
-        </motion.div>
-
-        {/* Results with Infinite Scroll Container */}
-        <InfiniteScrollContainer
-          sentinelRef={sentinelRef}
-          isLoading={isLoading}
-          isLoadingMore={isLoadingMore}
-          hasMore={hasNextPage}
-          isEmpty={!isLoading && results.length === 0}
-          totalResults={totalResults || results.length}
-          ShimmerComponent={MagazineLayout8Shimmer}
-          initialShimmerCount={2}
-          loadMoreShimmerCount={1}
-          endMessage="Bạn đã xem hết các gợi ý gần đây"
-          EmptyComponent={
-            <div className="py-2">
-              <EmptyState
-                icon={MapPin}
-                title="Không tìm thấy nhà hàng"
-                description={
-                  <>
-                    Rất tiếc, chúng tôi không tìm thấy nhà hàng nào quanh khu vực của bạn tại <span className="text-gray-500 font-bold">"{shortAddress}..."</span>
-                  </>
-                }
-                buttonText="Chọn điểm giao khác"
-                buttonIcon={Store}
-                onButtonClick={() => window.dispatchEvent(new CustomEvent('openLocationPicker'))}
-              />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1] }}
+        className="min-h-screen bg-[#F7F7F7] pt-24 pb-20 px-3 md:pt-32 md:px-6"
+      >
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-12 md:mb-20"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-1 bg-black" />
+              <span className="text-[10px] font-anton font-bold text-amber-600 uppercase tracking-[0.4em]">Curated For You</span>
             </div>
-          }
-        >
-          {results.map((item) => renderLayout(item))}
-        </InfiniteScrollContainer>
-      </div>
-      <style jsx>{`
-        .magazine-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-        .magazine-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 9999px; }
-        .magazine-scroll { scrollbar-width: thin; }
-      `}</style>
-    </motion.div>
+            <h1 className="text-5xl md:text-8xl font-anton font-bold text-black mb-4 uppercase tracking-tighter leading-none">
+              DINING<br />RECOMMENDATIONS
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-500 font-medium italic">
+              Elite selections <span className="font-anton text-black not-italic px-2 bg-amber-400 rounded-lg">near your location</span>
+            </p>
+          </motion.div>
+  
+          {/* Results with Infinite Scroll Container */}
+          <InfiniteScrollContainer
+            sentinelRef={sentinelRef}
+            isLoading={isLoading}
+            isLoadingMore={isLoadingMore}
+            hasMore={hasNextPage}
+            isEmpty={!isLoading && results.length === 0}
+            totalResults={totalResults || results.length}
+            ShimmerComponent={MagazineLayout8Shimmer}
+            initialShimmerCount={2}
+            loadMoreShimmerCount={1}
+            endMessage="Bạn đã xem hết các gợi ý gần đây"
+            EmptyComponent={
+              <div className="py-2">
+                <EmptyState
+                  icon={MapPin}
+                  title="Không tìm thấy nhà hàng"
+                  description={
+                    <>
+                      Rất tiếc, chúng tôi không tìm thấy nhà hàng nào quanh khu vực của bạn tại <span className="text-gray-500 font-bold">"{shortAddress}..."</span>
+                    </>
+                  }
+                  buttonText="Chọn điểm giao khác"
+                  buttonIcon={Store}
+                  onButtonClick={() => window.dispatchEvent(new CustomEvent('openLocationPicker'))}
+                />
+              </div>
+            }
+          >
+            {results.map((item) => renderLayout(item))}
+          </InfiniteScrollContainer>
+        </div>
+        <style jsx>{`
+          .magazine-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+          .magazine-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 9999px; }
+          .magazine-scroll { scrollbar-width: thin; }
+        `}</style>
+      </motion.div>
+    </PullToRefresh>
   );
 }

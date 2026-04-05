@@ -60,19 +60,19 @@ export const RestaurantCategoryTabs: React.FC<RestaurantCategoryTabsProps> = ({
 
     const containerRect = scrollTarget.getBoundingClientRect();
     const nodeRect = node.getBoundingClientRect();
-    const offsetTop = nodeRect.top - containerRect.top + scrollTarget.scrollTop - (isMobile ? 180 : 140);
+    const offsetTop = nodeRect.top - containerRect.top + scrollTarget.scrollTop - (isMobile ? 125 : 140);
 
     scrollTarget.scrollTo({ top: offsetTop, behavior: "smooth" });
   };
 
   return (
     <div
-      className={`sticky top-0 z-40 bg-[#F7F7F7] mb-6 transition-all pt-0 md:pt-0 ${isTabsSticky ? "md:pt-4 md:-mt-4" : ""}`}
+      className={`sticky top-[55px] md:top-0 z-40 md:bg-[#F7F7F7] mb-6 transition-all pt-0 md:pt-0 -mx-1.5 md:mx-0 ${isTabsSticky ? "md:pt-4 md:-mt-4" : ""}`}
     >
       <div ref={catContainerRef} className="relative bg-[#F7F7F7] border-b-2 border-gray-300">
         <HoverHighlightOverlay rect={catRect} style={catStyle} />
         <div ref={tabsRef} className="overflow-x-auto no-scrollbar">
-          <div className="inline-flex items-center gap-6 md:gap-8 px-6 py-4 min-w-full justify-start relative z-10">
+          <div className="inline-flex items-center gap-6 md:gap-8 px-4 md:px-6 py-4 min-w-full justify-start relative z-10">
             {categories.map((c) => (
               <button
                 key={c.id}

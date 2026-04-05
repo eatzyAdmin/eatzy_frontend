@@ -70,6 +70,7 @@ export default function HomePage() {
     fetchNextPage: recommendedFetchNextPage,
     isFetchingNextPage: recommendedIsFetchingNextPage,
     totalCount: recommendedTotalCount,
+    refresh: recommendedRefresh,
   } = useSearchRestaurants(
     showRecommended ? {
       latitude: locationCoords.latitude,
@@ -121,6 +122,8 @@ export default function HomePage() {
     hasMore,
     loadMore,
     totalResults,
+    refetch: refetchSearch,
+    refresh: refreshSearch,
   } = useSearch();
 
   // Distance Warning Logic
@@ -413,6 +416,7 @@ export default function HomePage() {
               onLoadMore={recommendedFetchNextPage}
               isLoadingMore={recommendedIsFetchingNextPage}
               totalResults={recommendedTotalCount}
+              onRefresh={recommendedRefresh}
             />
           </motion.div>
         )}
@@ -434,6 +438,7 @@ export default function HomePage() {
               clearSearch();
               setShowRecommended(true);
             }}
+            onRefresh={async () => { await refreshSearch(); }}
           />
         )}
       </AnimatePresence>

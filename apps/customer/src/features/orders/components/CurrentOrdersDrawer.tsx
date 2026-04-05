@@ -14,7 +14,8 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
-  const { orders, isLoading: isLoadingOrders, refetch } = useCurrentOrders({ isDrawerOpen: open });
+  const { orders, isLoading: isLoadingOrders, refetch, refresh: onRefresh } = useCurrentOrders({ isDrawerOpen: open });
+
   const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
   const [mobileView, setMobileView] = useState<"LIST" | "DETAIL">("LIST");
   const activeOrder = orders.find((o) => o.id === activeOrderId) ?? orders[0] ?? null;
@@ -170,6 +171,7 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
               handleCancelOrder={handleCancelOrder}
               handleConfirmCancel={handleConfirmCancel}
               cancellationReasons={cancellationReasons}
+              onRefresh={onRefresh}
             />
             <DesktopView
               orders={orders}

@@ -83,6 +83,7 @@ export default function FavoriteRestaurantCard({
           fill
           placeholderMode="vertical"
           className={`object-cover transition-transform duration-700 ease-out ${restaurant.status !== 'OPEN' ? 'grayscale brightness-[0.8] contrast-[1.1] group-hover:scale-110' : 'group-hover:scale-105'}`}
+          sizes="(max-width: 768px) 50vw, 300px"
         />
 
         {/* Green Duotone Overlay for Closed Restaurants */}

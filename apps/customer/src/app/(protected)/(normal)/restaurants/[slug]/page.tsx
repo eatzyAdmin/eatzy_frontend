@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ImageWithFallback, RestaurantDetailShimmer, FloatingRestaurantCartShimmer } from "@repo/ui";
-import { ChevronLeft, ChevronRight, Star, MapPin, Loader2, Store } from "@repo/ui/icons";
+import { RestaurantDetailShimmer, FloatingRestaurantCartShimmer } from "@repo/ui";
+import { ChevronLeft, ChevronRight, Star, MapPin, Loader2, Store, ArrowLeft } from "@repo/ui/icons";
 import { RestaurantVouchers, MobileRestaurantVouchers } from "@/features/restaurant/components/RestaurantVouchers";
 import { useRestaurantShippingInfo } from "@/features/restaurant/hooks/useRestaurantShippingInfo";
 import { motion, AnimatePresence } from "@repo/ui/motion";
@@ -11,7 +11,6 @@ import { useLoading, useHoverHighlight, useFlyToCart, FlyToCartLayer } from "@re
 import type { Restaurant, Dish, MenuCategory } from "@repo/types";
 import { useRestaurantCart } from "@/features/cart/hooks/useCart";
 import { useRestaurantWithMenu } from "@/features/restaurant";
-import { PullToRefresh } from "@repo/ui";
 import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer";
 import { ReviewsModal } from "@/features/restaurant/components/ReviewsModal";
 import FloatingRestaurantCart from "@/features/cart/components/FloatingRestaurantCart";
@@ -43,7 +42,6 @@ export default function RestaurantDetailPage() {
     isLoading: isApiLoading,
     isError,
     detail,
-    refreshAll,
   } = useRestaurantWithMenu(params.slug);
 
   // Sort categories by displayOrder and filter out empty ones
@@ -79,7 +77,6 @@ export default function RestaurantDetailPage() {
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const rightColumnRef = useRef<HTMLDivElement | null>(null);
   const leftColumnRef = useRef<HTMLDivElement | null>(null);
-  const mobileScrollRef = useRef<HTMLDivElement | null>(null);
 
   // Cart API hook - will be initialized after restaurant data loads
   const numericRestaurantId = restaurant ? Number(restaurant.id) : null;
@@ -122,14 +119,23 @@ export default function RestaurantDetailPage() {
     }
   }, [restaurant?.status, isApiLoading, showWarning, setShowWarning]);
 
+  const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
-    if (isApiLoading || !categories.length) return;
+    const container = document.getElementById("mobile-scroll-container");
+    if (!container) return;
+    const handleScroll = () => {
+      setScrollY(container.scrollTop);
+    };
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
 
-    // Desktop rightColumnRef scrolling, Mobile mobileScrollRef scrolling
+  useEffect(() => {
+    const rightCol = rightColumnRef.current;
+    if (!rightCol) return;
+
     const isMobile = window.innerWidth < 768;
-    const root = isMobile ? mobileScrollRef.current : rightColumnRef.current;
-
-    if (!root) return;
+    const root = isMobile ? document.getElementById("mobile-scroll-container") : rightCol;
 
     const obs = new IntersectionObserver(
       (entries) => {
@@ -140,7 +146,7 @@ export default function RestaurantDetailPage() {
       },
       {
         root: root,
-        rootMargin: "-20% 0px -50% 0px",
+        rootMargin: "-170px 0px -40% 0px", // Adjusted margin for sticky header
         threshold: 0.1
       }
     );
@@ -149,7 +155,7 @@ export default function RestaurantDetailPage() {
       if (node) obs.observe(node);
     });
     return () => obs.disconnect();
-  }, [categories, isApiLoading]);
+  }, [categories]);
 
 
   // Show loading shimmer while fetching
@@ -193,33 +199,75 @@ export default function RestaurantDetailPage() {
           </div>
         </motion.div>
       )}
-      {/* Back button - Fixed position */}
-      {/* Mobile Back Button - Strictly md:hidden */}
-      <button
+
+      <div
+        className="fixed top-0 left-0 right-0 z-50 h-[56px] md:hidden pointer-events-none"
+      >
+        <motion.div
+          style={{
+            opacity: Math.min(scrollY / 100, 1),
+          }}
+          className="absolute inset-0 bg-[#F7F7F7]"
+        />
+
+        <div className="relative h-full flex items-center px-1">
+          <motion.button
+            onClick={() => router.back()}
+            style={{
+              opacity: Math.min(1, scrollY / 50),
+              pointerEvents: scrollY > 0 ? "auto" : "none",
+            }}
+            className="w-10 h-10 flex items-center justify-center shrink-0"
+          >
+            <ArrowLeft className="w-6 h-6 text-[#1A1A1A]" />
+          </motion.button>
+
+          <motion.div
+            style={{
+              opacity: Math.max(0, (scrollY - 50) / 50),
+              transform: `translateY(${Math.max(0, 4 - (scrollY - 50) / 10)})`,
+            }}
+            className="flex-1 min-w-0 pr-10 pointer-events-auto"
+          >
+            <h1
+              className="text-[22px] font-black uppercase tracking-tight text-[#1A1A1A] line-clamp-1 text-center"
+              style={{
+                fontStretch: "condensed",
+                letterSpacing: "-0.01em",
+                fontFamily: "var(--font-anton), var(--font-sans)",
+              }}
+            >
+              {restaurant.name}
+            </h1>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Top Back Button (ChevronLeft) - Fades out on scroll */}
+      <motion.button
         onClick={() => router.back()}
-        className={`fixed top-4 left-4 z-40 w-10 h-10 rounded-full bg-white/80 backdrop-blur-xl shadow-md border border-gray-100 md:hidden flex items-center justify-center group active:scale-95 transition-all ${restaurant.status !== 'OPEN' ? 'hidden' : ''}`}
+        style={{
+          opacity: Math.max(0, 1 - scrollY / 50),
+          pointerEvents: scrollY < 100 ? "auto" : "none",
+        }}
+        className={`fixed top-4 left-4 z-[60] w-10 h-10 rounded-full bg-white/80 backdrop-blur-xl shadow-md border border-gray-100 md:hidden flex items-center justify-center group active:scale-95 transition-all ${restaurant.status !== 'OPEN' ? 'hidden' : ''}`}
       >
         <ChevronLeft className="w-6 h-6 text-[#1A1A1A]" />
-      </button>
+      </motion.button>
 
-      {/* Main Content Branching */}
-      <div className="flex-1 overflow-hidden h-full flex flex-col">
-        {/* 1. Mobile Branch - Uses PullToRefresh */}
-        <div className="md:hidden flex-1 h-full overflow-hidden">
-          <PullToRefresh
-            onRefresh={refreshAll}
-            className="h-full"
-            pullText="Kéo để cập nhật thông tin quán"
-            releaseText="Thả tay để cập nhật"
-            refreshingText="Đang cập nhật..."
-            usePortal={false}
-          >
-            <div
-              ref={mobileScrollRef}
-              id="mobile-scroll-container"
-              className="h-full overflow-y-auto no-scrollbar scroll-smooth"
-            >
-              <div className="relative space-y-6 mb-0 shrink-0 px-4 pt-[60px]">
+      {/* Main Content - Two Column Layout */}
+      {isApiLoading ? (
+        <>
+          <RestaurantDetailShimmer />
+          <FloatingRestaurantCartShimmer />
+        </>
+      ) : (
+        <div className="flex-1 overflow-hidden">
+          <div className="max-w-[1400px] mx-auto md:pr-16 md:px-8 px-0 pt-0 pb-0 md:pt-20 md:pb-0 h-full">
+            <div className="flex flex-col md:grid md:grid-cols-[30%_70%] md:gap-8 h-full overflow-y-auto md:overflow-visible no-scrollbar md:pb-0" id="mobile-scroll-container">
+              <div ref={leftColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pr-2 space-y-6 mb-0 shrink-0 px-4 pt-[60px] md:px-0 md:pt-0">
+
+                {/* Mobile Hero Image - Artistic Blend */}
                 <MobileRestaurantHero
                   coverImageUrl={detail?.coverImageUrl}
                   restaurantName={restaurant.name}
@@ -230,19 +278,23 @@ export default function RestaurantDetailPage() {
                   status={restaurant.status}
                 />
 
+                {/* Restaurant Title & Info */}
                 <div className="relative z-10">
-                  <div className="flex gap-4 items-start">
+                  <div className="flex gap-4 items-start md:block">
                     <MobileRestaurantAvatar
                       avatarUrl={detail?.avatarUrl}
                       restaurantName={restaurant.name}
                     />
+
                     <RestaurantHeader restaurant={restaurant}>
+                      {/* Mobile Rating & Shipping - Nested inside to maintain correct column layout */}
                       <div className="flex items-center gap-2 mt-1 flex-nowrap overflow-x-auto no-scrollbar">
                         <RestaurantRating
                           rating={restaurant.rating}
                           variant="mobile-badge"
                           onClick={() => setIsReviewsOpen(true)}
                         />
+
                         <RestaurantShipping
                           isLoading={isLoadingShipping}
                           distance={distance}
@@ -254,8 +306,20 @@ export default function RestaurantDetailPage() {
                         />
                       </div>
                     </RestaurantHeader>
+
+                    <RestaurantShipping
+                      isLoading={isLoadingShipping}
+                      distance={distance}
+                      baseFee={baseFee}
+                      finalFee={finalFee}
+                      hasFreeship={hasFreeship}
+                      variant="desktop"
+                      isOverDistance={isOverDistance}
+                    />
                   </div>
-                  <div className="mt-3 -mx-4 overflow-hidden">
+
+                  {/* Mobile Vouchers List */}
+                  <div className="md:hidden mt-3 -mx-4 overflow-hidden">
                     <MobileRestaurantVouchers restaurantId={numericRestaurantId} />
                   </div>
                 </div>
@@ -267,75 +331,9 @@ export default function RestaurantDetailPage() {
                 />
               </div>
 
-              <div className="sticky top-0 z-20 bg-[#F7F7F7]">
-                <RestaurantCategoryTabs
-                  categories={categories}
-                  activeCategoryId={activeCategoryId}
-                  sectionRefs={sectionRefs}
-                  scrollContainerRef={mobileScrollRef}
-                />
-              </div>
-
-              <div className="relative shrink-0 px-1.5 pb-20">
-                <RestaurantMenu
-                  categories={categories}
-                  allDishes={apiDishes}
-                  cartItems={cartItems}
-                  isUpdating={isUpdating}
-                  sectionRefs={sectionRefs}
-                  onDishClick={(d) => {
-                    if (restaurant.status !== 'OPEN') {
-                      sileo.error({ actionType: "store_closed", description: restaurant.name });
-                      return;
-                    }
-                    setDrawerDish(d);
-                    setDrawerOpen(true);
-                  }}
-                  updateItemQuantity={updateItemQuantity}
-                  removeItem={removeCartItem}
-                />
-              </div>
-            </div>
-          </PullToRefresh>
-        </div>
-
-        {/* 2. Desktop Branch - Pure Grid, No PullToRefresh */}
-        <div className="hidden md:block h-full overflow-hidden">
-          <div className="max-w-[1400px] mx-auto md:pr-16 md:px-8 px-0 pt-[88px] h-full relative overflow-hidden">
-            <div className="grid grid-cols-[30%_70%] gap-8 h-full">
-              {/* Desktop Left Column */}
-              <div
-                ref={leftColumnRef}
-                className="h-full overflow-y-auto no-scrollbar pr-2 space-y-6 pb-20 scroll-smooth"
-              >
-                <div className="relative z-10 w-full px-1">
-                  <RestaurantHeader restaurant={restaurant} />
-
-                  <div className="mt-4">
-                    <RestaurantShipping
-                      isLoading={isLoadingShipping}
-                      distance={distance}
-                      baseFee={baseFee}
-                      finalFee={finalFee}
-                      hasFreeship={hasFreeship}
-                      variant="desktop"
-                      isOverDistance={isOverDistance}
-                    />
-                  </div>
-                </div>
-
-                <RestaurantIllustration
-                  restaurant={restaurant}
-                  avatarUrl={detail?.avatarUrl}
-                  onRatingClick={() => setIsReviewsOpen(true)}
-                />
-              </div>
-
-              {/* Desktop Right Column */}
-              <div
-                ref={rightColumnRef}
-                className="h-full overflow-y-auto no-scrollbar pl-2 scroll-smooth pb-32 flex flex-col relative"
-              >
+              {/* Right Column - Main Image & Menu (Scrollable independently on desktop) */}
+              <div ref={rightColumnRef} className="relative md:overflow-y-auto no-scrollbar md:pl-2 shrink-0 px-1.5 md:px-0">
+                {/* Main Hero Image with Save Button - Desktop Only */}
                 <RestaurantHero
                   restaurant={restaurant}
                   coverImageUrl={detail?.coverImageUrl}
@@ -344,6 +342,7 @@ export default function RestaurantDetailPage() {
                   onToggleFavorite={toggleFavorite}
                 />
 
+                {/* Category tabs - positioned here, sticky on scroll */}
                 <RestaurantCategoryTabs
                   categories={categories}
                   activeCategoryId={activeCategoryId}
@@ -359,7 +358,10 @@ export default function RestaurantDetailPage() {
                   sectionRefs={sectionRefs}
                   onDishClick={(d) => {
                     if (restaurant.status !== 'OPEN') {
-                      sileo.error({ actionType: "store_closed", description: restaurant.name });
+                      sileo.error({
+                        actionType: "store_closed",
+                        description: restaurant.name,
+                      });
                       return;
                     }
                     setDrawerDish(d);
@@ -372,7 +374,7 @@ export default function RestaurantDetailPage() {
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <DishCustomizeDrawer
         open={drawerOpen}

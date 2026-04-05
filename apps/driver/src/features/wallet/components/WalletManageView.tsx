@@ -118,13 +118,13 @@ export default function WalletManageView({
         releaseText="Thả tay để cập nhật"
         refreshingText="Đang cập nhật..."
       >
-        <div className="flex flex-col min-h-full pt-2 bg-[#F7F7F7] pb-40">
+        <div className="flex flex-col min-h-full pt-2 bg-[#F7F7F7] pb-0">
           {/* Header - Now moves with pull */}
           <div className="flex items-center justify-between px-2 h-14 relative z-[110]">
             <button onClick={onBack} className="flex items-center gap-1.5 group px-1">
               <ChevronLeft size={26} className="text-[#1A1A1A]" strokeWidth={2.5} />
               <span className="text-[17px] font-extrabold text-[#1A1A1A] tracking-tight">
-                {activeType === 'TOPUP' ? 'Deposit' : 'Withdraw'}
+                {activeType === 'TOPUP' ? 'Nạp tiền' : 'Rút tiền'}
               </span>
             </button>
 
@@ -149,7 +149,7 @@ export default function WalletManageView({
                   : 'text-gray-400'
                   }`}
               >
-                Deposit
+                Nạp tiền
               </button>
               <button
                 onClick={() => setActiveType('WITHDRAW')}
@@ -158,7 +158,7 @@ export default function WalletManageView({
                   : 'text-gray-400'
                   }`}
               >
-                Withdraw
+                Rút tiền
               </button>
             </div>
           </div>
@@ -167,7 +167,7 @@ export default function WalletManageView({
           <div className="mt-8 px-6 flex flex-col items-center justify-center gap-1 text-[14px] font-semibold text-gray-600">
             <div className="flex items-center gap-1">
               <span>
-                {activeType === 'TOPUP' ? 'Maximum ' : 'Balance: '}
+                {activeType === 'TOPUP' ? 'Tối đa ' : 'Số dư: '}
                 <span className="font-extrabold text-[#1A1A1A]">
                   {currentMax.toLocaleString('vi-VN')}đ
                 </span>
@@ -192,7 +192,6 @@ export default function WalletManageView({
               <span className="text-xl font-bold text-gray-300 mt-1 ml-1">đ</span>
             </div>
 
-            {/* Error Messages */}
             <div className="h-6 mt-2">
               <AnimatePresence>
                 {amountNumber > 0 && amountNumber < MIN_LIMIT && (
@@ -203,7 +202,7 @@ export default function WalletManageView({
                     exit={{ opacity: 0, scale: 0.9 }}
                     className="text-red-500 text-[12px] font-bold"
                   >
-                    Minimum amount is 10,000đ
+                    Số tiền tối thiểu là 10.000đ
                   </motion.p>
                 )}
                 {amountNumber >= currentMax && (
@@ -214,7 +213,7 @@ export default function WalletManageView({
                     exit={{ opacity: 0, scale: 0.9 }}
                     className="text-red-500 text-[12px] font-bold"
                   >
-                    Maximum limit reached
+                    Đã đạt giới hạn tối đa
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -232,7 +231,7 @@ export default function WalletManageView({
                 : 'bg-gray-200/30 text-gray-300 shadow-none'
                 }`}
             >
-              Continue
+              Tiếp tục
             </motion.button>
 
             {/* Dynamic Quick Amount Options */}

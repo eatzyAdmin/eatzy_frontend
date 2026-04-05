@@ -77,13 +77,21 @@ export default function ImageWithFallback({ containerClassName, className, place
 
   const renderContent = (applyContainerClassToFallback: boolean) => (
     <>
-      <Image
-        {...props}
-        className={`${className} transition-opacity duration-500 ${status === "loaded" ? "opacity-100" : "opacity-0"}`}
-        onLoad={() => setStatus("loaded")}
-        onError={() => setStatus("error")}
-      />
-      {(status === "loading" || status === "error") && renderPlaceholder(true)}
+      {/* Placeholder base layer */}
+      {renderPlaceholder(true)}
+
+      {/* Entrance wrapper to handle fade & blur independently from hover effects */}
+      <div
+        className={`transition-all duration-700 ease-out ${isFill ? 'absolute inset-0' : 'relative w-full h-full'} ${status === "loaded" ? "opacity-100 blur-0" : "opacity-0 blur-lg"
+          }`}
+      >
+        <Image
+          {...props}
+          className={className}
+          onLoad={() => setStatus("loaded")}
+          onError={() => setStatus("error")}
+        />
+      </div>
     </>
   );
 

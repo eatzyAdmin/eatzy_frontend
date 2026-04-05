@@ -9,6 +9,8 @@ export interface UseScrollVisibilityOptions {
   controlBottomNav?: boolean;
   /** Callback when visibility changes */
   onVisibilityChange?: (visible: boolean) => void;
+  /** Optional container ref to listen to instead of window */
+  containerRef?: React.RefObject<HTMLElement>;
 }
 
 export interface UseScrollVisibilityResult {
@@ -39,20 +41,31 @@ export interface UseScrollVisibilityResult {
 export function useScrollVisibility({
   hideThreshold = 100,
   onVisibilityChange,
+  containerRef,
 }: UseScrollVisibilityOptions = {}): UseScrollVisibilityResult {
-  const lastScrollY = useRef(0);
+  const lastScrollPos = useRef(0);
   const isVisibleRef = useRef(true);
 
   const handleScroll = useCallback(() => {
-    const currentScrollY = window.scrollY;
+    // Get current scroll position based on source (container or window)
+    const currentScrollPos = containerRef?.current
+      ? containerRef.current.scrollTop
+      : window.scrollY;
 
+    const threshold = hideThreshold;
     let newVisible = isVisibleRef.current;
 
-    if (currentScrollY > lastScrollY.current && currentScrollY > hideThreshold) {
-      // Scrolling down & past threshold
+    // Logic: 
+    // 1. If scrolling down AND passed threshold -> hide
+    // 2. If scrolling up -> show
+    if (currentScrollPos > lastScrollPos.current && currentScrollPos > threshold) {
       newVisible = false;
-    } else if (currentScrollY < lastScrollY.current) {
-      // Scrolling up
+    } else if (currentScrollPos < lastScrollPos.current) {
+      newVisible = true;
+    }
+
+    // Edge case: if we are at the very top, always show
+    if (currentScrollPos <= 0) {
       newVisible = true;
     }
 
@@ -61,8 +74,8 @@ export function useScrollVisibility({
       onVisibilityChange?.(newVisible);
     }
 
-    lastScrollY.current = currentScrollY;
-  }, [hideThreshold, onVisibilityChange]);
+    lastScrollPos.current = currentScrollPos;
+  }, [hideThreshold, onVisibilityChange, containerRef]);
 
   useEffect(() => {
     let ticking = false;
@@ -77,9 +90,11 @@ export function useScrollVisibility({
       }
     };
 
-    window.addEventListener('scroll', scrollListener, { passive: true });
-    return () => window.removeEventListener('scroll', scrollListener);
-  }, [handleScroll]);
+    const target = containerRef?.current || window;
+
+    target.addEventListener('scroll', scrollListener, { passive: true });
+    return () => target.removeEventListener('scroll', scrollListener);
+  }, [handleScroll, containerRef?.current]);
 
   return { isVisible: isVisibleRef.current };
 }
