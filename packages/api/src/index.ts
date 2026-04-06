@@ -1,5 +1,5 @@
 // Main API exports
-export { http } from "./http";
+export { http, getAccessToken, setAccessToken } from "./http";
 export { authApi } from "./auth";
 export { cartApi } from "./cart";
 export { voucherApi } from "./voucher";

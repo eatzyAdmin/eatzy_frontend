@@ -70,6 +70,7 @@ function AnimatedNavigation() {
 }
 
 import DriverHeader from "@/features/layout/components/DriverHeader";
+import GlobalSocketHandlers from "./components/GlobalSocketHandlers";
 
 export default function NormalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -84,6 +85,7 @@ export default function NormalLayout({ children }: { children: React.ReactNode }
       <BottomNavProvider>
         <div className="fixed inset-0 overflow-hidden flex flex-col">
           <DriverHeader />
+          <GlobalSocketHandlers />
           <div className="flex-1 relative overflow-hidden">
             {children}
           </div>

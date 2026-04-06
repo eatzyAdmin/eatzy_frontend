@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider, LoadingProvider, SwipeConfirmationProvider } from "@repo/ui";
 import { AuthInitializer } from "@/features/auth/components/AuthInitializer";
 import { Toaster } from "@/components/DynamicIslandToast";
+import { NetworkStatusMonitor } from "@/components/NetworkStatusMonitor";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -26,6 +27,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <SwipeConfirmationProvider>
             <Toaster />
             <AuthInitializer />
+            <NetworkStatusMonitor />
             {children}
           </SwipeConfirmationProvider>
         </LoadingProvider>
