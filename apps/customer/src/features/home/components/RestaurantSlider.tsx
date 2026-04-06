@@ -196,7 +196,9 @@ export default function RestaurantSlider({
           whileHover={{ scale: 1.15, backgroundColor: 'rgba(255, 255, 255, 0.28)' }}
           whileTap={{ scale: 0.95 }}
           onClick={handlePrevious}
-          className="absolute left-0 top-1/2 -translate-y-1/2 md:translate-y-0 md:static flex-shrink-0 w-10 h-10 md:w-14 md:h-14 rounded-full bg-white/12 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center transition-colors z-30"
+          className={`absolute left-0 z-30 md:static flex-shrink-0 w-10 h-10 md:w-14 md:h-14 rounded-full bg-white/12 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center transition-colors ${isMobile ? 'top-1/2' : ''}`}
+          animate={isMobile ? { y: "-50%" } : { y: 0 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
         >
           <ChevronLeft className="w-5 h-5 md:w-7 md:h-7 text-white" />
         </motion.button>
@@ -326,7 +328,9 @@ export default function RestaurantSlider({
           whileHover={{ scale: 1.15, backgroundColor: 'rgba(255, 255, 255, 0.28)' }}
           whileTap={{ scale: 0.95 }}
           onClick={handleNext}
-          className="absolute right-0 top-1/2 -translate-y-1/2 md:translate-y-0 md:static flex-shrink-0 w-10 h-10 md:w-14 md:h-14 rounded-full bg-white/12 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center transition-colors z-30"
+          className={`absolute right-0 z-30 md:static flex-shrink-0 w-10 h-10 md:w-14 md:h-14 rounded-full bg-white/12 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center transition-colors ${isMobile ? 'top-1/2' : ''}`}
+          animate={isMobile ? { y: "-50%" } : { y: 0 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
         >
           <ChevronRight className="w-5 h-5 md:w-7 md:h-7 text-white" />
         </motion.button>

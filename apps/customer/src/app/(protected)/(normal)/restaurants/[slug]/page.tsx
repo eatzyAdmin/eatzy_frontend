@@ -121,14 +121,26 @@ export default function RestaurantDetailPage() {
 
   const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
-    const container = document.getElementById("mobile-scroll-container");
-    if (!container) return;
-    const handleScroll = () => {
-      setScrollY(container.scrollTop);
-    };
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
+    if (isApiLoading) return;
+    
+    // Use a small delay to ensure DOM is fully rendered after shimmer removal
+    const timer = setTimeout(() => {
+      const container = document.getElementById("mobile-scroll-container");
+      if (!container) return;
+      
+      const handleScroll = () => {
+        setScrollY(container.scrollTop);
+      };
+      
+      container.addEventListener("scroll", handleScroll, { passive: true });
+      // Initial sync
+      handleScroll();
+      
+      return () => container.removeEventListener("scroll", handleScroll);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [isApiLoading]);
 
   useEffect(() => {
     const rightCol = rightColumnRef.current;
