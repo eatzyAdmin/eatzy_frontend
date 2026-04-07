@@ -85,101 +85,17 @@ export default function ProfilePage() {
     await refresh();
   }, [refresh]);
 
-  const renderSubPage = () => {
-    if (!activeMobileSection) return null;
-
-    return (
-      <motion.div
-        key="sub-page-outer-container"
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
-        transition={pageTransition}
-        className="fixed inset-0 z-[200] bg-[#F7F7F7] overflow-hidden"
-      >
-        <motion.div
-          key="standard-sub-content"
-          initial={{ x: '-30%', opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: '-100%', opacity: 0 }}
-          transition={pageTransition}
-          className="absolute inset-0 bg-[#F7F7F7] overflow-hidden px-3 h-full w-full"
-        >
-          <PullToRefresh
-            onRefresh={handleSubPageRefresh}
-            className="flex-1 no-scrollbar overflow-visible h-full"
-            pullText="Kéo để làm mới"
-            releaseText="Thả tay để làm mới"
-            refreshingText="Đang làm mới"
-          >
-            <div className="max-w-xl mx-auto min-h-screen">
-              {/* Header - Sticky */}
-              <div className="sticky top-0 z-50 bg-[#F7F7F7]/95 backdrop-blur-md py-4 mb-2 -mx-3 px-3 max-md:[mask-image:linear-gradient(to_bottom,black_90%,transparent)]">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setActiveMobileSection(null)}
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center group flex-shrink-0"
-                  >
-                    <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
-                  </button>
-                  <div>
-                    <h1 className="text-[32px] md:text-[56px] font-bold leading-tight text-[#1A1A1A] font-anton uppercase tracking-tight">
-                      {activeMobileSection === 'personal' ? "PERSONAL INFO" : activeMobileSection === 'vehicle' ? "VEHICLE DETAILS" : activeMobileSection === 'bank' ? "BANKING DETAILS" : "NOTIFICATION SETTINGS"}
-                    </h1>
-                    <p className="text-sm font-medium md:text-base text-gray-500 mt-0.5">
-                      {activeMobileSection === 'personal' ? "Manage your biography and profile" : activeMobileSection === 'vehicle' ? "Your registered vehicle information" : activeMobileSection === 'bank' ? "Manage your payment and withdrawal account" : "Configure how you receive app alerts"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sub-page Content */}
-              <div className="pb-20">
-                {isLoading ? (
-                  <ProfileSectionShimmer type={activeMobileSection} />
-                ) : isError ? (
-                  <EmptyState
-                    icon={AlertCircle}
-                    title="Hệ thống đang bận"
-                    description="Đã có lỗi xảy ra khi kết nối máy chủ. Vui lòng kiểm tra lại kết nối và thử lại sau ít phút."
-                    buttonText="Thử lại"
-                    onButtonClick={handleSubPageRefresh}
-                    className="py-20"
-                  />
-                ) : !profile ? (
-                  <EmptyState
-                    icon={User}
-                    title="Chưa kích hoạt hồ sơ"
-                    description="Chúng tôi không tìm thấy hồ sơ tài xế liên kết với tài khoản này. Vui lòng liên hệ quản trị viên."
-                    className="py-20"
-                  />
-                ) : (
-                  <>
-                    {activeMobileSection === 'personal' && <PersonalInfoSection profile={profile} />}
-                    {activeMobileSection === 'vehicle' && <VehicleInfoSection profile={profile} />}
-                    {activeMobileSection === 'bank' && <BankInfoSection profile={profile} />}
-                    {activeMobileSection === 'notifications' && <NotificationSettingsSection />}
-                  </>
-                )}
-              </div>
-            </div>
-          </PullToRefresh>
-        </motion.div>
-      </motion.div>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-[#F7F7F7] pt-8 pb-40 overflow-hidden relative">
       <AnimatePresence initial={false}>
         {!activeMobileSection ? (
           <motion.div
             key="main-profile"
-            initial={{ x: '-30%', opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: '-100%', opacity: 0 }}
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
             transition={pageTransition}
-            className="absolute inset-0"
+            className="absolute inset-0 z-0"
           >
             <PullToRefresh
               onRefresh={handleRefresh}
@@ -234,16 +150,16 @@ export default function ProfilePage() {
                   transition={{ duration: 0.4, delay: 0.2 }}
                 >
                   <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 pl-2">Ứng dụng</h3>
-                   <div className="space-y-1">
-                     <ProfileMenuItem 
-                       icon={<Bell className="w-5 h-5" />} 
-                       label="Cài đặt thông báo" 
-                       subLabel="Tùy chỉnh các loại cảnh báo"
-                       onClick={() => setActiveMobileSection('notifications')}
-                     />
-                     <ProfileMenuItem icon={<ShieldCheck className="w-5 h-5" />} label="Bảo mật & Quyền riêng tư" />
-                     <ProfileMenuItem icon={<HelpCircle className="w-5 h-5" />} label="Trung tâm trợ giúp" />
-                   </div>
+                  <div className="space-y-1">
+                    <ProfileMenuItem
+                      icon={<Bell className="w-5 h-5" />}
+                      label="Cài đặt thông báo"
+                      subLabel="Tùy chỉnh các loại cảnh báo"
+                      onClick={() => setActiveMobileSection('notifications')}
+                    />
+                    <ProfileMenuItem icon={<ShieldCheck className="w-5 h-5" />} label="Bảo mật & Quyền riêng tư" />
+                    <ProfileMenuItem icon={<HelpCircle className="w-5 h-5" />} label="Trung tâm trợ giúp" />
+                  </div>
                 </motion.div>
 
                 {/* Logout */}
@@ -264,7 +180,74 @@ export default function ProfilePage() {
             </PullToRefresh>
           </motion.div>
         ) : (
-          renderSubPage()
+          <motion.div
+            key="sub-page-outer-container"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={pageTransition}
+            className="fixed inset-0 z-[200] bg-[#F7F7F7] overflow-hidden"
+          >
+            <PullToRefresh
+              onRefresh={handleSubPageRefresh}
+              className="flex-1 no-scrollbar overflow-visible h-full"
+              pullText="Kéo để làm mới"
+              releaseText="Thả tay để làm mới"
+              refreshingText="Đang làm mới"
+            >
+              <div className="max-w-xl mx-auto min-h-screen px-3">
+                {/* Header - Sticky */}
+                <div className="sticky top-0 z-50 bg-[#F7F7F7]/95 backdrop-blur-md py-4 mb-2 -mx-3 px-3 max-md:[mask-image:linear-gradient(to_bottom,black_90%,transparent)]">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => setActiveMobileSection(null)}
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50 transition-all flex items-center justify-center group flex-shrink-0"
+                    >
+                      <ArrowLeft className="w-5 h-5 text-gray-700 group-hover:text-gray-900" />
+                    </button>
+                    <div>
+                      <h1 className="text-[32px] md:text-[56px] font-bold leading-tight text-[#1A1A1A] font-anton uppercase tracking-tight">
+                        {activeMobileSection === 'personal' ? "PERSONAL INFO" : activeMobileSection === 'vehicle' ? "VEHICLE DETAILS" : activeMobileSection === 'bank' ? "BANKING DETAILS" : "NOTIFICATION SETTINGS"}
+                      </h1>
+                      <p className="text-sm font-medium md:text-base text-gray-500 mt-0.5">
+                        {activeMobileSection === 'personal' ? "Manage your biography and profile" : activeMobileSection === 'vehicle' ? "Your registered vehicle information" : activeMobileSection === 'bank' ? "Manage your payment and withdrawal account" : "Configure how you receive app alerts"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sub-page Content */}
+                <div className="pb-20">
+                  {isLoading ? (
+                    <ProfileSectionShimmer type={activeMobileSection} />
+                  ) : isError ? (
+                    <EmptyState
+                      icon={AlertCircle}
+                      title="Hệ thống đang bận"
+                      description="Đã có lỗi xảy ra khi kết nối máy chủ. Vui lòng kiểm tra lại kết nối và thử lại sau ít phút."
+                      buttonText="Thử lại"
+                      onButtonClick={handleSubPageRefresh}
+                      className="py-20"
+                    />
+                  ) : !profile ? (
+                    <EmptyState
+                      icon={User}
+                      title="Chưa kích hoạt hồ sơ"
+                      description="Chúng tôi không tìm thấy hồ sơ tài xế liên kết với tài khoản này. Vui lòng liên hệ quản trị viên."
+                      className="py-20"
+                    />
+                  ) : (
+                    <>
+                      {activeMobileSection === 'personal' && <PersonalInfoSection profile={profile} />}
+                      {activeMobileSection === 'vehicle' && <VehicleInfoSection profile={profile} />}
+                      {activeMobileSection === 'bank' && <BankInfoSection profile={profile} />}
+                      {activeMobileSection === 'notifications' && <NotificationSettingsSection />}
+                    </>
+                  )}
+                </div>
+              </div>
+            </PullToRefresh>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
