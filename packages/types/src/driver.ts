@@ -45,7 +45,11 @@ export interface UserDriver {
   id: number;
   name: string;
   email: string;
+  phoneNumber?: string;
   isActive?: boolean;
+  gender?: string;
+  age?: number;
+  address?: string;
 }
 
 export interface DriverProfile {

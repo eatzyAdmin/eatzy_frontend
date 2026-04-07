@@ -135,7 +135,7 @@ export default function PersonalInfoSection({ profile }: { profile: ICustomerPro
         </div>
 
         {/* Main Info Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 lg:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 lg:gap-10 px-1">
           {/* ... existing fields ... */}
           {/* Name Input */}
           <div className="group relative">

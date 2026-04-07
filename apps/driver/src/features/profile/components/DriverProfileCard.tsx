@@ -2,14 +2,15 @@
 
 import { ImageWithFallback } from "@repo/ui";
 import { ShieldCheck } from "@repo/ui/icons";
-import { DriverProfile } from "../data/mockProfileData";
+import { DriverProfile } from "@repo/types";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
-export default function DriverProfileCard({ profile }: { profile: DriverProfile }) {
+export default function DriverProfileCard({ profile }: { profile: DriverProfile | null }) {
   const { user } = useAuth();
 
-  const displayName = user?.name || profile.name;
-  const displayInfo = profile.licensePlate || "Chưa cập nhật biển số";
+  const displayName = profile?.user?.name || user?.name || "Chưa đăng nhập";
+  const displayInfo = profile?.vehicle_license_plate || "Chưa cập nhật biển số";
+  const avatarUrl = profile?.profile_photo || "https://i.pravatar.cc/150?img=11";
 
   return (
     <div className="bg-white rounded-[32px] p-3 shadow-[0_8px_32px_rgba(0,0,0,0.03)] border border-gray-100/50 flex items-center gap-5 relative overflow-hidden group">
@@ -20,8 +21,8 @@ export default function DriverProfileCard({ profile }: { profile: DriverProfile 
       <div className="relative shrink-0">
         <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-[#F7F7F7] shadow-xl relative transition-transform group-hover:scale-105 duration-500">
           <ImageWithFallback
-            src={profile.profilePhoto}
-            alt={profile.name}
+            src={avatarUrl}
+            alt={displayName}
             fill
             className="object-cover"
           />
