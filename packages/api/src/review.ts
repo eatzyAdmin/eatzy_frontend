@@ -34,9 +34,9 @@ export const reviewApi = {
    * GET /api/v1/reviews/my-restaurant
    */
   getMyRestaurantReviews: () => {
-    return http.get<IBackendRes<ReviewDTO[]>>(
+    return http.get<IBackendRes<{ result: ReviewDTO[]; meta: { page: number; pages: number; total: number } }>>(
       `/api/v1/reviews/my-restaurant`
-    ) as unknown as Promise<IBackendRes<ReviewDTO[]>>;
+    ) as unknown as Promise<IBackendRes<{ result: ReviewDTO[]; meta: { page: number; pages: number; total: number } }>>;
   },
 
   /**
