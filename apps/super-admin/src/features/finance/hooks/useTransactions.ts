@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { walletApi } from '@repo/api';
-import { WalletTransactionsBackendRes, ResultPaginationDTO, WalletTransactionResponse } from '@repo/types';
+import { ResultPaginationDTO, WalletTransactionResponse } from '@repo/types';
 
 interface UseTransactionsProps {
   searchTerm?: string;
@@ -46,18 +46,20 @@ export const useTransactions = ({
 
       const res = await walletApi.getAllTransactions(params);
 
-      // Explicitly cast to ResultPaginationDTO for safety
-      const data = res.data as unknown as ResultPaginationDTO<WalletTransactionResponse[]>;
-
-      return {
-        result: data.result || [],
-        meta: data.meta,
-      };
+      return (res.data ?? {
+        result: [],
+        meta: {
+          page: 0,
+          pageSize: pageSize,
+          pages: 0,
+          total: 0,
+        },
+      }) as ResultPaginationDTO<WalletTransactionResponse[]>;
     },
     getNextPageParam: (lastPage) => {
       const { meta } = lastPage;
       if (!meta) return undefined;
-      return meta.page + 1 < meta.pages ? meta.page + 1 : undefined;
+      return meta.page < meta.pages ? meta.page : undefined;
     },
     initialPageParam: 0,
   });
