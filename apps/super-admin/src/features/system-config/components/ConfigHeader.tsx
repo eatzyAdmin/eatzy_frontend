@@ -22,7 +22,7 @@ export function ConfigHeader({ onRefresh, isLoading }: ConfigHeaderProps) {
             SYSTEM CONFIGURATION
           </h1>
           <p className="text-gray-500 font-medium mt-1">
-            Quản lý các tham số vận hành, hoa hồng và thiết lập nền tảng Eatzy.
+            Manage operational parameters, commissions, and Eatzy platform settings.
           </p>
         </div>
       </div>

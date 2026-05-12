@@ -12,7 +12,7 @@ export interface DriverProfile {
 }
 
 export const mockDriverProfile: DriverProfile = {
-  name: "Chưa đăng nhập",
+  name: "Guest User",
   phone: "No data",
   email: "No data",
   vehicleType: "No data",

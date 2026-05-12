@@ -49,14 +49,14 @@ export function useSystemConfig() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['system-configs'] });
       showNotification({
-        message: 'Cập nhật cấu hình thành công',
+        message: 'Configuration updated successfully',
         type: 'success',
         format: 'Config'
       });
     },
     onError: (err: any) => {
       showNotification({
-        message: err.message || 'Cập nhật cấu hình thất bại',
+        message: err.message || 'Failed to update configuration',
         type: 'error',
         format: 'Config'
       });

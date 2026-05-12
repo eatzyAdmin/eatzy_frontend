@@ -114,7 +114,7 @@ export default function PwaInstallPrompt() {
                   INSTALL APP
                 </h3>
                 <p className="text-sm text-gray-500 font-medium mt-1 leading-relaxed">
-                  Cài đặt để nhận đơn nhanh hơn và truy cập ngay từ màn hình chính.
+                  Install to receive orders faster and access directly from your home screen.
                 </p>
               </div>
               <button
@@ -132,7 +132,7 @@ export default function PwaInstallPrompt() {
                     <Share className="w-5 h-5" />
                   </div>
                   <div className="text-sm text-blue-800">
-                    <p className="font-bold mb-1">Dành cho iOS:</p>
+                    <p className="font-bold mb-1">For iOS:</p>
                     <p className="opacity-90 leading-tight">
                       Nhấn vào nút <span className="font-bold">Chia sẻ</span> bên dưới trình duyệt, sau đó chọn <span className="font-bold">&quot;Thêm vào Màn hình chính&quot;</span>.
                     </p>

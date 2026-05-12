@@ -58,10 +58,10 @@ export function useRestaurants(search?: string, filterStr?: string) {
     mutationFn: (data: any) => restaurantApi.createRestaurant(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurants', 'admin-list'] });
-      showNotification({ message: 'Tạo cửa hàng thành công', type: 'success', format: "Tạo cửa hàng thành công." });
+      showNotification({ message: 'Store created successfully', type: 'success', format: "Store has been created." });
     },
     onError: (err: any) => {
-      showNotification({ message: err.message || 'Tạo cửa hàng thất bại', type: 'error', format: `${err.message}` });
+      showNotification({ message: err.message || 'Failed to create store', type: 'error', format: `${err.message}` });
     }
   });
 
@@ -69,10 +69,10 @@ export function useRestaurants(search?: string, filterStr?: string) {
     mutationFn: (data: any) => restaurantApi.updateRestaurant(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurants', 'admin-list'] });
-      showNotification({ message: 'Cập nhật cửa hàng thành công', type: 'success', format: "Đã cập nhật cửa hàng." });
+      showNotification({ message: 'Store updated successfully', type: 'success', format: "Store has been updated." });
     },
     onError: (err: any) => {
-      showNotification({ message: err.message || 'Cập nhật cửa hàng thất bại', type: 'error', format: `${err.message}` });
+      showNotification({ message: err.message || 'Failed to update store', type: 'error', format: `${err.message}` });
     }
   });
 
@@ -80,10 +80,10 @@ export function useRestaurants(search?: string, filterStr?: string) {
     mutationFn: (id: number) => restaurantApi.deleteRestaurant(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurants', 'admin-list'] });
-      showNotification({ message: 'Xóa cửa hàng thành công', type: 'success', format: "Đã xóa cửa hàng." });
+      showNotification({ message: 'Store deleted successfully', type: 'success', format: "Store has been deleted." });
     },
     onError: (err: any) => {
-      showNotification({ message: err.message || 'Xóa cửa hàng thất bại', type: 'error', format: `${err.message}` });
+      showNotification({ message: err.message || 'Failed to delete store', type: 'error', format: `${err.message}` });
     }
   });
 
@@ -97,10 +97,10 @@ export function useRestaurants(search?: string, filterStr?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurants', 'admin-list'] });
-      showNotification({ message: 'Cập nhật trạng thái thành công', type: 'success', format: "Trạng thái cửa hàng đã được cập nhật." });
+      showNotification({ message: 'Status updated successfully', type: 'success', format: "Store status has been updated." });
     },
     onError: (err: any) => {
-      showNotification({ message: err.message || 'Cập nhật trạng thái thất bại', type: 'error', format: `${err.message}` });
+      showNotification({ message: err.message || 'Failed to update status', type: 'error', format: `${err.message}` });
     }
   });
 
@@ -113,15 +113,15 @@ export function useRestaurants(search?: string, filterStr?: string) {
       queryClient.invalidateQueries({ queryKey: ['restaurants', 'admin-list'] });
       showNotification({
         type: 'success',
-        message: 'Thành công',
-        format: 'Đã cập nhật trạng thái tài khoản chủ cửa hàng.'
+        message: 'Success',
+        format: 'Owner account status has been updated.'
       });
     },
     onError: (error: any) => {
       showNotification({
         type: 'error',
-        message: 'Lỗi',
-        format: `Không thể cập nhật trạng thái: ${error.message}`
+        message: 'Error',
+        format: `Unable to update status: ${error.message}`
       });
     }
   });

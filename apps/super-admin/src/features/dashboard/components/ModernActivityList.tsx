@@ -38,8 +38,8 @@ export function ModernActivityList({ activities }: ModernActivityListProps) {
   return (
     <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 h-full">
       <div className="flex justify-between items-center mb-8">
-        <h3 className="text-xl font-bold text-[#1A1A1A]">Hoạt động gần đây</h3>
-        <button className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">Xem tất cả</button>
+        <h3 className="text-xl font-bold text-[#1A1A1A]">Recent Activity</h3>
+        <button className="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">View All</button>
       </div>
 
       <div className="flex flex-col gap-6">

@@ -61,11 +61,11 @@ export default function OrdersPage() {
   const handleToggleApp = () => {
     const newStatus = !isAppActive;
     confirm({
-      title: newStatus ? 'Bật ứng dụng' : 'Tắt ứng dụng',
+      title: newStatus ? 'Activate App' : 'Deactivate App',
       description: newStatus
-        ? 'Bật ứng dụng để nhận đơn hàng mới từ khách hàng.'
-        : 'Tắt ứng dụng sẽ ngừng nhận đơn hàng mới. Bạn có chắc chắn?',
-      confirmText: newStatus ? 'Bật' : 'Tắt',
+        ? 'Activate the app to receive new orders from customers.'
+        : 'Deactivating will stop receiving new orders. Are you sure?',
+      confirmText: newStatus ? 'Activate' : 'Deactivate',
       onConfirm: async () => {
         await toggleStatus();
         // Refetch orders after status change
@@ -91,7 +91,7 @@ export default function OrdersPage() {
 
       if (response.statusCode === 200) {
         showNotification({
-          message: 'Đã xác nhận đơn hàng!',
+          message: 'Order confirmed!',
           type: 'success',
           autoHideDuration: 3000
         });
@@ -101,8 +101,8 @@ export default function OrdersPage() {
       }
     } catch (error: any) {
       showNotification({
-        message: 'Lỗi xác nhận đơn hàng',
-        format: error?.message || 'Vui lòng kiểm tra lại kết nối hoặc thử lại sau.',
+        message: 'Order confirmation error',
+        format: error?.message || 'Please check your connection or try again later.',
         type: 'error',
         autoHideDuration: 5000
       });
@@ -115,7 +115,7 @@ export default function OrdersPage() {
 
       if (response.statusCode === 200) {
         showNotification({
-          message: 'Đã từ chối đơn hàng!',
+          message: 'Order rejected!',
           type: 'success',
           autoHideDuration: 3000
         });
@@ -125,8 +125,8 @@ export default function OrdersPage() {
       }
     } catch (error: any) {
       showNotification({
-        message: 'Lỗi từ chối đơn hàng',
-        format: error?.message || 'Vui lòng kiểm tra lại kết nối hoặc thử lại sau.',
+        message: 'Order rejection error',
+        format: error?.message || 'Please check your connection or try again later.',
         type: 'error',
         autoHideDuration: 5000
       });
@@ -139,7 +139,7 @@ export default function OrdersPage() {
 
       if (response.statusCode === 200) {
         showNotification({
-          message: 'Đơn hàng đã sẵn sàng giao!',
+          message: 'Order is ready for delivery!',
           type: 'success',
           autoHideDuration: 3000
         });
@@ -149,8 +149,8 @@ export default function OrdersPage() {
       }
     } catch (error: any) {
       showNotification({
-        message: 'Lỗi trạng thái đơn hàng',
-        format: error?.message || 'Vui lòng kiểm tra lại kết nối hoặc thử lại sau.',
+        message: 'Order status error',
+        format: error?.message || 'Please check your connection or try again later.',
         type: 'error',
         autoHideDuration: 5000
       });
@@ -227,7 +227,7 @@ export default function OrdersPage() {
                       <div className="h-full flex items-center justify-center">
                         <div className="text-center text-gray-400 mt-36">
                           <ClipboardList className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                          <div className="text-sm">Không có đơn hàng mới</div>
+                          <div className="text-sm">No new orders</div>
                         </div>
                       </div>
                     )}
@@ -268,7 +268,7 @@ export default function OrdersPage() {
                       <div className="h-full flex items-center justify-center">
                         <div className="text-center text-gray-400 mt-36">
                           <ChefHat className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                          <div className="text-sm">Không có đơn đang chuẩn bị</div>
+                          <div className="text-sm">No orders in progress</div>
                         </div>
                       </div>
                     )}
@@ -309,7 +309,7 @@ export default function OrdersPage() {
                       <div className="h-full flex items-center justify-center">
                         <div className="text-center text-gray-400 mt-36">
                           <Bike className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                          <div className="text-sm">Chưa có đơn chờ tài xế</div>
+                          <div className="text-sm">No orders waiting for driver</div>
                         </div>
                       </div>
                     )}

@@ -36,7 +36,7 @@ export default function OrderOfferModal({ offer, countdown, onAccept, onReject }
               <div className="mb-16">
                 <div className="flex items-baseline justify-between mb-4">
                   <div className="flex-1">
-                    <div className="text-sm text-[#777] mb-1">Thu nhập ròng</div>
+                    <div className="text-sm text-[#777] mb-1">Net Income</div>
                     <div className="text-5xl font-anton font-bold text-[var(--primary)]">
                       {Intl.NumberFormat('vi-VN').format(offer.netEarning)}
                       <span className="text-2xl ml-1">đ</span>
@@ -44,7 +44,7 @@ export default function OrderOfferModal({ offer, countdown, onAccept, onReject }
                   </div>
                   <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 text-[#555]">
                     {payIcon(offer.paymentMethod)}
-                    <span className="text-sm font-semibold">{offer.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Thẻ/Ví'}</span>
+                    <span className="text-sm font-semibold">{offer.paymentMethod === 'CASH' ? 'Cash' : 'E-wallet'}</span>
                   </div>
                 </div>
 
@@ -58,7 +58,7 @@ export default function OrderOfferModal({ offer, countdown, onAccept, onReject }
                   <div className="h-4 w-px bg-gray-200" />
                   <div className="flex items-center gap-2 text-[#777]">
                     <MapPin size={16} className="text-[var(--primary)]" />
-                    <span>Cách bạn:</span>
+                    <span>Distance to you:</span>
                     <span className="font-semibold text-[#1A1A1A]">{offer.distanceKm.toFixed(2)} km</span>
                   </div>
                 </div>
@@ -84,7 +84,7 @@ export default function OrderOfferModal({ offer, countdown, onAccept, onReject }
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-semibold text-[var(--primary)] uppercase tracking-wide mb-1">
-                      Điểm lấy hàng
+                      Pickup Point
                     </div>
                     <div className="font-bold text-[#1A1A1A] text-lg mb-0.5">{offer.pickup.name}</div>
                     <div className="text-sm text-[#777] line-clamp-2">{offer.pickup.address}</div>
@@ -112,9 +112,9 @@ export default function OrderOfferModal({ offer, countdown, onAccept, onReject }
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-1">
-                      Điểm giao hàng
+                      Delivery Point
                     </div>
-                    <div className="font-bold text-[#1A1A1A] text-lg mb-0.5">Điểm giao</div>
+                    <div className="font-bold text-[#1A1A1A] text-lg mb-0.5">Drop-off</div>
                     <div className="text-sm text-[#777] line-clamp-2">{offer.dropoff.address}</div>
                   </div>
                 </motion.div>

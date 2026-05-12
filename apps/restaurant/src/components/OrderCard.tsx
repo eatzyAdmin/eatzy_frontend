@@ -58,7 +58,7 @@ export default function OrderCard({ order, onClick }: OrderCardProps) {
         <div className="flex-1 min-w-0">
           <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Customer</h4>
           <div className="font-bold text-[#1A1A1A] text-sm truncate">
-            {order.customer?.name || 'Khách hàng'}
+            {order.customer?.name || 'Customer'}
           </div>
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function OrderCard({ order, onClick }: OrderCardProps) {
         <div className="flex items-start gap-2">
           <MapPin className="w-4 h-4 text-[var(--primary)] flex-shrink-0 mt-0.5" strokeWidth={2.4} />
           <div className="font-bold text-gray-700 text-base line-clamp-2">
-            {order.deliveryLocation.address || 'Địa chỉ giao hàng'}
+            {order.deliveryLocation.address || 'Delivery Address'}
           </div>
         </div>
       </div>

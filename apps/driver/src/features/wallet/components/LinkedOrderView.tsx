@@ -70,9 +70,9 @@ export default function LinkedOrderView({
       <PullToRefresh
         onRefresh={async () => onClose()}
         className="flex-1 min-h-0 overflow-y-auto no-scrollbar"
-        pullText="Kéo xuống để đóng"
-        releaseText="Thả tay để đóng ngay"
-        refreshingText="Đang đóng..."
+        pullText="Pull down to close"
+        releaseText="Release to close now"
+        refreshingText="Closing..."
         usePortal={false}
       >
         <div className="p-4 px-3 space-y-4">
@@ -124,20 +124,20 @@ export default function LinkedOrderView({
                 {/* Pickup */}
                 <div>
                   <div className="text-xs font-bold text-[var(--primary)] uppercase tracking-wide mb-1 flex items-center justify-between">
-                    <span>Nhà hàng</span>
+                    <span>Restaurant</span>
                   </div>
                   <div className="font-bold text-[#1A1A1A] text-sm mb-0.5 line-clamp-1">
-                    {order.restaurantLocation?.name || "Đang cập nhật"}
+                    {order.restaurantLocation?.name || "Updating..."}
                   </div>
                   <div className="text-xs text-gray-500 font-medium line-clamp-1">
-                    {order.restaurantLocation?.address || "Đang cập nhật địa chỉ"}
+                    {order.restaurantLocation?.address || "Address updating..."}
                   </div>
                 </div>
 
                 {/* Dropoff */}
                 <div className="mt-4">
                   <div className="text-xs font-bold text-red-500 uppercase tracking-wide mb-1 flex items-center justify-between">
-                    <span>Điểm giao</span>
+                    <span>Delivery Point</span>
                   </div>
                   <div className="font-bold text-[#1A1A1A] text-sm mb-0.5 line-clamp-2">
                     {order.deliveryLocation?.address}
@@ -157,7 +157,7 @@ export default function LinkedOrderView({
                 <h3 className="text-xl font-black font-anton text-[#1A1A1A]">ORDER INVENTORY</h3>
               </div>
               <span className="text-xs font-bold bg-[#1A1A1A] text-white px-3 py-1 rounded-lg">
-                {order.items.length} món
+                {order.items.length} items
               </span>
             </div>
 
@@ -188,11 +188,11 @@ export default function LinkedOrderView({
 
             <div className="space-y-3.5 px-1">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500 font-medium">Tạm tính</span>
+                <span className="text-gray-500 font-medium">Subtotal</span>
                 <span className="font-bold text-gray-900">{formatVnd(order.subtotal)}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500 font-medium">Phí giao hàng</span>
+                <span className="text-gray-500 font-medium">Delivery Fee</span>
                 <span className="font-bold text-gray-900">{formatVnd(order.fee)}</span>
               </div>
 
@@ -201,7 +201,7 @@ export default function LinkedOrderView({
                   <div className="flex justify-between items-center text-sm font-bold text-red-500">
                     <div className="flex items-center gap-1.5">
                       <Ticket className="w-3.5 h-3.5" />
-                      <span>Khuyến mãi</span>
+                      <span>Promotion</span>
                     </div>
                     <span>-{formatVnd(order.discount)}</span>
                   </div>
@@ -219,7 +219,7 @@ export default function LinkedOrderView({
             <div className="h-px bg-gray-200/50 my-4" />
 
             <div className="flex justify-between items-center pt-2 px-1">
-              <span className="font-bold text-[#1A1A1A] text-base">Tổng thanh toán</span>
+              <span className="font-bold text-[#1A1A1A] text-base">Total Payable</span>
               <div className="flex flex-col items-end">
                 <span className="font-anton text-[26px] text-[var(--primary)] leading-none whitespace-nowrap drop-shadow-sm">
                   {formatVnd(order.total)}

@@ -12,9 +12,9 @@ export default function VehicleInfoSection({ profile }: { profile: DriverProfile
     return (
       <EmptyState
         icon={Bike}
-        title="Chưa đăng ký xe"
-        description="Bạn chưa đăng ký phương tiện vận chuyển hoặc thông tin xe đang được xét duyệt. Vui lòng liên hệ bộ phận hỗ trợ."
-        buttonText="Gửi yêu cầu hỗ trợ"
+        title="Vehicle Not Registered"
+        description="You have not registered a transport vehicle or your vehicle information is being reviewed. Please contact support."
+        buttonText="Contact Support"
         onButtonClick={() => window.open('tel:19001234')}
         className="py-12"
       />
@@ -57,22 +57,22 @@ export default function VehicleInfoSection({ profile }: { profile: DriverProfile
                 <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-gray-300 border border-gray-100">
                   <Camera size={24} />
                 </div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Chưa có ảnh xe</span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">No vehicle photo</span>
               </>
             )}
 
             <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-xl border flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-tight backdrop-blur-md shadow-sm ${getStatusColor(profile.vehicle_photo_status)}`}>
               {getStatusIcon(profile.vehicle_photo_status)}
-              {profile.vehicle_photo_status || 'Chưa xác thực'}
+              {profile.vehicle_photo_status || 'Not verified'}
             </div>
           </div>
 
           {/* Vehicle Details Grid */}
           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-1 w-full">
-            <InfoGridItem icon={<Award size={14} />} label="Loại xe" value={profile.vehicle_type} />
-            <InfoGridItem icon={<Hash size={14} />} label="Biển số xe" value={profile.vehicle_license_plate} isMono />
-            <InfoGridItem icon={<FileText size={14} />} label="Hãng & Dòng xe" value={`${profile.vehicle_brand || "Chưa cập nhật"} ${profile.vehicle_model || ""}`} />
-            <InfoGridItem icon={<div className="w-1.5 h-1.5 rounded-full bg-blue-400" />} label="Dòng xe & Năm" value={`${profile.vehicle_model || "Chưa cập nhật"} ${profile.vehicle_year ? `(${profile.vehicle_year})` : ""}`} />
+            <InfoGridItem icon={<Award size={14} />} label="Vehicle Type" value={profile.vehicle_type} />
+            <InfoGridItem icon={<Hash size={14} />} label="License Plate" value={profile.vehicle_license_plate} isMono />
+            <InfoGridItem icon={<FileText size={14} />} label="Brand & Model" value={`${profile.vehicle_brand || "Not updated"} ${profile.vehicle_model || ""}`} />
+            <InfoGridItem icon={<div className="w-1.5 h-1.5 rounded-full bg-blue-400" />} label="Model & Year" value={`${profile.vehicle_model || "Not updated"} ${profile.vehicle_year ? `(${profile.vehicle_year})` : ""}`} />
           </div>
         </div>
       </div>

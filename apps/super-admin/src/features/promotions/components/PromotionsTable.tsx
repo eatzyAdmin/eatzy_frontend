@@ -60,13 +60,13 @@ export default function PromotionsTable({
     const isActive = (promo as any).active ?? false;
 
     confirm({
-      title: isDelete ? 'Xóa chiến dịch?' : (isActive ? 'Tạm dừng chiến dịch?' : 'Kích hoạt chiến dịch?'),
+      title: isDelete ? 'Delete Campaign?' : (isActive ? 'Pause Campaign?' : 'Activate Campaign?'),
       type: isDelete ? 'danger' : 'info',
       description: isDelete
-        ? "Hành động này không thể hoàn tác. Chiến dịch sẽ bị xóa vĩnh viễn khỏi hệ thống."
+        ? "This action cannot be undone. The campaign will be permanently deleted from the system."
         : (isActive
-          ? "Tạm dừng sẽ khiến người dùng không thể áp dụng mã giảm giá này."
-          : "Kích hoạt sẽ cho phép người dùng áp dụng mã giảm giá ngay lập tức."),
+          ? "Pausing will prevent users from applying this discount code."
+          : "Activating will allow users to apply the discount code immediately."),
       confirmText: isDelete ? "Slide to Delete" : "Slide to Confirm",
       onConfirm: async () => {
         if (type === 'delete') {
@@ -126,7 +126,7 @@ export default function PromotionsTable({
           fetchNextPage={onLoadMore}
           onRowClick={onEdit}
           emptyTitle="No Campaigns Found"
-          emptyMessage="Không tìm thấy chiến dịch nào khớp với tiêu chí tìm kiếm của bạn. Hãy thử thay đổi bộ lọc."
+          emptyMessage="No campaigns found matching your search criteria. Try changing the filters."
           emptyIcon={<Tag size={48} />}
           onResetFilters={() => { onSearch(''); handleApplyFilters(''); onRefresh(); }}
           handleSort={(key) => console.log('Sort by', key)}

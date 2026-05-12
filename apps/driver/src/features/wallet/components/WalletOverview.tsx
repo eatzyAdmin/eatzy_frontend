@@ -26,7 +26,7 @@ export default function WalletOverview({
           className={`px-5 py-2.5 bg-[var(--primary)] font-extrabold text-gray-800 text-[12px] rounded-tr-[32px] rounded-bl-[32px] shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center gap-1.5 uppercase tracking-tight ${isLoading ? 'opacity-50' : ''}`}
         >
           <Plus size={14} strokeWidth={4} />
-          Nạp / Rút
+          Top Up / Withdraw
         </motion.button>
       </div>
 

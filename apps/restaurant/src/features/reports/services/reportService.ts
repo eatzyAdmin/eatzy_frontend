@@ -246,7 +246,7 @@ const generateOrdersData = (): OrderReportItem[] => {
       discountAmount,
       totalAmount: subtotal + deliveryFee - discountAmount,
       itemsCount: Math.floor(Math.random() * 5) + 1,
-      cancellationReason: status === 'CANCELLED' ? 'Khách hàng hủy đơn' : undefined,
+      cancellationReason: status === 'CANCELLED' ? 'Customer cancelled order' : undefined,
     });
   }
 
@@ -401,7 +401,7 @@ const generateReviewSummary = (): ReviewSummaryDto => {
       customerName: customerNames[i % customerNames.length],
       rating,
       comment: reviewComments[Math.floor(Math.random() * reviewComments.length)],
-      reply: Math.random() > 0.4 ? 'Cảm ơn quý khách đã ủng hộ! Chúng tôi rất vui khi bạn hài lòng.' : null,
+      reply: Math.random() > 0.4 ? 'Thank you for your support! We are glad you are satisfied.' : null,
       dishNames: mockDishes.slice(0, Math.floor(Math.random() * 3) + 1).map(d => d.dishName),
       createdAt: reviewDate.toISOString(),
     });

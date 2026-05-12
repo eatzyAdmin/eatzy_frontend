@@ -60,10 +60,10 @@ export function useDrivers(search?: string, filterStr?: string, sortField?: stri
     mutationFn: (data: CreateDriverProfileDto) => driverApi.createDriverProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['drivers'] });
-      showNotification({ message: 'Tạo tài xế thành công', type: 'success', format: "Đã tạo hồ sơ tài xế mới." });
+      showNotification({ message: 'Driver created successfully', type: 'success', format: "New driver profile has been created." });
     },
     onError: (err: any) => {
-      showNotification({ message: err.message || 'Tạo tài xế thất bại', type: 'error', format: `${err.message}` });
+      showNotification({ message: err.message || 'Failed to create driver', type: 'error', format: `${err.message}` });
     }
   });
 
@@ -71,10 +71,10 @@ export function useDrivers(search?: string, filterStr?: string, sortField?: stri
     mutationFn: (data: UpdateDriverProfileDto) => driverApi.updateDriverProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['drivers'] });
-      showNotification({ message: 'Cập nhật tài xế thành công', type: 'success', format: "Đồ sơ tài xế đã được cập nhật." });
+      showNotification({ message: 'Driver updated successfully', type: 'success', format: "Driver profile has been updated." });
     },
     onError: (err: any) => {
-      showNotification({ message: err.message || 'Cập nhật tài xế thất bại', type: 'error', format: `${err.message}` });
+      showNotification({ message: err.message || 'Failed to update driver', type: 'error', format: `${err.message}` });
     }
   });
 
@@ -82,10 +82,10 @@ export function useDrivers(search?: string, filterStr?: string, sortField?: stri
     mutationFn: (id: number) => driverApi.deleteDriverProfile(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['drivers'] });
-      showNotification({ message: 'Xóa tài xế thành công', type: 'success', format: "Đã xóa hồ sơ tài xế." });
+      showNotification({ message: 'Driver deleted successfully', type: 'success', format: "Driver profile has been deleted." });
     },
     onError: (err: any) => {
-      showNotification({ message: err.message || 'Xóa tài xế thất bại', type: 'error', format: `${err.message}` });
+      showNotification({ message: err.message || 'Failed to delete driver', type: 'error', format: `${err.message}` });
     }
   });
 
@@ -98,15 +98,15 @@ export function useDrivers(search?: string, filterStr?: string, sortField?: stri
       queryClient.invalidateQueries({ queryKey: ['drivers'] });
       showNotification({
         type: 'success',
-        message: 'Thành công',
-        format: 'Đã cập nhật trạng thái tài khoản tài xế.'
+        message: 'Success',
+        format: 'Driver account status has been updated.'
       });
     },
     onError: (error: any) => {
       showNotification({
         type: 'error',
-        message: 'Lỗi',
-        format: `Không thể cập nhật trạng thái: ${error.message}`
+        message: 'Error',
+        format: `Unable to update status: ${error.message}`
       });
     }
   });

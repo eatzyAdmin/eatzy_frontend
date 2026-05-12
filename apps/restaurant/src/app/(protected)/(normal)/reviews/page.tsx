@@ -46,12 +46,12 @@ export default function ReviewsPage() {
   }, [reviews]);
 
   const categories = [
-    { label: "Mức độ ngon", score: averageRating, icon: ChefHat },
-    { label: "Độ chính xác", score: averageRating, icon: CheckCircle2 },
-    { label: "Phục vụ", score: averageRating, icon: Sparkles },
-    { label: "Giao tiếp", score: averageRating, icon: MessageSquare },
-    { label: "Vị trí", score: averageRating, icon: Map },
-    { label: "Giá trị", score: averageRating, icon: Tag },
+    { label: "Taste", score: averageRating, icon: ChefHat },
+    { label: "Accuracy", score: averageRating, icon: CheckCircle2 },
+    { label: "Service", score: averageRating, icon: Sparkles },
+    { label: "Communication", score: averageRating, icon: MessageSquare },
+    { label: "Location", score: averageRating, icon: Map },
+    { label: "Value", score: averageRating, icon: Tag },
   ];
 
   const ratingDistributionDisplay = useMemo(() => {
@@ -82,10 +82,10 @@ export default function ReviewsPage() {
   }, [displayReviews, searchQuery, sortBy, selectedRating]);
 
   const sortOptions = [
-    { value: 'relevant', label: 'Phù hợp nhất' },
-    { value: 'recent', label: 'Gần đây nhất' },
-    { value: 'highest', label: 'Đánh giá cao nhất' },
-    { value: 'lowest', label: 'Đánh giá thấp nhất' },
+    { value: 'relevant', label: 'Most relevant' },
+    { value: 'recent', label: 'Most recent' },
+    { value: 'highest', label: 'Highest rating' },
+    { value: 'lowest', label: 'Lowest rating' },
   ];
 
   const handleReply = async (reviewId: number) => {
@@ -111,7 +111,7 @@ export default function ReviewsPage() {
             </span>
             {unrepliedCount > 0 && (
               <span className="px-2.5 py-0.5 rounded-lg bg-orange-100 text-orange-700 text-[10px] font-bold uppercase tracking-wider">
-                {unrepliedCount} chưa phản hồi
+                {unrepliedCount} unreplied
               </span>
             )}
           </div>
@@ -141,9 +141,9 @@ export default function ReviewsPage() {
                   <span className="text-4xl drop-shadow-md">🏆</span>
                 </div>
 
-                <h3 className="text-xl font-anton font-bold text-[#1A1A1A] uppercase tracking-wide mb-2">Được khách yêu thích</h3>
+                <h3 className="text-xl font-anton font-bold text-[#1A1A1A] uppercase tracking-wide mb-2">Loved by Customers</h3>
                 <p className="text-gray-600 text-sm leading-relaxed px-2">
-                  Dựa trên {totalReviews} đánh giá từ khách hàng.
+                  Based on {totalReviews} customer reviews.
                 </p>
               </div>
 
@@ -309,7 +309,7 @@ export default function ReviewsPage() {
                           </div>
                           <div>
                             <div className="font-bold text-[#1A1A1A] text-base">{review.authorName}</div>
-                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Đơn #{review.orderId}</div>
+                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Order #{review.orderId}</div>
                           </div>
                         </div>
 
@@ -339,7 +339,7 @@ export default function ReviewsPage() {
                           <div className="mt-3 bg-lime-50 rounded-2xl p-4 border border-lime-100">
                             <div className="flex items-center gap-2 mb-2">
                               <MessageSquare className="w-4 h-4 text-lime-600" />
-                              <span className="text-xs font-bold text-lime-700 uppercase tracking-wider">Phản hồi của bạn</span>
+                              <span className="text-xs font-bold text-lime-700 uppercase tracking-wider">Your Reply</span>
                             </div>
                             <p className="text-lime-900 text-sm font-medium">{review.reply}</p>
                           </div>
@@ -350,7 +350,7 @@ export default function ReviewsPage() {
                                 type="text"
                                 value={replyText}
                                 onChange={(e) => setReplyText(e.target.value)}
-                                placeholder="Nhập phản hồi của bạn..."
+                                placeholder="Type your reply..."
                                 className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-lime-300 focus:ring-2 focus:ring-lime-100 focus:outline-none text-sm"
                                 disabled={isReplying}
                               />
@@ -360,7 +360,7 @@ export default function ReviewsPage() {
                                 className="px-4 py-3 bg-lime-500 text-white rounded-xl font-bold text-sm hover:bg-lime-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                               >
                                 <Send className="w-4 h-4" />
-                                {isReplying ? 'Đang gửi...' : 'Gửi'}
+                                {isReplying ? 'Sending...' : 'Send'}
                               </button>
                               <button
                                 onClick={() => { setReplyingTo(null); setReplyText(""); }}
@@ -376,7 +376,7 @@ export default function ReviewsPage() {
                             className="mt-3 flex items-center gap-2 text-sm font-bold text-lime-600 hover:text-lime-700 transition-colors"
                           >
                             <MessageSquare className="w-4 h-4" />
-                            Phản hồi đánh giá
+                            Reply to review
                           </button>
                         )}
                       </div>
@@ -399,10 +399,10 @@ function formatRelativeDate(dateString: string): string {
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'Hôm nay';
-  if (diffDays === 1) return 'Hôm qua';
-  if (diffDays < 7) return `${diffDays} ngày trước`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} tuần trước`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} tháng trước`;
-  return `${Math.floor(diffDays / 365)} năm trước`;
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+  return `${Math.floor(diffDays / 365)} years ago`;
 }

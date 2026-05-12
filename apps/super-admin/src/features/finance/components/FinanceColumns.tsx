@@ -15,7 +15,6 @@ export const getTransactionTypeStyle = (type: string) => {
 export const getStatusBadge = (status: WalletTransactionStatus) => {
   switch (status) {
     case 'SUCCESS':
-    case 'COMPLETED':
       return (
         <span className="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit bg-lime-100 text-lime-600 border border-lime-100/50">
           <CheckCircle2 size={12} strokeWidth={3.2} />

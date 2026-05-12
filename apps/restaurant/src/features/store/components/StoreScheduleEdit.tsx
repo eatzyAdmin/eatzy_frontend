@@ -32,10 +32,10 @@ const PASTEL_PALETTE = [
 ];
 
 const ZONES = [
-  { label: 'SÁNG', start: 0, end: 11 },
-  { label: 'TRƯA', start: 11, end: 14 },
-  { label: 'CHIỀU', start: 14, end: 18 },
-  { label: 'TỐI', start: 18, end: 24 },
+  { label: 'MORNING', start: 0, end: 11 },
+  { label: 'LUNCH', start: 11, end: 14 },
+  { label: 'AFTERNOON', start: 14, end: 18 },
+  { label: 'EVENING', start: 18, end: 24 },
 ];
 
 export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: StoreScheduleEditProps) {
@@ -201,18 +201,18 @@ export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: 
     if (currentJson === initialJson) {
       showNotification({
         type: 'error',
-        message: 'Bạn chưa thực hiện thay đổi nào!',
-        format: 'Kiểm tra lại các thay đổi và thử lại!',
+        message: 'No changes made!',
+        format: 'Check your changes and try again!',
         autoHideDuration: 3000
       });
       return;
     }
 
     confirm({
-      title: 'Cập nhật lịch làm việc',
-      description: 'Lịch làm việc mới sẽ được áp dụng cho cửa hàng của bạn. Lưu ý là đây chỉ là lịch hiển thị cho khách hàng thôi, thời gian hoạt động của quán sẽ phụ thuộc vào lúc bạn bật/tắt app.',
+      title: 'Update business hours',
+      description: 'The new business hours will be applied to your store. Note: this is for customer display only; your actual app availability depends on when you toggle Open/Closed.',
       type: 'info',
-      confirmText: 'Lưu thay đổi',
+      confirmText: 'Save changes',
       onConfirm: async () => {
         await onSave({ openingHours });
       }
@@ -361,8 +361,8 @@ export default function StoreScheduleEdit({ store, onSave, onClose, layoutId }: 
       setConflictShifts(newConflicts);
       showNotification({
         type: 'error',
-        message: 'Oops! Bị trùng với một lịch khác mất rồi!',
-        format: 'Kiểm tra lại các lịch trình khác và điều chỉnh phù hợp nha.',
+        message: 'Oops! Overlapping schedule detected!',
+        format: 'Please check other schedules and adjust accordingly.',
         autoHideDuration: 3000
       });
 

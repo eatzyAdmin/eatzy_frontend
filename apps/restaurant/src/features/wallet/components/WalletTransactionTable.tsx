@@ -187,7 +187,7 @@ export default function WalletTransactionTable({
           fetchNextPage={onLoadMore}
           onRowClick={handleRowClick}
           emptyTitle="No Transactions Found"
-          emptyMessage="Không tìm thấy giao dịch nào khớp với tiêu chí tìm kiếm của bạn."
+          emptyMessage="No transactions found matching your search criteria."
           emptyIcon={<FileText size={48} />}
           onResetFilters={handleClearFilters}
           handleSort={(key) => console.log('Sort by', key)}

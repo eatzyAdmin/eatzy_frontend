@@ -56,10 +56,10 @@ export function usePromotions(search?: string, filterStr?: string) {
     mutationFn: (data: CreateVoucherDto) => voucherApi.createVoucher(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
-      showNotification({ message: 'Tạo chiến dịch thành công', type: 'success', format: "Tạo chiến dịch thành công." });
+      showNotification({ message: 'Campaign created successfully', type: 'success', format: "Campaign has been created." });
     },
     onError: (err: any) => {
-      showNotification({ message: err.message || 'Tạo chiến dịch thất bại', type: 'error', format: `${err.message}` });
+      showNotification({ message: err.message || 'Failed to create campaign', type: 'error', format: `${err.message}` });
     }
   });
 
@@ -67,10 +67,10 @@ export function usePromotions(search?: string, filterStr?: string) {
     mutationFn: (data: CreateVoucherDto) => voucherApi.updateVoucher(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
-      showNotification({ message: 'Cập nhật chiến dịch thành công', type: 'success', format: "Đã cập nhật chiến dịch." });
+      showNotification({ message: 'Campaign updated successfully', type: 'success', format: "Campaign has been updated." });
     },
     onError: (err: any) => {
-      showNotification({ message: err.message || 'Cập nhật chiến dịch thất bại', type: 'error', format: `${err.message}` });
+      showNotification({ message: err.message || 'Failed to update campaign', type: 'error', format: `${err.message}` });
     }
   });
 
@@ -78,21 +78,21 @@ export function usePromotions(search?: string, filterStr?: string) {
     mutationFn: (id: number) => voucherApi.deleteVoucher(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
-      showNotification({ message: 'Xóa chiến dịch thành công', type: 'success', format: "Đã xóa chiến dịch." });
+      showNotification({ message: 'Campaign deleted successfully', type: 'success', format: "Campaign has been deleted." });
     },
     onError: (err: any) => {
-      showNotification({ message: err.message || 'Xóa chiến dịch thất bại', type: 'error', format: `${err.message}` });
+      showNotification({ message: err.message || 'Failed to delete campaign', type: 'error', format: `${err.message}` });
     }
   });
 
   const toggleMutation = useMutation({
     mutationFn: (id: number) => voucherApi.toggleVoucherActive(id),
     onSuccess: () => {
-      showNotification({ message: 'Cập nhật trạng thái thành công', type: 'success', format: "Đã cập nhật trạng thái." });
+      showNotification({ message: 'Status updated successfully', type: 'success', format: "Status has been updated." });
       queryClient.invalidateQueries({ queryKey: ['promotions'] });
     },
     onError: (err: any) => {
-      showNotification({ message: err.message || 'Cập nhật trạng thái thất bại', type: 'error', format: `${err.message}` });
+      showNotification({ message: err.message || 'Failed to update status', type: 'error', format: `${err.message}` });
     }
   });
 

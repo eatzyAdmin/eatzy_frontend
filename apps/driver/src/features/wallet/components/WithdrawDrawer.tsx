@@ -51,12 +51,12 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
 
   const handleNext = () => {
     if (amountNumber < MIN_LIMIT) {
-      showNotification({ message: "Số tiền quá nhỏ", type: "error", format: "Số tiền rút tối thiểu là 50.000đ" });
+      showNotification({ message: "Amount too small", type: "error", format: "Minimum withdrawal is 50.000đ" });
       return;
     }
     if (amountNumber > balance) {
       setShakeKey(prev => prev + 1);
-      showNotification({ message: "Số dư không đủ", type: "error", format: "Kiểm tra lại số tiền và thử lại!" });
+      showNotification({ message: "Insufficient balance", type: "error", format: "Check your balance and try again!" });
       return;
     }
     setStep('confirm');
@@ -70,7 +70,7 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
     setIsProcessing(true);
     setIsCompleted(true);
     setTimeout(() => {
-      showNotification({ message: "Yêu cầu rút tiền thành công", type: "success", format: `Rút thành công ${formatVnd(amountNumber)}` });
+      showNotification({ message: "Withdrawal request successful", type: "success", format: `Successfully withdrawn ${formatVnd(amountNumber)}` });
       onClose();
       setAmount("0");
     }, 1500);
@@ -127,10 +127,10 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
                     <PullToRefresh onRefresh={handleRefresh} className="flex-1 no-scrollbar overflow-y-auto">
                       <div className="p-6 flex flex-col items-center">
                         <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full mb-4">
-                          <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Số dư khả dụng:</span>
+                          <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Available Balance:</span>
                           <span className="text-[13px] font-extrabold text-[var(--primary)]">{formatVnd(balance)}</span>
                         </div>
-                        
+
                         <div className="flex items-start">
                           <motion.span
                             key={`amount-${shakeKey}`}
@@ -148,7 +148,7 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
 
                         {amountNumber > balance && (
                           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-xs font-bold mt-2">
-                            Số dư không đủ để rút
+                            Insufficient balance to withdraw
                           </motion.p>
                         )}
                       </div>
@@ -163,7 +163,7 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
                           </div>
                           <div>
                             <p className="text-sm font-bold text-[#1A1A1A]">Techcombank</p>
-                            <p className="text-[11px] text-gray-500 font-medium">Chi nhánh Hồ Chí Minh • **** 8829</p>
+                            <p className="text-[11px] text-gray-500 font-medium">Ho Chi Minh Branch • **** 8829</p>
                           </div>
                         </div>
                         <ChevronRight className="w-5 h-5 text-gray-400" />
@@ -213,7 +213,7 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
                     className="flex-1 p-6 space-y-8 flex flex-col h-full"
                   >
                     <div className="text-center space-y-2 mt-8">
-                      <div className="text-sm font-medium text-gray-500 uppercase tracking-widest">Số tiền rút</div>
+                      <div className="text-sm font-medium text-gray-500 uppercase tracking-widest">Withdrawal Amount</div>
                       <div className="text-5xl font-anton text-[#1A1A1A] tracking-tight">
                         {formatVnd(amountNumber)}
                       </div>
@@ -225,7 +225,7 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
                           <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center text-red-600">
                             <CreditCard className="w-4 h-4" />
                           </div>
-                          <span className="text-gray-500 font-medium">Tài khoản nhận</span>
+                          <span className="text-gray-500 font-medium">Recipient Account</span>
                         </div>
                         <span className="font-bold text-gray-900 text-right">TECH ***8829</span>
                       </div>
@@ -234,15 +234,15 @@ export default function WithdrawDrawer({ open, onClose, balance }: { open: boole
                           <div className="w-8 h-8 bg-lime-50 rounded-lg flex items-center justify-center text-lime-600">
                             <Wallet className="w-4 h-4" />
                           </div>
-                          <span className="text-gray-500 font-medium">Phí giao dịch</span>
+                          <span className="text-gray-500 font-medium">Transaction Fee</span>
                         </div>
-                        <span className="font-bold text-emerald-600 uppercase text-xs">Miễn phí</span>
+                        <span className="font-bold text-emerald-600 uppercase text-xs">Free</span>
                       </div>
                     </div>
 
                     <div className="mt-auto pb-10">
                       <SwipeToConfirm
-                        text={isCompleted ? "Đang xử lý..." : "Trượt để rút tiền"}
+                        text={isCompleted ? "Processing..." : "Slide to withdraw"}
                         onComplete={handleSwipeComplete}
                         disabled={isProcessing || isCompleted}
                         isLoading={isProcessing}

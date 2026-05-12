@@ -138,11 +138,11 @@ export default function ReportHeader({
   }, []);
 
   const tabs = [
-    { id: 'dashboard' as ReportTab, label: 'Tổng quan', icon: BarChart3 },
-    { id: 'revenue' as ReportTab, label: 'Doanh thu', icon: TrendingUp },
-    { id: 'orders' as ReportTab, label: 'Đơn hàng', icon: ShoppingBag },
-    { id: 'menu' as ReportTab, label: 'Thực đơn', icon: UtensilsCrossed },
-    { id: 'reviews' as ReportTab, label: 'Đánh giá', icon: Star },
+    { id: 'dashboard' as ReportTab, label: 'Overview', icon: BarChart3 },
+    { id: 'revenue' as ReportTab, label: 'Revenue', icon: TrendingUp },
+    { id: 'orders' as ReportTab, label: 'Orders', icon: ShoppingBag },
+    { id: 'menu' as ReportTab, label: 'Menu', icon: UtensilsCrossed },
+    { id: 'reviews' as ReportTab, label: 'Reviews', icon: Star },
   ];
 
   return (
@@ -175,7 +175,7 @@ export default function ReportHeader({
                 <Calendar className="w-4 h-4" />
               </div>
               <div className="flex flex-col items-start min-w-[120px]">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-lime-600">Thời gian</span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-lime-600">Period</span>
                 <span className="text-sm font-bold text-gray-900 leading-tight">
                   {format(startDate, 'MMMM yyyy', { locale: vi })}
                 </span>
@@ -204,7 +204,7 @@ export default function ReportHeader({
               onClick={() => setIsExportOpen(!isExportOpen)}
               className="flex items-center gap-2 bg-[#1A1A1A] text-white pl-4 pr-3 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-black/10 hover:shadow-xl transition-all"
             >
-              <span>Xuất Báo Cáo</span>
+              <span>Export Report</span>
               <div className="w-px h-4 bg-white/20 mx-1"></div>
               <ChevronDown className={`w-4 h-4 transition-transform ${isExportOpen ? 'rotate-180' : ''}`} />
             </motion.button>
@@ -226,7 +226,7 @@ export default function ReportHeader({
                     </div>
                     <div>
                       <span className="block text-sm font-bold text-gray-900">Excel</span>
-                      <span className="block text-[10px] font-medium text-gray-400">Bảng tính .xlsx</span>
+                      <span className="block text-[10px] font-medium text-gray-400">Spreadsheet .xlsx</span>
                     </div>
                   </button>
                   <button
@@ -238,7 +238,7 @@ export default function ReportHeader({
                     </div>
                     <div>
                       <span className="block text-sm font-bold text-gray-900">PDF</span>
-                      <span className="block text-[10px] font-medium text-gray-400">Tài liệu .pdf</span>
+                      <span className="block text-[10px] font-medium text-gray-400">Document .pdf</span>
                     </div>
                   </button>
                 </motion.div>

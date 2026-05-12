@@ -27,18 +27,18 @@ export default function StoreLocationEdit({ store, onSave, onClose, layoutId }: 
     if (Object.keys(updates).length === 0) {
       showNotification({
         type: 'error',
-        message: 'Bạn chưa thực hiện thay đổi nào!',
-        format: 'Kiểm tra lại các thay đổi và thử lại!',
+        message: 'No changes made!',
+        format: 'Check your changes and try again!',
         autoHideDuration: 3000
       });
       return;
     }
 
     confirm({
-      title: 'Cập nhật địa điểm',
-      description: 'Địa chỉ và tọa độ của cửa hàng sẽ được cập nhật.',
+      title: 'Update location',
+      description: 'The store address and coordinates will be updated.',
       type: 'info',
-      confirmText: 'Lưu thay đổi',
+      confirmText: 'Save changes',
       onConfirm: async () => {
         await onSave(updates);
       }
@@ -102,7 +102,7 @@ export default function StoreLocationEdit({ store, onSave, onClose, layoutId }: 
           />
           <div className="absolute top-4 left-4 right-4 bg-white/60 backdrop-blur-sm p-3 rounded-xl border border-white shadow-lg text-sm font-semibold text-gray-600 flex items-center gap-2 z-10">
             <Navigation className="w-4 h-4 text-emerald-500" />
-            Di chuyển ghim trên bản đồ để cập nhật tọa độ chính xác.
+            Drag the pin on the map to update the exact coordinates.
           </div>
         </div>
       </div>

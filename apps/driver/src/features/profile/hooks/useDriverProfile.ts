@@ -17,11 +17,11 @@ const mockDriverProfile: DriverProfile = {
     age: 28,
     address: "123 Đường Láng, Đống Đa, Hà Nội",
   } as any,
-  vehicle_type: "Xe máy",
+  vehicle_type: "Motorcycle",
   vehicle_brand: "Honda",
   vehicle_model: "Winner X 2024",
   vehicle_license_plate: "29-P1 999.99",
-  vehicle_color: "Đen Cam",
+  vehicle_color: "Black Orange",
   bank_name: "Techcombank",
   bank_account_name: "NGUYEN VAN TAI XE",
   bank_account_number: "19034567891011",
@@ -53,16 +53,16 @@ export const useDriverProfile = () => {
     onSuccess: () => {
       sileo.success({
         actionType: "profile_update_success",
-        title: "Cập nhật thành công",
-        description: "Thông tin của bạn đã được lưu lại.",
+        title: "Profile Updated",
+        description: "Your information has been saved.",
       });
       queryClient.invalidateQueries({ queryKey: ["driver", "profile", "me"] });
     },
     onError: (err: any) => {
       sileo.error({
         actionType: "profile_update_error",
-        title: "Cập nhật thất bại",
-        description: err.response?.data?.message || "Đã có lỗi xảy ra khi cập nhật thông tin."
+        title: "Update Failed",
+        description: err.response?.data?.message || "An error occurred while updating your information."
       });
     }
   });

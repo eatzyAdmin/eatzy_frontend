@@ -61,11 +61,11 @@ export default function RestaurantsTable({
     const isActive = restaurant.owner?.isActive ?? true;
 
     confirm({
-      title: isActive ? 'Tạm khóa đối tác?' : 'Mở khóa đối tác?',
+      title: isActive ? 'Lock Partner?' : 'Unlock Partner?',
       type: isActive ? 'danger' : 'info',
       description: isActive
-        ? `Tài khoản của đối tác ${restaurant.name} sẽ không thể đăng nhập vào hệ thống sau khi bị khóa.`
-        : `Tài khoản của đối tác ${restaurant.name} sẽ có thể đăng nhập lại vào hệ thống ngay lập tức.`,
+        ? `The account for partner ${restaurant.name} will not be able to log in to the system after being locked.`
+        : `The account for partner ${restaurant.name} will be able to log in to the system immediately.`,
       confirmText: isActive ? "Slide to Lock" : "Slide to Unlock",
       onConfirm: async () => {
         if (restaurant.owner) {
@@ -77,9 +77,9 @@ export default function RestaurantsTable({
 
   const handleDeleteRequest = (restaurant: Restaurant) => {
     confirm({
-      title: 'Xóa cửa hàng?',
+      title: 'Delete Store?',
       type: 'danger',
-      description: "Hành động này không thể hoàn tác. Cửa hàng sẽ bị xóa vĩnh viễn khỏi hệ thống.",
+      description: "This action cannot be undone. The store will be permanently deleted from the system.",
       confirmText: "Slide to Delete",
       onConfirm: async () => {
         await onDelete(restaurant.id);
@@ -142,7 +142,7 @@ export default function RestaurantsTable({
           fetchNextPage={onLoadMore}
           onRowClick={handleRowClick}
           emptyTitle="No Restaurants Found"
-          emptyMessage="Không tìm thấy cửa hàng nào khớp với tiêu chí tìm kiếm của bạn. Hãy thử thay đổi bộ lọc."
+          emptyMessage="No stores found matching your search criteria. Try changing the filters."
           emptyIcon={<Building2 size={48} />}
           onResetFilters={() => { onSearch(''); handleApplyFilters(''); onRefresh(); }}
           handleSort={(key) => console.log('Sort by', key)}
@@ -156,7 +156,7 @@ export default function RestaurantsTable({
                     ? 'text-amber-500 bg-amber-100 hover:bg-amber-200'
                     : 'text-lime-600 bg-lime-100 hover:bg-lime-200'
                     }`}
-                  title={(restaurant.owner?.isActive ?? true) ? 'Khóa đối tác (Lock)' : 'Mở khóa (Unlock)'}
+                  title={(restaurant.owner?.isActive ?? true) ? 'Lock Partner' : 'Unlock Partner'}
                 >
                   {(restaurant.owner?.isActive ?? true) ? <Lock size={18} /> : <ShieldCheck size={18} />}
                 </button>

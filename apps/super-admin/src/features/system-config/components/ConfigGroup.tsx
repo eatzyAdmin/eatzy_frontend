@@ -33,7 +33,7 @@ export function ConfigGroup({ type, configs, onEdit }: ConfigGroupProps) {
     }
 
     if (meta.type === 'boolean') {
-      return config.configValue === 'true' ? 'Đang bật' : 'Đang tắt';
+      return config.configValue === 'true' ? 'Enabled' : 'Disabled';
     }
 
     return config.configValue + (meta.suffix || '');

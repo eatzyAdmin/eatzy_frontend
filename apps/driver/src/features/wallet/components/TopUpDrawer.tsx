@@ -63,7 +63,7 @@ export default function TopUpDrawer({ open, onClose }: { open: boolean, onClose:
     setIsProcessing(true);
     setIsCompleted(true);
     setTimeout(() => {
-      showNotification({ message: "Nạp tiền thành công", type: "success", format: `Nạp thành công ${formatVnd(amountNumber)}` });
+      showNotification({ message: "Top up successful", type: "success", format: `Successfully topped up ${formatVnd(amountNumber)}` });
       onClose();
       setAmount("0");
     }, 1000);
@@ -119,8 +119,8 @@ export default function TopUpDrawer({ open, onClose }: { open: boolean, onClose:
                   >
                     <PullToRefresh onRefresh={handleRefresh} className="flex-1 no-scrollbar overflow-y-auto">
                       <div className="p-6 flex flex-col items-center">
-                        <div className="text-[14px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Số tiền muốn nạp</div>
-                        
+                        <div className="text-[14px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Top up amount</div>
+
                         <div className="flex items-start">
                           <motion.span
                             key={`amount-${shakeKey}`}
@@ -138,7 +138,7 @@ export default function TopUpDrawer({ open, onClose }: { open: boolean, onClose:
 
                         {amountNumber > 0 && amountNumber < MIN_LIMIT && (
                           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-xs font-bold mt-2">
-                            Tối thiểu 10.000đ
+                            Min 10.000đ
                           </motion.p>
                         )}
                       </div>
@@ -203,7 +203,7 @@ export default function TopUpDrawer({ open, onClose }: { open: boolean, onClose:
                     className="flex-1 p-6 space-y-8 flex flex-col h-full"
                   >
                     <div className="text-center space-y-2 mt-8">
-                      <div className="text-sm font-medium text-gray-500 uppercase tracking-widest">Số tiền nạp</div>
+                      <div className="text-sm font-medium text-gray-500 uppercase tracking-widest">Top up amount</div>
                       <div className="text-5xl font-anton text-[#1A1A1A] tracking-tight">
                         {formatVnd(amountNumber)}
                       </div>
@@ -215,24 +215,24 @@ export default function TopUpDrawer({ open, onClose }: { open: boolean, onClose:
                           <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
                             <CreditCard className="w-4 h-4" />
                           </div>
-                          <span className="text-gray-500 font-medium">Phương thức</span>
+                          <span className="text-gray-500 font-medium">Method</span>
                         </div>
-                        <span className="font-bold text-gray-900">Nạp Ngân Hàng</span>
+                        <span className="font-bold text-gray-900">Bank Transfer</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 bg-lime-50 rounded-lg flex items-center justify-center text-lime-600">
                             <Wallet className="w-4 h-4" />
                           </div>
-                          <span className="text-gray-500 font-medium">Phí giao dịch</span>
+                          <span className="text-gray-500 font-medium">Transaction Fee</span>
                         </div>
-                        <span className="font-bold text-emerald-600 uppercase text-xs">Miễn phí</span>
+                        <span className="font-bold text-emerald-600 uppercase text-xs">Free</span>
                       </div>
                     </div>
 
                     <div className="mt-auto pb-10">
                       <SwipeToConfirm
-                        text={isCompleted ? "Đang xử lý..." : "Trượt để nạp tiền"}
+                        text={isCompleted ? "Processing..." : "Slide to top up"}
                         onComplete={handleSwipeComplete}
                         disabled={isProcessing || isCompleted}
                         isLoading={isProcessing}

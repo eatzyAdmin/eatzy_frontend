@@ -17,7 +17,7 @@ export function NetworkStatusMonitor() {
 
         // Show success "Online" toast
         sileo.success({
-          title: "Đã có mạng trở lại",
+          title: "Back Online",
           duration: 3500,
         });
 
@@ -28,8 +28,8 @@ export function NetworkStatusMonitor() {
     const handleOffline = () => {
       if (!isOfflineToastShown.current) {
         sileo.error({
-          title: "Mất kết nối Internet",
-          description: "Vui lòng kiểm tra lại đường truyền WiFi/4G để tiếp tục sử dụng.",
+          title: "No Internet Connection",
+          description: "Please check your WiFi or mobile data connection.",
           duration: 0, // Persistent until manually cleared or connection back
         });
 

@@ -267,7 +267,7 @@ export default function DateTimePicker({ label, value, onChange, minDate }: Date
            ${isOpen ? 'border-primary/30 ring-4 ring-primary/5 bg-white shadow-xl shadow-black/5' : 'border-transparent hover:bg-gray-100/50'}
         `}
       >
-        <span className={!value ? 'text-gray-300' : 'text-gray-900'}>{displayValue || (mounted ? 'Chọn thời gian...' : '')}</span>
+        <span className={!value ? 'text-gray-300' : 'text-gray-900'}>{displayValue || (mounted ? 'Select time...' : '')}</span>
         <Calendar size={18} className={`${isOpen ? 'text-primary' : 'text-gray-400'} transition-colors`} />
       </div>
 

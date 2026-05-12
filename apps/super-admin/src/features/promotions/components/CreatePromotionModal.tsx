@@ -106,11 +106,11 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
   const handleSubmit = () => {
     const isEdit = !!initialData;
     confirm({
-      title: isEdit ? "Cập nhật chiến dịch?" : "Tạo chiến dịch mới?",
+      title: isEdit ? "Update Campaign?" : "Create New Campaign?",
       type: 'info',
       description: isEdit
-        ? "Bạn có chắc chắn muốn cập nhật thông tin cho chiến dịch này không?"
-        : "Chiến dịch sẽ được kích hoạt ngay lập tức sau khi tạo thành công.",
+        ? "Are you sure you want to update the information for this campaign?"
+        : "The campaign will be activated immediately after successful creation.",
       confirmText: isEdit ? "Slide to Update" : "Slide to Launch",
       onConfirm: async () => {
         setIsSubmitting(true);
@@ -162,7 +162,7 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
                     <h3 className="text-3xl font-anton font-bold text-[#1A1A1A] mb-2 uppercase tracking-tight">
                       {initialData ? 'EDIT CAMPAIGN' : 'NEW CAMPAIGN'}
                     </h3>
-                    <p className="text-gray-400 font-medium text-sm">Thiết lập chiến dịch khuyến mãi cho hệ thống Eatzy.</p>
+                    <p className="text-gray-400 font-medium text-sm">Set up promotion campaigns for the Eatzy system.</p>
                   </div>
                   <button onClick={onClose} className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-all">
                     <X size={24} />
@@ -192,7 +192,7 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
                       <div className="col-span-2">
                         <label className="text-[11px] uppercase font-bold text-gray-400 block mb-2 px-1 tracking-wider">Description</label>
                         <textarea
-                          placeholder="Mô tả về chương trình khuyến mãi và điều khoản áp dụng..."
+                          placeholder="Description of the promotion and terms of application..."
                           value={formData.description}
                           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                           className="w-full bg-[#F8F9FA] border-2 border-transparent rounded-2xl px-6 py-4 text-sm font-medium text-gray-900 outline-none focus:ring-2 focus:ring-primary/[0.03] focus:bg-white transition-all min-h-[100px] resize-none"
@@ -337,7 +337,7 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
                           <Globe size={20} />
                         </div>
                         <div className={`font-anton text-lg uppercase tracking-tight ${formData.applyToAll ? 'text-primary' : 'text-gray-900'}`}>Global Scope</div>
-                        <div className="text-xs font-medium text-gray-400 mt-1">Áp dụng cho mọi cửa hàng trên hệ thống</div>
+                        <div className="text-xs font-medium text-gray-400 mt-1">Applies to all stores in the system</div>
                         {formData.applyToAll && <CheckCircle size={20} className="absolute top-6 right-6 text-primary" />}
                       </button>
                       <button
@@ -351,7 +351,7 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
                           <Building2 size={20} />
                         </div>
                         <div className={`font-anton text-lg uppercase tracking-tight ${!formData.applyToAll ? 'text-primary' : 'text-gray-900'}`}>Select Restaurants</div>
-                        <div className="text-xs font-medium text-gray-400 mt-1">Chỉ áp dụng cho các cửa hàng được chọn</div>
+                        <div className="text-xs font-medium text-gray-400 mt-1">Applies only to selected stores</div>
                         {!formData.applyToAll && <CheckCircle size={20} className="absolute top-6 right-6 text-primary" />}
                       </button>
                     </div>
@@ -453,16 +453,16 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
                           </h3>
                           <div className="text-primary font-bold text-xs bg-primary/5 inline-block px-4 py-1.5 rounded-full border border-primary/10 uppercase tracking-widest">
                             {formData.discountType === DiscountType.PERCENTAGE
-                              ? `Giảm ${formData.discountValue}%`
+                              ? `Off ${formData.discountValue}%`
                               : formData.discountType === DiscountType.FIXED
-                                ? `Giảm ${new Intl.NumberFormat('vi-VN').format(formData.discountValue)}đ`
-                                : 'Miễn phí vận chuyển'}
+                                ? `Off ${new Intl.NumberFormat('vi-VN').format(formData.discountValue)}đ`
+                                : 'Free Shipping'}
                           </div>
                         </div>
 
                         <div className="mt-4 pt-4 border-t border-gray-50">
                           <p className="text-xs font-medium text-gray-400 italic line-clamp-3">
-                            {formData.description || 'Chưa có mô tả cho chiến dịch này...'}
+                            {formData.description || 'No description for this campaign yet...'}
                           </p>
                         </div>
                       </div>
@@ -490,9 +490,9 @@ export default function CreatePromotionModal({ isOpen, onClose, onSuccess, onSav
 
                         <div className="flex flex-col gap-2.5 pb-2">
                           <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                            <span className="text-gray-400">Thời hạn chiến dịch</span>
+                            <span className="text-gray-400">Campaign Period</span>
                             <span className="text-primary">
-                              {formData.endDate ? format(new Date(formData.endDate), 'dd/MM/yyyy') : 'KHÔNG GIỚI HẠN'}
+                              {formData.endDate ? format(new Date(formData.endDate), 'dd/MM/yyyy') : 'UNLIMITED'}
                             </span>
                           </div>
                           <div className="h-1.5 w-full bg-gray-200/50 rounded-full overflow-hidden">

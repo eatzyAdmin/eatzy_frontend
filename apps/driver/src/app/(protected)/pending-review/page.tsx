@@ -18,11 +18,11 @@ export default function PendingReviewPage() {
       <div className="max-w-md mx-auto">
         <div className="flex items-center gap-2 text-2xl font-bold text-[#1A1A1A]">
           <CheckCircle2 className="w-6 h-6 text-[var(--primary)]" />
-          <div>Đã nộp hồ sơ thành công</div>
+          <div>Application Submitted Successfully</div>
         </div>
-        <div className="mt-2 text-[#555]">Hồ sơ của bạn đang chờ kiểm duyệt. Vui lòng theo dõi phản hồi.</div>
+        <div className="mt-2 text-[#555]">Your application is pending review. Please stay tuned for updates.</div>
         <div className="mt-6">
-          <Button variant="outline" size="lg" onClick={() => router.push("/login")} className="w-full">Quay về trang đăng nhập</Button>
+          <Button variant="outline" size="lg" onClick={() => router.push("/login")} className="w-full">Back to Login</Button>
         </div>
       </div>
     </div>

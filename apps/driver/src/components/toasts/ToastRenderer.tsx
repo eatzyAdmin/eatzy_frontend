@@ -38,7 +38,7 @@ export function renderCustomDescription(opts: ExtendedToastOptions) {
           </motion.div>
           <div className="flex flex-col flex-1 text-left">
             <span className="font-bold text-[15px] leading-tight text-danger mb-0.5">
-              Thao tác ko thành công
+              Operation failed
             </span>
             <span className="text-white/40 text-[12px] leading-snug">
               {String(opts.description || opts.title)}
@@ -63,10 +63,10 @@ export function renderCustomDescription(opts: ExtendedToastOptions) {
 
             <div className="flex-1 min-w-0">
               <h4 className="text-white font-anton font-bold text-[19px] leading-tight truncate uppercase">
-                {opts.title || "Đơn hàng mới!"}
+                {opts.title || "New Order!"}
               </h4>
               <p className="text-white/60 text-[13px] mt-1 font-medium italic">
-                Chạm để xem chi tiết ngay
+                Tap to view details now
               </p>
             </div>
           </div>
@@ -120,10 +120,10 @@ export function renderCustomDescription(opts: ExtendedToastOptions) {
           </motion.div>
           <div className="flex flex-col text-left gap-1">
             <h4 className="text-white font-semibold text-[15px] leading-tight">
-              {opts.title || "Cập nhật thành công"}
+              {opts.title || "Updated Successfully"}
             </h4>
             <p className="text-white/50 text-[12px] font-medium leading-snug">
-              {String(opts.description || "Thông tin của bạn đã được lưu lại")}
+              {String(opts.description || "Your information has been saved")}
             </p>
           </div>
         </div>

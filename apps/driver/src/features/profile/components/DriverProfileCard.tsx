@@ -8,8 +8,8 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 export default function DriverProfileCard({ profile }: { profile: DriverProfile | null }) {
   const { user } = useAuth();
 
-  const displayName = profile?.user?.name || user?.name || "Chưa đăng nhập";
-  const displayInfo = profile?.vehicle_license_plate || "Chưa cập nhật biển số";
+  const displayName = profile?.user?.name || user?.name || "Not logged in";
+  const displayInfo = profile?.vehicle_license_plate || "No license plate";
   const avatarUrl = profile?.profile_photo || "https://i.pravatar.cc/150?img=11";
 
   return (

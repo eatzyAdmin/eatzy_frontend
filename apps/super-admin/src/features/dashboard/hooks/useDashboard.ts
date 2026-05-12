@@ -101,7 +101,7 @@ export function useDashboard() {
           id,
           name: o.restaurant.name || `Restaurant ${id}`,
           revenue: 0,
-          type: 'Đồ ăn',
+          type: 'Food',
           image: `https://ui-avatars.com/api/?name=${o.restaurant.name || id}&background=random`
         };
       }
@@ -119,7 +119,7 @@ export function useDashboard() {
     return orders.slice(0, 8).map(o => ({
       id: o.id.toString(),
       type: 'order' as const,
-      description: `Đơn hàng mới từ ${o.customer?.name || 'Khách hàng'}`,
+      description: `New order from ${o.customer?.name || 'Customer'}`,
       timestamp: o.createdAt,
       status: o.orderStatus
     }));

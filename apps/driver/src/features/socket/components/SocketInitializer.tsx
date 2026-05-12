@@ -46,8 +46,8 @@ export function SocketInitializer({ children }: { children: React.ReactNode }) {
           isWarningShown.current = false;
           
           sileo.success({
-            title: "Đã khôi phục kết nối",
-            description: "Hệ thống real-time đã hoạt động trở lại.",
+            title: "Connection Restored",
+            description: "Real-time system is back online.",
             duration: 3000,
           });
         }
@@ -56,8 +56,8 @@ export function SocketInitializer({ children }: { children: React.ReactNode }) {
         // Only show the warning once to avoid spamming
         if (!isWarningShown.current) {
           sileo.warning({
-            title: "Mất kết nối real-time",
-            description: "Hệ thống đang thử kết nối lại, vui lòng giữ ứng dụng mở...",
+            title: "Real-time connection lost",
+            description: "Reconnecting... please keep the app open.",
             duration: 0, // 0 means it won't auto-close
           });
           isWarningShown.current = true;
@@ -66,8 +66,8 @@ export function SocketInitializer({ children }: { children: React.ReactNode }) {
       onStompError={(frame) => {
         console.error("STOMP Error:", frame);
         sileo.error({
-          title: "Lỗi đường truyền",
-          description: "Không thể đồng bộ dữ liệu real-time. Đang thử lại...",
+          title: "Connection Error",
+          description: "Unable to sync real-time data. Retrying...",
           duration: 5000,
         });
       }}

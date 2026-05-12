@@ -101,14 +101,14 @@ export function useReplyToReview() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: reviewKeys.all });
       showNotification({
-        message: 'Phản hồi đã được gửi thành công!',
+        message: 'Reply sent successfully!',
         type: 'success',
         autoHideDuration: 3000,
       });
     },
     onError: (error: Error) => {
       showNotification({
-        message: 'Không thể gửi phản hồi',
+        message: 'Unable to send reply',
         type: 'error',
         format: error.message,
         autoHideDuration: 3000,

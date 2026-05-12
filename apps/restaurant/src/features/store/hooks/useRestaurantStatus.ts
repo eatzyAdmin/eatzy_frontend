@@ -73,15 +73,15 @@ export function useRestaurantStatus(): UseRestaurantStatusResult {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: restaurantStatusKeys.all });
       showNotification({
-        message: "Mở nhà hàng thành công!",
+        message: "Restaurant Opened Successfully!",
         type: "success",
-        format: "Nhà hàng đang mở và sẵn sàng nhận đơn hàng mới!",
+        format: "The restaurant is now open and ready to receive new orders!",
         autoHideDuration: 3000,
       });
     },
     onError: (error: Error) => {
       showNotification({
-        message: "Không thể mở nhà hàng",
+        message: "Unable to open restaurant",
         type: "error",
         format: error.message,
         autoHideDuration: 3000,
@@ -101,15 +101,15 @@ export function useRestaurantStatus(): UseRestaurantStatusResult {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: restaurantStatusKeys.all });
       showNotification({
-        message: "Nhà hàng đã tạm đóng cửa",
+        message: "Restaurant Temporarily Closed",
         type: "success",
-        format: "Nhà hàng đã tạm đóng cửa. Bạn sẽ không nhận được đơn hàng mới.",
+        format: "The restaurant has been closed. You will not receive any new orders.",
         autoHideDuration: 3000,
       });
     },
     onError: (error: Error) => {
       showNotification({
-        message: "Không thể đóng nhà hàng",
+        message: "Unable to close restaurant",
         type: "error",
         format: error.message,
         autoHideDuration: 3000,

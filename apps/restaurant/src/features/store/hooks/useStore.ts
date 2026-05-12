@@ -63,15 +63,15 @@ export function useUpdateStore() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: storeKeys.all });
       showNotification({
-        message: 'Thông tin cửa hàng đã được cập nhật!',
+        message: 'Store information updated!',
         type: 'success',
-        format: 'Dữ liệu được cập nhật thành công.',
+        format: 'Data has been updated successfully.',
         autoHideDuration: 3000,
       });
     },
     onError: (error: Error) => {
       showNotification({
-        message: 'Không thể cập nhật thông tin',
+        message: 'Unable to update information',
         type: 'error',
         format: error.message,
         autoHideDuration: 3000,
@@ -103,14 +103,14 @@ export function useUploadStoreImage() {
     },
     onSuccess: () => {
       showNotification({
-        message: 'Ảnh đã được tải lên thành công!',
+        message: 'Image uploaded successfully!',
         type: 'success',
         autoHideDuration: 3000,
       });
     },
     onError: (error: Error) => {
       showNotification({
-        message: 'Không thể tải ảnh lên',
+        message: 'Unable to upload image',
         type: 'error',
         format: error.message,
         autoHideDuration: 3000,

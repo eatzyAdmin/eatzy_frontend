@@ -163,28 +163,28 @@ export default function TransactionInfoView({
       <PullToRefresh
         onRefresh={async () => onClose()}
         className="flex-1 min-h-0 overflow-y-auto no-scrollbar"
-        pullText="Kéo xuống để đóng"
-        releaseText="Thả tay để đóng ngay"
-        refreshingText="Đang đóng..."
+        pullText="Pull down to close"
+        releaseText="Release to close now"
+        refreshingText="Closing..."
         usePortal={false}
       >
         <div className="p-6 px-4 space-y-6">
           {/* Stats Row */}
           <div className="flex items-center justify-between bg-gray-50 p-4 rounded-3xl">
             <div className="text-center flex-1 border-r border-gray-200 last:border-0 px-2">
-              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Giờ</div>
+              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Time</div>
               <div className="text-base font-bold text-[#1A1A1A] font-anton">
                 {new Date(transaction.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
             <div className="text-center flex-1 border-r border-gray-200 last:border-0 px-2">
-              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Ngày</div>
+              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Date</div>
               <div className="text-base font-bold text-[#1A1A1A] font-anton">
                 {new Date(transaction.timestamp).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}
               </div>
             </div>
             <div className="text-center flex-1 px-2 min-w-0">
-              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Loại</div>
+              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Type</div>
               <div className="text-[11px] font-bold text-[#1A1A1A] font-anton uppercase truncate">
                 {getWalletTransactionTypeLabel(transaction.type)}
               </div>

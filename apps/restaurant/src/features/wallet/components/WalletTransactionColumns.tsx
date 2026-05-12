@@ -100,7 +100,7 @@ export const getWalletTransactionColumns = () => {
             : 'bg-red-100 text-red-700 border-red-200'
             }`}>
             {isSuccess ? <CheckCircle className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
-            {isSuccess ? 'Thành công' : 'Thất bại'}
+            {isSuccess ? 'Success' : 'Failed'}
           </span>
         )
       }

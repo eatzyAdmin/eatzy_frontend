@@ -18,9 +18,9 @@ export function TopRestaurantsScroll({ restaurants }: TopRestaurantsScrollProps)
   return (
     <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-bold text-gray-900">Top Cửa hàng hiệu quả</h3>
+        <h3 className="text-lg font-bold text-gray-900">Top Performing Stores</h3>
         <button className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">
-          Xem tất cả <ChevronRight size={16} />
+          View all <ChevronRight size={16} />
         </button>
       </div>
 
@@ -33,7 +33,7 @@ export function TopRestaurantsScroll({ restaurants }: TopRestaurantsScrollProps)
           <div className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:border-blue-600 hover:text-blue-600 transition-colors">
             <Plus size={24} />
           </div>
-          <span className="text-xs font-medium text-gray-600 text-center">Thêm mới</span>
+          <span className="text-xs font-medium text-gray-600 text-center">Add New</span>
         </motion.button>
 
         {restaurants.map((restaurant) => (

@@ -29,7 +29,7 @@ export const mockTransactions: WalletTransaction[] = [
     id: "tx-1",
     type: "EARNING",
     amount: 35000,
-    description: "Thu nhập đơn #8291",
+    description: "Earning from order #8291",
     timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 mins ago
     status: "COMPLETED",
     referenceId: "#8291",
@@ -38,7 +38,7 @@ export const mockTransactions: WalletTransaction[] = [
     id: "tx-2",
     type: "EARNING",
     amount: 42000,
-    description: "Thu nhập đơn #9921",
+    description: "Earning from order #9921",
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
     status: "COMPLETED",
     referenceId: "#9921",
@@ -47,7 +47,7 @@ export const mockTransactions: WalletTransaction[] = [
     id: "tx-3",
     type: "ORDER_PAYMENT",
     amount: -185000,
-    description: "Thanh toán/Ứng tiền đơn #9921 (Tiền mặt)",
+    description: "Payment/Advancement for order #9921 (Cash)",
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2.1).toISOString(), // 2.1 hours ago
     status: "COMPLETED",
     referenceId: "#9921",
@@ -56,7 +56,7 @@ export const mockTransactions: WalletTransaction[] = [
     id: "tx-4",
     type: "WITHDRAWAL",
     amount: -2000000,
-    description: "Rút tiền về Techcombank",
+    description: "Withdraw to Techcombank",
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
     status: "PENDING",
   },
@@ -64,7 +64,7 @@ export const mockTransactions: WalletTransaction[] = [
     id: "tx-5",
     type: "TOP_UP",
     amount: 1000000,
-    description: "Nạp tiền vào ví",
+    description: "Top up wallet",
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(), // 1 day ago
     status: "COMPLETED",
   },
@@ -72,7 +72,7 @@ export const mockTransactions: WalletTransaction[] = [
     id: "tx-6",
     type: "EARNING",
     amount: 55000,
-    description: "Thu nhập đơn #3399",
+    description: "Earning from order #3399",
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
     status: "COMPLETED",
     referenceId: "#3399",
@@ -81,7 +81,7 @@ export const mockTransactions: WalletTransaction[] = [
     id: "tx-7",
     type: "ORDER_PAYMENT",
     amount: -320000,
-    description: "Thanh toán/Ứng tiền đơn #3399 (Tiền mặt)",
+    description: "Payment/Advancement for order #3399 (Cash)",
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48.1).toISOString(), // 2 days ago
     status: "COMPLETED",
     referenceId: "#3399",

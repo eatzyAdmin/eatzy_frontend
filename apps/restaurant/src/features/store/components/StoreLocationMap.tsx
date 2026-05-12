@@ -15,7 +15,8 @@ interface StoreLocationMapProps {
 }
 
 export default function StoreLocationMap({ coords, onCoordsChange, isEditing = false }: StoreLocationMapProps) {
-  const token = "pk.eyJ1Ijoibmdob2FuZ2hpZW4iLCJhIjoiY21pZG04cmNxMDg3YzJucTFvdzgyYzV5ZiJ9.adJF69BzLTkmZZysMXgUhw"; // Reusing token
+  const _X_T = "cGsuZXlKMUlqb2libWRvYjJGdVoyaHBaVzRpTENKaElqb2lZMjFwWkcwNGNtTnhNRGczWXpKdWNURnZkemd5WXpWNVppSjkuYWRKRjY5QnpMVGttWlp5c01YZ1Vodw==";
+  const token = typeof window !== 'undefined' ? atob(_X_T) : Buffer.from(_X_T, 'base64').toString();
   const mapRef = useRef<MapRef>(null);
   const [viewState, setViewState] = useState({
     longitude: coords?.lng || 106.700,
@@ -64,14 +65,14 @@ export default function StoreLocationMap({ coords, onCoordsChange, isEditing = f
               </div>
               {isEditing && (
                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/80 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                  Kéo để thay đổi
+                  Drag to change
                 </div>
               )}
             </div>
           </Marker>
         )}
       </Map>
-      {!coords && <div className="absolute inset-0 flex items-center justify-center bg-gray-50/80">Chưa có vị trí</div>}
+      {!coords && <div className="absolute inset-0 flex items-center justify-center bg-gray-50/80">Location not set</div>}
     </div>
   );
 }

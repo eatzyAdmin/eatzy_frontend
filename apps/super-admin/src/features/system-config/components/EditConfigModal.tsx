@@ -40,7 +40,7 @@ export const EditConfigModal: React.FC<EditConfigModalProps> = ({
       await onSave({ ...config, configValue: value });
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Có lỗi xảy ra khi lưu cấu hình');
+      setError(err.message || 'An error occurred while saving configuration');
     } finally {
       setLoading(false);
     }
@@ -119,7 +119,7 @@ export const EditConfigModal: React.FC<EditConfigModalProps> = ({
                     type="text"
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
-                    placeholder="Nhập giá trị mới..."
+                    placeholder="Enter new value..."
                     className="w-full px-8 py-6 bg-gray-50 border-2 border-gray-200 rounded-[28px] text-2xl font-bold text-gray-800 shadow-inner outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 placeholder:text-gray-200"
                     autoFocus
                   />
@@ -132,7 +132,7 @@ export const EditConfigModal: React.FC<EditConfigModalProps> = ({
 
                 <p className="text-xs text-gray-400 font-semibold px-2 flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                  Đảm bảo giá trị nhập vào đúng định dạng quy định của hệ thống.
+                  Ensure the input value follows the system's required format.
                 </p>
               </div>
 
@@ -157,7 +157,7 @@ export const EditConfigModal: React.FC<EditConfigModalProps> = ({
                 disabled={loading}
                 className="px-8 py-4 rounded-2xl text-base font-bold text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all duration-300"
               >
-                Hủy
+                Cancel
               </button>
               <Button
                 onClick={handleSave}

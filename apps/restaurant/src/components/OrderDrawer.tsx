@@ -21,12 +21,12 @@ interface OrderDrawerProps {
 }
 
 const REJECTION_REASONS = [
-  'Hết món',
-  'Nhà hàng quá tải',
-  'Không liên hệ được khách',
-  'Địa chỉ giao hàng quá xa',
-  'Món ăn không khả dụng',
-  'Lý do khác'
+  'Out of stock',
+  'Restaurant overloaded',
+  'Cannot contact customer',
+  'Delivery address too far',
+  'Item unavailable',
+  'Other reasons'
 ];
 
 export default function OrderDrawer({ open, order, onClose, onConfirm, onReject, onComplete, loading = false }: OrderDrawerProps) {
@@ -45,9 +45,9 @@ export default function OrderDrawer({ open, order, onClose, onConfirm, onReject,
 
   const handleSelectReason = (reason: string) => {
     confirm({
-      title: 'Từ chối đơn hàng',
-      description: `Bạn có chắc muốn từ chối đơn hàng này với lý do: "${reason}"?`,
-      confirmText: 'Từ chối',
+      title: 'Reject order',
+      description: `Are you sure you want to reject this order for: "${reason}"?`,
+      confirmText: 'Reject',
       onConfirm: () => {
         onReject(order.id, reason);
         setShowRejectReasons(false);
