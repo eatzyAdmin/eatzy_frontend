@@ -44,7 +44,7 @@ export function useMyRestaurantReviews(): UseMyRestaurantReviewsResult {
     queryFn: async () => {
       const response = await reviewApi.getMyRestaurantReviews();
       if (response.statusCode === 200 && response.data) {
-        return response.data;
+        return Array.isArray(response.data.result) ? response.data.result : [];
       }
       throw new Error(response.message || 'Failed to fetch reviews');
     },

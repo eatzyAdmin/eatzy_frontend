@@ -16,17 +16,18 @@ export class SocketClient {
   constructor(config: SocketConfig) {
     const { url, token } = config;
     
-    // Backend expects token via query parameter: /ws?token=xxx
-    // Use SockJS for better compatibility across browsers
+    // Microservices auth: JWT is sent via STOMP CONNECT headers (not URL query param)
+    // WebSocketAuthChannelInterceptor reads "Authorization: Bearer xxx" from STOMP frame
     this.client = new Client({
-      webSocketFactory: () => new SockJS(token ? `${url}?token=${token}` : url),
+      webSocketFactory: () => new SockJS(url),
+      connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       onConnect: config.onConnect,
       onDisconnect: config.onDisconnect,
       onStompError: config.onStompError,
-      // debug: (msg) => console.log('STOMP Debug:', msg),
+      debug: (msg) => console.log('STOMP Debug:', msg),
     });
   }
 

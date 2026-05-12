@@ -31,7 +31,7 @@ export function SocketInitializer({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, [token]);
 
-  // Use the production backend URL found in next.config.mjs
+  // WebSocket connects through API Gateway → routed to eatzy-communication-service
   const WS_URL = "https://eatzy-be.hoanduong.net/ws";
 
   return (
