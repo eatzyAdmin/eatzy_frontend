@@ -62,7 +62,9 @@ export default function RootLayout({
         <Providers>
           <StatusBarHandler />
           <SplashScreen />
-          {children}
+          <div className="app-safe-layout">
+            {children}
+          </div>
           <PwaInstallPrompt />
         </Providers>
       </body>

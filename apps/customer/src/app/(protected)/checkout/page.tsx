@@ -13,7 +13,7 @@ import NotesInput from "@/features/checkout/components/NotesInput";
 import PaymentMethodSelector from "@/features/checkout/components/PaymentMethodSelector";
 import PromoVoucherCard from "@/features/checkout/components/PromoVoucherCard";
 import { AnimatePresence, motion } from "@repo/ui/motion";
-import { Truck, Tag, ShoppingBag, ChevronLeft, Store, ChevronUp, ChevronDown, ChevronRight } from "@repo/ui/icons";
+import { Truck, Tag, ShoppingBag, ChevronLeft, Store, ChevronUp, ChevronDown, ChevronRight, X } from "@repo/ui/icons";
 import type { CreateOrderRequest } from "@repo/types";
 const CheckoutSummary = dynamic(() => import("@/features/checkout/components/CheckoutSummary"), { ssr: false });
 const RightSidebar = dynamic(() => import("@/features/checkout/components/RightSidebar"), { ssr: false });
@@ -254,7 +254,13 @@ export default function CheckoutPage() {
         ref={mainScrollRef as any}
       >
         <div className="max-w-[1400px] mx-auto px-3 md:px-4 pt-4 md:pr-16 md:px-8 md:pt-4 h-full">
-          <div className="md:hidden mb-6">
+          <div className="md:hidden mb-6 relative">
+            <button
+              onClick={() => router.back()}
+              className="absolute -top-1 -right-1 w-11 h-11 rounded-full bg-white/80 backdrop-blur-md shadow-sm flex items-center justify-center text-gray-400 hover:text-gray-600 active:scale-90 transition-all z-50 border border-white/50"
+            >
+              <X size={22} strokeWidth={2.5} />
+            </button>
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 mb-1">
                 <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
