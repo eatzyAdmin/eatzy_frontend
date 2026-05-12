@@ -106,9 +106,9 @@ export default function WalletManageView({ balance: propBalance, onBack, default
       <PullToRefresh
         onRefresh={handleRefresh}
         className="flex-1 no-scrollbar overflow-y-auto"
-        pullText="Kéo để cập nhật số dư"
-        releaseText="Thả tay để cập nhật"
-        refreshingText="Đang cập nhật..."
+        pullText="Pull to update balance"
+        releaseText="Release to update"
+        refreshingText="Updating..."
       >
         <div className="min-h-full flex flex-col pb-0">
           {/* Header */}
@@ -116,7 +116,7 @@ export default function WalletManageView({ balance: propBalance, onBack, default
             <button onClick={onBack} className="flex items-center gap-1.5 group px-1">
               <ChevronLeft size={26} className="text-[#1A1A1A]" strokeWidth={2.5} />
               <span className="text-[17px] font-extrabold text-[#1A1A1A] tracking-tight">
-                {activeType === 'TOPUP' ? 'Nạp tiền' : 'Rút tiền'}
+                {activeType === 'TOPUP' ? 'Top-up' : 'Withdraw'}
               </span>
             </button>
 
@@ -141,7 +141,7 @@ export default function WalletManageView({ balance: propBalance, onBack, default
                   : 'text-gray-400'
                   }`}
               >
-                Nạp tiền
+                Top-up
               </button>
               <button
                 onClick={() => setActiveType('WITHDRAW')}
@@ -150,7 +150,7 @@ export default function WalletManageView({ balance: propBalance, onBack, default
                   : 'text-gray-400'
                   }`}
               >
-                Rút tiền
+                Withdraw
               </button>
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function WalletManageView({ balance: propBalance, onBack, default
           <div className="mt-8 px-6 flex flex-col items-center justify-center gap-1 text-[14px] font-semibold text-gray-600">
             <div className="flex items-center gap-1">
               <span>
-                {activeType === 'TOPUP' ? 'Tối đa ' : 'Số dư: '}
+                {activeType === 'TOPUP' ? 'Maximum ' : 'Balance: '}
                 <span className="font-extrabold text-[#1A1A1A]">
                   {currentMax.toLocaleString('vi-VN')}đ
                 </span>
@@ -195,7 +195,7 @@ export default function WalletManageView({ balance: propBalance, onBack, default
                     exit={{ opacity: 0, scale: 0.9 }}
                     className="text-red-500 text-[12px] font-bold"
                   >
-                    Số tiền tối thiểu là 10.000đ
+                    Minimum amount is 10.000đ
                   </motion.p>
                 )}
                 {amountNumber >= currentMax && (
@@ -206,7 +206,7 @@ export default function WalletManageView({ balance: propBalance, onBack, default
                     exit={{ opacity: 0, scale: 0.9 }}
                     className="text-red-500 text-[12px] font-bold"
                   >
-                    Đã đạt giới hạn tối đa
+                    Maximum limit reached
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -224,7 +224,7 @@ export default function WalletManageView({ balance: propBalance, onBack, default
                 : 'bg-gray-200/30 text-gray-300 shadow-none'
                 }`}
             >
-              Tiếp tục
+              Continue
             </motion.button>
 
             {/* Dynamic Quick Amount Options */}

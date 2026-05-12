@@ -5,9 +5,9 @@ import { HelpCircle, MessageSquare, Phone, ChevronRight, Search, ArrowRight, Pla
 
 export default function HelpCenterSection() {
   const faqs = [
-    { q: "Làm thế nào để đổi quà từ điểm?", a: "Truy cập vào 'Phần thưởng' trong menu chính, chọn món quà bạn muốn và đổi mã voucher.", id: "01" },
-    { q: "Tôi có thể hủy đơn hàng không?", a: "Nếu đơn hàng chưa được quán xác nhận, bạn có thể thực hiện tại chi tiết đơn hàng.", id: "02" },
-    { q: "Thời gian giao hàng trung bình là bao lâu?", a: "Dưới 30 phút tính từ thời điểm món ăn được bếp hoàn thành.", id: "03" }
+    { q: "How to redeem rewards from points?", a: "Go to 'Rewards' in the main menu, select the reward you want and redeem the voucher code.", id: "01" },
+    { q: "Can I cancel my order?", a: "If the order hasn't been confirmed by the restaurant, you can cancel it in the order details.", id: "02" },
+    { q: "What is the average delivery time?", a: "Under 30 minutes from the time the dish is completed by the kitchen.", id: "03" }
   ];
 
   return (
@@ -20,13 +20,13 @@ export default function HelpCenterSection() {
         <div className="flex items-center gap-2">
           <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
             <HelpCircle size={12} />
-            Hỗ trợ & FAQ
+            Support & FAQ
           </span>
         </div>
         <h2 className="text-[56px] font-bold leading-none text-[#1A1A1A] uppercase" style={{ fontFamily: "var(--font-anton), var(--font-sans)" }}>
           RESOURCES
         </h2>
-        <p className="text-gray-500 font-medium">Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7</p>
+        <p className="text-gray-500 font-medium">We are always ready to support you 24/7</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -36,7 +36,7 @@ export default function HelpCenterSection() {
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-lime-500 transition-colors" />
             <input
               type="text"
-              placeholder="Bạn cần hỗ trợ điều gì?"
+              placeholder="How can we help you?"
               className="w-full py-5 pl-14 pr-6 bg-slate-50 border-2 border-transparent focus:border-lime-500/20 rounded-[28px] text-lg font-bold font-anton uppercase tracking-tight text-[#1A1A1A] placeholder:text-gray-300 focus:outline-none transition-all shadow-[inset_0_0_20px_rgba(0,0,0,0.03)]"
             />
           </div>
@@ -74,12 +74,12 @@ export default function HelpCenterSection() {
             </div>
 
             <div className="relative z-10">
-              <h3 className="text-3xl font-anton uppercase leading-none tracking-tight mb-4">Chat trực tiếp</h3>
-              <p className="text-sm text-gray-400 leading-relaxed font-medium">Kết nối ngay với đội ngũ chăm sóc khách hàng của chúng tôi để được giải đáp thắc mắc.</p>
+              <h3 className="text-3xl font-anton uppercase leading-none tracking-tight mb-4">Live Chat</h3>
+              <p className="text-sm text-gray-400 leading-relaxed font-medium">Connect now with our customer care team for answers to your questions.</p>
             </div>
 
             <button className="relative z-10 w-full py-5 bg-lime-500 text-black font-anton text-base uppercase tracking-widest rounded-2xl hover:bg-white transition-colors flex items-center justify-center gap-3 active:scale-95 group/btn">
-              Bắt đầu hỗ trợ
+              Start Support
               <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover/btn:bg-lime-500/20">
                 <Play className="w-3 h-3 fill-current" />
               </div>

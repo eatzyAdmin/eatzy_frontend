@@ -7,8 +7,8 @@ export function SafetyDisclaimer() {
         <ShieldCheck className="w-4 h-4 text-[var(--primary)]" />
       </div>
       <p className="text-xs text-[var(--primary)] leading-relaxed font-medium">
-        Đơn hàng được bảo vệ bởi <span className="font-bold">Eatzy Guarantee</span>.{" "}
-        <span className="font-bold cursor-pointer hover:underline">Tìm hiểu thêm</span>
+        Orders are protected by <span className="font-bold">Eatzy Guarantee</span>.{" "}
+        <span className="font-bold cursor-pointer hover:underline">Learn more</span>
       </p>
     </div>
   );

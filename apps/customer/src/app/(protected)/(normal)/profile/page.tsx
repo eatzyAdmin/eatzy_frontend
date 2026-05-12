@@ -84,9 +84,9 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     confirm({
-      title: "Đăng xuất tài khoản",
-      description: "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng?",
-      confirmText: "Trượt để đăng xuất",
+      title: "Log Out",
+      description: "Are you sure you want to log out of the application?",
+      confirmText: "Swipe to log out",
       type: "danger",
       onConfirm: async () => {
         show();
@@ -161,9 +161,9 @@ export default function ProfilePage() {
               <PullToRefresh
                 onRefresh={handleSubPageRefresh}
                 className="flex-1 no-scrollbar overflow-visible"
-                pullText="Kéo để làm mới"
-                releaseText="Thả tay để làm mới"
-                refreshingText="Đang làm mới"
+                pullText="Pull to refresh"
+                releaseText="Release to refresh"
+                refreshingText="Refreshing"
               >
                 <div className="max-w-xl mx-auto">
                   {/* Header style matched to favorites/order-history - Sticky */}
@@ -234,9 +234,9 @@ export default function ProfilePage() {
               <PullToRefresh
                 onRefresh={refreshUser}
                 className="max-w-7xl mx-auto px-4 space-y-8 pt-[72px] pb-[120px] no-scrollbar overflow-visible"
-                pullText="Kéo để làm mới"
-                releaseText="Thả tay để làm mới"
-                refreshingText="Đang làm mới"
+                pullText="Pull to refresh"
+                releaseText="Release to refresh"
+                refreshingText="Refreshing"
               >
                 <div className="space-y-8 pb-32">
                   {/* Main Card */}
@@ -254,24 +254,24 @@ export default function ProfilePage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.1 }}
                   >
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 pl-2">Tài khoản</h3>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 pl-2">Account</h3>
                     <div className="space-y-1">
                       <ProfileMenuItem
                         icon={<User className="w-5 h-5" />}
-                        label="Thông tin cá nhân"
-                        subLabel="Chỉnh sửa hồ sơ"
+                        label="Personal Info"
+                        subLabel="Edit Profile"
                         onClick={() => setActiveMobileSection('personal')}
                       />
                       <ProfileMenuItem
                         icon={<MapPin className="w-5 h-5" />}
-                        label="Địa chỉ đã lưu"
-                        subLabel="Nhà riêng, Công ty"
+                        label="Saved Addresses"
+                        subLabel="Home, Office"
                         onClick={() => setActiveMobileSection('addresses')}
                       />
                       <ProfileMenuItem
                         icon={<CreditCard className="w-5 h-5" />}
-                        label="Ví & Thanh toán"
-                        subLabel="Nạp tiền, Lịch sử"
+                        label="Wallet & Payment"
+                        subLabel="Top-up, History"
                         onClick={() => setActiveMobileSection('payment')}
                       />
                     </div>
@@ -283,11 +283,11 @@ export default function ProfilePage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.2 }}
                   >
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 pl-2">Ứng dụng</h3>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 pl-2">App</h3>
                     <div className="space-y-1">
-                      <ProfileMenuItem icon={<Bell className="w-5 h-5" />} label="Cài đặt thông báo" />
-                      <ProfileMenuItem icon={<ShieldCheck className="w-5 h-5" />} label="Bảo mật & Quyền riêng tư" />
-                      <ProfileMenuItem icon={<HelpCircle className="w-5 h-5" />} label="Trung tâm trợ giúp" />
+                      <ProfileMenuItem icon={<Bell className="w-5 h-5" />} label="Notification Settings" />
+                      <ProfileMenuItem icon={<ShieldCheck className="w-5 h-5" />} label="Security & Privacy" />
+                      <ProfileMenuItem icon={<HelpCircle className="w-5 h-5" />} label="Help Center" />
                     </div>
                   </motion.div>
 
@@ -299,7 +299,7 @@ export default function ProfilePage() {
                   >
                     <ProfileMenuItem
                       icon={<LogOut className="w-5 h-5" />}
-                      label="Đăng xuất"
+                      label="Log Out"
                       subLabel="v2.4.8"
                       isDestructive
                       onClick={handleLogout}

@@ -102,7 +102,7 @@ export function useSearchRestaurants(
 
       // Check for API error
       if (response.statusCode !== 200 && response.statusCode !== undefined) {
-        throw new Error(response.message || "Không thể tải danh sách nhà hàng");
+        throw new Error(response.message || "Could not load restaurant list");
       }
 
       return response.data;
@@ -132,10 +132,10 @@ export function useSearchRestaurants(
     if (query.isError && showErrorNotification) {
       const errorMessage = query.error instanceof Error
         ? query.error.message
-        : "Đã có lỗi xảy ra khi tìm kiếm nhà hàng";
+        : "An error occurred while searching for restaurants";
 
       sileo.error({
-        title: "Lỗi tìm kiếm",
+        title: "Search error",
         description: errorMessage,
         duration: 5000,
       });

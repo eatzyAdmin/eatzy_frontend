@@ -29,13 +29,13 @@ export default function PromoSummary({
             <Tag size={20} />
           </div>
           <div>
-            <h4 className="font-bold text-[#1A1A1A] text-[15px]">Ưu đãi & Vouchers</h4>
+            <h4 className="font-bold text-[#1A1A1A] text-[15px]">Offers & Vouchers</h4>
             {hasVoucher ? (
               <p className="text-[13px] font-bold text-lime-600">
-                Đã áp dụng, tiết kiệm {formatVnd(totalSaved)}
+                Applied, saved {formatVnd(totalSaved)}
               </p>
             ) : (
-              <p className="text-[13px] text-gray-400 font-medium">Chọn ưu đãi tốt nhất cho bạn</p>
+              <p className="text-[13px] text-gray-400 font-medium">Select the best offer for you</p>
             )}
           </div>
         </div>

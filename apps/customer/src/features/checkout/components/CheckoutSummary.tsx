@@ -37,7 +37,7 @@ export default function CheckoutSummary({
             {isLoadingFee ? (
               <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
             ) : isOverDistance ? (
-              <span className="font-semibold text-orange-500">Phạm vi quá xa</span>
+              <span className="font-semibold text-orange-500">Distance too far</span>
             ) : (
               <span className="font-bold text-gray-900">{formatVnd(baseFee)}</span>
             )}

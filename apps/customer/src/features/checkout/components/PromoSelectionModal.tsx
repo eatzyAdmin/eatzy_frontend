@@ -93,9 +93,9 @@ export default function PromoSelectionModal({
                 <PullToRefresh
                   onRefresh={onRefresh || (async () => { })}
                   className="h-full px-4 md:px-6 py-4 custom-scrollbar"
-                  pullText="Kéo để cập nhật voucher"
-                  releaseText="Thả để làm mới ngay"
-                  refreshingText="Đang tìm ưu đãi..."
+                  pullText="Pull to update vouchers"
+                  releaseText="Release to refresh"
+                  refreshingText="Finding offers..."
                   usePortal={false}
                 >
                   <div className="space-y-10 pb-6">
@@ -126,7 +126,7 @@ export default function PromoSelectionModal({
                                       selected={selectedShippingVoucherId === v.id}
                                       onSelect={() => setSelectedShippingVoucherId(selectedShippingVoucherId === v.id ? null : v.id)}
                                       disabled={!eligible}
-                                      reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
+                                      reason={!eligible ? 'Order not eligible yet' : undefined}
                                       isBest={bestVoucherIds.shipping === v.id}
                                       currentOrderValue={currentOrderValue}
                                       restaurantSlug={restaurant?.slug}
@@ -164,7 +164,7 @@ export default function PromoSelectionModal({
                                       selected={selectedDiscountVoucherId === v.id}
                                       onSelect={() => setSelectedDiscountVoucherId(selectedDiscountVoucherId === v.id ? null : v.id)}
                                       disabled={!eligible}
-                                      reason={!eligible ? 'Đơn hàng chưa đủ điều kiện' : undefined}
+                                      reason={!eligible ? 'Order not eligible yet' : undefined}
                                       isBest={bestVoucherIds.discount === v.id}
                                       currentOrderValue={currentOrderValue}
                                       restaurantSlug={restaurant?.slug}

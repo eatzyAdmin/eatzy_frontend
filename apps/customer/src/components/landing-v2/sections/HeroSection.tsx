@@ -18,7 +18,7 @@ export default function HeroSection({ animationComplete, onGetStarted, onExplore
     >
       {/* Subtitle */}
       <div className="mb-6 translate-y-6 text-lg text-white/80 font-normal">
-        Khám phá hương vị tuyệt vời cùng <span className="text-[var(--primary)] text-4xl font-bold">Eatzy</span>
+        Discover great flavors with <span className="text-[var(--primary)] text-4xl font-bold">Eatzy</span>
       </div>
 
       {/* Logo decoration */}
@@ -45,15 +45,15 @@ export default function HeroSection({ animationComplete, onGetStarted, onExplore
 
       {/* Main heading */}
       <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 max-w-4xl leading-tight">
-        Đặt Món Dễ Dàng
+        Easy Food Ordering
         <br />
-        <span className="text-[var(--primary)]">Giao Nhanh Tận Nơi!</span>
+        <span className="text-[var(--primary)]">Fast Delivery to Your Door!</span>
       </h1>
 
       {/* Description */}
       <p className="text-lg text-white/80 max-w-2xl mb-12">
-        Khám phá hàng nghìn nhà hàng và món ăn ngon, săn ưu đãi hấp dẫn và theo dõi đơn hàng thời gian thực. Tất cả
-        trong một ứng dụng tiện lợi.
+        Discover thousands of restaurants and delicious dishes, hunt for attractive offers and track orders in real-time. All
+        in one convenient app.
       </p>
 
       {/* CTA Buttons */}
@@ -64,7 +64,7 @@ export default function HeroSection({ animationComplete, onGetStarted, onExplore
           className="group rounded-full px-8 gap-2"
           onClick={onGetStarted}
         >
-          <span>Đặt Món Ngay</span>
+          <span>Order Now</span>
           <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
         </Button>
 
@@ -74,7 +74,7 @@ export default function HeroSection({ animationComplete, onGetStarted, onExplore
           className="rounded-full px-8"
           onClick={onExplore}
         >
-          Khám Phá Ưu Đãi
+          Explore Offers
         </Button>
       </div>
     </main>

@@ -34,7 +34,7 @@ export const RestaurantShipping: React.FC<RestaurantShippingProps> = ({
           {isLoading ? (
             <TextShimmer width={70} height={16} rounded="sm" />
           ) : isOverDistance ? (
-            <span className="text-[13px] font-anton font-bold text-gray-400 uppercase tracking-tight">Ngoài vùng giao</span>
+            <span className="text-[13px] font-anton font-bold text-gray-400 uppercase tracking-tight">Out of range</span>
           ) : hasFreeship && finalFee < baseFee ? (
             <>
               <span className="text-[14px] font-anton font-semibold text-[#1A1A1A] tracking-tight">{formatVnd(finalFee)}</span>
@@ -60,7 +60,7 @@ export const RestaurantShipping: React.FC<RestaurantShippingProps> = ({
             <TextShimmer width={60} height={22} rounded="sm" />
           ) : (
             <span className={`text-[18px] font-anton tracking-tight ${isOverDistance ? 'text-gray-400' : 'text-[#1A1A1A]'}`}>
-              {isOverDistance ? 'NGOÀI VÙNG' : `${distance.toFixed(1)} km`}
+              {isOverDistance ? 'OUT OF RANGE' : `${distance.toFixed(1)} km`}
             </span>
           )}
         </div>
@@ -73,7 +73,7 @@ export const RestaurantShipping: React.FC<RestaurantShippingProps> = ({
             {isLoading ? (
               <TextShimmer width={80} height={22} rounded="sm" />
             ) : isOverDistance ? (
-              <span className="text-[18px] font-anton text-gray-400 tracking-tight">KHÔNG THỂ GIAO HÀNG</span>
+              <span className="text-[18px] font-anton text-gray-400 tracking-tight">UNABLE TO DELIVER</span>
             ) : hasFreeship && finalFee < baseFee ? (
               <div className="flex items-center gap-1.5">
                 <span className="text-[13px] text-gray-400 line-through font-bold">{formatVnd(baseFee)}</span>

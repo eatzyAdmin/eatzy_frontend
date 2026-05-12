@@ -60,7 +60,7 @@ export function useNearbyRestaurants(
       const response = await restaurantApi.getNearbyRestaurants(params);
 
       if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể tải danh sách quán ăn gần đây');
+        throw new Error(response.message || 'Could not load nearby restaurants');
       }
 
       return response.data;

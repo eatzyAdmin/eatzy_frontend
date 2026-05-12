@@ -134,9 +134,9 @@ export default function SearchResults({
     <div className="py-0">
       <EmptyState
         icon={Search}
-        title="Không tìm thấy kết quả"
-        description={`Rất tiếc, chúng tôi không tìm thấy kết quả nào phù hợp với "${searchQuery}". Hãy thử thay đổi từ khóa hoặc xem các gợi ý dành riêng cho bạn.`}
-        buttonText="Xem gợi ý"
+        title="No results found"
+        description={`Sorry, we couldn't find any results matching "${searchQuery}". Try changing keywords or see recommendations for you.`}
+        buttonText="View recommendations"
         buttonIcon={Sparkles}
         onButtonClick={onShowRecommendations}
       />
@@ -148,9 +148,9 @@ export default function SearchResults({
       ref={containerRef}
       onRefresh={onRefresh || (async () => { })}
       disabled={!onRefresh || isLoading}
-      pullText="Kéo để cập nhật kết quả"
-      releaseText="Thả để tìm kiếm lại"
-      refreshingText="Đang tìm kiếm..."
+      pullText="Pull to update results"
+      releaseText="Release to search again"
+      refreshingText="Searching..."
       className="h-screen magazine-scroll"
     >
       <motion.div
@@ -198,7 +198,7 @@ export default function SearchResults({
             ShimmerComponent={MagazineLayout8Shimmer}
             initialShimmerCount={3}
             loadMoreShimmerCount={2}
-            endMessage={`Đã hiển thị tất cả ${displayCount} kết quả`}
+            endMessage={`Showing all ${displayCount} results`}
             EmptyComponent={EmptyResultState}
           >
             {filteredResults.map((item) => renderLayout(item))}

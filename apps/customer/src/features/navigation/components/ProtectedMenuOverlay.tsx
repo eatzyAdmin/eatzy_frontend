@@ -15,7 +15,7 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
   const { confirm } = useSwipeConfirmation();
 
   const handleHomeClick = () => {
-    show("Đang tải trang chủ...");
+    show("Loading homepage...");
     const next = new URLSearchParams(params.toString());
     next.delete('q');
     router.replace(`/home`, { scroll: false });
@@ -23,19 +23,19 @@ export default function ProtectedMenuOverlay({ open, onClose }: { open: boolean;
   };
 
   const handleOrderHistoryClick = () => {
-    show("Đang tải lịch sử đơn hàng...");
+    show("Loading order history...");
     router.push(`/order-history`); // Keep original path, adjust if /orders is correct
     onClose();
   };
 
   const handleFavoritesClick = () => {
-    show("Đang tải trang yêu thích...");
+    show("Loading favorites...");
     router.push(`/favorites`);
     onClose();
   };
 
   const handleAccountClick = () => {
-    show("Đang tải cài đặt tài khoản...");
+    show("Loading account settings...");
     router.push(`/profile`);
     onClose();
   };

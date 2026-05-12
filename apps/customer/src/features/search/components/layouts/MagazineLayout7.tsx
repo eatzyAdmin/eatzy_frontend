@@ -1,4 +1,4 @@
-import { motion } from '@repo/ui/motion';
+﻿import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import { ImageWithFallback } from '@repo/ui';
 import { Star } from '@repo/ui/icons';
@@ -45,7 +45,7 @@ export default function MagazineLayout7({ restaurant, dishes }: { restaurant: Re
         <div
           ref={setRefs}
           onMouseLeave={clearHover}
-          onClick={(e) => { triggerTap(e); setTimeout(() => { show('Đang mở chi tiết quán'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
+          onClick={(e) => { triggerTap(e); setTimeout(() => { show('Opening restaurant details'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
           className="relative grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-12 cursor-pointer"
         >
           <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
@@ -105,3 +105,4 @@ export default function MagazineLayout7({ restaurant, dishes }: { restaurant: Re
     </motion.section>
   );
 }
+

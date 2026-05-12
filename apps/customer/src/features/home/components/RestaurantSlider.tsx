@@ -106,16 +106,16 @@ export default function RestaurantSlider({
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="w-6 h-6 animate-spin text-white/20" />
                 <h3 className="text-lg md:text-xl font-bold text-white tracking-tight">
-                  Đang tìm kiếm...
+                  Searching...
                 </h3>
               </div>
             ) : (
               <>
                 <h3 className="text-md md:text-xl font-bold md:font-extrabold text-white tracking-tight">
-                  Không tìm thấy quán
+                  No restaurants found
                 </h3>
                 <p className="text-[13px] md:text-[14px] text-gray-400 font-medium leading-relaxed max-w-[280px] md:max-w-none mx-auto">
-                  Rất tiếc, chưa có nhà hàng nào trong danh mục này tại
+                  Sorry, no restaurants in this category at
                   <span className="text-white font-semibold px-1">
                     {selectedLocation?.address
                       ? selectedLocation.address
@@ -127,7 +127,7 @@ export default function RestaurantSlider({
                         .map((s, idx) => idx === 0 ? s.replace(/^\d+[\d\-/]*\s+/, '') : s)
                         .slice(0, 3)
                         .join(', ')
-                      : "địa chỉ đã chọn"
+                      : "selected address"
                     }
                   </span>
                 </p>
@@ -144,7 +144,7 @@ export default function RestaurantSlider({
               className="group relative flex items-center gap-2.5 px-6 py-3 bg-primary/60 border-2 border-white/20 backdrop-blur-sm rounded-full text-white/90 font-semibold font-anton text-lg md:text-xl uppercase shadow-lg shadow-black/10 transition-all hover:bg-white hover:text-[#1A1A1A]"
             >
               <MapPin className="w-4 h-4" strokeWidth={2.5} />
-              Chọn điểm giao khác
+              Change delivery location
               <ChevronRight className="w-4 h-4 opacity-40 group-hover:translate-x-1 transition-transform" strokeWidth={3} />
             </motion.button>
           )}
@@ -309,7 +309,7 @@ export default function RestaurantSlider({
                                 }}
                                 className="inline-flex items-center pl-1 gap-2.5 rounded-lg text-[13px] font-bold text-white transition-colors uppercase"
                               >
-                                KHÁM PHÁ
+                                EXPLORE
                                 <ChevronRight className="w-4 h-4" />
                               </motion.button>
                             </motion.div>

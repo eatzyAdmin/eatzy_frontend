@@ -24,8 +24,8 @@ export const useCustomerProfile = () => {
     onSuccess: () => {
       sileo.success({
         actionType: "profile_update_success",
-        title: "Cập nhật thành công",
-        description: "Thông tin cá nhân của bạn đã được lưu lại.",
+        title: "Update Successful",
+        description: "Your personal info has been saved.",
         avatarUrl: data?.user?.avatar
       });
       queryClient.invalidateQueries({ queryKey: ["customer", "profile", "me"] });
@@ -33,8 +33,8 @@ export const useCustomerProfile = () => {
     onError: (err: any) => {
       sileo.error({
         actionType: "profile_update_error",
-        title: "Cập nhật thất bại",
-        description: err.response?.data?.message || "Đã có lỗi xảy ra khi cập nhật thông tin."
+        title: "Update Failed",
+        description: err.response?.data?.message || "An error occurred while updating info."
       });
     }
   });

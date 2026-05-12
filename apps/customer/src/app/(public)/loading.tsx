@@ -19,7 +19,7 @@ export default function Loading() {
             </div>
           </div>
           <div className="text-base tracking-wide">Eatzy Magazine</div>
-          <div className="text-sm text-white/80">Đang tải…</div>
+          <div className="text-sm text-white/80">Loading…</div>
         </div>
       </div>
     </div>

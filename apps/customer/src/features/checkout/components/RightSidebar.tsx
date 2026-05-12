@@ -48,7 +48,7 @@ export default function RightSidebar({
 
     confirm({
       title: "Confirm Order",
-      description: `Đặt đơn hàng với tổng tiền ${formatVnd(totalPayable)}?`,
+      description: `Place an order with a total of ${formatVnd(totalPayable)}?`,
       confirmText: "Place Order",
       type: "success",
       processingDuration: 1500,
@@ -119,7 +119,7 @@ export default function RightSidebar({
               </>
             ) : isOverDistance ? (
               <>
-                <span>Vui lòng chọn điểm giao khác</span>
+                <span>Please choose another location</span>
                 <ChevronRight className="w-5 h-5" strokeWidth={3.3} />
               </>
             ) : (

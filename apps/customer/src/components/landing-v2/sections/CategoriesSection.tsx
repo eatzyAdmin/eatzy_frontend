@@ -19,40 +19,40 @@ export default function CategoriesSection({ visible }: CategoriesSectionProps) {
 
   const categories = [
     {
-      name: "Cơm & Bún",
+      name: "Rice & Noodles",
       emoji: "🍚",
       gradient: "from-emerald-400 to-teal-500",
-      description: "Các món cơm và bún truyền thống",
+      description: "Traditional rice and noodle dishes",
     },
     {
-      name: "Đồ Ăn Nhanh",
+      name: "Fast Food",
       emoji: "🍔",
       gradient: "from-yellow-400 to-orange-500",
-      description: "Burger, pizza, gà rán...",
+      description: "Burgers, pizzas, fried chicken...",
     },
     {
-      name: "Món Á",
+      name: "Asian Food",
       emoji: "🍜",
       gradient: "from-red-400 to-pink-500",
-      description: "Phở, mì, sushi, dimsum...",
+      description: "Pho, noodles, sushi, dim sum...",
     },
     {
-      name: "Đồ Uống",
+      name: "Drinks",
       emoji: "🥤",
       gradient: "from-blue-400 to-cyan-500",
-      description: "Trà sữa, cà phê, nước ép...",
+      description: "Milk tea, coffee, juice...",
     },
     {
-      name: "Tráng Miệng",
+      name: "Desserts",
       emoji: "🍰",
       gradient: "from-purple-400 to-pink-500",
-      description: "Bánh ngọt, kem, chè...",
+      description: "Cakes, ice cream, sweet soup...",
     },
     {
-      name: "Lẩu & Nướng",
+      name: "Hotpot & BBQ",
       emoji: "🍲",
       gradient: "from-orange-400 to-red-500",
-      description: "Lẩu, nướng BBQ, hotpot...",
+      description: "Hotpot, BBQ, grill...",
     },
   ];
 
@@ -66,11 +66,11 @@ export default function CategoriesSection({ visible }: CategoriesSectionProps) {
           }`}
         >
           <h2 className="text-3xl md:text-5xl font-light text-white mb-4">
-            Khám Phá - <span className="text-[var(--primary)] font-semibold">Danh Mục Phong Phú</span>
+            Explore - <span className="text-[var(--primary)] font-semibold">Diverse Categories</span>
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] mx-auto my-4 rounded-full"></div>
           <p className="text-white/80 text-xl font-light max-w-3xl mx-auto mb-8">
-            Hàng nghìn món ăn đa dạng từ các nhà hàng uy tín, phục vụ mọi khẩu vị của bạn
+            Thousands of diverse dishes from reputable restaurants, serving all your tastes
           </p>
         </div>
 

@@ -1,4 +1,4 @@
-import { motion } from '@repo/ui/motion';
+﻿import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import { ImageWithFallback } from '@repo/ui';
 import { useHoverHighlight, HoverHighlightOverlay, useTapRipple, TapRippleOverlay, useLoading } from '@repo/ui';
@@ -68,7 +68,7 @@ export default function MagazineLayout12({ restaurant, dishes }: { restaurant: R
         <div
           ref={setRefs}
           onMouseLeave={clearHover}
-          onClick={(e) => { triggerTap(e); setTimeout(() => { show('Đang mở chi tiết quán'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
+          onClick={(e) => { triggerTap(e); setTimeout(() => { show('Opening restaurant details'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
           className="relative w-full max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 items-end cursor-pointer px-4"
         >
           <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
@@ -110,7 +110,7 @@ export default function MagazineLayout12({ restaurant, dishes }: { restaurant: R
                   </p>
                   <div className="flex items-center gap-3 group/btn">
                     <span className="text-xs font-anton font-bold text-white uppercase tracking-[0.2em] border-b border-white pb-1 group-hover/btn:border-amber-500 group-hover/btn:text-amber-500 transition-colors">
-                      KHÁM PHÁ
+                      EXPLORE
                     </span>
                     <ChevronRight className="w-4 h-4 text-white group-hover/btn:text-amber-500 transition-colors" />
                   </div>
@@ -135,3 +135,4 @@ export default function MagazineLayout12({ restaurant, dishes }: { restaurant: R
     </motion.section>
   );
 }
+

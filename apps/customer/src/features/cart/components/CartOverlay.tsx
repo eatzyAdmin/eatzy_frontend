@@ -64,7 +64,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
     if (isEditMode) {
       toggleSelection(cartId);
     } else {
-      show("Đang chuyển đến Checkout...");
+      show("Navigating to Checkout...");
       onClose();
       setActiveRestaurant(String(restaurantId));
       setTimeout(() => {
@@ -102,9 +102,9 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
             <PullToRefresh
               onRefresh={refresh}
               className="flex-1 overflow-y-auto no-scrollbar relative"
-              pullText="Kéo để cập nhật giỏ hàng"
-              releaseText="Thả tay để làm mới"
-              refreshingText="Đang cập nhật..."
+              pullText="Pull to refresh cart"
+              releaseText="Release to refresh"
+              refreshingText="Updating..."
               usePortal={false}
             >
               {/* Header - Sticky with Mask Effect */}
@@ -247,7 +247,7 @@ export default function CartOverlay({ open, onClose }: { open: boolean; onClose:
                         )}
                       </div>
                       <span className="text-md md:text-lg font-bold tracking-tight">
-                        {isDeletingCarts ? "Đang xử lý..." : `Xóa (${selectedRestIds.size}) quán đã chọn`}
+                        {isDeletingCarts ? "Processing..." : `Delete (${selectedRestIds.size}) selected baskets`}
                       </span>
                     </div>
                   </button>

@@ -8,7 +8,7 @@ export const mockCustomerProfile: ICustomerProfileDisplay = {
   membershipTier: "Gold Member",
 };
 export const mockAddresses = [
-  { id: 1, label: "Nhà riêng", address_line: "123 Đường Lê Lợi, Quận 1, TP. Hồ Chí Minh" },
-  { id: 2, label: "Công ty", address_line: "456 Đại lộ Nguyễn Huệ, Quận 3, TP. Hồ Chí Minh" },
-  { id: 3, label: "Nhà bạn gái", address_line: "789 Đường Võ Văn Kiệt, Quận 5, TP. Hồ Chí Minh" }
+  { id: 1, label: "Home", address_line: "123 Le Loi Street, District 1, Ho Chi Minh City" },
+  { id: 2, label: "Office", address_line: "456 Nguyen Hue Blvd, District 3, Ho Chi Minh City" },
+  { id: 3, label: "Friend's House", address_line: "789 Vo Van Kiet Street, District 5, Ho Chi Minh City" }
 ];

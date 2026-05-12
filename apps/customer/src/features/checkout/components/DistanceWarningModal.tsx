@@ -57,7 +57,7 @@ export default function DistanceWarningModal({
               <div className="flex items-center justify-between px-6 py-6 pb-5 md:px-7 md:py-7 md:pb-6 text-[#154D1B] bg-[#E4F8D5] flex-shrink-0 rounded-t-[40px] md:rounded-t-[40px] rounded-b-[40px] md:rounded-b-[50px] shadow-sm">
                 <div className="flex flex-col gap-1.5">
                   <div className="text-2xl sm:text-3xl font-anton font-bold uppercase tracking-tight leading-none">
-                    KHOẢNG CÁCH QUÁ XA
+                    DISTANCE TOO FAR
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <div className="px-2 py-0.5 bg-[#154D1B] rounded-xl shadow-sm">
@@ -88,11 +88,11 @@ export default function DistanceWarningModal({
 
                 <div className="mb-8">
                   <p className="text-gray-500 text-[15px] font-medium leading-relaxed">
-                    Vì lý do phục vụ trải nghiệm món ăn tốt nhất và đảm bảo chất lượng giao hàng, Eatzy giới hạn bán kính giao hàng tối đa là <span className="font-bold md:font-black text-lg md:text-xl text-[#154D1B] ml-0.5 ">{maxDistance}km</span>.
+                    To ensure the best food experience and delivery quality, Eatzy limits the maximum delivery radius to <span className="font-bold md:font-black text-lg md:text-xl text-[#154D1B] ml-0.5 ">{maxDistance}km</span>.
                   </p>
                   <div className="mt-2 text-sm text-gray-500 font-medium">
-                    Vị trí hiện tại của bạn tại <span className="text-[#1A1A1A] font-bold">"{currentAddress?.split(',').map(s => s.trim()).filter(s => !/^\d{5}$/.test(s)).slice(0, 3).join(', ')}..." </span>
-                    đang cách quán <span className="font-bold text-orange-600 px-1.5 py-0.5 bg-orange-50 rounded-lg">{currentDistance.toFixed(1)}km</span>.
+                    Your current location at <span className="text-[#1A1A1A] font-bold">"{currentAddress?.split(',').map(s => s.trim()).filter(s => !/^\d{5}$/.test(s)).slice(0, 3).join(', ')}..." </span>
+                    is <span className="font-bold text-orange-600 px-1.5 py-0.5 bg-orange-50 rounded-lg">{currentDistance.toFixed(1)}km</span> away.
                   </div>
                 </div>
 
@@ -108,7 +108,7 @@ export default function DistanceWarningModal({
                       <div className="flex items-center gap-3 relative z-10 transition-all">
                         <MapPin size={20} strokeWidth={2.5} />
                         <span className="text-xl font-anton font-black tracking-tight uppercase">
-                          Chọn điểm giao khác
+                          Choose another location
                         </span>
                         <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1.5 transition-transform duration-300" strokeWidth={3} />
                       </div>
@@ -123,7 +123,7 @@ export default function DistanceWarningModal({
                       <div className="flex items-center gap-3 relative z-10 transition-all">
                         <MapPin size={22} strokeWidth={2.5} />
                         <span className="text-xl font-anton font-black tracking-tight uppercase">
-                          Chọn điểm giao khác
+                          Choose another location
                         </span>
                         <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1.5 transition-transform duration-300" strokeWidth={3} />
                       </div>
@@ -136,7 +136,7 @@ export default function DistanceWarningModal({
                   onClick={onClose}
                   className="md:hidden mt-6 w-full text-gray-400 font-bold text-sm tracking-widest uppercase hover:text-gray-600 transition-colors"
                 >
-                  Để sau
+                  Maybe later
                 </button>
               </div>
             </div>

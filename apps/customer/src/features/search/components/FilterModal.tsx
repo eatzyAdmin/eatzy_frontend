@@ -29,11 +29,11 @@ interface FilterModalProps {
 const MIN_PRICE = 0;
 const MAX_PRICE = 500000; // 500k for food app
 const SORT_OPTIONS = [
-  { id: 'recommended', label: 'Đề xuất', icon: Sparkles },
-  { id: 'cheapest', label: 'Giá rẻ nhất', icon: Tag },
-  { id: 'bestseller', label: 'Bán chạy', icon: Flame },
-  { id: 'nearest', label: 'Gần nhất', icon: MapPin },
-  { id: 'rating', label: 'Đánh giá tốt', icon: Star },
+  { id: 'recommended', label: 'Recommended', icon: Sparkles },
+  { id: 'cheapest', label: 'Cheapest', icon: Tag },
+  { id: 'bestseller', label: 'Bestseller', icon: Flame },
+  { id: 'nearest', label: 'Nearest', icon: MapPin },
+  { id: 'rating', label: 'Top Rated', icon: Star },
 ];
 
 const HISTOGRAM_DATA = [10, 25, 15, 30, 45, 60, 80, 50, 40, 70, 65, 55, 45, 35, 25, 15, 10, 20, 30, 40, 50, 45, 35, 25, 15];
@@ -166,8 +166,8 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
 
                 {/* Price Range */}
                 <section>
-                  <h3 className="text-xl font-bold mb-2">Khoảng giá</h3>
-                  <p className="text-gray-500 text-sm mb-6">Giá món ăn/đồ uống (VND)</p>
+                  <h3 className="text-xl font-bold mb-2">Price Range</h3>
+                  <p className="text-gray-500 text-sm mb-6">Food/Drink Price (VND)</p>
 
                   {/* Container that overrides bounded box of PremiumPriceRangeFilter */}
                   <div className="[&>div]:bg-transparent [&>div]:p-0 [&>div]:border-none [&>div]:shadow-none">
@@ -185,7 +185,7 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
 
                 {/* Sort Options */}
                 <section>
-                  <h3 className="text-xl font-bold mb-6">Sắp xếp theo</h3>
+                  <h3 className="text-xl font-bold mb-6">Sort By</h3>
 
                   <div className="grid grid-cols-2 gap-1 md:gap-3">
                     {SORT_OPTIONS.map(opt => {
@@ -237,7 +237,7 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
 
                 {/* Categories */}
                 <section>
-                  <h3 className="text-xl font-bold mb-4">Danh mục món ăn</h3>
+                  <h3 className="text-xl font-bold mb-4">Categories</h3>
 
                   <div className="flex flex-wrap gap-2.5">
                     {CATEGORIES.map(cat => {
@@ -272,7 +272,7 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
                       sort === 'recommended' &&
                       category === null;
                     if (isDefault) {
-                      sileo.info({ title: 'Bộ lọc mặc định', description: 'Bộ lọc hiện đã ở trạng thái ban đầu.' });
+                      sileo.info({ title: 'Default Filters', description: 'Filters have been reset to default.' });
                     } else {
                       setPriceRange([0, MAX_PRICE]);
                       setSort('recommended');
@@ -281,7 +281,7 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
                   }}
                   className="text-gray-600 hover:text-gray-900 font-medium px-4 py-2 hover:bg-gray-100 rounded-xl transition-colors"
                 >
-                  Xóa bộ lọc
+                  Clear Filters
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.95 }}
@@ -291,7 +291,7 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
                       sort !== (filters.sort || 'recommended') ||
                       category !== filters.category;
                     if (!isChanged) {
-                      sileo.info({ title: 'Bộ lọc không có gì thay đổi', description: 'Các tiêu chí lọc vẫn đang được giữ nguyên.' });
+                      sileo.info({ title: 'No changes', description: 'Filter criteria remain unchanged.' });
                       onClose();
                     } else {
                       onApply({ minPrice: priceRange[0], maxPrice: priceRange[1], sort, category });
@@ -299,7 +299,7 @@ export default function FilterModal({ open, onClose, layoutId, filters, onApply 
                   }}
                   className="px-8 py-3 bg-[var(--primary)] text-white font-bold rounded-2xl hover:bg-[var(--primary)]/90 transition-colors shadow-lg shadow-[var(--primary)]/30"
                 >
-                  Áp dụng
+                  Apply
                 </motion.button>
               </div>
 

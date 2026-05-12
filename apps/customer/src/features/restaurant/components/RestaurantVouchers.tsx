@@ -110,7 +110,7 @@ export const RestaurantVouchers: React.FC<RestaurantVouchersProps> = ({ restaura
               </div>
               <div className="flex flex-col items-end whitespace-nowrap">
                 <span className="text-[17px] font-anton uppercase tracking-widest text-[#1A1A1A] leading-none mb-0.5 pt-0.5">VOUCHERS</span>
-                <span className="text-[9px] font-bold text-black/40 uppercase tracking-tighter">Ưu đãi hời</span>
+                <span className="text-[9px] font-bold text-black/40 uppercase tracking-tighter">Great deals</span>
               </div>
             </div>
 
@@ -218,12 +218,12 @@ const DetailedVoucherCard = ({ voucher, index }: { voucher: Voucher, index: numb
 
       <div className="flex flex-col items-center gap-1">
         <span className="text-[12px] font-bold text-[#1A1A1A]/80 uppercase tracking-tight truncate max-w-[220px]">
-          {voucher.description || (isFreeship ? 'Miễn phí giao hàng' : 'Giảm trực tiếp')}
+          {voucher.description || (isFreeship ? 'Free shipping' : 'Direct discount')}
         </span>
         <div className="flex items-center gap-1.5 opacity-40">
           <div className="w-1 h-1 rounded-full bg-black" />
           <span className="text-[10px] font-black uppercase tracking-wider">
-            Đơn tối thiểu {formatVnd(voucher.minOrderValue || 0)}
+            Min order {formatVnd(voucher.minOrderValue || 0)}
           </span>
         </div>
       </div>

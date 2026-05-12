@@ -1,4 +1,4 @@
-import { motion } from '@repo/ui/motion';
+﻿import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import { ImageWithFallback, SkeletonAvatar } from '@repo/ui';
 import { useHoverHighlight, HoverHighlightOverlay, useTapRipple, TapRippleOverlay, useLoading } from '@repo/ui';
@@ -25,7 +25,7 @@ export default function MagazineLayout14({ restaurant, dishes }: { restaurant: R
       <div
         ref={setRefs}
         onMouseLeave={clearHover}
-        onClick={(e) => { triggerTap(e); setTimeout(() => { show('Đang mở chi tiết quán'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
+        onClick={(e) => { triggerTap(e); setTimeout(() => { show('Opening restaurant details'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
         className="relative p-6 md:p-10 cursor-pointer"
       >
         <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
@@ -109,3 +109,4 @@ export default function MagazineLayout14({ restaurant, dishes }: { restaurant: R
     </motion.section>
   );
 }
+

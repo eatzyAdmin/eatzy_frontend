@@ -77,7 +77,7 @@ export function useRestaurantDetailById(
       if (!id) throw new Error('Invalid restaurant ID');
       const response = await restaurantDetailApi.getById(id);
       if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể tải thông tin quán');
+        throw new Error(response.message || 'Could not load restaurant info');
       }
       return response.data;
     },
@@ -116,7 +116,7 @@ export function useRestaurantDetailBySlug(
       if (!slug) throw new Error('Invalid restaurant slug');
       const response = await restaurantDetailApi.getBySlug(slug);
       if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể tải thông tin quán');
+        throw new Error(response.message || 'Could not load restaurant info');
       }
       return response.data;
     },
@@ -165,7 +165,7 @@ export function useRestaurantMenu(
       if (!restaurantId) throw new Error('Invalid restaurant ID');
       const response = await restaurantDetailApi.getMenu(restaurantId);
       if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể tải menu');
+        throw new Error(response.message || 'Could not load menu');
       }
       return response.data;
     },

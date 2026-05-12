@@ -54,7 +54,7 @@ export default function StoreClosedModal({
               <div className="flex items-center justify-between px-6 py-6 pb-5 md:px-8 md:py-8 md:pb-7 text-[#154D1B] bg-[#E4F8D5] flex-shrink-0 rounded-t-[40px] md:rounded-t-[40px] rounded-b-[40px] md:rounded-b-[50px] shadow-sm">
                 <div className="flex flex-col gap-1.5">
                   <div className="text-2xl sm:text-3xl font-anton font-bold uppercase tracking-tight leading-none">
-                    CỬA HÀNG ĐÓNG CỬA
+                    STORE CLOSED
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <div className="px-2 py-1 bg-[#154D1B] rounded-xl shadow-sm">
@@ -84,9 +84,9 @@ export default function StoreClosedModal({
                     {restaurantName}
                   </h3>
                   <p className="text-gray-500 text-[15px] font-medium leading-relaxed px-2">
-                    Nhà hàng hiện đang <span className="font-bold text-red-500 uppercase">tạm nghỉ</span>.
+                    The restaurant is currently <span className="font-bold text-red-500 uppercase">closed</span>.
                     <br />
-                    Món ngon cần thời gian chuẩn bị chu đáo hơn, bạn vui lòng quay lại sau hoặc chọn quán khác nhé!
+                    Good food needs time to prepare carefully, please come back later or choose another restaurant!
                   </p>
                 </div>
 
@@ -100,7 +100,7 @@ export default function StoreClosedModal({
                     <div className="flex items-center gap-3 relative z-10">
                       <ArrowLeft size={22} strokeWidth={3} className="group-hover/btn:-translate-x-1 transition-transform" />
                       <span className="text-xl font-anton font-black tracking-tighter uppercase">
-                        Quay lại
+                        Go Back
                       </span>
                     </div>
                   </motion.button>

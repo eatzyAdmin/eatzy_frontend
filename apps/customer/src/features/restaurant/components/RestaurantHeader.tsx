@@ -51,7 +51,7 @@ export const RestaurantHeader: React.FC<RestaurantHeaderProps> = ({ restaurant, 
         </>
       )}
 
-      {/* Chèn Rating & Shipping vào đây cho Mobile */}
+      {/* Insert Rating & Shipping here for Mobile */}
       <div className="md:hidden">
         {children}
       </div>

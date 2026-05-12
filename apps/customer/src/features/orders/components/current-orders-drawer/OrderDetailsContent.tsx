@@ -53,7 +53,7 @@ export default function OrderDetailsContent({
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-gray-400 space-y-2 bg-gray-50/50 backdrop-blur-[2px]">
               <Loader2 className="w-6 h-6 animate-spin opacity-50" />
-              <div className="text-xs font-medium">Đang tải bản đồ...</div>
+              <div className="text-xs font-medium">Loading map...</div>
             </div>
           )}
         </div>
@@ -69,8 +69,8 @@ export default function OrderDetailsContent({
                 <Bike className="w-6 h-6 text-lime-600" />
               </div>
             </div>
-            <h4 className="font-bold text-[#1A1A1A] text-sm">Đang tìm tài xế...</h4>
-            <p className="text-xs text-gray-400 mt-1 max-w-[200px]">Chúng tôi đang kết nối với tài xế gần nhất</p>
+            <h4 className="font-bold text-[#1A1A1A] text-sm">Finding driver...</h4>
+            <p className="text-xs text-gray-400 mt-1 max-w-[200px]">We are connecting to the nearest driver</p>
           </div>
         ) : order.driver ? (
           <div className="flex items-center gap-4">
@@ -78,7 +78,7 @@ export default function OrderDetailsContent({
               <User className="w-6 h-6 text-gray-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Tài xế</h4>
+              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Driver</h4>
               <div className="font-bold text-[#1A1A1A] text-base truncate">{order.driver.name}</div>
               <div className="flex items-center gap-2 mt-0.5">
                 {order.driver.vehicleType && <span className="text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{order.driver.vehicleType}</span>}
@@ -92,8 +92,8 @@ export default function OrderDetailsContent({
               <User className="w-6 h-6 text-gray-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Tài xế</h4>
-              <div className="font-bold text-gray-500 text-sm">Đang chờ phân công...</div>
+              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Driver</h4>
+              <div className="font-bold text-gray-500 text-sm">Waiting for assignment...</div>
             </div>
           </div>
         )}
@@ -103,7 +103,7 @@ export default function OrderDetailsContent({
       <div className="bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50">
         <div className="px-6 py-4 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30">
           <MapPin className="w-5 h-5 text-gray-400" />
-          <h4 className="font-bold text-[#1A1A1A]">Lộ trình giao hàng</h4>
+          <h4 className="font-bold text-[#1A1A1A]">Delivery route</h4>
         </div>
         <div className="p-5 flex gap-4">
           <div className="flex flex-col items-center">
@@ -117,12 +117,12 @@ export default function OrderDetailsContent({
           </div>
           <div className="flex-1 flex flex-col justify-between py-0.5 min-h-[100px]">
             <div className="pb-4">
-              <div className="text-xs font-bold text-[var(--primary)] uppercase tracking-wide mb-1">Nhà hàng</div>
+              <div className="text-xs font-bold text-[var(--primary)] uppercase tracking-wide mb-1">Restaurant</div>
               <div className="font-bold text-[#1A1A1A] text-sm mb-0.5 line-clamp-1">{order.restaurant?.name}</div>
-              <div className="text-xs text-gray-500 font-medium line-clamp-1">{order.restaurant?.address ?? "Đang cập nhật"}</div>
+              <div className="text-xs text-gray-500 font-medium line-clamp-1">{order.restaurant?.address ?? "Updating..."}</div>
             </div>
             <div>
-              <div className="text-xs font-bold text-red-500 uppercase tracking-wide mb-1">Điểm giao</div>
+              <div className="text-xs font-bold text-red-500 uppercase tracking-wide mb-1">Delivery point</div>
               <div className="font-bold text-[#1A1A1A] text-sm mb-0.5 line-clamp-2">{order.deliveryAddress}</div>
             </div>
           </div>
@@ -134,9 +134,9 @@ export default function OrderDetailsContent({
         <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5 text-gray-400" />
-            <h4 className="font-bold text-[#1A1A1A]">Chi tiết đơn hàng</h4>
+            <h4 className="font-bold text-[#1A1A1A]">Order details</h4>
           </div>
-          <span className="text-xs font-bold bg-[#1A1A1A] text-white px-2.5 py-1 rounded-lg">{order.orderItems?.length ?? 0} món</span>
+          <span className="text-xs font-bold bg-[#1A1A1A] text-white px-2.5 py-1 rounded-lg">{order.orderItems?.length ?? 0} items</span>
         </div>
 
         <div className="p-2">
@@ -158,22 +158,22 @@ export default function OrderDetailsContent({
         {/* Bill Summary */}
         <div className="bg-gray-50/50 p-6 space-y-3 border-t border-gray-100">
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-500 font-medium">Tạm tính</span>
+            <span className="text-gray-500 font-medium">Subtotal</span>
             <span className="font-bold text-gray-900">{formatVnd(order.subtotal)}</span>
           </div>
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-500 font-medium">Phí giao hàng</span>
+            <span className="text-gray-500 font-medium">Delivery fee</span>
             <span className="font-bold text-gray-900">{formatVnd(order.deliveryFee)}</span>
           </div>
           {(order.discountAmount ?? 0) > 0 && (
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500 font-medium">Giảm giá</span>
+              <span className="text-gray-500 font-medium">Discount</span>
               <span className="font-bold text-[var(--primary)]">-{formatVnd(order.discountAmount ?? 0)}</span>
             </div>
           )}
           <div className="h-px bg-gray-200 my-3" />
           <div className="flex justify-between items-center">
-            <span className="font-bold text-[#1A1A1A] text-base">Tổng cộng</span>
+            <span className="font-bold text-[#1A1A1A] text-base">Total</span>
             <span className="font-anton text-2xl text-[var(--primary)]">{formatVnd(order.totalAmount)}</span>
           </div>
         </div>
@@ -185,7 +185,7 @@ export default function OrderDetailsContent({
           <ShieldCheck className="w-4 h-4 text-[var(--primary)]" />
         </div>
         <p className="text-xs text-[var(--primary)] leading-relaxed font-medium">
-          Đơn hàng được bảo vệ bởi Eatzy Guarantee. <span className="font-bold cursor-pointer hover:underline">Tìm hiểu thêm</span>
+          Order protected by Eatzy Guarantee. <span className="font-bold cursor-pointer hover:underline">Learn more</span>
         </p>
       </div>
 
@@ -200,7 +200,7 @@ export default function OrderDetailsContent({
               className="w-full h-12 rounded-[20px] bg-white border border-red-100 text-red-500 font-bold text-sm shadow-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-all"
             >
               <XCircle className="w-5 h-5" />
-              Hủy đơn hàng này
+              Cancel this order
             </motion.button>
           ) : (
             <motion.div
@@ -210,12 +210,12 @@ export default function OrderDetailsContent({
               className="bg-white rounded-[28px] p-5 border border-red-100 shadow-md space-y-4"
             >
               <div className="flex items-center justify-between border-b border-gray-50 pb-3">
-                <h3 className="text-lg font-semibold text-[#1A1A1A] uppercase">Tại sao bạn muốn hủy?</h3>
+                <h3 className="text-lg font-semibold text-[#1A1A1A] uppercase">Why do you want to cancel?</h3>
                 <button
                   onClick={() => setShowCancelReasons(false)}
                   className="text-xs font-bold text-gray-400 hover:text-gray-600 uppercase tracking-wider"
                 >
-                  Quay lại
+                  Go back
                 </button>
               </div>
               <div className="space-y-2">
@@ -234,7 +234,7 @@ export default function OrderDetailsContent({
                 onClick={() => setShowCancelReasons(false)}
                 className="w-full py-3 rounded-xl bg-gray-50 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-all"
               >
-                Giữ lại đơn hàng
+                Keep order
               </button>
             </motion.div>
           )}

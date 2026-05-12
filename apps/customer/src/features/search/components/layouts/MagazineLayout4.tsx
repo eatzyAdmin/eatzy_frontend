@@ -1,4 +1,4 @@
-import { motion } from '@repo/ui/motion';
+﻿import { motion } from '@repo/ui/motion';
 import type { Restaurant, Dish, MenuCategory } from '@repo/types';
 import { Star } from '@repo/ui/icons';
 import { useHoverHighlight, HoverHighlightOverlay, useTapRipple, TapRippleOverlay, useLoading } from '@repo/ui';
@@ -83,7 +83,7 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
         <div
           ref={setRefs}
           onMouseLeave={clearHover}
-          onClick={(e) => { triggerTap(e); setTimeout(() => { show('Đang mở chi tiết quán'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
+          onClick={(e) => { triggerTap(e); setTimeout(() => { show('Opening restaurant details'); router.push(`/restaurants/${restaurant.slug}`); }, 300); }}
           className="relative grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 cursor-pointer"
         >
           <HoverHighlightOverlay rect={rect} style={style} preset="tail" />
@@ -203,3 +203,4 @@ export default function MagazineLayout4({ restaurant, dishes, menuCategories }: 
     </motion.article>
   );
 }
+

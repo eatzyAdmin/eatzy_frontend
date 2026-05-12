@@ -9,7 +9,7 @@ import { TextShimmer } from "@repo/ui";
 import PaymentMethodDrawer from "./PaymentMethodDrawer";
 
 const METHODS: { key: PaymentMethod; label: string; icon: React.ReactNode; color: string; sub: string }[] = [
-  { key: "EATZYPAY", label: "EatzyPay", icon: <Wallet className="w-5 h-5" />, color: "lime", sub: "Ví điện tử" },
+  { key: "EATZYPAY", label: "EatzyPay", icon: <Wallet className="w-5 h-5" />, color: "lime", sub: "E-Wallet" },
   { key: "VNPAY", label: "VnPay", icon: <CreditCard className="w-5 h-5" />, color: "blue", sub: "QR Code" },
   { key: "CASH", label: "By Cash", icon: <Banknote className="w-5 h-5" />, color: "lime", sub: "COD" },
 ];
@@ -42,7 +42,7 @@ export default function PaymentMethodSelector({ value, onChange }: { value: Paym
             onClick={() => setIsDrawerOpen(true)}
             className="flex items-center gap-0.5 text-lime-600 font-bold text-[12px]"
           >
-            Xem tất cả
+            View all
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

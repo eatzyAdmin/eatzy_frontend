@@ -31,14 +31,14 @@ export default function PromoVoucherCard({
     if (isFreeship) {
       return (
         <>
-          giảm <span className="hidden md:inline">đến </span>{formatVnd(voucher.maxDiscountAmount || 0)} phí ship
+          off {formatVnd(voucher.maxDiscountAmount || 0)} delivery fee
         </>
       );
     }
     if (voucher.discountType === 'PERCENTAGE') {
-      return `giảm ${voucher.discountValue}% giá món`;
+      return `${voucher.discountValue}% off food`;
     }
-    return `giảm ${formatVnd(voucher.discountValue)} giá món`;
+    return `${formatVnd(voucher.discountValue)} off food`;
   };
 
   const missingAmount = (typeof currentOrderValue === 'number' && typeof voucher.minOrderValue === 'number')
@@ -203,13 +203,13 @@ export default function PromoVoucherCard({
                 {missingAmount !== null && missingAmount > 0 ? (
                   <div className="flex items-baseline gap-1 md:gap-1.5 text-[10px] md:text-[11px] font-bold text-gray-500 uppercase tracking-tight">
                     <span className="translate-y-[-0.5px] whitespace-nowrap">
-                      <span className="md:hidden">Thêm</span>
-                      <span className="hidden md:inline">Mua thêm</span>
+                      <span className="md:hidden">Add</span>
+                      <span className="hidden md:inline">Buy more</span>
                     </span>
                     <span className="font-anton text-[13px] md:text-[15px] text-black tracking-normal whitespace-nowrap leading-none translate-y-[1px]">{formatVnd(missingAmount)}</span>
                     <span className="translate-y-[-0.5px]">
-                      <span className="md:hidden">nhận</span>
-                      <span className="hidden md:inline">để nhận</span> {getIneligibleBenefitText()}
+                      <span className="md:hidden">get</span>
+                      <span className="hidden md:inline">to get</span> {getIneligibleBenefitText()}
                     </span>
                   </div>
                 ) : (

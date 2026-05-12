@@ -515,7 +515,7 @@ export default function DishCustomizeDrawer({
                                     </div>
                                     <div className={`text-[11px] md:text-sm font-semibold transition-all ${active ? "text-lime-600/80" : "text-gray-400"}`}>
                                       {Number(opt.price || 0) === 0 ? (
-                                        <span className="text-[9px] md:text-[12px] font-semibold">Miễn phí</span>
+                                        <span className="text-[9px] md:text-[12px] font-semibold">Free</span>
                                       ) : (
                                         `+ ${formatVnd(Number(opt.price || 0))}`
                                       )}
@@ -546,10 +546,10 @@ export default function DishCustomizeDrawer({
                           <ChefHat className="w-8 h-8" />
                         </div>
                         <div className="mt-3 text-base font-semibold text-[#1A1A1A]">
-                          Không có tuỳ chọn thêm
+                          No extra options
                         </div>
                         <div className="text-sm text-gray-500">
-                          Chọn phân loại hoặc tiếp tục
+                          Select a category or continue
                         </div>
                       </div>
                     </div>
@@ -621,7 +621,7 @@ export default function DishCustomizeDrawer({
                     </div>
                   )}
                   <span className="text-base font-bold tracking-tight">
-                    {isAdding ? "Đang thêm..." : "Thêm vào giỏ hàng"}
+                    {isAdding ? "Adding..." : "Add to cart"}
                   </span>
                 </div>
 

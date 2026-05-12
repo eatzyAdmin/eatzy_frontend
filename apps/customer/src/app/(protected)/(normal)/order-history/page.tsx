@@ -14,9 +14,9 @@ import { useBottomNav } from "@/features/navigation/context/BottomNavContext";
 import { PullToRefresh } from "@repo/ui";
 
 const statusFilters = [
-  { value: "ALL", label: "Tất cả", icon: LayoutGrid },
-  { value: "DELIVERED", label: "Hoàn thành", icon: CheckCircle2 },
-  { value: "CANCELLED", label: "Đã hủy", icon: XCircle },
+  { value: "ALL", label: "All", icon: LayoutGrid },
+  { value: "DELIVERED", label: "Completed", icon: CheckCircle2 },
+  { value: "CANCELLED", label: "Cancelled", icon: XCircle },
 ];
 
 export default function OrderHistoryPage() {
@@ -105,9 +105,9 @@ export default function OrderHistoryPage() {
         ref={scrollContainerRef}
         onRefresh={refresh}
         className="flex-1 no-scrollbar"
-        pullText="Kéo để cập nhật đơn hàng"
-        releaseText="Thả tay để cập nhật"
-        refreshingText="Đang cập nhật..."
+        pullText="Pull to refresh orders"
+        releaseText="Release to refresh"
+        refreshingText="Updating..."
       >
         <div className="max-w-[1400px] mx-auto px-3 md:px-8">
             <div className="flex items-center gap-4 py-3 pb-0 md:pt-20">
@@ -230,20 +230,20 @@ export default function OrderHistoryPage() {
             ) : (actualSearchQuery || statusFilter !== "ALL") ? (
               <EmptyState
                 icon={Store}
-                title="Không tìm thấy đơn hàng"
+                title="No orders found"
                 description={
                   actualSearchQuery
-                    ? "Không có đơn hàng nào phù hợp với tìm kiếm của bạn"
-                    : "Không có đơn hàng nào trong phân loại này"
+                    ? "No orders match your search"
+                    : "No orders in this category"
                 }
                 className="py-24"
               />
             ) : (
               <EmptyState
                 icon={Receipt}
-                title="Bạn chưa có đơn hàng nào"
-                description="Hãy bắt đầu đặt món để tích lũy lịch sử đơn hàng của bạn nhé!"
-                buttonText="Khám phá ngay"
+                title="You have no orders yet"
+                description="Start ordering to build your order history!"
+                buttonText="Explore now"
                 buttonIcon={Compass}
                 onButtonClick={() => router.push('/home?recommend=true')}
                 className="py-24"

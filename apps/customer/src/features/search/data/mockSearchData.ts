@@ -148,35 +148,35 @@ export const mockSearchRestaurants: Restaurant[] = [
 
 export const mockVouchers: Voucher[] = [
   // rest-1
-  { id: 1, restaurantId: 'rest-1', code: 'PHO20', description: 'Giảm 20% hóa đơn từ 200K', discountType: 'PERCENTAGE', discountValue: 20, minOrderValue: 200000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
-  { id: 2, restaurantId: 'rest-1', code: 'PHO50', description: 'Giảm 50K cho đơn từ 150K', discountType: 'FIXED', discountValue: 50000, minOrderValue: 150000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 1, restaurantId: 'rest-1', code: 'PHO20', description: 'Discount 20% for orders from 200K', discountType: 'PERCENTAGE', discountValue: 20, minOrderValue: 200000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 2, restaurantId: 'rest-1', code: 'PHO50', description: 'Discount 50K for orders from 150K', discountType: 'FIXED', discountValue: 50000, minOrderValue: 150000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
   // rest-2
-  { id: 3, restaurantId: 'rest-2', code: 'SUSHI10', description: 'Giảm 10% cho đơn từ 300K', discountType: 'PERCENTAGE', discountValue: 10, minOrderValue: 300000, startDate: '2025-11-01', endDate: '2025-12-01', isAvailable: true },
-  { id: 4, restaurantId: 'rest-2', code: 'DEAL5K', description: 'Giảm 5K, thêm nhiều ưu đãi', discountType: 'FIXED', discountValue: 5000, minOrderValue: 80000, startDate: '2025-11-01', endDate: '2025-12-01', isAvailable: true },
+  { id: 3, restaurantId: 'rest-2', code: 'SUSHI10', description: 'Discount 10% for orders from 300K', discountType: 'PERCENTAGE', discountValue: 10, minOrderValue: 300000, startDate: '2025-11-01', endDate: '2025-12-01', isAvailable: true },
+  { id: 4, restaurantId: 'rest-2', code: 'DEAL5K', description: 'Discount 5K, plus more offers', discountType: 'FIXED', discountValue: 5000, minOrderValue: 80000, startDate: '2025-11-01', endDate: '2025-12-01', isAvailable: true },
   // rest-3
-  { id: 5, restaurantId: 'rest-3', code: 'PIZZA15', description: 'Giảm 15% đơn hàng', discountType: 'PERCENTAGE', discountValue: 15, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
-  { id: 6, restaurantId: 'rest-3', code: 'PASTA30', description: 'Giảm 30K đơn từ 180K', discountType: 'FIXED', discountValue: 30000, minOrderValue: 180000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 5, restaurantId: 'rest-3', code: 'PIZZA15', description: 'Discount 15% on total order', discountType: 'PERCENTAGE', discountValue: 15, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 6, restaurantId: 'rest-3', code: 'PASTA30', description: 'Discount 30K for orders from 180K', discountType: 'FIXED', discountValue: 30000, minOrderValue: 180000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
   // rest-4
-  { id: 7, restaurantId: 'rest-4', code: 'BUN10', description: 'Giảm 10% cho món nước', discountType: 'PERCENTAGE', discountValue: 10, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
-  { id: 8, restaurantId: 'rest-4', code: 'RICE20', description: 'Giảm 20K đơn từ 120K', discountType: 'FIXED', discountValue: 20000, minOrderValue: 120000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 7, restaurantId: 'rest-4', code: 'BUN10', description: 'Discount 10% on soup dishes', discountType: 'PERCENTAGE', discountValue: 10, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 8, restaurantId: 'rest-4', code: 'RICE20', description: 'Discount 20K for orders from 120K', discountType: 'FIXED', discountValue: 20000, minOrderValue: 120000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
   // rest-5
-  { id: 9, restaurantId: 'rest-5', code: 'COFFEE12', description: 'Giảm 12% đồ uống', discountType: 'PERCENTAGE', discountValue: 12, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
-  { id: 10, restaurantId: 'rest-5', code: 'PASTRY15', description: 'Giảm 15K bánh ngọt', discountType: 'FIXED', discountValue: 15000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 9, restaurantId: 'rest-5', code: 'COFFEE12', description: 'Discount 12% on drinks', discountType: 'PERCENTAGE', discountValue: 12, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 10, restaurantId: 'rest-5', code: 'PASTRY15', description: 'Discount 15K on pastries', discountType: 'FIXED', discountValue: 15000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
   // rest-6
-  { id: 11, restaurantId: 'rest-6', code: 'BBQ8', description: 'Giảm 8% thịt nướng', discountType: 'PERCENTAGE', discountValue: 8, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
-  { id: 12, restaurantId: 'rest-6', code: 'STEWPOT40', description: 'Giảm 40K lẩu & canh', discountType: 'FIXED', discountValue: 40000, minOrderValue: 200000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 11, restaurantId: 'rest-6', code: 'BBQ8', description: 'Discount 8% on BBQ', discountType: 'PERCENTAGE', discountValue: 8, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 12, restaurantId: 'rest-6', code: 'STEWPOT40', description: 'Discount 40K for hotpots', discountType: 'FIXED', discountValue: 40000, minOrderValue: 200000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
   // rest-7
-  { id: 13, restaurantId: 'rest-7', code: 'THAI20', description: 'Giảm 20% set curry', discountType: 'PERCENTAGE', discountValue: 20, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
-  { id: 14, restaurantId: 'rest-7', code: 'SALAD15', description: 'Giảm 15K món khai vị', discountType: 'FIXED', discountValue: 15000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 13, restaurantId: 'rest-7', code: 'THAI20', description: 'Discount 20% on curry sets', discountType: 'PERCENTAGE', discountValue: 20, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 14, restaurantId: 'rest-7', code: 'SALAD15', description: 'Discount 15K on appetizers', discountType: 'FIXED', discountValue: 15000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
   // rest-8
-  { id: 15, restaurantId: 'rest-8', code: 'BURGER30', description: 'Giảm 30% burger thứ 2', discountType: 'PERCENTAGE', discountValue: 30, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
-  { id: 16, restaurantId: 'rest-8', code: 'SIDES20', description: 'Giảm 20K phần side', discountType: 'FIXED', discountValue: 20000, minOrderValue: 100000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 15, restaurantId: 'rest-8', code: 'BURGER30', description: 'Discount 30% on 2nd burger', discountType: 'PERCENTAGE', discountValue: 30, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 16, restaurantId: 'rest-8', code: 'SIDES20', description: 'Discount 20K on sides', discountType: 'FIXED', discountValue: 20000, minOrderValue: 100000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
   // rest-9
-  { id: 17, restaurantId: 'rest-9', code: 'DIM10', description: 'Giảm 10% dimsum', discountType: 'PERCENTAGE', discountValue: 10, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 17, restaurantId: 'rest-9', code: 'DIM10', description: 'Discount 10% on dimsum', discountType: 'PERCENTAGE', discountValue: 10, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
   { id: 18, restaurantId: 'rest-9', code: 'COMBO199', description: 'Combo dimsum 199K', discountType: 'FIXED', discountValue: 199000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
   // rest-10
-  { id: 19, restaurantId: 'rest-10', code: 'MED12', description: 'Giảm 12% món chính', discountType: 'PERCENTAGE', discountValue: 12, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
-  { id: 20, restaurantId: 'rest-10', code: 'MAIN50', description: 'Giảm 50K món chính', discountType: 'FIXED', discountValue: 50000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 19, restaurantId: 'rest-10', code: 'MED12', description: 'Discount 12% on main courses', discountType: 'PERCENTAGE', discountValue: 12, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
+  { id: 20, restaurantId: 'rest-10', code: 'MAIN50', description: 'Discount 50K on main courses', discountType: 'FIXED', discountValue: 50000, startDate: '2025-01-01', endDate: '2025-12-31', isAvailable: true },
 ];
 
 // Menu categories for each restaurant
@@ -230,23 +230,23 @@ export const mockDishes: Dish[] = [
     optionGroups: [
       {
         id: 'size', title: 'variant__19f2a48e6cddf3', options: [
-          { id: 'size-s', name: 'Nhỏ', price: 60000 },
-          { id: 'size-m', name: 'Vừa', price: 65000 },
-          { id: 'size-l', name: 'Lớn', price: 75000 },
+          { id: 'size-s', name: 'Small', price: 60000 },
+          { id: 'size-m', name: 'Medium', price: 65000 },
+          { id: 'size-l', name: 'Large', price: 75000 },
         ]
       },
       {
-        id: 'ag-them', title: 'Thêm topping', options: [
-          { id: 'add-trung', name: 'Trứng trần', price: 5000 },
-          { id: 'add-thit', name: 'Thêm thịt', price: 15000 },
-          { id: 'add-banh', name: 'Thêm bánh phở', price: 5000 },
+        id: 'ag-them', title: 'Add toppings', options: [
+          { id: 'add-trung', name: 'Poached Egg', price: 5000 },
+          { id: 'add-thit', name: 'Extra Meat', price: 15000 },
+          { id: 'add-banh', name: 'Extra Noodles', price: 5000 },
         ]
       },
       {
-        id: 'ag-cay', title: 'Độ cay', required: true, minSelect: 1, maxSelect: 1, options: [
-          { id: 'cay-it', name: 'Ít cay', price: 0 },
-          { id: 'cay-vua', name: 'Vừa cay', price: 0 },
-          { id: 'cay-nhieu', name: 'Cay nhiều', price: 0 },
+        id: 'ag-cay', title: 'Spiciness', required: true, minSelect: 1, maxSelect: 1, options: [
+          { id: 'cay-it', name: 'Mild', price: 0 },
+          { id: 'cay-vua', name: 'Medium spice', price: 0 },
+          { id: 'cay-nhieu', name: 'Hot', price: 0 },
         ]
       },
     ]

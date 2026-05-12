@@ -94,9 +94,9 @@ export default function MobileView({
           >
             <PullToRefresh
               onRefresh={onRefresh}
-              pullText="Kéo để cập nhật"
-              releaseText="Thả để cập nhật"
-              refreshingText="Đang cập nhật..."
+              pullText="Pull to refresh"
+              releaseText="Release to refresh"
+              refreshingText="Updating..."
               disabled={isLoadingOrders}
               className="h-full overflow-y-auto custom-scrollbar px-3 md:px-0"
             >
@@ -121,7 +121,7 @@ export default function MobileView({
                       >
                         Current Orders
                       </h3>
-                      <div className="text-sm font-medium text-gray-500 mt-1">{orders.length} đơn hàng đang xử lý</div>
+                      <div className="text-sm font-medium text-gray-500 mt-1">{orders.length} orders processing</div>
                     </div>
                   </div>
                 </div>
@@ -138,9 +138,9 @@ export default function MobileView({
                     {orders.length === 0 ? (
                       <EmptyState
                         icon={FileText}
-                        title="Chưa có đơn hàng nào"
-                        description="Hãy khám phá các nhà hàng xung quanh bạn nhé!"
-                        buttonText="Đặt món ngay"
+                        title="No orders yet"
+                        description="Explore the restaurants around you!"
+                        buttonText="Order now"
                         buttonIcon={Compass}
                         onButtonClick={handleExplore}
                         className="py-12"
@@ -181,7 +181,7 @@ export default function MobileView({
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-gray-400 space-y-2 bg-gray-50/50 backdrop-blur-[2px]">
                   <Loader2 className="w-8 h-8 animate-spin opacity-50" />
-                  <div className="text-sm font-medium">Đang tải bản đồ...</div>
+                  <div className="text-sm font-medium">Loading map...</div>
                 </div>
               )}
             </div>

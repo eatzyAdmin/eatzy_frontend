@@ -80,7 +80,7 @@ export function useRestaurantReviews(
   const query = useQuery({
     queryKey: [...restaurantReviewKeys.byTarget(restaurantName || ''), search, rating, sort],
     queryFn: async () => {
-      if (!restaurantName) throw new Error('Cần tên nhà hàng để tải đánh giá');
+      if (!restaurantName) throw new Error('Restaurant name is required to load reviews');
 
       // Build spring-filter string
       let filter = `reviewTarget:'restaurant' and targetName:'${restaurantName.replace(/'/g, "\\'")}'`;
@@ -101,7 +101,7 @@ export function useRestaurantReviews(
       });
 
       if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể tải đánh giá');
+        throw new Error(response.message || 'Could not load reviews');
       }
 
       if (!response.data || !response.data.result) {

@@ -61,7 +61,7 @@ export const RestaurantRating: React.FC<RestaurantRatingProps> = ({
         </div>
         <div className="h-8 w-[1px] bg-[#1A1A1A]/10 mx-1" />
         <div className="flex flex-col items-center">
-          <span className="text-[12px] font-bold text-[#1A1A1A] group-hover:text-black transition-colors">Xem đánh giá</span>
+          <span className="text-[12px] font-bold text-[#1A1A1A] group-hover:text-black transition-colors">View reviews</span>
           <div className="flex items-center gap-0.5 mt-0.5">
             {[...Array(5)].map((_, i) => (
               <Star

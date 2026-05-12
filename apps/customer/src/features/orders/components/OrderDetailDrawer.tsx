@@ -67,9 +67,9 @@ export default function OrderDetailDrawer({
   if (!order) return null;
 
   const getReviewText = () => {
-    if (!isRestaurantReviewed && !isDriverReviewed) return "Trải nghiệm của bạn thế nào?";
-    if (!isRestaurantReviewed) return "Bạn thấy cửa hàng thế nào?";
-    if (!isDriverReviewed) return "Bạn thấy tài xế thế nào?";
+    if (!isRestaurantReviewed && !isDriverReviewed) return "How was your experience?";
+    if (!isRestaurantReviewed) return "How was the store?";
+    if (!isDriverReviewed) return "How was the driver?";
     return "";
   };
 
@@ -138,7 +138,7 @@ export default function OrderDetailDrawer({
                       )}
                     </div>
                     <p className="text-[14px] font-bold tracking-tight text-white relative z-10">
-                      {reviewedBoth ? "Xem lại đánh giá" : getReviewText()}
+                      {reviewedBoth ? "View your review" : getReviewText()}
                     </p>
                     <ChevronRight size={14} strokeWidth={3} className="text-white/60 group-hover:text-white transition-colors relative z-10" />
                   </motion.button>
@@ -179,7 +179,7 @@ export default function OrderDetailDrawer({
                       >
                         <span className="text-[17px] font-bold text-[#1A1A1A] tracking-tight">{getReviewText()}</span>
                         <div className="flex items-center gap-1 text-lime-600">
-                          <span className="text-[13px] font-bold border-b-2 border-dotted border-lime-500/40 pb-0.5">Chia sẻ trải nghiệm ngay</span>
+                          <span className="text-[13px] font-bold border-b-2 border-dotted border-lime-500/40 pb-0.5">Share your experience now</span>
                           <ChevronRight className="w-4 h-4" strokeWidth={3} />
                         </div>
                       </motion.button>
@@ -196,9 +196,9 @@ export default function OrderDetailDrawer({
                 <PullToRefresh
                   onRefresh={async () => { onClose(); }}
                   className="h-full overflow-y-auto no-scrollbar"
-                  pullText="Kéo để đóng"
-                  releaseText="Thả tay để đóng"
-                  refreshingText="Đang đóng..."
+                  pullText="Pull to close"
+                  releaseText="Release to close"
+                  refreshingText="Closing..."
                   usePortal={false}
                 >
                   <div className="flex flex-col gap-3 p-3 pb-20">
@@ -226,9 +226,9 @@ export default function OrderDetailDrawer({
                               onClick={() => router.push(`/orders/${order.id}/review`)}
                               className="flex flex-col items-center justify-center gap-0.5"
                             >
-                              <span className="text-[17px] font-bold text-[#1A1A1A] tracking-tight">Cảm ơn bạn đã đánh giá!</span>
+                              <span className="text-[17px] font-bold text-[#1A1A1A] tracking-tight">Thank you for your review!</span>
                               <div className="flex items-center gap-1 text-lime-600">
-                                <span className="text-[13px] font-bold border-b-2 border-dashed border-lime-500/40 pb-0.5">Xem lại đánh giá của bạn</span>
+                                <span className="text-[13px] font-bold border-b-2 border-dashed border-lime-500/40 pb-0.5">View your review</span>
                                 <ChevronRight className="w-4 h-4" strokeWidth={3} />
                               </div>
                             </motion.button>

@@ -307,20 +307,20 @@ export default function AddressFormModal({
                   <div className="flex items-center gap-8 flex-1">
                     <div>
                       <h3 className="text-2xl font-anton font-bold text-[#1A1A1A] uppercase tracking-tight">
-                        {initialData ? "CẬP NHẬT ĐỊA CHỈ" : "THÊM ĐỊA CHỈ MỚI"}
+                        {initialData ? "UPDATE ADDRESS" : "ADD NEW ADDRESS"}
                       </h3>
                       <div className="text-sm font-medium text-gray-500 mt-1">
-                        Kéo thả ghim hoặc tìm địa chỉ của bạn
+                        Drag and drop the pin or search for your address
                       </div>
                     </div>
 
                     <div className="flex flex-col gap-1 flex-1 max-w-xs">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">TÊN GỢI NHỚ</label>
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">LABEL</label>
                       <input
                         type="text"
                         value={label}
                         onChange={(e) => setLabel(e.target.value)}
-                        placeholder="Ví dụ: Nhà riêng, Công ty..."
+                        placeholder="e.g. Home, Office..."
                         className="h-11 px-4 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 text-[#1A1A1A] font-bold outline-none transition-all text-sm placeholder:text-gray-400 hover:border-slate-300"
                       />
                     </div>
@@ -421,7 +421,7 @@ export default function AddressFormModal({
                     <div className="flex-1 min-h-0 bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col">
                       <div className="px-6 py-4 pb-0 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30 shrink-0">
                         <Store className="w-5 h-5 text-gray-400" />
-                        <h4 className="font-bold text-[#1A1A1A] text-base">Địa điểm gần đây</h4>
+                        <h4 className="font-bold text-[#1A1A1A] text-base">Recent locations</h4>
                       </div>
                       <div className="flex-1 overflow-y-auto p-4 custom-scrollbar pr-3">
                         {nearbyPlaces.length > 0 ? (
@@ -450,7 +450,7 @@ export default function AddressFormModal({
                         ) : (
                           <div className="h-full flex flex-col items-center justify-center text-center text-gray-400 space-y-2">
                             <Loader2 className="w-6 h-6 animate-spin opacity-50" />
-                            <div className="text-xs font-medium">Đang tìm địa điểm gần đó...</div>
+                            <div className="text-xs font-medium">Finding nearby locations...</div>
                           </div>
                         )}
                       </div>
@@ -462,9 +462,9 @@ export default function AddressFormModal({
                           <Navigation className="w-5 h-5 text-lime-600" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">ĐỊA CHỈ ĐANG CHỌN</h4>
+                          <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">SELECTED ADDRESS</h4>
                           <div className="font-bold text-[#1A1A1A] text-sm leading-snug line-clamp-2 mt-0.5">
-                            {currentAddress || "Đang tải vị trí..."}
+                            {currentAddress || "Loading location..."}
                           </div>
                         </div>
                       </div>
@@ -475,7 +475,7 @@ export default function AddressFormModal({
                         className="w-full h-12 rounded-[16px] bg-[#1A1A1A] text-white font-bold text-base flex items-center justify-center gap-2 hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-black/10 active:scale-[0.98]"
                       >
                         {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
-                        {initialData ? "Lưu thay đổi" : "Thêm địa chỉ mới"}
+                        {initialData ? "Save changes" : "Add new address"}
                       </button>
                     </div>
                   </div>
@@ -536,10 +536,10 @@ export default function AddressFormModal({
                     <div className="px-3 pt-3 pb-0 flex items-center justify-between">
                       <div>
                         <h3 className="text-xl font-anton font-bold text-[#1A1A1A] uppercase">
-                          {initialData ? "CẬP NHẬT ĐỊA CHỈ" : "THÊM ĐỊA CHỈ MỚI"}
+                          {initialData ? "UPDATE ADDRESS" : "ADD NEW ADDRESS"}
                         </h3>
                         <div className="text-[12px] font-medium text-gray-400 mt-0.5">
-                          Kéo thả ghim hoặc tìm địa chỉ của bạn
+                          Drag and drop the pin or search for your address
                         </div>
                       </div>
                       <button
@@ -556,7 +556,7 @@ export default function AddressFormModal({
                         type="text"
                         value={label}
                         onChange={(e) => setLabel(e.target.value)}
-                        placeholder="Tên gợi nhớ: Nhà riêng, Công ty..."
+                        placeholder="Label: Home, Office..."
                         className="w-full h-11 px-4 rounded-2xl bg-slate-50/60 border-2 border-dashed border-slate-200 focus:border-[var(--primary)]/20 focus:ring-4 focus:ring-[var(--primary)]/5 text-[#1A1A1A] font-bold outline-none transition-all text-sm hover:border-slate-300"
                       />
                     </div>
@@ -625,7 +625,7 @@ export default function AddressFormModal({
                 >
                   <div className="bg-white/70 backdrop-blur-sm rounded-t-[36px] p-3 pb-0 flex flex-col gap-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
                     <span className="text-[13px] text-center font-bold text-gray-500 tracking-tight uppercase">
-                      Địa chỉ đã chọn
+                      Selected address
                     </span>
                     <div className="flex items-center gap-3 rounded-[20px]">
                       <div className="w-9 h-9 rounded-xl bg-lime-50 border border-lime-100 flex items-center justify-center flex-shrink-0">
@@ -633,7 +633,7 @@ export default function AddressFormModal({
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-bold text-[#1A1A1A] text-[13px] leading-tight line-clamp-2">
-                          {currentAddress || "Đang tải vị trí..."}
+                          {currentAddress || "Loading location..."}
                         </div>
                       </div>
                     </div>
@@ -645,7 +645,7 @@ export default function AddressFormModal({
                         className="w-full h-12 rounded-[20px] bg-[#1A1A1A] text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl shadow-black/10 active:scale-95"
                       >
                         {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-4 h-4" />}
-                        {initialData ? "Lưu thay đổi" : "Thêm địa chỉ mới"}
+                        {initialData ? "Save changes" : "Add new address"}
                       </button>
                     </div>
                   </div>

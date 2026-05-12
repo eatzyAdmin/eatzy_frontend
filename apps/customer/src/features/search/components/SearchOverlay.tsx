@@ -152,7 +152,7 @@ export default function SearchOverlay({
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Tìm món, nhà hàng..."
+                  placeholder="Search dishes, restaurants..."
                   className="flex-1 bg-transparent text-white text-xl md:text-2xl font-semibold font-anton placeholder:text-white/60 focus:outline-none min-w-0"
                 />
                 <button
@@ -271,7 +271,7 @@ export default function SearchOverlay({
                     className="flex flex-col items-center justify-center w-[72px] h-14 rounded-2xl text-gray-500 gap-1 outline-none"
                   >
                     <Filter className="w-[22px] h-[22px]" strokeWidth={2.5} />
-                    <span className="text-[11px] font-bold">Bộ lọc</span>
+                    <span className="text-[11px] font-bold">Filters</span>
                   </motion.button>
 
                   <motion.button
@@ -297,7 +297,7 @@ export default function SearchOverlay({
                         </span>
                       )}
                     </div>
-                    <span className="text-[11px] font-bold">Giỏ hàng</span>
+                    <span className="text-[11px] font-bold">Cart</span>
                   </motion.button>
                 </motion.div>
               </div>

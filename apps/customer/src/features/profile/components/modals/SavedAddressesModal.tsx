@@ -63,9 +63,9 @@ export default function SavedAddressesModal({
     if (!addr.id) return;
 
     confirm({
-      title: "Xóa địa chỉ",
-      description: `Bạn có chắc chắn muốn xóa "${addr.label}"? Hành động này không thể hoàn tác.`,
-      confirmText: "Trượt để xóa",
+      title: "Delete Address",
+      description: `Are you sure you want to delete "${addr.label}"? This action cannot be undone.`,
+      confirmText: "Swipe to delete",
       type: "danger",
       onConfirm: async () => {
         deleteAddress(addr.id!);
@@ -87,8 +87,8 @@ export default function SavedAddressesModal({
 
   const getIcon = (label: string) => {
     const l = label.toLowerCase();
-    if (l.includes("nhà") || l.includes("home")) return Home;
-    if (l.includes("công ty") || l.includes("work") || l.includes("văn phòng")) return Briefcase;
+    if (l.includes("home")) return Home;
+    if (l.includes("work") || l.includes("office")) return Briefcase;
     return Map;
   };
 
@@ -136,7 +136,7 @@ export default function SavedAddressesModal({
                         Saved Addresses
                       </h3>
                       <div className="text-xs font-medium text-gray-500 mt-0.5">
-                        Chọn từ danh sách địa chỉ đã lưu của bạn
+                        Choose from your list of saved addresses
                       </div>
                     </div>
                   </div>
@@ -157,8 +157,8 @@ export default function SavedAddressesModal({
                   ) : addresses.length === 0 ? (
                     <EmptyState
                       icon={MapPin}
-                      title="Chưa có địa chỉ nào"
-                      description="Hãy thêm địa chỉ giao hàng của bạn để đặt món nhanh hơn nhé!"
+                      title="No addresses yet"
+                      description="Add your delivery address to order faster!"
                       className="py-12"
                     />
                   ) : (
@@ -195,7 +195,7 @@ export default function SavedAddressesModal({
                               <div className="space-y-0.5">
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-1.5 mb-1.5 md:mb-1 text-gray-400">
-                                    <span className="text-[8px] font-black uppercase tracking-widest leading-none">Vị trí</span>
+                                    <span className="text-[8px] font-black uppercase tracking-widest leading-none">Location</span>
                                   </div>
                                   <h4 className="font-bold text-[#1A1A1A] text-base md:text-lg tracking-tight leading-tight truncate md:group-hover:text-lime-600 transition-colors">
                                     {addr.label}
@@ -246,21 +246,21 @@ export default function SavedAddressesModal({
                     className="w-full h-12 bg-[#1A1A1A] text-white font-bold text-sm rounded-[20px] flex items-center justify-center gap-3 active:scale-[0.98] transition-all shadow-xl shadow-black/10"
                   >
                     <Plus size={18} strokeWidth={3} />
-                    Thêm địa chỉ mới
+                    Add New Address
                   </button>
                 </div>
 
                 {/* Desktop Only Bottom Hint */}
                 <div className="hidden md:flex p-6 border-t border-gray-50 bg-gray-50/30 items-center justify-between">
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    {addresses.length} địa chỉ đã lưu
+                    {addresses.length} saved addresses
                   </p>
                   <button
                     onClick={handleOpenAdd}
                     className="flex items-center gap-2 text-lime-600 font-bold text-xs hover:text-lime-700 transition-colors"
                   >
                     <Plus size={14} strokeWidth={3} />
-                    THÊM ĐỊA CHỈ MỚI
+                    ADD NEW ADDRESS
                   </button>
                 </div>
               </div>

@@ -7,9 +7,9 @@ export function CancellationAlert({ reason }: { reason?: string }) {
         <AlertTriangle className="w-6 h-6 text-red-600" />
       </div>
       <div>
-        <h4 className="font-anton text-lg text-red-700 uppercase tracking-tight">ĐƠN HÀNG ĐÃ HỦY</h4>
+        <h4 className="font-anton text-lg text-red-700 uppercase tracking-tight">ORDER CANCELLED</h4>
         <p className="text-sm text-red-600/80 font-medium mt-1 leading-relaxed">
-          Lý do: <span className="font-bold">{reason || "Không có lý do cụ thể"}</span>
+          Reason: <span className="font-bold">{reason || "No specific reason provided"}</span>
         </p>
       </div>
     </div>

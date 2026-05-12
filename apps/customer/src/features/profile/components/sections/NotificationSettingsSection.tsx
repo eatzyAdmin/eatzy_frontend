@@ -17,10 +17,10 @@ export default function NotificationSettingsSection() {
   };
 
   const notificationTypes = [
-    { key: "push", label: "Thông báo đẩy", sub: "Nhận thông báo tức thì trên điện thoại", icon: Bell },
-    { key: "email", label: "Email định kỳ", sub: "Bản tin ẩm thực hàng tuần", icon: MessageSquare },
-    { key: "offers", label: "Ưu đãi đặc quyền", sub: "Khám phá các voucher mới nhất", icon: Tag },
-    { key: "updates", label: "Cập nhật ứng dụng", sub: "Thông tin về các tính năng mới", icon: Terminal },
+    { key: "push", label: "Push Notifications", sub: "Receive instant notifications on your phone", icon: Bell },
+    { key: "email", label: "Periodic Email", sub: "Weekly culinary newsletter", icon: MessageSquare },
+    { key: "offers", label: "Exclusive Offers", sub: "Discover the latest vouchers", icon: Tag },
+    { key: "updates", label: "App Updates", sub: "Information about new features", icon: Terminal },
   ];
 
   return (
@@ -33,13 +33,13 @@ export default function NotificationSettingsSection() {
         <div className="flex items-center gap-2">
           <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
             <Bell size={12} />
-            Thông báo
+            Notifications
           </span>
         </div>
         <h2 className="text-[56px] font-bold leading-none text-[#1A1A1A] uppercase" style={{ fontFamily: "var(--font-anton), var(--font-sans)" }}>
           NOTIFICATIONS
         </h2>
-        <p className="text-gray-500 font-medium">Chọn cách bạn muốn nhận thông tin từ Eatzy</p>
+        <p className="text-gray-500 font-medium">Choose how you want to receive information from Eatzy</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
@@ -77,8 +77,8 @@ export default function NotificationSettingsSection() {
             <ShieldCheck className="w-6 h-6 text-lime-400" />
           </div>
           <div>
-            <h4 className="font-bold text-lg uppercase tracking-tight" style={{ fontFamily: "var(--font-anton), var(--font-sans)" }}>Quyền riêng tư</h4>
-            <p className="text-gray-400 text-sm">Chúng tôi không bao giờ chia sẻ thông tin liên hệ của bạn cho bên thứ ba.</p>
+            <h4 className="font-bold text-lg uppercase tracking-tight" style={{ fontFamily: "var(--font-anton), var(--font-sans)" }}>Privacy</h4>
+            <p className="text-gray-400 text-sm">We never share your contact information with third parties.</p>
           </div>
         </div>
       </div>

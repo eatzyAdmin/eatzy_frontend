@@ -96,11 +96,11 @@ export default function DeliveryLocationButton({
   };
 
   // Determine display text
-  const displayAddress = selectedLocation?.address || "Đang xác định...";
+  const displayAddress = selectedLocation?.address || "Identifying...";
 
   // Format address similarly to DistanceWarningModal: 3 parts, no purely numeric parts
   const formattedAddress = useMemo(() => {
-    if (!selectedLocation?.address) return "Đang xác định...";
+    if (!selectedLocation?.address) return "Identifying...";
     const parts = selectedLocation.address.split(',').map(s => s.trim());
     // Filter out postal codes or pure numbers
     const filteredParts = parts.filter(s => !/^\d{5}$/.test(s) && !/^\d+$/.test(s));
@@ -109,7 +109,7 @@ export default function DeliveryLocationButton({
   }, [selectedLocation?.address]);
 
   const isLoading = isInitializing || isLocationLoading;
-  const displayName = isLoading ? "Đang tải..." : formattedAddress;
+  const displayName = isLoading ? "Loading..." : formattedAddress;
 
   // ======== Render Variants ========
 
@@ -126,7 +126,7 @@ export default function DeliveryLocationButton({
         >
           <MapPin className="w-4 h-4 text-lime-400 flex-shrink-0" />
           <span className="text-sm font-bold text-white truncate flex-1 min-w-0 text-left">
-            {isLoading ? "Đang tải..." : displayName}
+            {isLoading ? "Loading..." : displayName}
           </span>
           <ChevronDown className="w-4 h-4 text-white/60 flex-shrink-0" />
         </motion.button>
@@ -143,7 +143,7 @@ export default function DeliveryLocationButton({
         >
           <MapPin className="w-4 h-4 text-gray-700" />
           <span className="text-sm font-medium text-gray-900 truncate max-w-[180px]">
-            {isLoading ? "Đang tải..." : displayName}
+            {isLoading ? "Loading..." : displayName}
           </span>
           <ChevronDown className="w-4 h-4 text-gray-500" />
         </motion.button>
@@ -180,11 +180,11 @@ export default function DeliveryLocationButton({
             <div className="flex items-center gap-2 mb-2">
               <div className="px-2 py-0.5 rounded-md bg-lime-500/20 border border-lime-500/30">
                 <span className="text-[10px] font-bold text-lime-300 uppercase tracking-wider">
-                  Giao đến
+                  Deliver to
                 </span>
               </div>
               {isManuallySelected && (
-                <span className="text-[10px] text-white/40">• Đã chọn</span>
+                <span className="text-[10px] text-white/40">• Selected</span>
               )}
             </div>
 
@@ -199,7 +199,7 @@ export default function DeliveryLocationButton({
 
               <div className="flex-1 min-w-0 text-left">
                 <div className="text-white font-semibold text-base truncate">
-                  {isLoading ? "Đang xác định vị trí..." : displayName}
+                  {isLoading ? "Identifying location..." : displayName}
                 </div>
                 {!isLoading && selectedLocation?.address && displayName !== selectedLocation.address && (
                   <div className="text-white/50 text-xs truncate mt-0.5">
@@ -209,7 +209,7 @@ export default function DeliveryLocationButton({
               </div>
 
               <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 border border-white/20">
-                <span className="text-xs font-medium text-white/80">Thay đổi</span>
+                <span className="text-xs font-medium text-white/80">Change</span>
                 <ChevronDown className="w-3 h-3 text-white/60" />
               </div>
             </div>

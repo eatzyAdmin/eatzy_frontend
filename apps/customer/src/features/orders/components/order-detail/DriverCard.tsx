@@ -9,9 +9,9 @@ export function DriverCard({ driver }: { driver: any }) {
         <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-300 mb-3 border border-gray-100/50">
           <User className="w-6 h-6" />
         </div>
-        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Tài xế</h4>
-        <div className="font-anton text-xl text-gray-300 uppercase tracking-wide">CHƯA CÓ TÀI XẾ</div>
-        <p className="text-[10px] text-gray-400 font-medium mt-1">Đơn hàng đang chờ điều phối</p>
+        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Driver</h4>
+        <div className="font-anton text-xl text-gray-300 uppercase tracking-wide">NO DRIVER ASSIGNED</div>
+        <p className="text-[10px] text-gray-400 font-medium mt-1">Order is waiting for coordination</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ export function DriverCard({ driver }: { driver: any }) {
         <div className="w-[38%] flex flex-col justify-center md:justify-between py-1">
           <div className="hidden md:flex flex-col">
             <span className="font-anton text-[22px] text-[#1A1A1A] leading-none mb-0.5">{driver.completedTrips || "0"}</span>
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Đánh giá</span>
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Rating</span>
           </div>
           <div className="hidden md:block h-px w-full bg-gray-100 my-1.5" />
           <div className="flex flex-col">
@@ -57,15 +57,15 @@ export function DriverCard({ driver }: { driver: any }) {
               <Star className="w-3.5 h-3.5 fill-[#1A1A1A] text-[#1A1A1A] -mt-0.5" />
             </div>
             <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">
-              <span className="hidden md:inline">Xếp hạng</span>
-              <span className="inline md:hidden">{driver.completedTrips || "0"} Đánh giá</span>
+              <span className="hidden md:inline">Trips</span>
+              <span className="inline md:hidden">{driver.completedTrips || "0"} Reviews</span>
             </span>
           </div>
           <div className="h-px w-full bg-gray-100 my-3 md:my-1.5" />
           <div className="flex flex-col leading-tight">
             <span className="font-anton text-[18px] text-[#1A1A1A] leading-none tracking-tight">{driver.vehicleLicensePlate || "---"}</span>
             <span className="text-[9px] text-gray-500 font-bold truncate max-w-full">
-              {driver.vehicleDetails || "Phương tiện"}
+              {driver.vehicleDetails || "Vehicle"}
             </span>
           </div>
         </div>

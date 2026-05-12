@@ -22,8 +22,8 @@ export const useCustomerAddresses = () => {
     mutationFn: (newAddress: IAddress) => addressApi.createAddress(newAddress),
     onSuccess: () => {
       sileo.success({
-        title: "Thêm địa chỉ thành công",
-        description: "Địa chỉ mới của bạn đã được lưu lại."
+        title: "Address Added Successfully",
+        description: "Your new address has been saved."
       });
       queryClient.invalidateQueries({ queryKey: ["customer", "addresses", "me"] });
     }
@@ -33,8 +33,8 @@ export const useCustomerAddresses = () => {
     mutationFn: (updatedAddress: IAddress) => addressApi.updateAddress(updatedAddress),
     onSuccess: () => {
       sileo.success({
-        title: "Cập nhật thành công",
-        description: "Thông tin địa chỉ đã được thay đổi."
+        title: "Update Successful",
+        description: "Address info has been updated."
       });
       queryClient.invalidateQueries({ queryKey: ["customer", "addresses", "me"] });
     }
@@ -44,8 +44,8 @@ export const useCustomerAddresses = () => {
     mutationFn: (id: number) => addressApi.deleteAddress(id),
     onSuccess: () => {
       sileo.success({
-        title: "Đã xóa địa chỉ",
-        description: "Địa chỉ đã được gỡ khỏi danh sách của bạn."
+        title: "Address Deleted",
+        description: "The address has been removed from your list."
       });
       queryClient.invalidateQueries({ queryKey: ["customer", "addresses", "me"] });
     }

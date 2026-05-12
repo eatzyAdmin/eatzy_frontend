@@ -61,7 +61,7 @@ export function useMobileExitGuard() {
 
           // Show smooth notification
           sileo.warning({
-            title: "Nhấn quay lại thêm lần nữa để thoát",
+            title: "Press back again to exit",
             description: "",
           });
         }

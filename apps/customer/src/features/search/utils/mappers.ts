@@ -41,7 +41,7 @@ export function mapMagazineToRestaurantWithMenu(
     dishes = [{
       id: `placeholder-${magazine.id}`,
       name: magazine.name,
-      description: magazine.description || 'Khám phá các món ăn tại đây',
+      description: magazine.description || 'Explore the dishes here',
       price: 0,
       imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
       restaurantId: String(magazine.id),

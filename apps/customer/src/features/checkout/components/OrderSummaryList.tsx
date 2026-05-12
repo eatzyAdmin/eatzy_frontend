@@ -22,7 +22,7 @@ export default function OrderSummaryList() {
             <h4 className="font-bold text-[#1A1A1A]">Order Items</h4>
           </div>
         </div>
-        <div className="p-6 text-center text-gray-400">Đang tải...</div>
+        <div className="p-6 text-center text-gray-400">Loading...</div>
       </div>
     );
   }

@@ -65,7 +65,7 @@ export function useCart(): UseCartResult {
     queryFn: async () => {
       const response = await cartApi.getMyCarts();
       if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể tải giỏ hàng');
+        throw new Error(response.message || 'Unable to load cart');
       }
       return response.data || [];
     },
@@ -94,7 +94,7 @@ export function useCart(): UseCartResult {
       for (const id of cartIds) {
         const response = await cartApi.deleteCart(id);
         if (response.statusCode !== 200) {
-          throw new Error(response.message || 'Không thể xóa giỏ hàng');
+          throw new Error(response.message || 'Unable to delete cart');
         }
       }
     },
@@ -103,8 +103,8 @@ export function useCart(): UseCartResult {
     },
     onError: (error: Error) => {
       sileo.error({
-        title: "Lỗi xóa giỏ hàng",
-        description: error.message || "Đã có lỗi xảy ra khi xóa giỏ hàng"
+        title: "Error deleting cart",
+        description: error.message || "An error occurred while deleting the cart"
       });
     }
   });
@@ -163,7 +163,7 @@ export function useRestaurantCart(restaurantId: number | null): UseRestaurantCar
       if (!restaurantId) return null;
       const response = await cartApi.getCartForRestaurant(restaurantId);
       if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể tải giỏ hàng');
+        throw new Error(response.message || 'Unable to load cart');
       }
       return response.data;
     },
@@ -226,16 +226,16 @@ export function useRestaurantCart(restaurantId: number | null): UseRestaurantCar
 
       const response = await cartApi.saveOrUpdateCart(request);
       if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể thêm vào giỏ hàng');
+        throw new Error(response.message || 'Unable to add to cart');
       }
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
-      sileo.success({ title: 'Đã thêm vào giỏ hàng!', description: "Thêm vào giỏ hàng thành công" });
+      sileo.success({ title: 'Added to cart!', description: "Item added to cart successfully" });
     },
     onError: (error: Error) => {
-      sileo.error({ title: "Lỗi", description: `${error.message}` });
+      sileo.error({ title: "Error", description: `${error.message}` });
     },
   });
 
@@ -264,7 +264,7 @@ export function useRestaurantCart(restaurantId: number | null): UseRestaurantCar
 
       const response = await cartApi.saveOrUpdateCart(request);
       if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể cập nhật giỏ hàng');
+        throw new Error(response.message || 'Unable to update cart');
       }
       return response.data;
     },
@@ -272,7 +272,7 @@ export function useRestaurantCart(restaurantId: number | null): UseRestaurantCar
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
     onError: (error: Error) => {
-      sileo.error({ title: "Lỗi", description: error.message });
+      sileo.error({ title: "Error", description: error.message });
     },
   });
 
@@ -282,14 +282,14 @@ export function useRestaurantCart(restaurantId: number | null): UseRestaurantCar
       if (!cart) return;
       const response = await cartApi.deleteCart(cart.id);
       if (response.statusCode !== 200) {
-        throw new Error(response.message || 'Không thể xóa giỏ hàng');
+        throw new Error(response.message || 'Unable to delete cart');
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
     onError: (error: Error) => {
-      sileo.error({ title: "Lỗi", description: `${error.message}` });
+      sileo.error({ title: "Error", description: `${error.message}` });
     },
   });
 

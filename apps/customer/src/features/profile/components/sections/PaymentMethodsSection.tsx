@@ -16,14 +16,6 @@ import TransactionOrderDetailModal from "../modals/TransactionOrderDetailModal";
 import TransactionDetailDrawer from "../modals/TransactionDetailDrawer";
 import { WalletTransactionType, WalletTransactionStatus, WALLET_CREDIT_TYPES, WalletTransactionResponse } from "@repo/types";
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(amount).replace("₫", "VNĐ");
-};
-
 const formatDate = (dateString: string) => {
   return new Intl.DateTimeFormat("vi-VN", {
     hour: "2-digit",
@@ -117,7 +109,7 @@ export default function PaymentMethodsSection({ onOpenManage }: PaymentMethodsSe
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
                 <Wallet size={12} />
-                Quản lý tài chính
+                Finance Management
               </span>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-end gap-x-6 gap-y-2">
@@ -134,7 +126,7 @@ export default function PaymentMethodsSection({ onOpenManage }: PaymentMethodsSe
                 <button
                   onClick={() => setShowBalance(!showBalance)}
                   className="mb-2 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
-                  title={showBalance ? "Ẩn số dư" : "Hiện số dư"}
+                  title={showBalance ? "Hide balance" : "Show balance"}
                 >
                   {showBalance ? <EyeOff size={24} /> : <Eye size={24} />}
                 </button>
@@ -153,12 +145,12 @@ export default function PaymentMethodsSection({ onOpenManage }: PaymentMethodsSe
                 className="px-4 py-2 bg-lime-400 font-bold text-black text-[12px] rounded-tr-[32px] rounded-bl-[32px] shadow-lg active:scale-90 transition-all flex items-center gap-1.5"
               >
                 <Plus size={14} strokeWidth={3} />
-                Nạp tiền
+                Top-up
               </button>
             </div>
 
             <div className="relative z-10">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2 block">Số dư hiện tại</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2 block">Current Balance</span>
               <div className="flex items-baseline gap-3">
                 {isLoading ? (
                   <TextShimmer width={150} height={40} rounded="xl" backgroundColor="bg-white/10" className="shrink-0" />
@@ -181,7 +173,7 @@ export default function PaymentMethodsSection({ onOpenManage }: PaymentMethodsSe
               className="px-6 py-3.5 bg-[#1A1A1A] text-white font-anton text-xs uppercase tracking-wider rounded-2xl hover:bg-lime-500 hover:text-black transition-all shadow-lg active:scale-95 flex items-center gap-2"
             >
               <Plus size={16} />
-              Nạp tiền
+              Top-up
             </button>
             <button
               onClick={refresh}
@@ -200,7 +192,7 @@ export default function PaymentMethodsSection({ onOpenManage }: PaymentMethodsSe
             <div className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-[#1A1A1A]">
               <TransactionsIcon size={20} />
             </div>
-            <h3 className="text-xl font-bold tracking-tight text-[#1A1A1A]">Lịch sử giao dịch</h3>
+            <h3 className="text-xl font-bold tracking-tight text-[#1A1A1A]">Transaction History</h3>
           </div>
         </div>
 
@@ -217,15 +209,15 @@ export default function PaymentMethodsSection({ onOpenManage }: PaymentMethodsSe
           ) : transactions.length === 0 ? (
             <div className="py-20 border-2 border-dashed border-gray-100 rounded-[40px] flex flex-col items-center justify-center text-gray-400 bg-slate-50/30">
               <Receipt size={32} className="opacity-20 mb-4" />
-              <p className="text-sm font-bold uppercase tracking-widest">Chưa có giao dịch nào</p>
-              <p className="text-xs">Mọi chi tiêu và nạp tiền sẽ xuất hiện ở đây</p>
+              <p className="text-sm font-bold uppercase tracking-widest">No transactions yet</p>
+              <p className="text-xs">All spending and top-ups will appear here</p>
             </div>
           ) : (
             transactions.map((tx, idx) => {
               const Icon = getTransactionIcon(tx.transactionType, tx.status);
               const isCredit = WALLET_CREDIT_TYPES.includes(tx.transactionType as any);
               const statusColor = tx.status === WalletTransactionStatus.SUCCESS ? "text-lime-500" : tx.status === WalletTransactionStatus.FAILED ? "text-red-500" : "text-amber-500";
-              const statusText = tx.status === WalletTransactionStatus.SUCCESS ? "Thành công" : tx.status === WalletTransactionStatus.FAILED ? "Thất bại" : "Đang xử lý";
+              const statusText = tx.status === WalletTransactionStatus.SUCCESS ? "Success" : tx.status === WalletTransactionStatus.FAILED ? "Failed" : "Processing";
 
               return (
                 <div key={tx.id}>
@@ -242,7 +234,7 @@ export default function PaymentMethodsSection({ onOpenManage }: PaymentMethodsSe
 
                       <div className="flex-1 min-w-0 flex flex-col">
                         <h4 className="text-[15px] md:text-[16px] font-bold text-slate-900 truncate tracking-tight">
-                          {tx.description || "Giao dịch Eatzy"}
+                          {tx.description || "Eatzy Transaction"}
                         </h4>
                         <p className="text-[11px] md:text-[12px] text-slate-400 font-medium mt-0.5">
                           {formatDate(tx.transactionDate)}

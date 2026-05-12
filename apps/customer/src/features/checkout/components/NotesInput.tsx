@@ -19,11 +19,11 @@ export default function NotesInput({ value, onChange }: { value: string; onChang
               value={value}
               onChange={(e) => onChange(e.target.value)}
               rows={3}
-              placeholder="Ví dụ: Gọi trước khi đến, không bấm chuông"
+              placeholder="Example: Call before arrival, don't ring the bell"
               className="w-full bg-transparent outline-none text-[14px] font-bold text-[#1A1A1A] placeholder:text-gray-300 placeholder:font-normal px-0 py-2 border-b border-gray-100 focus:border-orange-500 transition-colors resize-none"
             />
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-2">
-              Thông tin sẽ hiển thị cho tài xế
+              Information will be shown to the driver
             </div>
           </div>
         </div>

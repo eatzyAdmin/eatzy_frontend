@@ -40,12 +40,12 @@ export function RestaurantCard({ restaurant }: { restaurant: any }) {
 
         <div className="space-y-1.5">
           <div className="flex flex-col">
-            <span className="hidden md:block text-[9px] font-black text-white/50 uppercase tracking-[0.2em] mb-0.5">Cửa hàng</span>
+            <span className="hidden md:block text-[9px] font-black text-white/50 uppercase tracking-[0.2em] mb-0.5">Restaurant</span>
             <h3 className="font-anton text-2xl text-white uppercase leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] line-clamp-1">{restaurant.name}</h3>
           </div>
           <div className="flex items-center gap-2 pt-1 group/visit">
             <span className="text-[10px] font-black text-white/80 uppercase tracking-widest border-b border-white/30 pb-0.5 group-hover:text-white group-hover:border-white transition-all">
-              Xem cửa hàng
+              View Restaurant
             </span>
             <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-[var(--primary)] transition-colors">
               <ChevronRight className="w-2.5 h-2.5 text-white" />

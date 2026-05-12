@@ -56,7 +56,7 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
   }, []);
 
   const handleCheckout = () => {
-    show("Đang chuẩn bị đơn hàng...");
+    show("Preparing your order...");
     setIsOpen(false);
     setActiveRestaurant(String(restaurantId));
     setTimeout(() => {
@@ -117,7 +117,7 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                 </div>
 
                 <div className="flex items-center gap-2 bg-black/10 px-4 py-2.5 rounded-2xl">
-                  <span className="text-[13px] font-anton font-bold uppercase tracking-tight">Chi tiết</span>
+                  <span className="text-[13px] font-anton font-bold uppercase tracking-tight">Details</span>
                   <ChevronRight className="w-4 h-4" strokeWidth={3} />
                 </div>
               </>
@@ -132,7 +132,7 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                   </span>
                 </div>
                 <div className="flex flex-col items-start mr-1 md:mr-2">
-                  <span className="hidden md:block text-xs font-semibold opacity-80 uppercase tracking-wide">Giỏ hàng</span>
+                  <span className="hidden md:block text-xs font-semibold opacity-80 uppercase tracking-wide">My Cart</span>
                   <span className="font-bold text-sm md:text-lg leading-none">{formatVnd(totalPrice)}</span>
                 </div>
               </>
@@ -254,7 +254,7 @@ export default function FloatingRestaurantCart({ restaurantId, restaurantName }:
                           <span className="font-anton text-[28px] sm:text-[40px] leading-none tracking-tighter text-[#154D1B]">
                             {Math.floor(totalPrice / 1000)}<span className="text-[14px] sm:text-[20px] opacity-30">.000</span>
                           </span>
-                          <span className="font-anton text-[12px] sm:text-[16px] text-[#154D1B] ml-1 opacity-60">VNĐ</span>
+                          <span className="font-anton text-[12px] sm:text-[16px] text-[#154D1B] ml-1 opacity-60">VND</span>
                         </div>
                       </div>
 

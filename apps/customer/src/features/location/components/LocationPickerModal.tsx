@@ -341,9 +341,9 @@ export default function LocationPickerModal({
                 {/* Header - EXACT from code cũ */}
                 <div className="bg-white px-4 md:px-8 py-4 md:py-6 border-b border-gray-100 flex items-center justify-between sticky top-0 z-50 shadow-sm/50">
                   <div>
-                    <h3 className="text-2xl font-anton font-bold text-[#1A1A1A] uppercase">BẠN MUỐN GIAO ĐẾN ĐÂU?</h3>
+                    <h3 className="text-2xl font-anton font-bold text-[#1A1A1A] uppercase">WHERE DO YOU WANT TO DELIVER?</h3>
                     <div className="text-xs md:text-sm font-medium text-gray-500 mt-1">
-                      Kéo thả ghim hoặc tìm kiếm địa chỉ của bạn
+                      Drag and drop the pin or search for your address
                     </div>
                   </div>
 
@@ -360,7 +360,7 @@ export default function LocationPickerModal({
                         <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center shrink-0 relative z-10 transition-colors group-hover:bg-white/40">
                           <MapPin size={16} strokeWidth={2.5} className="text-white" />
                         </div>
-                        <p className="text-[14px] font-bold tracking-tight text-white relative z-10">Địa chỉ đã lưu</p>
+                        <p className="text-[14px] font-bold tracking-tight text-white relative z-10">Saved addresses</p>
                         <ChevronRight size={14} strokeWidth={3} className="text-white/60 group-hover:text-white transition-colors relative z-10" />
                       </button>
                     )}
@@ -461,7 +461,7 @@ export default function LocationPickerModal({
                     <div className="flex-1 min-h-0 bg-white rounded-[28px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col">
                       <div className="px-6 py-4 pb-0 border-b border-gray-50 flex items-center gap-2 bg-gray-50/30 shrink-0">
                         <Store className="w-5 h-5 text-gray-400" />
-                        <h4 className="font-bold text-[#1A1A1A] text-base">Địa điểm gần đây</h4>
+                        <h4 className="font-bold text-[#1A1A1A] text-base">Recent locations</h4>
                       </div>
                       <div className="flex-1 overflow-y-auto p-4 custom-scrollbar pr-3">
                         {nearbyPlaces.length > 0 ? (
@@ -490,7 +490,7 @@ export default function LocationPickerModal({
                         ) : (
                           <div className="h-full flex flex-col items-center justify-center text-center text-gray-400 space-y-2">
                             <Loader2 className="w-6 h-6 animate-spin opacity-50" />
-                            <div className="text-xs font-medium">Đang tìm địa điểm gần đó...</div>
+                            <div className="text-xs font-medium">Finding nearby locations...</div>
                           </div>
                         )}
                       </div>
@@ -502,9 +502,9 @@ export default function LocationPickerModal({
                           <Navigation className="w-5 h-5 text-lime-600" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">ĐỊA CHỈ ĐANG CHỌN</h4>
+                          <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">SELECTED ADDRESS</h4>
                           <div className="font-bold text-[#1A1A1A] text-sm leading-snug line-clamp-2 mt-0.5">
-                            {currentAddress || "Đang tải vị trí..."}
+                            {currentAddress || "Loading location..."}
                           </div>
                         </div>
                       </div>
@@ -514,7 +514,7 @@ export default function LocationPickerModal({
                         className="w-full h-12 rounded-[16px] bg-[#1A1A1A] text-white font-bold text-base flex items-center justify-center gap-2 hover:bg-black transition-all shadow-lg shadow-black/10"
                       >
                         <Check className="w-5 h-5" />
-                        Xác nhận địa điểm
+                        Confirm location
                       </button>
                     </div>
                   </div>
@@ -574,9 +574,9 @@ export default function LocationPickerModal({
                     {/* Header */}
                     <div className="px-3 pt-3 pb-0 flex items-center justify-between">
                       <div>
-                        <h3 className="text-xl font-anton font-bold text-[#1A1A1A] uppercase">BẠN MUỐN GIAO ĐẾN ĐÂU?</h3>
+                        <h3 className="text-xl font-anton font-bold text-[#1A1A1A] uppercase">WHERE DO YOU WANT TO DELIVER?</h3>
                         <div className="text-[12px] font-medium text-gray-400 mt-0.5">
-                          Kéo thả ghim hoặc tìm kiếm địa chỉ của bạn
+                          Drag and drop the pin or search for your address
                         </div>
                       </div>
                       <button
@@ -657,7 +657,7 @@ export default function LocationPickerModal({
                       className="flex items-center justify-center gap-1.5 px-2 pb-1 group active:opacity-60 transition-opacity"
                     >
                       <span className="text-[13px] font-bold text-lime-600 tracking-tight border-b border-dotted border-lime-600 pb-px">
-                        Dùng địa chỉ đã lưu
+                        Use saved address
                       </span>
                       <ChevronRight size={14} className="text-lime-600 mb-[-1px]" strokeWidth={2.8} />
                     </button>
@@ -668,7 +668,7 @@ export default function LocationPickerModal({
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-bold text-[#1A1A1A] text-[13px] leading-tight line-clamp-2">
-                          {currentAddress || "Đang tải vị trí..."}
+                          {currentAddress || "Loading location..."}
                         </div>
                       </div>
                     </div>
@@ -680,7 +680,7 @@ export default function LocationPickerModal({
                         className="w-full h-12 rounded-[20px] bg-[#1A1A1A] text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl shadow-black/10 active:scale-95"
                       >
                         <Check className="w-4 h-4" />
-                        Xác nhận địa điểm
+                        Confirm location
                       </button>
                     </div>
                   </div>

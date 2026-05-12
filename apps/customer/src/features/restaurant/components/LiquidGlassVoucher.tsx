@@ -15,8 +15,8 @@ export const LiquidGlassVoucher: React.FC<LiquidGlassVoucherProps> = ({ voucher,
 
   const getTitle = () => {
     if (voucher.description) return voucher.description;
-    if (voucher.code) return `Mã: ${voucher.code}`;
-    return isFreeship ? 'Miễn phí giao hàng' : 'Giảm giá cực hời';
+    if (voucher.code) return `Code: ${voucher.code}`;
+    return isFreeship ? 'Free shipping' : 'Great discount';
   };
 
   const getDiscountValue = () => {

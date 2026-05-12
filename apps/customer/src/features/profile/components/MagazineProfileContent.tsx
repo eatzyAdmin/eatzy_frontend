@@ -52,18 +52,18 @@ export default function MagazineProfileContent({ onLogout }: { onLogout: () => v
 
   const menuSections = [
     {
-      title: "Cài đặt tài khoản",
+      title: "Account Settings",
       items: [
-        { id: "01", icon: User, label: "Thông tin cá nhân" },
-        { id: "02", icon: MapPin, label: "Địa chỉ đã lưu" },
-        { id: "03", icon: Wallet, label: "Ví & Thanh toán" },
+        { id: "01", icon: User, label: "Personal Info" },
+        { id: "02", icon: MapPin, label: "Saved Addresses" },
+        { id: "03", icon: Wallet, label: "Wallet & Payment" },
       ]
     },
     {
-      title: "Ứng dụng & Hỗ trợ",
+      title: "App & Support",
       items: [
-        { id: "04", icon: Bell, label: "Cài đặt thông báo" },
-        { id: "06", icon: HelpCircle, label: "Trung tâm trợ giúp" },
+        { id: "04", icon: Bell, label: "Notification Settings" },
+        { id: "06", icon: HelpCircle, label: "Help Center" },
       ]
     }
   ];
@@ -116,7 +116,7 @@ export default function MagazineProfileContent({ onLogout }: { onLogout: () => v
               </h2>
               <div className="flex items-center gap-1.5 text-gray-400">
                 <span className="text-[13px] font-medium truncate opacity-80">
-                  {profileData.email || "Chưa cập nhật email"}
+                  {profileData.email || "Email not updated"}
                 </span>
               </div>
             </div>
@@ -189,7 +189,7 @@ export default function MagazineProfileContent({ onLogout }: { onLogout: () => v
                 <LogOut className="w-5 h-5" />
               </div>
               <span className="flex-1 text-left text-base font-bold">
-                Đăng xuất
+                Log Out
               </span>
               <ChevronRight className="w-4 h-4 text-red-200 group-hover:translate-x-0 transition-all -translate-x-1 opacity-0 group-hover:opacity-100" />
             </button>

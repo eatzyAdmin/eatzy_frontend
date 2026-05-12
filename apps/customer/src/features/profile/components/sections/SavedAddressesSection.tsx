@@ -27,9 +27,9 @@ export default function SavedAddressesSection() {
     if (!addr.id) return;
 
     confirm({
-      title: "Xóa địa chỉ",
-      description: `Bạn có chắc chắn muốn xóa "${addr.label}"? Hành động này không thể hoàn tác.`,
-      confirmText: "Trượt để xóa",
+      title: "Delete Address",
+      description: `Are you sure you want to delete "${addr.label}"? This action cannot be undone.`,
+      confirmText: "Swipe to delete",
       type: "danger",
       onConfirm: async () => {
         deleteAddress(addr.id!);
@@ -51,8 +51,8 @@ export default function SavedAddressesSection() {
 
   const getIcon = (label: string) => {
     const l = label.toLowerCase();
-    if (l.includes("nhà") || l.includes("home")) return Home;
-    if (l.includes("công ty") || l.includes("work") || l.includes("văn phòng")) return Briefcase;
+    if (l.includes("home")) return Home;
+    if (l.includes("work") || l.includes("office")) return Briefcase;
     return Map;
   };
 
@@ -68,13 +68,13 @@ export default function SavedAddressesSection() {
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 w-fit">
                 <MapPin size={12} />
-                Địa chỉ giao hàng
+                Delivery Addresses
               </span>
             </div>
             <h2 className="text-4xl md:text-[56px] font-bold leading-none text-[#1A1A1A] uppercase" style={{ fontFamily: "var(--font-anton), var(--font-sans)" }}>
               ADDRESSES
             </h2>
-            <p className="text-gray-500 font-medium">Lưu trữ địa chỉ giúp bạn đặt hàng nhanh chóng hơn</p>
+            <p className="text-gray-500 font-medium">Storing addresses helps you order faster</p>
           </div>
 
           {/* Desktop Version - Only visible on md+ screens */}
@@ -84,7 +84,7 @@ export default function SavedAddressesSection() {
               className="px-8 py-4 bg-[#1A1A1A] text-white font-anton text-sm uppercase tracking-wider rounded-[24px] hover:bg-lime-500 hover:text-black transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 w-fit"
             >
               <Plus size={18} />
-              Thêm địa chỉ mới
+              Add New Address
             </button>
           </div>
         </div>
@@ -95,8 +95,8 @@ export default function SavedAddressesSection() {
           ) : addresses.length === 0 ? (
             <EmptyState
               icon={MapPin}
-              title="Chưa có địa chỉ nào"
-              description="Hãy thêm địa chỉ giao hàng của bạn để đặt món nhanh hơn nhé!"
+              title="No addresses yet"
+              description="Add your delivery address to order faster!"
               className="py-12"
             />
           ) : (
@@ -132,7 +132,7 @@ export default function SavedAddressesSection() {
                     <div className="space-y-0.5">
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 mb-1.5 md:mb-1 text-gray-400">
-                          <span className="text-[8px] font-black uppercase tracking-widest leading-none">Vị trí</span>
+                          <span className="text-[8px] font-black uppercase tracking-widest leading-none">Location</span>
                         </div>
                         <h4 className="font-bold text-[#1A1A1A] text-base md:text-lg tracking-tight leading-tight truncate md:group-hover:text-lime-600 transition-colors">
                           {addr.label}
@@ -174,7 +174,7 @@ export default function SavedAddressesSection() {
                   {/* Desktop Only Chevron Link - Bottom Right */}
                   <div className="hidden md:flex absolute bottom-4 right-4 z-20 items-center gap-2 overflow-hidden pointer-events-none md:group-hover:pointer-events-auto">
                     <span className="text-[10px] font-black text-lime-600 uppercase tracking-widest translate-x-10 opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 transition-all duration-500 ease-out">
-                      Cập nhật
+                      Update
                     </span>
                     <div className="w-8 h-8 rounded-full flex items-center justify-center md:group-hover:bg-lime-500 md:group-hover:text-black transition-all duration-300">
                       <ChevronRight className="w-4 h-4 transition-transform md:group-hover:translate-x-1" strokeWidth={3} />
@@ -195,7 +195,7 @@ export default function SavedAddressesSection() {
             className="px-8 py-4 bg-[#1A1A1A] text-white font-bold text-sm rounded-[24px] hover:bg-lime-500 hover:text-black transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 w-full"
           >
             <Plus size={18} strokeWidth={3} />
-            Thêm địa chỉ mới
+            Add New Address
           </button>
         </div>
       </div>

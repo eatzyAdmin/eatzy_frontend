@@ -102,10 +102,10 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
   const displayReviews = reviews;
 
   const sortOptions = [
-    { value: 'relevant', label: 'Phù hợp nhất' },
-    { value: 'recent', label: 'Gần đây nhất' },
-    { value: 'highest', label: 'Đánh giá cao nhất' },
-    { value: 'lowest', label: 'Đánh giá thấp nhất' },
+    { value: 'relevant', label: 'Most Relevant' },
+    { value: 'recent', label: 'Most Recent' },
+    { value: 'highest', label: 'Highest Rated' },
+    { value: 'lowest', label: 'Lowest Rated' },
   ];
 
   if (!mounted) return null;
@@ -180,7 +180,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                         <span className="text-3xl md:text-4xl drop-shadow-md">🏆</span>
                       </div>
                       {rating > 4.0 && (
-                        <h3 className="text-lg md:text-xl font-anton font-bold text-[#1A1A1A] uppercase tracking-wide mb-2">Được khách yêu thích</h3>
+                        <h3 className="text-lg md:text-xl font-anton font-bold text-[#1A1A1A] uppercase tracking-wide mb-2">Guest Favorite</h3>
                       )}
                       <p className="text-gray-600 text-sm leading-relaxed px-2">
                         Based on {totalReviewsCount} customer reviews.
@@ -224,7 +224,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                             />
                           </div>
 
-                          <span className="text-[10px] font-bold text-gray-400 w-10 text-right uppercase">{item.count} lượt</span>
+                          <span className="text-[10px] font-bold text-gray-400 w-10 text-right uppercase">{item.count} reviews</span>
                         </div>
                       ))}
                     </div>
@@ -235,9 +235,9 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                 <PullToRefresh
                   onRefresh={refresh}
                   className="flex-1 overflow-y-auto px-3 md:pr-12 md:pl-8 py-0 md:py-6 relative bg-[#F7F7F7] md:bg-white no-scrollbar"
-                  pullText="Kéo để cập nhật đánh giá"
-                  releaseText="Thả tay để cập nhật"
-                  refreshingText="Đang tải đánh giá mới..."
+                  pullText="Pull to refresh reviews"
+                  releaseText="Release to refresh"
+                  refreshingText="Loading new reviews..."
                   usePortal={false}
                 >
                   {/* Mobile Header - Profile Sub-header Style - Moved inside to enable blur/mask effects */}
@@ -279,7 +279,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                           : 'bg-white border-gray-100 text-gray-500 hover:border-gray-200'
                           }`}
                       >
-                        <span className="uppercase font-semibold">Tất cả</span>
+                        <span className="uppercase font-semibold">All</span>
                         <span className="opacity-40 text-[9px] leading-tight mt-0.5">{totalReviewsCount} Reviews</span>
                       </button>
                       {[5, 4, 3, 2, 1].map((stars) => {
@@ -307,7 +307,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                       {/* Header */}
                       <div className="flex items-center justify-between pl-2 md:pl-0">
                         <h2 className="text-sm md:text-xl font-bold text-gray-900">
-                          {displayReviews.length} lượt đánh giá
+                          {displayReviews.length} reviews
                         </h2>
 
                         <div className="relative" ref={sortRef}>
@@ -388,8 +388,8 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                       ) : isError ? (
                         <EmptyState
                           icon={AlertCircle}
-                          title="Đã có lỗi xảy ra"
-                          description={error?.message || "Không thể tải danh sách đánh giá từ máy chủ."}
+                          title="An error occurred"
+                          description={error?.message || "Could not load reviews from server."}
                           className="py-12"
                         />
                       ) : (
@@ -397,10 +397,10 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                           {displayReviews.length === 0 ? (
                             <EmptyState
                               icon={activeSearch ? Search : MessageSquare}
-                              title={activeSearch ? "Không tìm thấy kết quả" : "Chưa có đánh giá nào"}
+                              title={activeSearch ? "No results found" : "No reviews yet"}
                               description={activeSearch
-                                ? `Không tìm thấy đánh giá nào khớp với từ khóa "${activeSearch}"`
-                                : `Nhà hàng "${restaurant.name}" hiện chưa có lượt đánh giá nào từ khách hàng.`
+                                ? `No reviews found matching keyword "${activeSearch}"`
+                                : `Restaurant "${restaurant.name}" has no customer reviews yet.`
                               }
                               className="py-12"
                             />
@@ -428,7 +428,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <div className="font-bold text-gray-900 text-sm">{review.authorName}</div>
-                                        <div className="text-xs text-gray-500 font-medium">Khách hàng Eatzy</div>
+                                        <div className="text-xs text-gray-500 font-medium">Eatzy Customer</div>
                                       </div>
                                     </div>
 
@@ -458,7 +458,7 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                                           <div className="w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center text-white">
                                             <ChefHat size={12} />
                                           </div>
-                                          Phản hồi từ quán
+                                          Response from host
                                         </div>
                                         <p className="text-gray-600 text-sm leading-relaxed italic">
                                           "{review.reply}"
@@ -486,10 +486,10 @@ export const ReviewsModal = ({ restaurant, isOpen, onClose }: ReviewsModalProps)
                           )}
                         </div>
                       )}
-                      </div>
                     </div>
-                  </PullToRefresh>
-                </div>
+                  </div>
+                </PullToRefresh>
+              </div>
             </motion.div>
           </div>
         </>

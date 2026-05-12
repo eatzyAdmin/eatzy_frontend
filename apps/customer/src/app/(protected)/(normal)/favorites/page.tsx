@@ -99,7 +99,7 @@ export default function FavoritesPage() {
   }, [favoriteRestaurants, actualSearchQuery]);
 
   const handleRestaurantClick = (restaurant: Restaurant) => {
-    show("Đang tải thông tin quán ăn...");
+    show("Loading restaurant info...");
     router.push(`/restaurants/${restaurant.slug || restaurant.id}`);
   };
 
@@ -120,9 +120,9 @@ export default function FavoritesPage() {
         ref={scrollContainerRef}
         onRefresh={refresh}
         className="flex-1 no-scrollbar"
-        pullText="Kéo để cập nhật yêu thích"
-        releaseText="Thả tay để cập nhật"
-        refreshingText="Đang cập nhật..."
+        pullText="Pull to refresh favorites"
+        releaseText="Release to refresh"
+        refreshingText="Updating..."
       >
         <div className="max-w-[1400px] mx-auto px-3 md:px-8">
           {/* Page Title & Back Button (Scrollable) */}

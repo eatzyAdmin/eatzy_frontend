@@ -52,7 +52,7 @@ export const useCustomerWalletTransactions = () => {
   // Combine data
   const transactions = transactionsData?.pages.flatMap(page => page.result) || [];
   const isLoading = isWalletLoading || isTransactionsLoading;
-  const error = (walletError || transactionsError) ? "Không thể tải dữ liệu ví" : null;
+  const error = (walletError || transactionsError) ? "Could not load wallet data" : null;
 
   return {
     wallet: wallet ?? null,

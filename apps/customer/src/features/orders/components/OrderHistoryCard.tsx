@@ -129,7 +129,7 @@ export default function OrderHistoryCard({ order, onClick }: { order: OrderRespo
 
           {/* Items Count Badge - Absolute on Mobile, part of flow on Desktop */}
           <div className="absolute top-3 right-3 flex items-center justify-center md:relative md:top-0 md:right-0 bg-gray-100 md:bg-black/40 backdrop-blur-md px-2 py-1 md:px-3 md:py-2.5 rounded-xl md:rounded-2xl border border-white/10 z-30">
-            <span className="text-[10px] md:text-xs md:font-anton font-bold text-gray-400 md:text-white/95 tabular-nums md:uppercase">{totalItems} món</span>
+            <span className="text-[10px] md:text-xs md:font-anton font-bold text-gray-400 md:text-white/95 tabular-nums md:uppercase">{totalItems} items</span>
           </div>
         </div>
 
@@ -168,7 +168,7 @@ export default function OrderHistoryCard({ order, onClick }: { order: OrderRespo
             {/* Desktop Metrics Row (Hidden on Mobile) */}
             <div className="hidden md:flex items-center gap-8 pt-2">
               <div className="space-y-2">
-                <div className="text-white text-xl font-anton leading-none">{totalItems} món</div>
+                <div className="text-white text-xl font-anton leading-none">{totalItems} items</div>
                 <div className="text-white/40 text-[10px] uppercase font-bold tracking-widest leading-none">Quantity</div>
               </div>
               <div className="w-px h-10 bg-white/15" />

@@ -133,9 +133,9 @@ export default function RecommendedSection({
       ref={containerRef}
       onRefresh={onRefresh || (async () => { })}
       disabled={!onRefresh || isLoading}
-      pullText="Kéo để cập nhật món ngon"
-      releaseText="Thả để làm mới gợi ý"
-      refreshingText="Đang tìm món mới..."
+      pullText="Pull to refresh dishes"
+      releaseText="Release to refresh recommendations"
+      refreshingText="Finding new dishes..."
       className="h-screen magazine-scroll"
     >
       <motion.div
@@ -176,18 +176,18 @@ export default function RecommendedSection({
             ShimmerComponent={MagazineLayout8Shimmer}
             initialShimmerCount={2}
             loadMoreShimmerCount={1}
-            endMessage="Bạn đã xem hết các gợi ý gần đây"
+            endMessage="You've seen all recent recommendations"
             EmptyComponent={
               <div className="py-2">
                 <EmptyState
                   icon={MapPin}
-                  title="Không tìm thấy nhà hàng"
+                  title="No restaurants found"
                   description={
                     <>
-                      Rất tiếc, chúng tôi không tìm thấy nhà hàng nào quanh khu vực của bạn tại <span className="text-gray-500 font-bold">"{shortAddress}..."</span>
+                      Sorry, we couldn't find any restaurants around your area at <span className="text-gray-500 font-bold">"{shortAddress}..."</span>
                     </>
                   }
-                  buttonText="Chọn điểm giao khác"
+                  buttonText="Change delivery point"
                   buttonIcon={Store}
                   onButtonClick={() => window.dispatchEvent(new CustomEvent('openLocationPicker'))}
                 />

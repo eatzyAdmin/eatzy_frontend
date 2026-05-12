@@ -11,7 +11,7 @@ export function LogisticsInfo({ order }: { order: OrderResponse }) {
       <div className="px-6 py-4 pt-4 md:pt-6 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
         <div className="flex items-center gap-2">
           <MapPin className="w-5 h-5 text-gray-400" />
-          <h4 className="font-bold text-[#1A1A1A]">Lộ trình giao hàng</h4>
+          <h4 className="font-bold text-[#1A1A1A]">Delivery Route</h4>
         </div>
         {(order.distance ?? 0) > 0 && (
           <span className="text-[11px] font-black text-lime-600 bg-lime-50 px-2.5 py-1 rounded-xl border border-lime-100">
@@ -34,7 +34,7 @@ export function LogisticsInfo({ order }: { order: OrderResponse }) {
         <div className="flex-1 flex flex-col justify-between py-0.5 min-h-[100px]">
           <div>
             <div className="text-xs font-bold text-[var(--primary)] uppercase tracking-wide mb-1 flex items-center justify-between">
-              <span>Nhà hàng</span>
+              <span>Restaurant</span>
               {order.preparingAt && (
                 <span className="text-[10px] text-gray-400 font-bold lowercase opacity-70">
                   {new Date(order.preparingAt).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })}
@@ -42,16 +42,16 @@ export function LogisticsInfo({ order }: { order: OrderResponse }) {
               )}
             </div>
             <div className="font-bold text-[#1A1A1A] text-sm mb-0.5 line-clamp-1">
-              {restaurant?.name || "Đang cập nhật"}
+              {restaurant?.name || "Updating..."}
             </div>
             <div className="text-xs text-gray-500 font-medium line-clamp-1">
-              {restaurant?.address || "Đang cập nhật địa chỉ"}
+              {restaurant?.address || "Address updating..."}
             </div>
           </div>
 
           <div className="mt-4">
             <div className="text-xs font-bold text-red-500 uppercase tracking-wide mb-1 flex items-center justify-between">
-              <span>Điểm giao</span>
+              <span>Delivery point</span>
               {order.deliveredAt && (
                 <span className="text-[10px] text-gray-400 font-bold lowercase opacity-70">
                   {new Date(order.deliveredAt).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })}

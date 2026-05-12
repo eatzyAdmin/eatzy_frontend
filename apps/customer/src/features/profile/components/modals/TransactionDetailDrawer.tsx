@@ -152,9 +152,9 @@ export default function TransactionDetailDrawer({
                     <PullToRefresh
                       onRefresh={async () => { onClose(); }}
                       className="flex-1 no-scrollbar overflow-y-auto h-full"
-                      pullText="Kéo để đóng"
-                      releaseText="Thả tay để đóng"
-                      refreshingText="Đang đóng..."
+                      pullText="Pull to close"
+                      releaseText="Release to close"
+                      refreshingText="Closing..."
                       usePortal={false}
                     >
                       <div className="flex flex-col min-h-full">
@@ -162,19 +162,19 @@ export default function TransactionDetailDrawer({
                           {/* Stats Row mirrored from Driver */}
                           <div className="flex items-center justify-between bg-gray-50 p-4 rounded-3xl">
                             <div className="text-center flex-1 border-r border-gray-200 last:border-0 px-2">
-                              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Giờ</div>
+                              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Time</div>
                               <div className="text-base font-bold text-[#1A1A1A] font-anton">
                                 {formatTime(transaction.transactionDate)}
                               </div>
                             </div>
                             <div className="text-center flex-1 border-r border-gray-200 last:border-0 px-2">
-                              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Ngày</div>
+                              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Date</div>
                               <div className="text-base font-bold text-[#1A1A1A] font-anton">
                                 {formatDate(transaction.transactionDate)}
                               </div>
                             </div>
                             <div className="text-center flex-1 px-2 min-w-0">
-                              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Loại</div>
+                              <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Type</div>
                               <div className="text-[11px] font-bold text-[#1A1A1A] font-anton uppercase truncate">
                                 {transaction.transactionType}
                               </div>
@@ -270,9 +270,9 @@ export default function TransactionDetailDrawer({
                     <PullToRefresh
                       onRefresh={async () => { onClose(); }}
                       className="flex-1 no-scrollbar overflow-y-auto h-full"
-                      pullText="Kéo để đóng"
-                      releaseText="Thả tay để đóng"
-                      refreshingText="Đang đóng..."
+                      pullText="Pull to close"
+                      releaseText="Release to close"
+                      refreshingText="Closing..."
                       usePortal={false}
                     >
                       <div className="flex flex-col min-h-full">
@@ -322,7 +322,7 @@ export default function TransactionDetailDrawer({
                           ) : (
                             <div className="flex-1 flex flex-col items-center justify-center p-20 text-gray-400">
                               <Ban size={48} className="opacity-20 mb-4" />
-                              <p className="font-bold uppercase tracking-widest">Không tìm thấy đơn hàng</p>
+                              <p className="font-bold uppercase tracking-widest">Order not found</p>
                             </div>
                           )}
                         </div>

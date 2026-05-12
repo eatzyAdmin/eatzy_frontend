@@ -8,10 +8,10 @@ export function OrderItemsList({ order }: { order: OrderResponse }) {
       <div className="px-6 md:px-8 py-4 md:py-6 md:pb-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
         <div className="flex items-center gap-3">
           <Package className="w-5 h-5 md:w-6 md:h-6 text-gray-400" />
-          <h4 className="text-lg md:text-lg text-[#1A1A1A] font-bold">Chi tiết món ăn</h4>
+          <h4 className="text-lg md:text-lg text-[#1A1A1A] font-bold">Item Details</h4>
         </div>
         <span className="text-xs font-bold bg-[#1A1A1A] text-white px-3 py-1 rounded-lg">
-          {order.orderItems.length} món
+          {order.orderItems.length} items
         </span>
       </div>
 
@@ -42,11 +42,11 @@ export function OrderItemsList({ order }: { order: OrderResponse }) {
 
       <div className="p-6 md:p-8 space-y-3.5 border-t border-gray-100">
         <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-500 font-medium">Tạm tính</span>
+          <span className="text-gray-500 font-medium">Subtotal</span>
           <span className="font-bold text-gray-900">{formatVnd(order.subtotal)}</span>
         </div>
         <div className="flex justify-between items-center text-sm">
-          <span className="text-gray-500 font-medium">Phí giao hàng</span>
+          <span className="text-gray-500 font-medium">Delivery Fee</span>
           <span className="font-bold text-gray-900">{formatVnd(order.deliveryFee)}</span>
         </div>
 
@@ -55,7 +55,7 @@ export function OrderItemsList({ order }: { order: OrderResponse }) {
             <div className="flex justify-between items-center text-sm font-bold text-red-500">
               <div className="flex items-center gap-1.5">
                 <Ticket className="w-3.5 h-3.5" />
-                <span>Khuyến mãi</span>
+                <span>Promotion</span>
               </div>
               <span>-{formatVnd(order.discountAmount)}</span>
             </div>
@@ -72,7 +72,7 @@ export function OrderItemsList({ order }: { order: OrderResponse }) {
         <div className="h-px bg-gray-200/50 my-2" />
 
         <div className="flex justify-between items-center pt-2">
-          <span className="font-bold text-[#1A1A1A] text-base">Tổng thanh toán</span>
+          <span className="font-bold text-[#1A1A1A] text-base">Total Payable</span>
           <div className="flex flex-col items-end">
             <span className="font-anton text-[26px] md:text-3xl text-[var(--primary)] leading-none whitespace-nowrap">
               {formatVnd(order.totalAmount)}

@@ -77,9 +77,9 @@ export default function DesktopView({
         <div className="flex-1 flex flex-col items-center justify-center text-center px-6 bg-[#F8F9FA]">
           <EmptyState
             icon={FileText}
-            title="Không có đơn hàng"
-            description="Hiện tại bạn không có đơn hàng nào đang trong quá trình xử lý."
-            buttonText="Khám phá ngay"
+            title="No orders"
+            description="You currently have no orders in process."
+            buttonText="Explore now"
             buttonIcon={Compass}
             onButtonClick={handleExplore}
             className="px-0 py-12"
@@ -166,7 +166,7 @@ export default function DesktopView({
               })() : (
                 <div className="h-full w-full flex flex-col items-center justify-center text-center text-gray-400 space-y-2 bg-gray-50/50 backdrop-blur-[2px]">
                   <Loader2 className="w-6 h-6 animate-spin opacity-50" />
-                  <div className="text-xs font-medium">Đang tải bản đồ...</div>
+                  <div className="text-xs font-medium">Loading map...</div>
                 </div>
               )}
             </div>

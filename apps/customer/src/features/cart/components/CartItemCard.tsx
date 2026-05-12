@@ -88,7 +88,7 @@ export default function CartItemCard({
                   <ChefHat className={`w-3 h-3 text-[var(--primary)]`} strokeWidth={3} />
                 </div>
                 <span className={`text-[10px] font-black font-anton uppercase text-[var(--primary)] tracking-wide tabular-nums`}>
-                  {itemCount} MÓN
+                  {itemCount} ITEMS
                 </span>
               </div>
             </div>
@@ -101,7 +101,7 @@ export default function CartItemCard({
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 mb-1 text-gray-400">
                 <Store className={`w-3 h-3 text-[var(--primary)] ${isClosed ? 'grayscale' : ''}`} />
-                <span className="text-[8px] font-black uppercase tracking-widest leading-none">Cửa hàng</span>
+                <span className="text-[8px] font-black uppercase tracking-widest leading-none">Store</span>
               </div>
               <h4 className={`font-bold text-gray-700 text-base md:text-lg truncate leading-tight tracking-tight ${isClosed ? 'opacity-60' : ''}`}>
                 {cart.restaurant.name}
@@ -114,7 +114,7 @@ export default function CartItemCard({
           </div>
 
           <div className="flex flex-col border-t border-gray-50 pt-2.5">
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-[0.15em] leading-none mb-1 opacity-50">Tạm tính</span>
+            <span className="text-[8px] font-black text-gray-400 uppercase tracking-[0.15em] leading-none mb-1 opacity-50">Subtotal</span>
             <div className={`text-xl md:text-xl font-anton font-semibold text-gray-700 leading-none tracking-tight ${isClosed ? 'opacity-60' : ''}`}>
               {formatVnd(subtotal)}
             </div>
