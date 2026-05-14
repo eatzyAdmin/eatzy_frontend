@@ -79,4 +79,6 @@ export { default as SavedAddressesShimmer } from "./feedback/shimmer/SavedAddres
 export { default as WalletTransactionsShimmer } from "./feedback/shimmer/WalletTransactionsShimmer";
 export { TransactionRowShimmer } from "./feedback/shimmer/TransactionRowShimmer";
 export { default as CurrentOrderCardShimmer } from "./feedback/shimmer/CurrentOrderCardShimmer";
+export { default as RecentOrderCardShimmer } from "./feedback/shimmer/RecentOrderCardShimmer";
+export { default as MessageItemShimmer } from "./feedback/shimmer/MessageItemShimmer";
 export { default as PullToRefresh } from "./feedback/PullToRefresh";

@@ -37,9 +37,9 @@ export default function DeliveryLocationButton({
   variant = "home",
   className = "",
 }: DeliveryLocationButtonProps) {
-  const { 
+  const {
     isLocationPickerOpen: isModalOpen, setLocationPickerOpen: setIsModalOpen,
-    isSavedAddressesOpen: isSavedAddressesModalOpen, setSavedAddressesOpen: setIsSavedAddressesModalOpen 
+    isSavedAddressesOpen: isSavedAddressesModalOpen, setSavedAddressesOpen: setIsSavedAddressesModalOpen
   } = useUIStore();
   const [isInitializing, setIsInitializing] = useState(true);
 
@@ -66,7 +66,7 @@ export default function DeliveryLocationButton({
       if (isManuallySelected && isExpired) {
         clearSelectedLocation();
       }
-      
+
       setIsInitializing(false);
     };
 

@@ -57,7 +57,7 @@ export default function CurrentOrderCard({ order, onClick }: { order: OrderRespo
   return (
     <div className="relative w-full group/card mb-4">
       {/* Background Shell - Peeking out below the card */}
-      <div className={`absolute inset-0 z-0 ${config.bg} rounded-[40px] rounded-b-[32px] transition-colors duration-500 shadow-sm`} />
+      <div className={`absolute inset-0 z-0 ${config.bg} backdrop-blur-sm rounded-[40px] rounded-b-[32px] transition-colors duration-500 shadow-sm`} />
 
       {/* Main Card */}
       <motion.div

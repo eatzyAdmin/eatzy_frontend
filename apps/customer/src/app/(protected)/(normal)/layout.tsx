@@ -37,10 +37,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const isFavorites = pathname?.startsWith("/favorites") ?? false;
   const isReviewPage = pathname?.includes("/review") ?? false;
   const isProfile = pathname?.startsWith("/profile") ?? false;
+  const isMessages = pathname?.startsWith("/messages") ?? false;
 
   // Combine modes for layout and animation purposes
   const effectiveSearchMode = isSearchMode || isRecommendedMode;
-  const shouldSlideHeader = effectiveSearchMode || isOrderHistory || isFavorites || isReviewPage;
+  const shouldSlideHeader = effectiveSearchMode || isOrderHistory || isFavorites || isReviewPage || isMessages;
   const isSearchBarCompact = !isHeaderVisible && effectiveSearchMode;
 
   useEffect(() => {
@@ -74,10 +75,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   }, [setRecommendedMode, setOrdersDrawerOpen, setCartOpen]);
 
   useEffect(() => {
-    if (!shouldSlideHeader && !isProfile) {
+    if (!shouldSlideHeader && !isProfile && !isMessages) {
       setIsHeaderVisible(true);
     }
-  }, [shouldSlideHeader, isProfile]);
+  }, [shouldSlideHeader, isProfile, isMessages]);
 
   useEffect(() => {
     // Reset recommended mode if we move away from home
@@ -121,7 +122,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <BottomNavProvider>
-      <div className={`relative w-full overflow-x-hidden ${(isOrderHistory || isFavorites) ? "h-screen overflow-y-hidden" : "min-h-screen"}`}>
+      <div className={`relative w-full overflow-x-hidden ${(isOrderHistory || isFavorites || isMessages) ? "h-screen overflow-y-hidden" : "min-h-screen"}`}>
         <AnimatePresence>
           {((shouldSlideHeader || isProfile) && isHeaderVisible) && (
             <motion.div
@@ -129,8 +130,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className={`pointer-events-none fixed inset-x-0 top-0 h-16 md:h-20 z-[20] max-md:[mask-image:linear-gradient(to_bottom,black_70%,transparent)] ${(isOrderHistory || isFavorites || isReviewPage) ? "bg-[#F7F7F7]/95 backdrop-blur-md" : "backdrop-blur-xl"
-                } ${(isRestaurantDetail || isOrderHistory || isFavorites || isReviewPage) ? "hidden md:block" : ""}`}
+              className={`pointer-events-none fixed inset-x-0 top-0 h-16 md:h-20 z-[20] max-md:[mask-image:linear-gradient(to_bottom,black_70%,transparent)] ${(isOrderHistory || isFavorites || isReviewPage || isMessages || isProfile) ? "bg-[#F7F7F7]/95 backdrop-blur-md" : "backdrop-blur-xl"
+                } ${(isRestaurantDetail || isOrderHistory || isFavorites || isReviewPage || isMessages) ? "hidden md:block" : ""}`}
             />
           )}
         </AnimatePresence>
@@ -142,17 +143,19 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -100, opacity: 0 }}
               transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
-              className={(isRestaurantDetail || isOrderHistory || isFavorites || isReviewPage) ? "hidden md:block" : ""}
+              className={(isRestaurantDetail || isOrderHistory || isFavorites || isReviewPage || isMessages) ? "hidden md:block" : ""}
             >
               <HomeHeader
                 onMenuClick={() => setMenuOpen(true)}
                 onFavoritesClick={() => setOrdersDrawerOpen(true)}
                 onSearchClick={() => setSearchOpen(true)}
                 onCartClick={() => setCartOpen(true)}
-                hideSearchIcon={shouldSlideHeader || isRestaurantDetail || isFavorites || isReviewPage || isProfile}
-                hideCart={isRestaurantDetail}
+                onMessagesClick={() => router.push('/messages')}
+                hideSearchIcon={shouldSlideHeader || isRestaurantDetail || isFavorites || isReviewPage || isProfile || isMessages}
+                hideCart={isRestaurantDetail || isOrderHistory || isFavorites || isMessages}
                 showHomeIcon={isMobile}
-                disableScrollHide={isProfile}
+                isMobile={isMobile}
+                disableScrollHide={isProfile || isMessages}
                 onLogoClick={() => {
                   if (pathname === '/home' && !isSearchMode && !isRecommendedMode) return;
 

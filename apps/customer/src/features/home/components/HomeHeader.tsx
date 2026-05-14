@@ -1,11 +1,13 @@
 'use client';
 
 import { motion } from '@repo/ui/motion';
-import { Menu, BookHeart, Search, ShoppingCart, Home, Truck, BellRing } from '@repo/ui/icons';
+import { Menu, BookHeart, Search, ShoppingCart, Home, Truck, BellRing, MessageSquare } from '@repo/ui/icons';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useCurrentOrders } from '@/features/orders/hooks/useCurrentOrders';
+import { getTotalUnreadMessages } from '@/features/messages/data/mockMessages';
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
 
 // Dynamically import DeliveryLocationButton to avoid SSR issues with zustand persist
 const DeliveryLocationButton = dynamic(
@@ -18,11 +20,13 @@ interface HomeHeaderProps {
   onFavoritesClick?: () => void;
   onSearchClick?: () => void;
   onCartClick?: () => void;
+  onMessagesClick?: () => void;
   hideSearchIcon?: boolean;
   hideCart?: boolean;
   onLogoClick?: () => void;
   showHomeIcon?: boolean;
   disableScrollHide?: boolean;
+  isMobile?: boolean;
 }
 
 export default function HomeHeader({
@@ -30,15 +34,21 @@ export default function HomeHeader({
   onFavoritesClick,
   onSearchClick,
   onCartClick,
+  onMessagesClick,
   hideSearchIcon = false,
   hideCart = false,
   onLogoClick,
   showHomeIcon = false,
   disableScrollHide = false,
+  isMobile = false,
 }: HomeHeaderProps) {
   const { totalItems, carts } = useCart();
   const { activeOrdersCount } = useCurrentOrders();
   const cartCount = carts.length;
+  const pathname = usePathname();
+  
+  const isHome = pathname === '/home' || pathname === '/';
+  const isMessages = pathname?.startsWith('/messages');
 
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -86,8 +96,8 @@ export default function HomeHeader({
                 stiffness: 100,
               },
             }}
-            onClick={showHomeIcon ? onLogoClick : onMenuClick}
-            className={`w-10 h-10 rounded-2xl md:rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
+            onClick={showHomeIcon ? onMessagesClick : onMenuClick}
+            className={`relative w-10 h-10 rounded-2xl md:rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
               ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
               : 'bg-white/10 border-white/20 hover:bg-white/20'
               }`}
@@ -97,8 +107,18 @@ export default function HomeHeader({
                 initial={{ rotate: -90, opacity: 0 }}
                 animate={{ rotate: 0, opacity: 1 }}
                 key="home-icon"
+                className="relative"
               >
                 <BellRing strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
+                {getTotalUnreadMessages() > 0 && (
+                  <motion.span
+                    initial={{ scale: 0.6, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="absolute -top-3 -left-3 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--primary)] text-black text-[10px] font-black flex items-center justify-center border border-white shadow-sm"
+                  >
+                    {getTotalUnreadMessages()}
+                  </motion.span>
+                )}
               </motion.div>
             ) : (
               <motion.div
@@ -178,6 +198,31 @@ export default function HomeHeader({
             )}
           </motion.button>
 
+          {/* Header Notification Icon - Desktop version: Visible on Favorites, History, Profile, Store detail (NOT Home, NOT Messages) */}
+          {!isMobile && !isHome && !isMessages && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onMessagesClick}
+              className={`relative w-10 h-10 rounded-2xl md:rounded-xl backdrop-blur-md border flex items-center justify-center transition-colors ${hideSearchIcon
+                ? 'bg-gray-100 border-gray-200 hover:bg-gray-200'
+                : 'bg-white/10 border-white/20 hover:bg-white/20'
+                }`}
+            >
+              <BellRing strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
+              {getTotalUnreadMessages() > 0 && (
+                <motion.span
+                  initial={{ scale: 0.6, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1 rounded-full bg-[var(--primary)] text-[12px] leading-[20px] text-black font-black border border-white/60 flex items-center justify-center shadow-sm tabular-nums"
+                >
+                  {getTotalUnreadMessages()}
+                </motion.span>
+              )}
+            </motion.button>
+          )}
+
           {/* Search - hide when in search mode */}
           {!hideSearchIcon && (
             <motion.button
@@ -225,6 +270,37 @@ export default function HomeHeader({
           )}
         </motion.div>
       </div>
+
+      {/* Floating Desktop Notification Icon - ONLY visible on Home page */}
+      {!isMobile && isHome && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5, x: -20 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          className="fixed bottom-8 left-8 z-[60]"
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onMessagesClick}
+            className={`relative w-14 h-14 md:w-16 md:h-16 rounded-[24px] backdrop-blur-md shadow-2xl flex items-center justify-center transition-all border ${hideSearchIcon
+              ? 'bg-gray-100 border-gray-200 hover:bg-gray-200 text-gray-900 shadow-black/5'
+              : 'bg-white/10 border-white/20 hover:bg-white/20 text-white shadow-black/20'
+              }`}
+          >
+            <BellRing strokeWidth={2} className="w-7 h-7 md:w-8 md:h-8" />
+            {getTotalUnreadMessages() > 0 && (
+              <motion.span
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                className="absolute -top-1 -right-1 min-w-[24px] h-[24px] px-1.5 rounded-full bg-[var(--primary)] text-black text-[12px] font-black flex items-center justify-center border-2 border-white shadow-lg"
+              >
+                {getTotalUnreadMessages()}
+              </motion.span>
+            )}
+          </motion.button>
+        </motion.div>
+      )}
     </motion.header>
   );
 }
