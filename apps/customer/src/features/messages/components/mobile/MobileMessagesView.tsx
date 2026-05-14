@@ -45,15 +45,20 @@ export default function MobileMessagesView({
   }, [activeTab]);
 
   return (
-    <div className="flex-1 flex flex-col bg-[#F7F7F7] overflow-y-auto no-scrollbar relative min-h-screen">
-      <PullToRefresh onRefresh={onRefresh} className="flex-1 flex flex-col relative min-h-screen">
+    <div className="flex-1 flex flex-col bg-[#F7F7F7] relative overflow-hidden h-screen">
+      <PullToRefresh onRefresh={onRefresh} className="flex-1 overflow-y-auto no-scrollbar relative">
         {/* 1. Header Area */}
         <MessagesMobileHeader onBack={onBack} />
+        
         {/* 2. Recent Orders Section */}
         <RecentOrdersList />
 
-        {/* 3. Overlapping List Container */}
-        <ChatListContainer>
+        {/* Spacer to allow background scrolling/pulling behind the drawer */}
+        <div className="h-[400px]" />
+      </PullToRefresh>
+
+      {/* 3. Overlapping List Container - Now outside pull-to-refresh to avoid conflicts */}
+      <ChatListContainer>
         {/* Status Filters - Now inside the container */}
         <div className="px-6 py-4 flex items-center justify-center">
           <div className="flex items-center justify-center gap-2 w-full">
@@ -91,7 +96,6 @@ export default function MobileMessagesView({
           />
         )}
       </ChatListContainer>
-    </PullToRefresh>
-  </div>
+    </div>
   );
 }
