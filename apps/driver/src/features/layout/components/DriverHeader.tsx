@@ -1,16 +1,17 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "@repo/ui/motion";
-import { BellRing, Landmark } from "@repo/ui/icons";
+import { BellRing, Landmark, MessageSquare } from "@repo/ui/icons";
 
 export default function DriverHeader() {
   const pathname = usePathname();
+  const router = useRouter();
 
   // Navigation Logic
   const isHome = pathname === "/home" || pathname === "/";
   const isProfileOrSettings = pathname?.includes("/profile") || pathname?.includes("/settings");
-  const isHidden = pathname?.includes("/history") || pathname?.includes("/wallet");
+  const isHidden = pathname?.includes("/history") || pathname?.includes("/wallet") || pathname?.includes("/messages");
 
   if (isHidden) return null;
 
@@ -41,6 +42,7 @@ export default function DriverHeader() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => router.push("/messages")}
             className={`w-10 h-10 rounded-2xl border flex items-center justify-center transition-colors ${headerStyles.button}`}
           >
             <BellRing strokeWidth={2.3} className={`w-5 h-5 ${isHome ? 'text-gray-500' : 'text-gray-900'}`} />
