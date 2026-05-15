@@ -32,6 +32,11 @@ export default function MessagesLayout() {
   const { setIsVisible } = useBottomNav();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { refresh } = useCurrentOrders();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     // Hide bottom nav when on the messages page
@@ -76,6 +81,10 @@ export default function MessagesLayout() {
     setSearchQuery("");
   };
 
+
+  if (!isMounted) {
+    return <div className="h-screen bg-[#F7F7F7]" />;
+  }
 
   return (
     <div className="h-screen flex flex-col bg-[#F7F7F7] overflow-hidden">

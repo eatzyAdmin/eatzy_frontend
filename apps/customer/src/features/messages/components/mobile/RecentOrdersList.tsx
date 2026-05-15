@@ -3,18 +3,46 @@
 import { useCurrentOrders } from "@/features/orders/hooks/useCurrentOrders";
 import RecentOrderCard from "./RecentOrderCard";
 import { motion } from "@repo/ui/motion";
-import { RecentOrderCardShimmer } from "@repo/ui";
+import { RecentOrderCardShimmer, ShoppingBag, AlertCircle, RotateCcw } from "@repo/ui";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { useRouter } from "next/navigation";
 
 /**
  * RecentOrdersList Component
  * Horizontal scrolling list of active orders for the mobile messages view.
  */
 export default function RecentOrdersList({ isLoading: parentLoading }: { isLoading?: boolean }) {
-  const { orders, isLoading: hookLoading } = useCurrentOrders();
+  const { orders, isLoading: hookLoading, isError, refetch } = useCurrentOrders();
   const isLoading = parentLoading || hookLoading;
+  const router = useRouter();
 
-  // If no orders and not loading, we don't show the section
-  if (!isLoading && orders.length === 0) return null;
+  // Handle Error State
+  if (isError) {
+    return (
+      <div className="flex flex-col gap-3 px-6 py-6">
+        <EmptyState
+          icon={AlertCircle}
+          title="Something went wrong"
+          description="We couldn't load your recent orders. Please try again."
+          buttonIcon={RotateCcw}
+        />
+      </div>
+    );
+  }
+
+  // If no orders and not loading, we show the standard empty state
+  if (!isLoading && orders.length === 0) {
+    return (
+      <div className="flex flex-col gap-3 px-6 py-6">
+        <EmptyState
+          icon={ShoppingBag}
+          title="No Active Orders"
+          description="You don't have any active orders right now. Ready to satisfy your cravings?"
+
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-3 py-1.5 pb-0 pl-4">
