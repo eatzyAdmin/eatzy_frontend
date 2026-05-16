@@ -120,7 +120,7 @@ export function SwipeToConfirm({
   return (
     <div
       ref={sliderRef}
-      className={`relative flex items-center rounded-full h-14 w-80 sm:w-80 select-none overflow-hidden ${className || ""} ${!isLoading ? "shadow-md" : ""} ${disabled && !isLoading ? "grayscale opacity-80" : ""
+      className={`relative flex items-center rounded-full h-14 w-full max-w-80 select-none overflow-hidden ${className || ""} ${!isLoading ? "shadow-md" : ""} ${disabled && !isLoading ? "grayscale opacity-80" : ""
         }`}
       style={{
         background: isLoading
