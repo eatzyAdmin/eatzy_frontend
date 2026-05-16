@@ -8,6 +8,7 @@ import { DotsLoader, SwipeToConfirm } from "@repo/ui";
 import { orderApi } from "@repo/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { orderOffersKeys } from "../hooks/useOrderOffers";
+import { useOrderEarnings } from "../hooks/useOrderEarnings";
 import { useBottomNav } from "@/app/(protected)/(normal)/context/BottomNavContext";
 import OrderDetailsView from "./OrderDetailsView";
 import { ArrowLeft, User, List, Receipt } from "@repo/ui/icons";
@@ -18,6 +19,9 @@ export default function CurrentOrderPanel({ order, onExpandedChange }: { order: 
   const [isExpanded, setIsExpanded] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const { setIsVisible, setIsHeaderVisible } = useBottomNav();
+
+  // Use the dedicated hook for earnings calculation
+  const { earnings: calculatedEarnings } = useOrderEarnings(order.earnings);
 
   useEffect(() => {
     setIsVisible(false);
@@ -308,7 +312,7 @@ export default function CurrentOrderPanel({ order, onExpandedChange }: { order: 
                             <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">Thu nhập ròng của bạn</span>
                             <div className="flex items-baseline gap-1">
                               <span className="text-2xl font-black text-[#1A1A1A] tracking-tighter">
-                                {formatVnd(order.earnings?.driverNetEarning)}
+                                {formatVnd(calculatedEarnings?.driverNetEarning)}
                               </span>
                               <span className="text-sm font-bold text-[var(--primary)]">đ</span>
                             </div>
@@ -395,7 +399,7 @@ export default function CurrentOrderPanel({ order, onExpandedChange }: { order: 
                     <OrderDetailsView
                       orderId={order.id}
                       customer={order.customer}
-                      earnings={order.earnings}
+                      earnings={calculatedEarnings as any}
                       paymentMethodLabel={paymentMethodLabel}
                       onBack={() => setView('main')}
                     />
