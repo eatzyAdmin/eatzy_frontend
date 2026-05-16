@@ -114,7 +114,28 @@ export default function useOrderOffers(online: boolean) {
       return { currentOffer, activeOrder: null };
     }
 
-    return { currentOffer: null, activeOrder: null };
+    // MOCK DATA FOR UI TESTING
+    const mockOffer: DriverOrderOffer = {
+      id: "9999",
+      netEarning: 25000,
+      orderValue: 150000,
+      paymentMethod: 'EATZYPAY',
+      distanceKm: 3.5,
+      pickup: {
+        name: "Phở Gia Truyền - Mock",
+        address: "123 Đường Lý Tự Trọng, Quận 1",
+        lng: 106.6967,
+        lat: 10.7725,
+      },
+      dropoff: {
+        address: "456 Đường Nguyễn Huệ, Quận 1",
+        lng: 106.7018,
+        lat: 10.7756,
+      },
+      expireSeconds: 30,
+    };
+
+    return { currentOffer: mockOffer, activeOrder: null };
   }, [orders]);
 
   const clearCountdown = useCallback(() => {
