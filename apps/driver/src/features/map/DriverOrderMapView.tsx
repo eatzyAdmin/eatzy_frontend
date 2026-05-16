@@ -4,12 +4,20 @@ import { motion } from "@repo/ui/motion";
 import Map, { Marker, Source, Layer } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { DriverActiveOrder } from "@repo/types";
-import { Store, MapPin } from "@repo/ui/icons";
+import { Store, MapPin, User, Bike } from "@repo/ui/icons";
 
 type MapFly = { fitBounds: (bounds: [[number, number], [number, number]], opts?: { padding?: number; duration?: number }) => void };
 type MapLike = { getMap: () => MapFly };
 
-export default function DriverOrderMapView({ order }: { order: DriverActiveOrder }) {
+export default function DriverOrderMapView({ 
+  order, 
+  locateVersion = 0,
+  currentDriverPos 
+}: { 
+  order: DriverActiveOrder; 
+  locateVersion?: number;
+  currentDriverPos?: { lat: number; lng: number } | null;
+}) {
   const _X_T = "cGsuZXlKMUlqb2libWRvYjJGdVoyaHBaVzRpTENKaElqb2lZMjFwWkcwNGNtTnhNRGczWXpKdWNURnZkemd5WXpWNVppSjkuYWRKRjY5QnpMVGttWlp5c01YZ1Vodw==";
   const token = typeof window !== 'undefined' ? atob(_X_T) : Buffer.from(_X_T, 'base64').toString();
   const mapRef = useRef<unknown>(null);
@@ -27,9 +35,24 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
     return nLat >= -90 && nLat <= 90 && nLng >= -180 && nLng <= 180;
   };
 
-  const hasDriver = isValidCoordinate(order.driverLocation.lat, order.driverLocation.lng);
+  // Use real-time position if available, otherwise fallback to order data
+  const effectiveDriverPos = useMemo(() => {
+    if (isValidCoordinate(currentDriverPos?.lat, currentDriverPos?.lng)) return currentDriverPos!;
+    return order.driverLocation;
+  }, [currentDriverPos, order.driverLocation]);
+
+  const hasDriver = isValidCoordinate(effectiveDriverPos.lat, effectiveDriverPos.lng);
   const hasPickup = isValidCoordinate(order.pickup.lat, order.pickup.lng);
   const hasDropoff = isValidCoordinate(order.dropoff.lat, order.dropoff.lng);
+
+  // Determine which leg the driver is currently on
+  const activeLeg = useMemo(() => {
+    const status = order.orderStatus || "";
+    // Driver is going to customer
+    if (["PICKED_UP", "ARRIVED"].includes(status)) return "TO_DROPOFF";
+    // Otherwise, assume driver is going to restaurant (assigned/ready/preparing)
+    return "TO_PICKUP";
+  }, [order.orderStatus]);
 
   useEffect(() => {
     if (!hasPickup || !hasDropoff) return;
@@ -47,9 +70,16 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
     };
 
     (async () => {
-      // Only fetch driver route if driver location is valid
-      const a = hasDriver ? await fetchRoute(order.driverLocation, order.pickup) : null;
-      const b = await fetchRoute(order.pickup, order.dropoff);
+      // Leg 1: Always Driver -> Pickup (Used when heading to restaurant)
+      const a = hasDriver ? await fetchRoute(effectiveDriverPos, order.pickup) : null;
+      
+      // Leg 2: 
+      // - If heading to customer: Driver -> Dropoff (Active)
+      // - If heading to pickup: Restaurant -> Customer (Inactive/Grey)
+      const b = (activeLeg === 'TO_DROPOFF') 
+        ? await fetchRoute(effectiveDriverPos, order.dropoff)
+        : await fetchRoute(order.pickup, order.dropoff);
+
       setDriverRoute(a);
       setDeliveryRoute(b);
 
@@ -57,7 +87,7 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
       const coords: [number, number][] = [
         ...(a?.geometry?.coordinates ?? []),
         ...(b?.geometry?.coordinates ?? []),
-        ...(hasDriver ? [[order.driverLocation.lng, order.driverLocation.lat] as [number, number]] : []),
+        ...(hasDriver ? [[effectiveDriverPos.lng, effectiveDriverPos.lat] as [number, number]] : []),
         [order.pickup.lng, order.pickup.lat],
         [order.dropoff.lng, order.dropoff.lat],
       ];
@@ -85,7 +115,34 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
       };
       requestAnimationFrame(animate);
     })();
-  }, [order, token]);
+  }, [order, token, effectiveDriverPos, hasDriver, hasPickup, hasDropoff]);
+
+  // Refit bounds when locateVersion changes
+  useEffect(() => {
+    if (locateVersion > 0) {
+      const inst = mapRef.current as MapLike | null;
+      const coords: [number, number][] = [
+        [order.pickup.lng, order.pickup.lat],
+        [order.dropoff.lng, order.dropoff.lat],
+      ];
+      if (hasDriver) coords.push([effectiveDriverPos.lng, effectiveDriverPos.lat]);
+
+      const lngs = coords.map((c) => c[0]);
+      const lats = coords.map((c) => c[1]);
+      const minLng = Math.min(...lngs);
+      const maxLng = Math.max(...lngs);
+      const minLat = Math.min(...lats);
+      const maxLat = Math.max(...lats);
+
+      inst?.getMap()?.fitBounds(
+        [
+          [minLng, minLat],
+          [maxLng, maxLat],
+        ],
+        { padding: 80, duration: 900 }
+      );
+    }
+  }, [locateVersion, order, hasDriver, effectiveDriverPos]);
 
   const partial = (coords: [number, number][], t: number) => {
     const safe = Array.isArray(coords)
@@ -125,18 +182,18 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
               return p.length > 1
                 ? p
                 : [
-                  [order.driverLocation.lng, order.driverLocation.lat],
+                  [effectiveDriverPos.lng, effectiveDriverPos.lat],
                   [order.pickup.lng, order.pickup.lat],
                 ];
             })()
             : [
-              [order.driverLocation.lng, order.driverLocation.lat],
+              [effectiveDriverPos.lng, effectiveDriverPos.lat],
               [order.pickup.lng, order.pickup.lat],
             ],
       },
-      properties: {},
+      properties: { legId: "driver-to-pickup" },
     };
-  }, [driverRoute, progressA, order.driverLocation.lng, order.driverLocation.lat, order.pickup.lng, order.pickup.lat, hasDriver, hasPickup]);
+  }, [driverRoute, progressA, effectiveDriverPos.lng, effectiveDriverPos.lat, order.pickup.lng, order.pickup.lat, hasDriver, hasPickup]);
 
   const deliveryFeature = useMemo(() => {
     if (!hasPickup || !hasDropoff) return null;
@@ -151,18 +208,18 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
               return p.length > 1
                 ? p
                 : [
-                  [order.pickup.lng, order.pickup.lat],
+                  [activeLeg === 'TO_DROPOFF' ? effectiveDriverPos.lng : order.pickup.lng, activeLeg === 'TO_DROPOFF' ? effectiveDriverPos.lat : order.pickup.lat],
                   [order.dropoff.lng, order.dropoff.lat],
                 ];
             })()
             : [
-              [order.pickup.lng, order.pickup.lat],
+              [activeLeg === 'TO_DROPOFF' ? effectiveDriverPos.lng : order.pickup.lng, activeLeg === 'TO_DROPOFF' ? effectiveDriverPos.lat : order.pickup.lat],
               [order.dropoff.lng, order.dropoff.lat],
             ],
       },
-      properties: {},
+      properties: { legId: "pickup-to-dropoff" },
     };
-  }, [deliveryRoute, progressB, order.pickup.lng, order.pickup.lat, order.dropoff.lng, order.dropoff.lat, hasPickup, hasDropoff]);
+  }, [deliveryRoute, progressB, order.pickup.lng, order.pickup.lat, order.dropoff.lng, order.dropoff.lat, hasPickup, hasDropoff, activeLeg, effectiveDriverPos.lng, effectiveDriverPos.lat]);
 
   const lines = useMemo(() => ({ type: "FeatureCollection", features: [driverFeature, deliveryFeature] }), [driverFeature, deliveryFeature]);
 
@@ -192,18 +249,54 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
       style={{ width: "100%", height: "100%" }}
     >
       <Source id="order-lines" type="geojson" data={lines as unknown as never}>
-        <Layer id="driver-to-pickup" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#78C841", "line-width": 5, "line-opacity": 0.95 }} />
-        <Layer id="pickup-to-dropoff" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#78C841", "line-width": 5, "line-opacity": 0.95 }} />
+        {/* 1. Inactive Leg (Rendered first, at the bottom) */}
+        <Layer 
+          id="inactive-leg" 
+          type="line" 
+          filter={["!=", "legId", activeLeg === 'TO_PICKUP' ? "driver-to-pickup" : "pickup-to-dropoff"]}
+          layout={{ "line-cap": "round", "line-join": "round" }} 
+          paint={{ 
+            "line-color": "#cbd5e1", 
+            "line-width": 4,
+            "line-opacity": 1
+          }} 
+        />
+
+        {/* 2. Active Leg Casing (The shadow/outline for the active path) */}
+        <Layer 
+          id="active-leg-casing" 
+          type="line" 
+          filter={["==", "legId", activeLeg === 'TO_PICKUP' ? "driver-to-pickup" : "pickup-to-dropoff"]}
+          layout={{ "line-cap": "round", "line-join": "round" }} 
+          paint={{ 
+            "line-color": "#1e40af", 
+            "line-width": 10,
+            "line-opacity": 0.3 
+          }} 
+        />
+
+        {/* 3. Active Leg (Rendered last, on the very top) */}
+        <Layer 
+          id="active-leg" 
+          type="line" 
+          filter={["==", "legId", activeLeg === 'TO_PICKUP' ? "driver-to-pickup" : "pickup-to-dropoff"]}
+          layout={{ "line-cap": "round", "line-join": "round" }} 
+          paint={{ 
+            "line-color": "#2563eb", 
+            "line-width": 6,
+            "line-opacity": 1 
+          }} 
+        />
       </Source>
 
       {/* 2. Markers */}
       {hasPickup && (
         <Marker longitude={order.pickup.lng} latitude={order.pickup.lat} anchor="bottom">
           <div className="flex flex-col items-center">
-            <div className="bg-white p-1.5 rounded-full shadow-lg border-2 border-emerald-500">
-              <Store className="w-5 h-5 text-emerald-600" />
+            <div className="bg-[#A3E635] p-2 rounded-full shadow-lg border-2 border-white">
+              <Store className="w-5 h-5 text-white" />
             </div>
-            <div className="w-1 h-2 bg-emerald-500" />
+            <div className="w-1.5 h-2 bg-[#A3E635]" style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} />
           </div>
         </Marker>
       )}
@@ -211,23 +304,23 @@ export default function DriverOrderMapView({ order }: { order: DriverActiveOrder
       {hasDropoff && (
         <Marker longitude={order.dropoff.lng} latitude={order.dropoff.lat} anchor="bottom">
           <div className="flex flex-col items-center">
-            <div className="bg-white p-1.5 rounded-full shadow-lg border-2 border-red-500">
-              <MapPin className="w-5 h-5 text-red-600" />
+            <div className="bg-red-500 p-2 rounded-full shadow-lg border-2 border-white">
+              <MapPin className="w-5 h-5 text-white" />
             </div>
-            <div className="w-1 h-2 bg-red-500" />
+            <div className="w-1.5 h-2 bg-red-500" style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} />
           </div>
         </Marker>
       )}
 
       {hasDriver && (
-        <Marker longitude={order.driverLocation.lng} latitude={order.driverLocation.lat} anchor="center">
+        <Marker longitude={effectiveDriverPos.lng} latitude={effectiveDriverPos.lat} anchor="center">
           <div className="relative">
             <motion.span
               className="absolute -inset-2 rounded-full border-2 border-blue-500/40"
-              animate={{ scale: [1, 1.6], opacity: [0.7, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+              animate={{ scale: [1, 2], opacity: [0.7, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
             />
-            <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
+            <div className="w-5 h-5 bg-blue-600 rounded-full border-2 border-white shadow-xl flex items-center justify-center relative z-10" />
           </div>
         </Marker>
       )}
