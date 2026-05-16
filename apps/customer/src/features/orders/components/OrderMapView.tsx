@@ -4,6 +4,7 @@ import { motion } from "@repo/ui/motion";
 import Map, { Marker, Source, Layer } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Store, Bike, MapPin } from "@repo/ui/icons";
+import { useDriverLocation } from "@/features/socket/hooks/useDriverLocation";
 
 type LatLng = { lat: number; lng: number };
 type MapFly = { fitBounds: (bounds: [[number, number], [number, number]], opts?: { padding?: number; duration?: number }) => void };
@@ -32,12 +33,24 @@ export default function OrderMapView({
   const [progressA, setProgressA] = useState(0);
   const [progressB, setProgressB] = useState(0);
 
-  // Check if we have valid locations
+  // WebSocket for real-time tracking (Cleaned up: logic moved to hook)
+  const currentDriverLocation = useDriverLocation(driverLocation);
+
   const hasRestaurant = restaurantLocation && Number.isFinite(restaurantLocation.lat) && Number.isFinite(restaurantLocation.lng);
   const hasDelivery = deliveryLocation && Number.isFinite(deliveryLocation.lat) && Number.isFinite(deliveryLocation.lng);
-  const hasDriver = driverLocation && Number.isFinite(driverLocation.lat) && Number.isFinite(driverLocation.lng);
+  const hasDriver = currentDriverLocation && Number.isFinite(currentDriverLocation.lat) && Number.isFinite(currentDriverLocation.lng);
 
   const isPending = orderStatus === "PENDING" || orderStatus === "PLACED";
+
+  // Determine which leg is active
+  const activeLeg = useMemo(() => {
+    if (!orderStatus) return "TO_PICKUP";
+    if (["PICKED_UP", "ARRIVED"].includes(orderStatus)) return "TO_DROPOFF";
+    return "TO_PICKUP";
+  }, [orderStatus]);
+
+  const lastLegRef = useRef<string | null>(null);
+  const isFirstLoad = useRef(true);
 
   useEffect(() => {
     if (!hasRestaurant || !hasDelivery) return;
@@ -70,8 +83,16 @@ export default function OrderMapView({
     };
 
     (async () => {
-      const a = await fetchRoute(driverLocation!, restaurantLocation!);
-      const b = await fetchRoute(restaurantLocation!, deliveryLocation!);
+      // Leg 1: Driver -> Restaurant
+      const a = hasDriver ? await fetchRoute(currentDriverLocation!, restaurantLocation!) : null;
+      
+      // Leg 2: 
+      // - If heading to customer: Driver -> Delivery
+      // - If heading to pickup: Restaurant -> Delivery
+      const b = (activeLeg === "TO_DROPOFF" && hasDriver)
+        ? await fetchRoute(currentDriverLocation!, deliveryLocation!)
+        : await fetchRoute(restaurantLocation!, deliveryLocation!);
+
       setDriverRoute(a);
       setDeliveryRoute(b);
 
@@ -79,7 +100,7 @@ export default function OrderMapView({
       const coords = [
         ...(a?.geometry?.coordinates ?? []),
         ...(b?.geometry?.coordinates ?? []),
-        [driverLocation!.lng, driverLocation!.lat],
+        [currentDriverLocation!.lng, currentDriverLocation!.lat],
         [restaurantLocation!.lng, restaurantLocation!.lat],
         [deliveryLocation!.lng, deliveryLocation!.lat],
       ];
@@ -89,24 +110,35 @@ export default function OrderMapView({
       const maxLng = Math.max(...lngs);
       const minLat = Math.min(...lats);
       const maxLat = Math.max(...lats);
-      inst?.getMap()?.fitBounds(
-        [
-          [minLng, minLat],
-          [maxLng, maxLat],
-        ],
-        { padding: 60, duration: 900 }
-      );
 
-      const startTime = performance.now();
-      const animate = (time: number) => {
-        const t = Math.min((time - startTime) / 900, 1);
-        setProgressA(t);
-        setProgressB(t);
-        if (t < 1) requestAnimationFrame(animate);
-      };
-      requestAnimationFrame(animate);
+      if (isFirstLoad.current || lastLegRef.current !== activeLeg) {
+        inst?.getMap()?.fitBounds(
+          [
+            [minLng, minLat],
+            [maxLng, maxLat],
+          ],
+          { padding: 60, duration: 900 }
+        );
+      }
+
+      if (isFirstLoad.current || lastLegRef.current !== activeLeg) {
+        const startTime = performance.now();
+        const animate = (time: number) => {
+          const t = Math.min((time - startTime) / 900, 1);
+          setProgressA(t);
+          setProgressB(t);
+          if (t < 1) requestAnimationFrame(animate);
+        };
+        requestAnimationFrame(animate);
+      } else {
+        setProgressA(1);
+        setProgressB(1);
+      }
+
+      lastLegRef.current = activeLeg;
+      isFirstLoad.current = false;
     })();
-  }, [restaurantLocation, deliveryLocation, driverLocation, token, isPending, hasRestaurant, hasDelivery, hasDriver]);
+  }, [restaurantLocation, deliveryLocation, currentDriverLocation, token, isPending, hasRestaurant, hasDelivery, hasDriver, activeLeg]);
 
   const partial = (coords: [number, number][], t: number) => {
     const safe = Array.isArray(coords)
@@ -137,8 +169,8 @@ export default function OrderMapView({
     if (!hasRestaurant) return null;
     const restLng = restaurantLocation!.lng;
     const restLat = restaurantLocation!.lat;
-    const drvLng = hasDriver ? driverLocation!.lng : restLng;
-    const drvLat = hasDriver ? driverLocation!.lat : restLat;
+    const drvLng = hasDriver ? currentDriverLocation!.lng : restLng;
+    const drvLat = hasDriver ? currentDriverLocation!.lat : restLat;
 
     return {
       type: "Feature",
@@ -152,9 +184,9 @@ export default function OrderMapView({
             })()
             : [[drvLng, drvLat], [restLng, restLat]],
       },
-      properties: {},
+      properties: { legId: "driver-to-restaurant" },
     };
-  }, [driverRoute, progressA, restaurantLocation, driverLocation, hasRestaurant, hasDriver]);
+  }, [driverRoute, progressA, restaurantLocation, currentDriverLocation, hasRestaurant, hasDriver]);
 
   const deliveryFeature = useMemo(() => {
     if (!hasRestaurant || !hasDelivery) return null;
@@ -170,14 +202,22 @@ export default function OrderMapView({
         coordinates:
           deliveryRoute?.geometry?.coordinates && deliveryRoute?.geometry?.coordinates.length > 1
             ? (() => {
-              const p = partial(deliveryRoute.geometry.coordinates, progressB);
-              return p.length > 1 ? p : [[restLng, restLat], [delLng, delLat]];
-            })()
-            : [[restLng, restLat], [delLng, delLat]],
+                const p = partial(deliveryRoute.geometry.coordinates, progressB);
+                return p.length > 1
+                  ? p
+                  : [
+                      [activeLeg === "TO_DROPOFF" && hasDriver ? currentDriverLocation!.lng : restLng, activeLeg === "TO_DROPOFF" && hasDriver ? currentDriverLocation!.lat : restLat],
+                      [delLng, delLat],
+                    ];
+              })()
+            : [
+                [activeLeg === "TO_DROPOFF" && hasDriver ? currentDriverLocation!.lng : restLng, activeLeg === "TO_DROPOFF" && hasDriver ? currentDriverLocation!.lat : restLat],
+                [delLng, delLat],
+              ],
       },
-      properties: {},
+      properties: { legId: "restaurant-to-delivery" },
     };
-  }, [deliveryRoute, progressB, restaurantLocation, deliveryLocation, hasRestaurant, hasDelivery]);
+  }, [deliveryRoute, progressB, restaurantLocation, deliveryLocation, hasRestaurant, hasDelivery, activeLeg, hasDriver, currentDriverLocation]);
 
   const lines = useMemo(() => ({
     type: "FeatureCollection",
@@ -227,55 +267,76 @@ export default function OrderMapView({
           style={{ width: "100%", height: "100%" }}
         >
           <Source id="order-lines" type="geojson" data={lines as unknown as never}>
-            <Layer id="driver-to-restaurant" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#22c55e", "line-width": 5, "line-opacity": (isPending || !hasDriver) ? 0 : 0.95 }} />
-            <Layer id="restaurant-to-delivery" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#3b82f6", "line-width": 5, "line-opacity": 0.95 }} />
+            {/* 1. Inactive Leg Casing (Subtle Darker Sky for border) */}
+            <Layer 
+              id="inactive-leg-casing" 
+              type="line" 
+              filter={["!=", "legId", activeLeg === "TO_PICKUP" ? "driver-to-restaurant" : "restaurant-to-delivery"]}
+              layout={{ "line-cap": "round", "line-join": "round" }} 
+              paint={{ "line-color": "#0ea5e9", "line-width": 10, "line-opacity": 0.15 }} 
+            />
+
+            {/* 2. Inactive Leg Core (Very Light Sky Blue) */}
+            <Layer 
+              id="inactive-leg" 
+              type="line" 
+              filter={["!=", "legId", activeLeg === "TO_PICKUP" ? "driver-to-restaurant" : "restaurant-to-delivery"]}
+              layout={{ "line-cap": "round", "line-join": "round" }} 
+              paint={{ "line-color": "#bae6fd", "line-width": 6, "line-opacity": 0.9 }} 
+            />
+
+            {/* 3. Active Leg Casing (Dark Blue) */}
+            <Layer 
+              id="active-leg-casing" 
+              type="line" 
+              filter={["==", "legId", activeLeg === "TO_PICKUP" ? "driver-to-restaurant" : "restaurant-to-delivery"]}
+              layout={{ "line-cap": "round", "line-join": "round" }} 
+              paint={{ "line-color": "#1e40af", "line-width": 10, "line-opacity": 0.3 }} 
+            />
+
+            {/* 4. Active Leg Core (Dark Blue) */}
+            <Layer 
+              id="active-leg" 
+              type="line" 
+              filter={["==", "legId", activeLeg === "TO_PICKUP" ? "driver-to-restaurant" : "restaurant-to-delivery"]}
+              layout={{ "line-cap": "round", "line-join": "round" }} 
+              paint={{ "line-color": "#2563eb", "line-width": 6, "line-opacity": 1 }} 
+            />
           </Source>
 
           {hasDelivery && (
-            <Marker longitude={deliveryLocation!.lng} latitude={deliveryLocation!.lat} anchor="center">
-              <div className="relative">
-                <motion.span
-                  className="absolute -inset-2 rounded-full border-2 border-blue-500/40"
-                  animate={{ scale: [1, 1.6], opacity: [0.7, 0] }}
-                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
-                />
-                <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
+            <Marker longitude={deliveryLocation!.lng} latitude={deliveryLocation!.lat} anchor="bottom">
+              <div className="flex flex-col items-center">
+                <div className="bg-red-500 p-2 rounded-full shadow-lg border-2 border-white">
+                  <MapPin className="w-5 h-5 text-white" />
+                </div>
+                <div className="w-1.5 h-2 bg-red-500" style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} />
               </div>
             </Marker>
           )}
 
           {hasRestaurant && (
             <Marker longitude={restaurantLocation!.lng} latitude={restaurantLocation!.lat} anchor="bottom">
-              <div className="flex flex-col items-center -translate-y-1">
-                <div className="relative">
-                  <motion.span
-                    className="absolute -inset-1 rounded-full border-2 border-orange-500/40"
-                    animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
-                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
-                  />
-                  <div className="w-9 h-9 rounded-full bg-orange-500 border-2 border-white shadow-lg flex items-center justify-center">
-                    <Store className="w-5 h-5 text-white" />
-                  </div>
+              <div className="flex flex-col items-center">
+                <div className="bg-[#A3E635] p-2 rounded-full shadow-lg border-2 border-white">
+                  <Store className="w-5 h-5 text-white" />
                 </div>
-                <div className="w-2 h-2 rounded-full bg-orange-500 mt-1" />
+                <div className="w-1.5 h-2 bg-[#A3E635]" style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} />
               </div>
             </Marker>
           )}
 
           {!isPending && hasDriver && (
-            <Marker longitude={driverLocation!.lng} latitude={driverLocation!.lat} anchor="bottom">
-              <div className="flex flex-col items-center -translate-y-1">
-                <div className="relative">
-                  <motion.span
-                    className="absolute -inset-1 rounded-full border-2 border-green-500/40"
-                    animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
-                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
-                  />
-                  <div className="w-9 h-9 rounded-full bg-green-500 border-2 border-white shadow-lg flex items-center justify-center">
-                    <Bike className="w-5 h-5 text-white" />
-                  </div>
+            <Marker longitude={currentDriverLocation!.lng} latitude={currentDriverLocation!.lat} anchor="center">
+              <div className="relative">
+                <motion.span
+                  className="absolute -inset-2 rounded-full border-2 border-blue-500/40"
+                  animate={{ scale: [1, 2], opacity: [0.7, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                />
+                <div className="w-9 h-9 rounded-full bg-blue-600 border-2 border-white shadow-xl flex items-center justify-center relative z-10">
+                  <Bike className="w-5 h-5 text-white" />
                 </div>
-                <div className="w-2 h-2 rounded-full bg-green-500 mt-1" />
               </div>
             </Marker>
           )}

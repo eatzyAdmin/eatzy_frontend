@@ -6,6 +6,7 @@ import { ThemeProvider, LoadingProvider, SwipeConfirmationProvider } from "@repo
 import { AuthInitializer } from "@/features/auth/components/AuthInitializer";
 import { Toaster } from "@/components/DynamicIslandToast";
 import { NetworkStatusMonitor } from "@/components/NetworkStatusMonitor";
+import { SocketInitializer } from "@/features/socket/components/SocketInitializer";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -28,7 +29,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             <Toaster />
             <AuthInitializer />
             <NetworkStatusMonitor />
-            {children}
+            <SocketInitializer>
+              {children}
+            </SocketInitializer>
           </SwipeConfirmationProvider>
         </LoadingProvider>
       </ThemeProvider>

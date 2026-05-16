@@ -11,8 +11,8 @@ export default function GlobalSocketHandlers() {
   const { status } = useDriverStatus();
   const { connected } = useSocket();
 
-  // Push location updates if status is AVAILABLE (case-insensitive check)
-  const shouldTrack = status?.toUpperCase() === "AVAILABLE";
+  // Push location updates if status is AVAILABLE or UNAVAILABLE (busy delivering)
+  const shouldTrack = status?.toUpperCase() === "AVAILABLE" || status?.toUpperCase() === "UNAVAILABLE";
 
   useDriverLocationUpdate(shouldTrack);
 

@@ -84,6 +84,9 @@ importers:
       '@repo/models':
         specifier: workspace:*
         version: link:../../packages/models
+      '@repo/socket':
+        specifier: workspace:*
+        version: link:../../packages/socket
       '@repo/store':
         specifier: workspace:*
         version: link:../../packages/store

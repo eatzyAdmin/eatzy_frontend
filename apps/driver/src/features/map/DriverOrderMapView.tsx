@@ -9,12 +9,12 @@ import { Store, MapPin, User, Bike } from "@repo/ui/icons";
 type MapFly = { fitBounds: (bounds: [[number, number], [number, number]], opts?: { padding?: number; duration?: number }) => void };
 type MapLike = { getMap: () => MapFly };
 
-export default function DriverOrderMapView({ 
-  order, 
+export default function DriverOrderMapView({
+  order,
   locateVersion = 0,
-  currentDriverPos 
-}: { 
-  order: DriverActiveOrder; 
+  currentDriverPos
+}: {
+  order: DriverActiveOrder;
   locateVersion?: number;
   currentDriverPos?: { lat: number; lng: number } | null;
 }) {
@@ -54,6 +54,9 @@ export default function DriverOrderMapView({
     return "TO_PICKUP";
   }, [order.orderStatus]);
 
+  const lastLegRef = useRef<string | null>(null);
+  const isFirstLoad = useRef(true);
+
   useEffect(() => {
     if (!hasPickup || !hasDropoff) return;
 
@@ -72,11 +75,11 @@ export default function DriverOrderMapView({
     (async () => {
       // Leg 1: Always Driver -> Pickup (Used when heading to restaurant)
       const a = hasDriver ? await fetchRoute(effectiveDriverPos, order.pickup) : null;
-      
+
       // Leg 2: 
       // - If heading to customer: Driver -> Dropoff (Active)
       // - If heading to pickup: Restaurant -> Customer (Inactive/Grey)
-      const b = (activeLeg === 'TO_DROPOFF') 
+      const b = (activeLeg === 'TO_DROPOFF')
         ? await fetchRoute(effectiveDriverPos, order.dropoff)
         : await fetchRoute(order.pickup, order.dropoff);
 
@@ -91,6 +94,7 @@ export default function DriverOrderMapView({
         [order.pickup.lng, order.pickup.lat],
         [order.dropoff.lng, order.dropoff.lat],
       ];
+
       const lngs = coords.map((c) => c[0]);
       const lats = coords.map((c) => c[1]);
       const minLng = Math.min(...lngs);
@@ -98,24 +102,37 @@ export default function DriverOrderMapView({
       const minLat = Math.min(...lats);
       const maxLat = Math.max(...lats);
 
-      inst?.getMap()?.fitBounds(
-        [
-          [minLng, minLat],
-          [maxLng, maxLat],
-        ],
-        { padding: 80, duration: 900 }
-      );
+      // Fit bounds only on first load or when leg changes
+      if (isFirstLoad.current || lastLegRef.current !== activeLeg) {
+        inst?.getMap()?.fitBounds(
+          [
+            [minLng, minLat],
+            [maxLng, maxLat],
+          ],
+          { padding: 80, duration: 900 }
+        );
+      }
 
-      const startTime = performance.now();
-      const animate = (time: number) => {
-        const t = Math.min((time - startTime) / 900, 1);
-        setProgressA(t);
-        setProgressB(t);
-        if (t < 1) requestAnimationFrame(animate);
-      };
-      requestAnimationFrame(animate);
+      // Trigger animation only on first load or when switching legs (pickup -> dropoff)
+      if (isFirstLoad.current || lastLegRef.current !== activeLeg) {
+        const startTime = performance.now();
+        const animate = (time: number) => {
+          const t = Math.min((time - startTime) / 900, 1);
+          setProgressA(t);
+          setProgressB(t);
+          if (t < 1) requestAnimationFrame(animate);
+        };
+        requestAnimationFrame(animate);
+      } else {
+        // If just a position update, keep the path fully drawn
+        setProgressA(1);
+        setProgressB(1);
+      }
+
+      lastLegRef.current = activeLeg;
+      isFirstLoad.current = false;
     })();
-  }, [order, token, effectiveDriverPos, hasDriver, hasPickup, hasDropoff]);
+  }, [order.id, activeLeg, token, effectiveDriverPos, hasDriver, hasPickup, hasDropoff]);
 
   // Refit bounds when locateVersion changes
   useEffect(() => {
@@ -249,43 +266,56 @@ export default function DriverOrderMapView({
       style={{ width: "100%", height: "100%" }}
     >
       <Source id="order-lines" type="geojson" data={lines as unknown as never}>
-        {/* 1. Inactive Leg (Rendered first, at the bottom) */}
-        <Layer 
-          id="inactive-leg" 
-          type="line" 
+        {/* 1. Inactive Leg Casing (Subtle Darker Sky for border) */}
+        <Layer
+          id="inactive-leg-casing"
+          type="line"
           filter={["!=", "legId", activeLeg === 'TO_PICKUP' ? "driver-to-pickup" : "pickup-to-dropoff"]}
-          layout={{ "line-cap": "round", "line-join": "round" }} 
-          paint={{ 
-            "line-color": "#cbd5e1", 
-            "line-width": 4,
-            "line-opacity": 1
-          }} 
-        />
-
-        {/* 2. Active Leg Casing (The shadow/outline for the active path) */}
-        <Layer 
-          id="active-leg-casing" 
-          type="line" 
-          filter={["==", "legId", activeLeg === 'TO_PICKUP' ? "driver-to-pickup" : "pickup-to-dropoff"]}
-          layout={{ "line-cap": "round", "line-join": "round" }} 
-          paint={{ 
-            "line-color": "#1e40af", 
+          layout={{ "line-cap": "round", "line-join": "round" }}
+          paint={{
+            "line-color": "#0ea5e9",
             "line-width": 10,
-            "line-opacity": 0.3 
-          }} 
+            "line-opacity": 0.15
+          }}
         />
 
-        {/* 3. Active Leg (Rendered last, on the very top) */}
-        <Layer 
-          id="active-leg" 
-          type="line" 
-          filter={["==", "legId", activeLeg === 'TO_PICKUP' ? "driver-to-pickup" : "pickup-to-dropoff"]}
-          layout={{ "line-cap": "round", "line-join": "round" }} 
-          paint={{ 
-            "line-color": "#2563eb", 
+        {/* 2. Inactive Leg Core (Very Light Sky Blue) */}
+        <Layer
+          id="inactive-leg"
+          type="line"
+          filter={["!=", "legId", activeLeg === 'TO_PICKUP' ? "driver-to-pickup" : "pickup-to-dropoff"]}
+          layout={{ "line-cap": "round", "line-join": "round" }}
+          paint={{
+            "line-color": "#2b84b4ff",
             "line-width": 6,
-            "line-opacity": 1 
-          }} 
+            "line-opacity": 0.9
+          }}
+        />
+
+        {/* 3. Active Leg Casing (Dark Blue) */}
+        <Layer
+          id="active-leg-casing"
+          type="line"
+          filter={["==", "legId", activeLeg === 'TO_PICKUP' ? "driver-to-pickup" : "pickup-to-dropoff"]}
+          layout={{ "line-cap": "round", "line-join": "round" }}
+          paint={{
+            "line-color": "#1e40af",
+            "line-width": 10,
+            "line-opacity": 0.3
+          }}
+        />
+
+        {/* 4. Active Leg Core (Dark Blue) */}
+        <Layer
+          id="active-leg"
+          type="line"
+          filter={["==", "legId", activeLeg === 'TO_PICKUP' ? "driver-to-pickup" : "pickup-to-dropoff"]}
+          layout={{ "line-cap": "round", "line-join": "round" }}
+          paint={{
+            "line-color": "#2563eb",
+            "line-width": 6,
+            "line-opacity": 1
+          }}
         />
       </Source>
 
