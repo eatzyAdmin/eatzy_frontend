@@ -21,7 +21,7 @@ export default function useOrderOffers(online: boolean) {
       // Use explicit status filtering for better compatibility with backend Spring Filter
       const ACTIVE_STATUSES = ['PREPARING', 'DRIVER_ASSIGNED', 'READY', 'PICKED_UP', 'ARRIVED'];
       const statusFilter = ACTIVE_STATUSES.map(s => `orderStatus~'${s}'`).join(' or ');
-      
+
       const response = await orderApi.getMyDriverOrders({
         filter: statusFilter,
       });
@@ -43,7 +43,7 @@ export default function useOrderOffers(online: boolean) {
     console.log("DEBUG: Processing orders for panels, total orders:", orders.length);
     // Current Panel statuses: AFTER PREPARING
     const CURRENT_PANEL_STATUSES = ['DRIVER_ASSIGNED', 'READY', 'PICKED_UP', 'ARRIVED'];
-    
+
     // An order is an active order (Current Panel) if its status is in CURRENT_PANEL_STATUSES
     const active = orders.find(o => CURRENT_PANEL_STATUSES.includes(o.orderStatus));
     console.log("DEBUG: Found active order (Current Panel):", active?.id, "Status:", active?.orderStatus);
@@ -114,28 +114,7 @@ export default function useOrderOffers(online: boolean) {
       return { currentOffer, activeOrder: null };
     }
 
-    // MOCK DATA FOR UI TESTING
-    const mockOffer: DriverOrderOffer = {
-      id: "9999",
-      netEarning: 25000,
-      orderValue: 150000,
-      paymentMethod: 'EATZYPAY',
-      distanceKm: 3.5,
-      pickup: {
-        name: "Phở Gia Truyền - Mock",
-        address: "123 Đường Lý Tự Trọng, Quận 1",
-        lng: 106.6967,
-        lat: 10.7725,
-      },
-      dropoff: {
-        address: "456 Đường Nguyễn Huệ, Quận 1",
-        lng: 106.7018,
-        lat: 10.7756,
-      },
-      expireSeconds: 30,
-    };
-
-    return { currentOffer: mockOffer, activeOrder: null };
+    return { currentOffer: null, activeOrder: null };
   }, [orders]);
 
   const clearCountdown = useCallback(() => {
@@ -170,7 +149,7 @@ export default function useOrderOffers(online: boolean) {
     if (offerId && currentOffer) {
       setCountdown(30);
       clearCountdown();
-      
+
       countdownRef.current = setInterval(() => {
         setCountdown((c) => {
           if (c <= 1) {
@@ -216,13 +195,13 @@ export default function useOrderOffers(online: boolean) {
     }
   }, [currentOffer, rejectMutation]);
 
-  return { 
-    currentOffer, 
+  return {
+    currentOffer,
     activeOrder,
-    countdown, 
-    acceptOffer, 
+    countdown,
+    acceptOffer,
     rejectOffer,
-    isLoading 
+    isLoading
   };
 }
 
