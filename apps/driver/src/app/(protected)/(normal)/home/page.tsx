@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "@repo/ui/motion";
 import { useLoading } from "@repo/ui";
 const DriverMapView = dynamic(() => import("@/features/map/DriverMapView"), { ssr: false });
@@ -25,6 +25,11 @@ export default function Page() {
 
   const [locateVersion, setLocateVersion] = useState(0);
   const { currentOffer, activeOrder, countdown, acceptOffer, rejectOffer } = useOrderOffers(online);
+  const [isPanelExpanded, setIsPanelExpanded] = useState(true);
+
+  const handlePanelExpandedChange = useCallback((expanded: boolean) => {
+    setIsPanelExpanded(expanded);
+  }, []);
 
   // Hide loading after 1.5s on mount
   useEffect(() => {
@@ -37,17 +42,35 @@ export default function Page() {
   return (
     <div className="w-full h-full">
       <DriverMapView locateVersion={locateVersion} activeOrder={activeOrder} />
-      <div className="absolute left-4 right-4 bottom-[104px] space-y-3 pointer-events-none">
-        <div className="flex items-center justify-between gap-3">
-          <ConnectToggle online={online} isLoading={isStatusLoading} onToggle={toggleStatus} className="pointer-events-auto" />
+      <div 
+        className={`absolute z-40 flex flex-col justify-end pointer-events-none transition-all duration-300 ${
+          activeOrder ? "left-0 right-0 bottom-0" : "left-4 right-4 bottom-[104px]"
+        }`}
+      >
+        <motion.div 
+          animate={{ 
+            opacity: activeOrder && isPanelExpanded ? 0 : 1,
+            y: activeOrder && isPanelExpanded ? 10 : 0,
+            scale: activeOrder && isPanelExpanded ? 0.95 : 1,
+            pointerEvents: activeOrder && isPanelExpanded ? "none" : "auto"
+          }}
+          transition={{ type: "spring", damping: 20, stiffness: 100 }}
+          className={`flex items-center justify-between gap-3 ${
+            activeOrder 
+              ? `px-4 ${isPanelExpanded ? 'mb-3' : 'mb-24'}` 
+              : "mb-3"
+          }`}
+        >
+          <ConnectToggle online={online} isLoading={isStatusLoading} onToggle={toggleStatus} />
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setLocateVersion((v) => v + 1)}
-            className="backdrop-blur-xl bg-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/40 border-white/20 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 pointer-events-auto"
+            className="backdrop-blur-xl bg-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/40 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300"
           >
             <LocateFixed className="w-7 h-7 text-black" strokeWidth={2.5} />
           </motion.button>
-        </div>
+        </motion.div>
+
         {online && !activeOrder && (
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -72,10 +95,12 @@ export default function Page() {
             </div>
           </motion.div>
         )}
+
         {activeOrder && (
-          <div className="pointer-events-auto">
+          <div className="pointer-events-auto w-full">
             <CurrentOrderPanel
               order={activeOrder}
+              onExpandedChange={handlePanelExpandedChange}
             />
           </div>
         )}

@@ -79,9 +79,8 @@ export default function useOrderOffers(online: boolean) {
           orderId: active.id.toString(),
           orderSubtotal: active.subtotal,
           deliveryFee: active.deliveryFee,
-          // Fallback: If driverNetEarning is not available (for active orders), 
-          // calculate it from delivery fee (mimicking backend 80% commission logic)
-          driverNetEarning: active.driverNetEarning || (active.deliveryFee ? active.deliveryFee * 0.2 : 0),
+          driverCommissionAmount: active.driverCommissionAmount ?? null,
+          driverNetEarning: active.driverNetEarning ?? null,
         } as DriverEarningsSummary,
         distanceKm: active.distance,
       };
@@ -95,8 +94,7 @@ export default function useOrderOffers(online: boolean) {
     if (offer) {
       const currentOffer: DriverOrderOffer = {
         id: offer.id.toString(),
-        // Fallback: Calculate estimated net earning from delivery fee if missing
-        netEarning: offer.driverNetEarning || (offer.deliveryFee ? offer.deliveryFee * 0.2 : 0),
+        netEarning: offer.driverNetEarning ?? null,
         orderValue: offer.totalAmount,
         paymentMethod: offer.paymentMethod as PaymentMethod,
         distanceKm: offer.distance || 0,

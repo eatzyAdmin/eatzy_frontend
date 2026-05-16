@@ -4,9 +4,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion } from "@repo/ui/motion";
 import { BellRing, Landmark, MessageSquare } from "@repo/ui/icons";
 
+import { useBottomNav } from "@/app/(protected)/(normal)/context/BottomNavContext";
+
 export default function DriverHeader() {
   const pathname = usePathname();
   const router = useRouter();
+  const { isHeaderVisible } = useBottomNav();
 
   // Navigation Logic
   const isHome = pathname === "/home" || pathname === "/";
@@ -33,8 +36,11 @@ export default function DriverHeader() {
     };
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${headerStyles.container}`}
+    <motion.header
+      initial={{ y: 0 }}
+      animate={{ y: isHeaderVisible ? 0 : -100 }}
+      transition={{ type: "spring", damping: 25, stiffness: 120 }}
+      className={`fixed top-0 left-0 right-0 z-50 ${headerStyles.container}`}
     >
       <div className="flex items-center justify-between">
         {/* Left Section: Menu-like behavior with Logo */}
@@ -68,6 +74,6 @@ export default function DriverHeader() {
           </div>
         </motion.div>
       </div>
-    </header>
+    </motion.header>
   );
 }

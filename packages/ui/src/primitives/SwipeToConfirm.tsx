@@ -120,16 +120,20 @@ export function SwipeToConfirm({
   return (
     <div
       ref={sliderRef}
-      className={`relative flex items-center rounded-full h-14 w-80 sm:w-80 select-none overflow-hidden ${className || ""} ${!isLoading ? "shadow-md" : ""} ${disabled && !isLoading ? "opacity-70" : ""
+      className={`relative flex items-center rounded-full h-14 w-80 sm:w-80 select-none overflow-hidden ${className || ""} ${!isLoading ? "shadow-md" : ""} ${disabled && !isLoading ? "grayscale opacity-80" : ""
         }`}
       style={{
         background: isLoading
           ? `linear-gradient(to right, #6b7280, #4b5563)`
-          : `linear-gradient(to right, ${theme.start} ${percent}%, ${theme.end} ${percent}%)`,
+          : disabled
+            ? '#d1d5db'
+            : `linear-gradient(to right, ${theme.start} ${percent}%, ${theme.end} ${percent}%)`,
       }}
     >
       {/* Shimmering overlay effect */}
-      <div className={`absolute inset-0 z-0 ${styles.shimmerOverlay}`} />
+      {!disabled && !isLoading && (
+        <div className={`absolute inset-0 z-0 ${styles.shimmerOverlay}`} />
+      )}
 
       {/* Touch/click capture area */}
       <div
@@ -144,7 +148,6 @@ export function SwipeToConfirm({
       />
 
       {/* Slider Knob with shimmering effect */}
-      {/* Slider Knob with shimmering effect */}
       {!isLoading && (
         <div
           ref={knobRef}
@@ -155,15 +158,15 @@ export function SwipeToConfirm({
           }}
         >
           <div className="bg-white rounded-full h-11 w-11 flex items-center justify-center shadow-md overflow-hidden">
-            <div className={styles.shimmerContainer}>
-              <ChevronsRight size={28} className={`text-neutral-700 ${styles.shimmerIcon}`} strokeWidth={2.5} />
+            <div className={!disabled ? styles.shimmerContainer : ""}>
+              <ChevronsRight size={28} className={`text-neutral-700 ${!disabled ? styles.shimmerIcon : ""}`} strokeWidth={2.5} />
             </div>
           </div>
         </div>
       )}
 
       {/* Text with shimmering effect */}
-      <span className={`flex-grow flex items-center justify-center gap-2 text-white text-lg font-semibold transition-all ${isLoading ? 'px-0' : 'pl-10 pr-4'}`}>
+      <span className={`flex-grow flex items-center justify-center gap-2 text-white text-lg font-semibold transition-all ${isLoading ? 'px-0' : 'pl-10 pr-4'} ${disabled ? 'text-gray-500' : ''}`}>
         {isLoading && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
         {text}
       </span>

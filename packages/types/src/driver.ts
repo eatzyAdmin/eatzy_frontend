@@ -8,15 +8,16 @@ export type DriverEarningsSummary = {
   orderSubtotal: number;
   deliveryFee: number;
   driverCommissionRate?: number;
-  driverCommissionAmount?: number;
-  driverNetEarning: number;
+  driverCommissionAmount?: number | null;
+  driverNetEarning: number | null;
   restaurantNetEarning?: number;
   platformTotalEarning?: number;
+  orderItemsCount?: number;
 };
 
 export type DriverOrderOffer = {
   id: string;
-  netEarning: number; // driver_net_earning
+  netEarning: number | null; // driver_net_earning
   orderValue: number; // total_amount
   paymentMethod: PaymentMethod;
   distanceKm: number;
