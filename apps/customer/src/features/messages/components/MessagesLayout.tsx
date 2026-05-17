@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import {
   ArrowLeft, Search, Filter, X, LayoutGrid, Truck, BellRing,
   MessageSquare, User, Info, Compass, RotateCcw
 } from '@repo/ui/icons';
-import { mockSystemChats, mockDriverChats, ChatSession } from '../data/mockMessages';
+import { ChatSession } from '../data/mockMessages';
 import MessageList from './MessageList';
 import MessageDetail from './MessageDetail';
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -16,6 +16,8 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import MobileMessagesView from './mobile/MobileMessagesView';
 import { useMobileBackHandler } from '@/hooks/useMobileBackHandler';
 import { useCurrentOrders } from '@/features/orders/hooks/useCurrentOrders';
+import { useSearchParams } from 'next/navigation';
+import { useUnreadMessageCount } from '../hooks/useUnreadMessageCount';
 
 const statusFilters = [
   { value: "ALL", label: "All", icon: LayoutGrid },
@@ -23,15 +25,21 @@ const statusFilters = [
   { value: "system", label: "System", icon: BellRing },
 ];
 
+import { useOrderLastMessages } from '../hooks/useOrderLastMessages';
+
 export default function MessagesLayout() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const orderIdParam = searchParams ? searchParams.get('orderId') : null;
+  const fromParam = searchParams ? searchParams.get('from') : null;
+
   const [activeTab, setActiveTab] = useState<'ALL' | 'driver' | 'system'>('ALL');
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const isMobile = useIsMobile();
   const { setIsVisible } = useBottomNav();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const { refresh } = useCurrentOrders();
+  const { orders, refresh } = useCurrentOrders();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -44,7 +52,40 @@ export default function MessagesLayout() {
     return () => setIsVisible(true);
   }, [setIsVisible]);
 
-  const allChats = [...mockDriverChats, ...mockSystemChats];
+  useEffect(() => {
+    if (orderIdParam) {
+      setActiveChatId(`order_${orderIdParam}`);
+    }
+  }, [orderIdParam]);
+
+  const { unreadCounts } = useUnreadMessageCount();
+  const { lastMessages } = useOrderLastMessages(orders);
+
+  // Dynamically map active orders with assigned drivers to ChatSessions
+  const activeOrderChats = useMemo(() => {
+    return orders
+      .filter(ord => ord.driver)
+      .map(ord => {
+        const orderKey = `order_${ord.id}`;
+        const lastMsgInfo = lastMessages[orderKey];
+        return {
+          id: orderKey,
+          type: 'driver' as const,
+          partnerId: `driver_${ord.driver?.id}`,
+          partnerName: ord.driver?.name || 'Driver',
+          partnerAvatar: ord.driver?.avatarUrl,
+          lastMessage: lastMsgInfo ? lastMsgInfo.text : 'Active delivery chat room',
+          lastMessageTime: lastMsgInfo ? lastMsgInfo.time : (ord.createdAt ? new Date(ord.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now'),
+          unreadCount: unreadCounts[orderKey] || 0,
+          messages: []
+        };
+      });
+  }, [orders, unreadCounts, lastMessages]);
+
+  const allChats = useMemo(() => {
+    return activeOrderChats;
+  }, [activeOrderChats]);
+
   const isEmpty = allChats.length === 0;
 
   const handleRefresh = async () => {
@@ -59,7 +100,7 @@ export default function MessagesLayout() {
     }, 1000);
   };
 
-  const filteredChats = allChats.filter(chat => {
+  const filteredChats = allChats.filter((chat: ChatSession) => {
     const matchesTab = activeTab === 'ALL' || chat.type === activeTab;
     const matchesSearch = chat.partnerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
@@ -68,14 +109,36 @@ export default function MessagesLayout() {
 
   const isSearchEmpty = searchQuery.length > 0 && filteredChats.length === 0;
 
-  const activeChat = allChats.find(c => c.id === activeChatId) || null;
+  const activeChat = allChats.find((c: ChatSession) => c.id === activeChatId) || null;
 
   const handleBack = () => {
-    setActiveChatId(null);
+    if (orderIdParam) {
+      if (fromParam === 'detail') {
+        router.push(`/home?openDrawer=true&drawerTab=detail&orderId=${orderIdParam}`);
+      } else if (fromParam === 'card') {
+        router.push(`/home?openDrawer=true`);
+      } else {
+        router.back();
+      }
+    } else {
+      setActiveChatId(null);
+    }
   };
 
   // Use the standard mobile back handler
-  useMobileBackHandler(!!activeChatId && isMobile, () => setActiveChatId(null));
+  useMobileBackHandler(!!activeChatId && isMobile, () => {
+    if (orderIdParam) {
+      if (fromParam === 'detail') {
+        router.push(`/home?openDrawer=true&drawerTab=detail&orderId=${orderIdParam}`);
+      } else if (fromParam === 'card') {
+        router.push(`/home?openDrawer=true`);
+      } else {
+        router.back();
+      }
+    } else {
+      setActiveChatId(null);
+    }
+  });
 
   const handleClearSearch = () => {
     setSearchQuery("");

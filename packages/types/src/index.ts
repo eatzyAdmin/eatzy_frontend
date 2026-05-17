@@ -16,3 +16,4 @@ export * from './report';
 export * from './file';
 export * from './review';
 export * from './address';
+export * from './chat';

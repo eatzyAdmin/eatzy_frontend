@@ -5,9 +5,9 @@ import { Menu, BookHeart, Search, ShoppingCart, Home, Truck, BellRing, MessageSq
 import { useState, useEffect } from 'react';
 import { useCart } from '@/features/cart/hooks/useCart';
 import { useCurrentOrders } from '@/features/orders/hooks/useCurrentOrders';
-import { getTotalUnreadMessages } from '@/features/messages/data/mockMessages';
 import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
+import { useUnreadMessageCount } from '@/features/messages/hooks/useUnreadMessageCount';
 
 // Dynamically import DeliveryLocationButton to avoid SSR issues with zustand persist
 const DeliveryLocationButton = dynamic(
@@ -44,6 +44,8 @@ export default function HomeHeader({
 }: HomeHeaderProps) {
   const { totalItems, carts } = useCart();
   const { activeOrdersCount } = useCurrentOrders();
+  const { unreadCount } = useUnreadMessageCount();
+
   const cartCount = carts.length;
   const pathname = usePathname();
   
@@ -110,13 +112,13 @@ export default function HomeHeader({
                 className="relative"
               >
                 <BellRing strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
-                {getTotalUnreadMessages() > 0 && (
+                {unreadCount > 0 && (
                   <motion.span
                     initial={{ scale: 0.6, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="absolute -top-3 -left-3 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--primary)] text-black text-[10px] font-black flex items-center justify-center border border-white shadow-sm"
                   >
-                    {getTotalUnreadMessages()}
+                    {unreadCount}
                   </motion.span>
                 )}
               </motion.div>
@@ -210,14 +212,14 @@ export default function HomeHeader({
                 }`}
             >
               <BellRing strokeWidth={2.3} className={`w-5 h-5 ${hideSearchIcon ? 'text-gray-900' : 'text-white'}`} />
-              {getTotalUnreadMessages() > 0 && (
+              {unreadCount > 0 && (
                 <motion.span
                   initial={{ scale: 0.6, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 300, damping: 15 }}
                   className="absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1 rounded-full bg-[var(--primary)] text-[12px] leading-[20px] text-black font-black border border-white/60 flex items-center justify-center shadow-sm tabular-nums"
                 >
-                  {getTotalUnreadMessages()}
+                  {unreadCount}
                 </motion.span>
               )}
             </motion.button>
@@ -288,14 +290,14 @@ export default function HomeHeader({
               }`}
           >
             <BellRing strokeWidth={2} className="w-7 h-7 md:w-8 md:h-8" />
-            {getTotalUnreadMessages() > 0 && (
+            {unreadCount > 0 && (
               <motion.span
                 initial={{ scale: 0.6, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 className="absolute -top-1 -right-1 min-w-[24px] h-[24px] px-1.5 rounded-full bg-[var(--primary)] text-black text-[12px] font-black flex items-center justify-center border-2 border-white shadow-lg"
               >
-                {getTotalUnreadMessages()}
+                {unreadCount}
               </motion.span>
             )}
           </motion.button>

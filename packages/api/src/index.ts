@@ -40,3 +40,5 @@ export * from "./order/mappers/order.mapper";
 // Wallet module exports
 export { walletApi } from "./wallet";
 export * from "./wallet/mappers/wallet.mapper";
+
+export { chatApi } from "./chat";

@@ -7,6 +7,7 @@ export { SocketProvider, useSocket } from "./SocketProvider";
 // Integration hooks for apps
 export { useDriverLocationUpdate } from "./hooks/useDriverLocationUpdate";
 export { useOrderNotifications } from "./hooks/useOrderNotifications";
+export { useOrderChat, type ChatMessageNotification } from "./hooks/useOrderChat";
 
 // Types
 export interface OrderNotification {

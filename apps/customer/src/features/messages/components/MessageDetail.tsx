@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, Fragment } from 'react';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import { ChatSession, ChatMessage } from '../data/mockMessages';
-import { ChevronLeft, Send, BadgeCheck, Utensils, Info, Clock, ExternalLink, ArrowLeft, Store, ChevronRight } from '@repo/ui/icons';
+import { ChevronLeft, Send, BadgeCheck, Utensils, Info, Clock, ExternalLink, ArrowLeft, Store, ChevronRight, AlertCircle, MessageSquare } from '@repo/ui/icons';
 import Image from 'next/image';
 import { ImageWithFallback } from '@repo/ui';
 import { formatVnd } from '@repo/lib';
@@ -10,6 +10,8 @@ import type { OrderResponse } from '@repo/types';
 import { StickyOrderHeaderCard } from './StickyOrderHeaderCard';
 import { mapToOrderResponse } from '../utils';
 import MessageDetailShimmer from './MessageDetailShimmer';
+import { useChatSession } from '../hooks/useChatSession';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 import patternBg from '@repo/ui/assets/placeholders/background_pattern_light.jpg';
 
@@ -21,27 +23,45 @@ interface MessageDetailProps {
 
 export default function MessageDetail({ chat, onBack, isMobile }: MessageDetailProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [stickyOrder, setStickyOrder] = useState<any>(null);
   const orderRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showTimeId, setShowTimeId] = useState<string | null>(null);
 
-  const [localMessages, setLocalMessages] = useState<ChatMessage[]>(chat.messages);
+  const [stickyOrder, setStickyOrder] = useState<any>(null);
   const [inputText, setInputText] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Initial loading simulation
-  useEffect(() => {
-    // Wait for the detail view animation to settle first
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [chat.id]);
+  const {
+    localMessages,
+    isLoading,
+    isError,
+    stickyOrder: apiStickyOrder,
+    sendMessage,
+    refetch,
+    orderId
+  } = useChatSession({
+    chatId: chat.id,
+    initialMessages: chat.messages,
+    isDriverApp: false
+  });
+
+  const handleStickyOrderClick = () => {
+    if (!orderId) return;
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem("pending_open_order_id", orderId.toString());
+      window.dispatchEvent(new CustomEvent("openOrdersDrawer"));
+    }
+  };
 
   useEffect(() => {
-    setLocalMessages(chat.messages);
-  }, [chat.messages]);
+    if (apiStickyOrder) {
+      setStickyOrder(apiStickyOrder);
+    } else {
+      const lastMsgWithCard = [...localMessages].reverse().find(m => m.orderCard);
+      if (lastMsgWithCard && lastMsgWithCard.orderCard) {
+        setStickyOrder(lastMsgWithCard.orderCard);
+      }
+    }
+  }, [apiStickyOrder, localMessages]);
 
   // Auto-resize textarea
   useLayoutEffect(() => {
@@ -54,25 +74,8 @@ export default function MessageDetail({ chat, onBack, isMobile }: MessageDetailP
 
   const handleSend = () => {
     if (!inputText.trim()) return;
-
-    const newMessage: any = {
-      id: `temp-${Date.now()}`,
-      text: inputText,
-      senderId: 'me',
-      isMe: true,
-      timestamp: new Date().toISOString(),
-      status: 'sending'
-    };
-
-    setLocalMessages(prev => [...prev, newMessage]);
+    sendMessage(inputText);
     setInputText("");
-
-    // Simulate server response/sent status
-    setTimeout(() => {
-      setLocalMessages(prev => prev.map(m =>
-        m.id === newMessage.id ? { ...m, status: 'sent' } : m
-      ));
-    }, 1500);
 
     // Immediate smooth scroll to bottom after state update
     setTimeout(() => {
@@ -91,40 +94,6 @@ export default function MessageDetail({ chat, onBack, isMobile }: MessageDetailP
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [localMessages, isLoading]);
-
-  useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      // 1. Find the absolute latest message with an order card
-      const orderMessages = chat.messages.filter(m => m.orderCard);
-      if (orderMessages.length === 0) {
-        setStickyOrder(null);
-        return;
-      }
-
-      const lastOrderMsg = orderMessages[orderMessages.length - 1];
-      const lastOrderRef = orderRefs.current[lastOrderMsg.id];
-
-      if (lastOrderRef) {
-        const rect = lastOrderRef.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-
-        // 2. Determine visibility
-        // Header height is roughly 70px, so we use a small buffer
-        const isVisible = rect.top < containerRect.bottom && rect.bottom > containerRect.top + 70;
-
-        // 3. Show sticky only if the LATEST order is NOT visible
-        setStickyOrder(isVisible ? null : lastOrderMsg.orderCard);
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    handleScroll();
-
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [chat.messages]);
 
   return (
     <div className="flex flex-col h-full bg-[#F8F9FA] overflow-hidden relative">
@@ -176,7 +145,7 @@ export default function MessageDetail({ chat, onBack, isMobile }: MessageDetailP
                   exit={{ opacity: 0, x: 20 }}
                   className="w-[280px]"
                 >
-                  <StickyOrderHeaderCard order={stickyOrder} compact />
+                  <StickyOrderHeaderCard order={stickyOrder} compact onClick={handleStickyOrderClick} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -195,7 +164,7 @@ export default function MessageDetail({ chat, onBack, isMobile }: MessageDetailP
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <StickyOrderHeaderCard order={stickyOrder} />
+              <StickyOrderHeaderCard order={stickyOrder} onClick={handleStickyOrderClick} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -222,154 +191,176 @@ export default function MessageDetail({ chat, onBack, isMobile }: MessageDetailP
             : (stickyOrder ? 'pt-[105px]' : 'pt-24')
             } pb-20`}
         >
-          <AnimatePresence>
-            {isLoading ? (
-              <MessageDetailShimmer isMobile={isMobile} />
-            ) : localMessages.map((msg, idx) => {
-              const isSystemMsg = msg.senderId === 'system_auto' || msg.senderId === 'eatzy_system' || msg.senderId === 'eatzy_promos';
+          <AnimatePresence mode="wait">
+            {isError ? (
+              <div key="error-state" className="flex flex-col items-center justify-center min-h-[350px] py-12 px-6">
+                <EmptyState
+                  icon={AlertCircle}
+                  title="Failed to Load Chat"
+                  description="We couldn't retrieve the message history for this order. Please check your connection and try again."
+                  buttonText="Retry"
+                  onButtonClick={refetch}
+                />
+              </div>
+            ) : isLoading ? (
+              <MessageDetailShimmer key="loading-shimmer" isMobile={isMobile} />
+            ) : localMessages.length === 0 ? (
+              <div key="empty-state" className="flex flex-col items-center justify-center min-h-[350px] py-12 px-6">
+                <EmptyState
+                  icon={MessageSquare}
+                  title="No messages yet"
+                  description="Start the conversation by sending a message to your assigned driver."
+                />
+              </div>
+            ) : (
+              <div key="messages-list" className="contents">
+                {localMessages.map((msg, idx) => {
+                  const isSystemMsg = msg.senderId === 'system_auto' || msg.senderId === 'eatzy_system' || msg.senderId === 'eatzy_promos';
 
-              // Telegram Style Date Separator Logic
-              const currentDate = new Date(msg.timestamp);
-              const prevMsg = idx > 0 ? localMessages[idx - 1] : null;
-              const prevDate = prevMsg ? new Date(prevMsg.timestamp) : null;
+                  // Telegram Style Date Separator Logic
+                  const currentDate = new Date(msg.timestamp);
+                  const prevMsg = idx > 0 ? localMessages[idx - 1] : null;
+                  const prevDate = prevMsg ? new Date(prevMsg.timestamp) : null;
 
-              const isNewDay = !prevDate ||
-                currentDate.getDate() !== prevDate.getDate() ||
-                currentDate.getMonth() !== prevDate.getMonth() ||
-                currentDate.getFullYear() !== prevDate.getFullYear();
+                  const isNewDay = !prevDate ||
+                    currentDate.getDate() !== prevDate.getDate() ||
+                    currentDate.getMonth() !== prevDate.getMonth() ||
+                    currentDate.getFullYear() !== prevDate.getFullYear();
 
-              const isSamePersonPrev = prevMsg?.senderId === msg.senderId;
-              const isWithinOneMinutePrev = prevDate && (currentDate.getTime() - prevDate.getTime() < 60000);
-              const isSameGroupPrev = isSamePersonPrev && isWithinOneMinutePrev && !isNewDay;
+                  const isSamePersonPrev = prevMsg?.senderId === msg.senderId;
+                  const isWithinOneMinutePrev = prevDate && (currentDate.getTime() - prevDate.getTime() < 60000);
+                  const isSameGroupPrev = isSamePersonPrev && isWithinOneMinutePrev && !isNewDay;
 
-              const nextMsg = idx < localMessages.length - 1 ? localMessages[idx + 1] : null;
-              const isSamePersonNext = nextMsg?.senderId === msg.senderId;
-              const nextDate = nextMsg ? new Date(nextMsg.timestamp) : null;
-              const isWithinOneMinuteNext = nextDate && (nextDate.getTime() - currentDate.getTime() < 60000);
+                  const nextMsg = idx < localMessages.length - 1 ? localMessages[idx + 1] : null;
+                  const isSamePersonNext = nextMsg?.senderId === msg.senderId;
+                  const nextDate = nextMsg ? new Date(nextMsg.timestamp) : null;
+                  const isWithinOneMinuteNext = nextDate && (nextDate.getTime() - currentDate.getTime() < 60000);
 
-              // Check if next message would start a new day
-              const isNextNewDay = nextDate && (
-                nextDate.getDate() !== currentDate.getDate() ||
-                nextDate.getMonth() !== currentDate.getMonth() ||
-                nextDate.getFullYear() !== currentDate.getFullYear()
-              );
+                  // Check if next message would start a new day
+                  const isNextNewDay = nextDate && (
+                    nextDate.getDate() !== currentDate.getDate() ||
+                    nextDate.getMonth() !== currentDate.getMonth() ||
+                    nextDate.getFullYear() !== currentDate.getFullYear()
+                  );
 
-              const isSameGroupNext = isSamePersonNext && isWithinOneMinuteNext && !isNextNewDay;
+                  const isSameGroupNext = isSamePersonNext && isWithinOneMinuteNext && !isNextNewDay;
 
-              const getDateLabel = (date: Date) => {
-                const today = new Date();
-                const yesterday = new Date();
-                yesterday.setDate(today.getDate() - 1);
+                  const getDateLabel = (date: Date) => {
+                    const today = new Date();
+                    const yesterday = new Date();
+                    yesterday.setDate(today.getDate() - 1);
 
-                if (date.toDateString() === today.toDateString()) return 'Today';
-                if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+                    if (date.toDateString() === today.toDateString()) return 'Today';
+                    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
 
-                return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-              };
+                    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+                  };
 
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex flex-col gap-1 ${isSameGroupNext ? 'mb-1' : 'mb-5'}`}
-                >
-                  <Fragment>
-                    {isNewDay && (
-                      <div className={`flex justify-center my-6 sticky z-20 transition-all duration-300 ${(stickyOrder && isMobile) ? 'top-[15px]' : 'top-[0px]'
-                        }`}>
-                        <div className="bg-gray-100/60 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-[0_0_12px_rgba(0,0,0,0.1)] border-2 border-white/40">
-                          <span className="text-[13px] font-bold text-gray-500 tracking-tight">
-                            {getDateLabel(currentDate)}
-                          </span>
-                        </div>
-                      </div>
-                    )}
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`flex flex-col gap-1 ${isSameGroupNext ? 'mb-1' : 'mb-5'}`}
+                    >
+                      <Fragment>
+                        {isNewDay && (
+                          <div className={`flex justify-center my-6 sticky z-20 transition-all duration-300 ${(stickyOrder && isMobile) ? 'top-[15px]' : 'top-[0px]'
+                            }`}>
+                            <div className="bg-gray-100/60 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-[0_0_12px_rgba(0,0,0,0.1)] border-2 border-white/40">
+                              <span className="text-[13px] font-bold text-gray-500 tracking-tight">
+                                {getDateLabel(currentDate)}
+                              </span>
+                            </div>
+                          </div>
+                        )}
 
 
-                    {/* Message Bubble (Telegram Style) */}
-                    <div className={`flex items-end gap-3 ${msg.isMe ? 'justify-end' : 'justify-start'}`}>
-                      {/* Loading Status Left of Bubble */}
-                      <AnimatePresence>
-                        {msg.isMe && (msg as any).status === 'sending' && (
+                        {/* Message Bubble (Telegram Style) */}
+                        <div className={`flex items-end gap-3 ${msg.isMe ? 'justify-end' : 'justify-start'}`}>
+                          {/* Loading Status Left of Bubble */}
+                          <AnimatePresence>
+                            {msg.isMe && (msg as any).status === 'sending' && (
+                              <motion.div
+                                initial={{ opacity: 0, x: 10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 10 }}
+                                className="flex items-center gap-2 mb-1.5"
+                              >
+                                <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
+                                <span className="text-[14px] leading-snug tracking-tight font-semibold text-gray-400">Sending...</span>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                           <motion.div
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 10 }}
-                            className="flex items-center gap-2 mb-1.5"
+                            initial={{ opacity: 0, scale: 0.3, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            transition={{
+                              type: 'spring',
+                              stiffness: 250,
+                              damping: 25,
+                              mass: 1,
+                              delay: (localMessages.length - 1 - idx) * 0.08
+                            }}
+                            style={{ transformOrigin: msg.isMe ? 'bottom right' : 'bottom left' }}
+                            onClick={() => setShowTimeId(showTimeId === msg.id ? null : msg.id)}
+                            className={`relative px-3 py-2 cursor-pointer max-w-[76%] md:max-w-[72%] ${msg.isMe
+                              ? `bg-primary/60 backdrop-blur-sm text-white rounded-[24px] shadow-[0_0_24px_rgba(0,0,0,0.18)] ${!isSameGroupPrev ? 'rounded-br-[8px]' : (!isSameGroupNext ? 'rounded-tr-[8px]' : 'rounded-r-[8px]')
+                              }`
+                              : `bg-white/50 backdrop-blur-sm text-gray-800 rounded-[24px] border-2 border-white shadow-[0_0_20px_rgba(0,0,0,0.12)] ${!isSameGroupPrev ? 'rounded-bl-[8px]' : (!isSameGroupNext ? 'rounded-tl-[8px]' : 'rounded-l-[8px]')
+                              }`
+                              }`}
                           >
-                            <div className="w-4 h-4 border-2 border-gray-300 border-t-primary rounded-full animate-spin" />
-                            <span className="text-[14px] leading-snug tracking-tight font-semibold text-gray-400">Sending...</span>
+                            <p className="text-[15px] leading-snug tracking-tight font-normal">
+                              {msg.text}
+                            </p>
+
+                            <AnimatePresence>
+                              {showTimeId === msg.id && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 5 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                  className={`flex items-center gap-1 mt-1 opacity-60 justify-end`}
+                                >
+                                  <span className={`text-[9px] font-bold tabular-nums ${msg.isMe ? 'text-white/80' : 'text-gray-400'}`}>
+                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </motion.div>
+                        </div>
+
+                        {/* Official CurrentOrderCard Integrated 100% */}
+                        {msg.orderCard && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.3, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            transition={{
+                              type: 'spring',
+                              stiffness: 250,
+                              damping: 25,
+                              mass: 1,
+                              delay: (localMessages.length - 1 - idx) * 0.05
+                            }}
+                            style={{ transformOrigin: msg.isMe ? 'bottom right' : 'bottom left' }}
+                            ref={el => { orderRefs.current[msg.id] = el }}
+                            className={`w-full flex ${msg.isMe ? 'justify-end' : 'justify-start'} mb-5`}
+                          >
+                            <div className="w-full md:max-w-[400px]">
+                              <CurrentOrderCard
+                                order={mapToOrderResponse(msg.orderCard)}
+                                onClick={handleStickyOrderClick}
+                              />
+                            </div>
                           </motion.div>
                         )}
-                      </AnimatePresence>
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.3, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{
-                          type: 'spring',
-                          stiffness: 250,
-                          damping: 25,
-                          mass: 1,
-                          delay: (localMessages.length - 1 - idx) * 0.08
-                        }}
-                        style={{ transformOrigin: msg.isMe ? 'bottom right' : 'bottom left' }}
-                        onClick={() => setShowTimeId(showTimeId === msg.id ? null : msg.id)}
-                        className={`relative px-3 py-2 cursor-pointer max-w-[76%] md:max-w-[72%] ${msg.isMe
-                          ? `bg-primary/60 backdrop-blur-sm text-white rounded-[24px] shadow-[0_0_24px_rgba(0,0,0,0.18)] ${!isSameGroupPrev ? 'rounded-br-[8px]' : (!isSameGroupNext ? 'rounded-tr-[8px]' : 'rounded-r-[8px]')
-                          }`
-                          : `bg-white/50 backdrop-blur-sm text-gray-800 rounded-[24px] border-2 border-white shadow-[0_0_20px_rgba(0,0,0,0.12)] ${!isSameGroupPrev ? 'rounded-bl-[8px]' : (!isSameGroupNext ? 'rounded-tl-[8px]' : 'rounded-l-[8px]')
-                          }`
-                          }`}
-                      >
-                        <p className="text-[15px] leading-snug tracking-tight font-normal">
-                          {msg.text}
-                        </p>
-
-                        <AnimatePresence>
-                          {showTimeId === msg.id && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: 5 }}
-                              transition={{ duration: 0.2 }}
-                              className={`flex items-center gap-1 mt-1 opacity-60 justify-end`}
-                            >
-                              <span className={`text-[9px] font-bold tabular-nums ${msg.isMe ? 'text-white/80' : 'text-gray-400'}`}>
-                                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
+                      </Fragment>
                     </div>
-
-                    {/* Official CurrentOrderCard Integrated 100% */}
-                    {msg.orderCard && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.3, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{
-                          type: 'spring',
-                          stiffness: 250,
-                          damping: 25,
-                          mass: 1,
-                          delay: (localMessages.length - 1 - idx) * 0.05
-                        }}
-                        style={{ transformOrigin: msg.isMe ? 'bottom right' : 'bottom left' }}
-                        ref={el => { orderRefs.current[msg.id] = el }}
-                        className={`w-full flex ${msg.isMe ? 'justify-end' : 'justify-start'} mb-5`}
-                      >
-                        <div className="w-full md:max-w-[400px]">
-                          <CurrentOrderCard
-                            order={mapToOrderResponse(msg.orderCard)}
-                            onClick={() => { }}
-                          />
-                        </div>
-                      </motion.div>
-                    )}
-                  </Fragment>
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
           </AnimatePresence>
         </div>
       </div>

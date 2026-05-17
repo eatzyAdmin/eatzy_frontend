@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import type { DriverActiveOrder } from "@repo/types";
 import { Phone, Compass, DollarSign, MapPin, Package, ChevronDown, ChevronLeft, X, Star, MessageCircle, Check } from "@repo/ui/icons";
@@ -12,13 +13,16 @@ import { useOrderEarnings } from "../hooks/useOrderEarnings";
 import { useBottomNav } from "@/app/(protected)/(normal)/context/BottomNavContext";
 import OrderDetailsView from "./OrderDetailsView";
 import { ArrowLeft, User, List, Receipt } from "@repo/ui/icons";
+import { useOrderChatCount } from "../../messages/hooks/useOrderChatCount";
 
 export default function CurrentOrderPanel({ order, onExpandedChange }: { order: DriverActiveOrder, onExpandedChange?: (expanded: boolean) => void }) {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [view, setView] = useState<'main' | 'detail'>('main');
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const { setIsVisible, setIsHeaderVisible } = useBottomNav();
+  const { msgCount } = useOrderChatCount(order.id, true);
 
   // Use the dedicated hook for earnings calculation
   const { earnings: calculatedEarnings } = useOrderEarnings(order.earnings);
@@ -148,8 +152,16 @@ export default function CurrentOrderPanel({ order, onExpandedChange }: { order: 
             </div>
 
             <div className="flex items-center gap-2">
-              <button className="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center text-[#1A1A1A] shadow-sm border border-gray-100 active:scale-90 transition-transform">
+              <button 
+                onClick={() => router.push(`/messages?orderId=${order.id}`)}
+                className="relative w-10 h-10 rounded-full bg-white/60 flex items-center justify-center text-[#1A1A1A] shadow-sm border border-gray-100 active:scale-90 transition-transform"
+              >
                 <MessageCircle size={20} strokeWidth={2.5} />
+                {msgCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-[var(--primary)] text-black text-[9px] font-black flex items-center justify-center px-0.5 border border-white shadow-sm">
+                    {msgCount}
+                  </span>
+                )}
               </button>
               <button className="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center text-[#1A1A1A] shadow-sm border border-gray-100 active:scale-90 transition-transform">
                 <Phone size={20} strokeWidth={2.5} />

@@ -15,6 +15,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import MobileMessagesView from '@/features/messages/components/mobile/MobileMessagesView';
 import { useMobileBackHandler } from '@/hooks/useMobileBackHandler';
 import { useCurrentOrders } from '@/features/orders/hooks/useCurrentOrders';
+import { useSearchParams } from 'next/navigation';
+import { orderApi } from '@repo/api';
+import { useMemo } from 'react';
 
 const statusFilters = [
   { value: "ALL", label: "All", icon: LayoutGrid },
@@ -22,8 +25,13 @@ const statusFilters = [
   { value: "system", label: "System", icon: BellRing },
 ];
 
+import { useOrderLastMessages } from '../hooks/useOrderLastMessages';
+
 export default function MessagesLayout() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const orderIdParam = searchParams ? searchParams.get('orderId') : null;
+
   const [activeTab, setActiveTab] = useState<'ALL' | 'driver' | 'system'>('ALL');
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,6 +39,7 @@ export default function MessagesLayout() {
   const { setIsVisible } = useBottomNav();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { refresh } = useCurrentOrders();
+  const [realOrders, setRealOrders] = useState<any[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -43,17 +52,65 @@ export default function MessagesLayout() {
     return () => setIsVisible(true);
   }, [setIsVisible]);
 
-  const allChats = [...mockDriverChats, ...mockSystemChats];
-  
+  useEffect(() => {
+    if (orderIdParam) {
+      setActiveChatId(`order_${orderIdParam}`);
+    }
+  }, [orderIdParam]);
+
+  // Fetch active driver orders
+  const fetchActiveOrders = () => {
+    const ACTIVE_STATUSES = ['PREPARING', 'DRIVER_ASSIGNED', 'READY', 'PICKED_UP', 'ARRIVED'];
+    const statusFilter = ACTIVE_STATUSES.map(s => `orderStatus~'${s}'`).join(' or ');
+
+    orderApi.getMyDriverOrders({ filter: statusFilter })
+      .then(res => {
+        if (res.statusCode === 200 && res.data?.result) {
+          setRealOrders(res.data.result);
+        }
+      })
+      .catch(err => console.error("Error fetching driver active orders:", err));
+  };
+
+  useEffect(() => {
+    fetchActiveOrders();
+  }, []);
+
+  const { lastMessages } = useOrderLastMessages(realOrders);
+
+  // Dynamically map active orders with assigned customers to ChatSessions
+  const activeOrderChats = useMemo(() => {
+    return realOrders.map(ord => {
+      const orderKey = `order_${ord.id}`;
+      const lastMsgInfo = lastMessages[orderKey];
+      return {
+        id: orderKey,
+        type: 'driver' as const,
+        partnerId: `customer_${ord.customer?.id}`,
+        partnerName: ord.customer?.name || 'Customer',
+        partnerAvatar: ord.customer?.avatarUrl || ord.customer?.avatar,
+        lastMessage: lastMsgInfo ? lastMsgInfo.text : 'Active delivery chat room',
+        lastMessageTime: lastMsgInfo ? lastMsgInfo.time : (ord.createdAt ? new Date(ord.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now'),
+        unreadCount: 0,
+        messages: []
+      };
+    });
+  }, [realOrders, lastMessages]);
+
+  const allChats = useMemo(() => {
+    return [...activeOrderChats, ...mockDriverChats, ...mockSystemChats];
+  }, [activeOrderChats]);
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await refresh();
+    fetchActiveOrders();
     setTimeout(() => {
       setIsRefreshing(false);
     }, 1000);
   };
 
-  const filteredChats = allChats.filter(chat => {
+  const filteredChats = allChats.filter((chat: ChatSession) => {
     const matchesTab = activeTab === 'ALL' || chat.type === activeTab;
     const matchesSearch = chat.partnerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
@@ -61,13 +118,23 @@ export default function MessagesLayout() {
   });
 
   const isSearchEmpty = searchQuery.length > 0 && filteredChats.length === 0;
-  const activeChat = allChats.find(c => c.id === activeChatId) || null;
+  const activeChat = allChats.find((c: ChatSession) => c.id === activeChatId) || null;
 
   const handleBack = () => {
-    setActiveChatId(null);
+    if (orderIdParam) {
+      router.back();
+    } else {
+      setActiveChatId(null);
+    }
   };
 
-  useMobileBackHandler(!!activeChatId && isMobile, () => setActiveChatId(null));
+  useMobileBackHandler(!!activeChatId && isMobile, () => {
+    if (orderIdParam) {
+      router.back();
+    } else {
+      setActiveChatId(null);
+    }
+  });
 
   const handleClearSearch = () => {
     setSearchQuery("");

@@ -1,10 +1,12 @@
 "use client";
 import { motion } from "@repo/ui/motion";
-import { MapPin, Package, Bike, User, ShieldCheck, XCircle, Loader2 } from "@repo/ui/icons";
+import { MapPin, Package, Bike, User, ShieldCheck, XCircle, Loader2, MessageSquare } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
 import type { OrderResponse, OrderItemResponse } from "@repo/types";
 import OrderStatusSteps from "@/features/orders/components/OrderStatusSteps";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { useOrderChatCount } from "@/features/messages/hooks/useOrderChatCount";
 
 const OrderMapView = dynamic(() => import("@/features/orders/components/OrderMapView"), { ssr: false });
 
@@ -31,6 +33,9 @@ export default function OrderDetailsContent({
   isMapVisible = true,
   hideHeader = false,
 }: OrderDetailsContentProps) {
+  const router = useRouter();
+  const { msgCount } = useOrderChatCount(order.id, !!order.driver);
+
   return (
     <>
       {/* Status Steps Card - Premium Dark Style */}
@@ -73,18 +78,32 @@ export default function OrderDetailsContent({
             <p className="text-xs text-gray-400 mt-1 max-w-[200px]">We are connecting to the nearest driver</p>
           </div>
         ) : order.driver ? (
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200">
-              <User className="w-6 h-6 text-gray-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Driver</h4>
-              <div className="font-bold text-[#1A1A1A] text-base truncate">{order.driver.name}</div>
-              <div className="flex items-center gap-2 mt-0.5">
-                {order.driver.vehicleType && <span className="text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{order.driver.vehicleType}</span>}
-                {order.driver.vehicleLicensePlate && <span className="text-xs font-bold text-[#1A1A1A]">{order.driver.vehicleLicensePlate}</span>}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200">
+                <User className="w-6 h-6 text-gray-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Driver</h4>
+                <div className="font-bold text-[#1A1A1A] text-base truncate">{order.driver.name}</div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  {order.driver.vehicleType && <span className="text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{order.driver.vehicleType}</span>}
+                  {order.driver.vehicleLicensePlate && <span className="text-xs font-bold text-[#1A1A1A]">{order.driver.vehicleLicensePlate}</span>}
+                </div>
               </div>
             </div>
+
+            <button
+              onClick={() => router.push(`/messages?orderId=${order.id}&from=detail`)}
+              className="relative w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200/60 flex items-center justify-center text-gray-600 hover:text-black active:scale-95 transition-all shadow-sm border border-gray-200"
+            >
+              <MessageSquare size={18} strokeWidth={2.4} />
+              {msgCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--primary)] text-black text-[9px] font-black flex items-center justify-center border border-white shadow-sm">
+                  {msgCount}
+                </span>
+              )}
+            </button>
           </div>
         ) : (
           <div className="flex items-center gap-4">

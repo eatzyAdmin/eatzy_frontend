@@ -1,9 +1,10 @@
 import { useRouter } from "next/navigation";
 import { motion } from "@repo/ui/motion";
 import { ImageWithFallback, useHoverHighlight, HoverHighlightOverlay } from "@repo/ui";
-import { Store, MapPin, ChefHat, Bike, BadgeCheck, ClipboardList, X, Clock, ChevronRight } from "@repo/ui/icons";
+import { Store, MapPin, ChefHat, Bike, BadgeCheck, ClipboardList, X, Clock, ChevronRight, MessageCircle } from "@repo/ui/icons";
 import type { OrderResponse } from "@repo/types";
 import { formatVnd } from "@repo/lib";
+import { useOrderChatCount } from "../../messages/hooks/useOrderChatCount";
 
 const statusConfig: Record<string, { label: string; icon: any; color: string; bg: string; border: string; iconBg: string }> = {
   PENDING: { label: "Pending", icon: Clock, color: "text-gray-700", bg: "bg-gray-200/30", border: "border-gray-100/50", iconBg: "bg-gray-200/40" },
@@ -21,6 +22,8 @@ export default function CurrentOrderCard({ order, onClick }: { order: OrderRespo
   const router = useRouter();
   const config = statusConfig[order.orderStatus] || statusConfig.PENDING;
   const StatusIcon = config.icon;
+
+  const { msgCount } = useOrderChatCount(order.id, !!order.driver);
 
   const {
     containerRef,
@@ -182,9 +185,28 @@ export default function CurrentOrderCard({ order, onClick }: { order: OrderRespo
           </div>
         </div>
 
-        <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-gray-300 shadow-sm border border-gray-100">
-          <ChevronRight size={14} strokeWidth={3} />
-        </div>
+        {order.driver ? (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/messages?orderId=${order.id}&from=card`);
+            }}
+            className="relative w-7 h-7 rounded-full bg-white flex items-center justify-center text-gray-500 shadow-sm border border-gray-100 transition-all hover:bg-gray-50"
+          >
+            <MessageCircle size={14} strokeWidth={3} />
+            {msgCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] rounded-full bg-red-500 text-white text-[8px] font-black flex items-center justify-center px-0.5 border border-white">
+                {msgCount}
+              </span>
+            )}
+          </motion.button>
+        ) : (
+          <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-gray-300 shadow-sm border border-gray-100">
+            <ChevronRight size={14} strokeWidth={3} />
+          </div>
+        )}
       </div>
     </div>
   );

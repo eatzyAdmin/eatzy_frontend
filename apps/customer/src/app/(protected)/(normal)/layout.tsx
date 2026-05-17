@@ -87,6 +87,38 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, isRecommendedMode, setRecommendedMode]);
 
+  useEffect(() => {
+    // Close all drawers/overlays when navigating to a new page
+    setOrdersDrawerOpen(false);
+    setCartOpen(false);
+    setMenuOpen(false);
+    setSearchOpen(false);
+  }, [pathname, setOrdersDrawerOpen, setCartOpen, setMenuOpen, setSearchOpen]);
+
+  useEffect(() => {
+    const openDrawerParam = searchParams ? searchParams.get('openDrawer') : null;
+    const drawerTabParam = searchParams ? searchParams.get('drawerTab') : null;
+    const orderIdParam = searchParams ? searchParams.get('orderId') : null;
+
+    if (openDrawerParam === 'true') {
+      setOrdersDrawerOpen(true);
+      if (drawerTabParam === 'detail' && orderIdParam) {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("pending_open_order_id", orderIdParam);
+        }
+      }
+      
+      // Clean up query parameters so they don't persist on page reload or future clicks
+      const params = new URLSearchParams(window.location.search);
+      params.delete('openDrawer');
+      params.delete('drawerTab');
+      params.delete('orderId');
+      const newQuery = params.toString();
+      const newPath = window.location.pathname + (newQuery ? `?${newQuery}` : '');
+      window.history.replaceState(null, '', newPath);
+    }
+  }, [searchParams, setOrdersDrawerOpen]);
+
   const handleSearch = (query: string, filters?: { minPrice?: number; maxPrice?: number; sort?: string; category?: string | null }) => {
     performSearch(query, filters);
   };

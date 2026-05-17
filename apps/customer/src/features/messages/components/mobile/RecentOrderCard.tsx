@@ -5,6 +5,7 @@ import { ImageWithFallback } from "@repo/ui";
 import { User, MessageSquareText } from "@repo/ui/icons";
 import type { OrderResponse } from "@repo/types";
 import { formatVnd } from "@repo/lib";
+import { useOrderChatCount } from "../../hooks/useOrderChatCount";
 
 interface RecentOrderCardProps {
   order: OrderResponse;
@@ -19,6 +20,7 @@ interface RecentOrderCardProps {
 export default function RecentOrderCard({ order, onClick }: RecentOrderCardProps) {
   const driverName = order.driver?.name || "Finding driver...";
   const dishNamesStr = order.orderItems?.map(item => item.dish?.name).join(", ") || "Order items...";
+  const { msgCount } = useOrderChatCount(order.id, !!order.driver);
 
   return (
     <div className="relative w-[130px] flex-shrink-0 group cursor-pointer" onClick={onClick}>
@@ -44,8 +46,15 @@ export default function RecentOrderCard({ order, onClick }: RecentOrderCardProps
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent z-[2]" />
 
         {/* Message Icon - Indicates chat intent */}
-        <div className="absolute top-3 right-3 z-[10] w-7 h-7 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center">
-          <MessageSquareText className="w-4 h-4 text-white" />
+        <div className="absolute top-3 right-3 z-[10]">
+          <div className="w-7 h-7 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center relative">
+            <MessageSquareText className="w-4 h-4 text-white" />
+            {msgCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-[15px] h-[15px] rounded-full bg-[var(--primary)] text-black text-[9px] font-black flex items-center justify-center px-0.5 border border-white shadow-sm">
+                {msgCount}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Info Overlay (Bottom) */}

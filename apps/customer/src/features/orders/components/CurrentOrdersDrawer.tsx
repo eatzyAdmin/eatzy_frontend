@@ -50,8 +50,16 @@ export default function CurrentOrdersDrawer({ open, onClose }: { open: boolean; 
   useEffect(() => {
     if (open) {
       refetch();
-      // If we have exactly one order, jump directly to DETAIL view
-      if (orders.length === 1) {
+      
+      const pendingOrderId = typeof window !== 'undefined' ? sessionStorage.getItem("pending_open_order_id") : null;
+      if (pendingOrderId) {
+        const parsed = parseInt(pendingOrderId, 10);
+        setActiveOrderId(parsed);
+        setMobileView("DETAIL");
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem("pending_open_order_id");
+        }
+      } else if (orders.length === 1) {
         setMobileView("DETAIL");
         setActiveOrderId(orders[0].id);
       } else {

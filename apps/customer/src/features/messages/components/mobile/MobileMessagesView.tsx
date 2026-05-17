@@ -51,7 +51,7 @@ export default function MobileMessagesView({
         <MessagesMobileHeader onBack={onBack} />
         
         {/* 2. Recent Orders Section */}
-        <RecentOrdersList />
+        <RecentOrdersList onSelectChat={setActiveChatId} />
 
         {/* Spacer to allow background scrolling/pulling behind the drawer */}
         <div className="h-[400px]" />

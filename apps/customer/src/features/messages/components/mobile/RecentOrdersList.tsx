@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
  * RecentOrdersList Component
  * Horizontal scrolling list of active orders for the mobile messages view.
  */
-export default function RecentOrdersList({ isLoading: parentLoading }: { isLoading?: boolean }) {
+export default function RecentOrdersList({ isLoading: parentLoading, onSelectChat }: { isLoading?: boolean, onSelectChat?: (chatId: string) => void }) {
   const { orders, isLoading: hookLoading, isError, refetch } = useCurrentOrders();
   const isLoading = parentLoading || hookLoading;
   const router = useRouter();
@@ -66,7 +66,9 @@ export default function RecentOrdersList({ isLoading: parentLoading }: { isLoadi
               key={order.id}
               order={order}
               onClick={() => {
-                // Potential action: open order details or just a visual
+                if (onSelectChat && order.driver) {
+                  onSelectChat(`order_${order.id}`);
+                }
               }}
             />
           ))
