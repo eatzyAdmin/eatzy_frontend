@@ -98,8 +98,30 @@ export default function MessagesLayout() {
   }, [realOrders, lastMessages]);
 
   const allChats = useMemo(() => {
-    return [...activeOrderChats, ...mockDriverChats, ...mockSystemChats];
-  }, [activeOrderChats]);
+    const chats = [...activeOrderChats, ...mockDriverChats, ...mockSystemChats];
+
+    // If orderIdParam is present, but it's not yet in the activeOrderChats list (due to loading delay)
+    if (orderIdParam) {
+      const targetId = `order_${orderIdParam}`;
+      const exists = chats.some(c => c.id === targetId);
+      if (!exists) {
+        // Add a temporary placeholder chat so the detail screen mounts immediately
+        chats.push({
+          id: targetId,
+          type: 'driver' as const,
+          partnerId: 'customer_loading',
+          partnerName: 'Khách hàng',
+          partnerAvatar: undefined,
+          lastMessage: 'Đang tải thông tin...',
+          lastMessageTime: '',
+          unreadCount: 0,
+          messages: []
+        });
+      }
+    }
+
+    return chats;
+  }, [activeOrderChats, orderIdParam]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
