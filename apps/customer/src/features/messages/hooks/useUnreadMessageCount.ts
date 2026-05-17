@@ -3,32 +3,39 @@ import { chatApi } from "@repo/api";
 import { useCurrentOrders } from "@/features/orders/hooks/useCurrentOrders";
 import { useSocket } from "@repo/socket";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function useUnreadMessageCount() {
   const { orders } = useCurrentOrders();
+  const { user } = useAuth();
   const { connected, subscribe, unsubscribe } = useSocket();
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
-  
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const orderIdParam = searchParams ? searchParams.get('orderId') : null;
   const isMessagesPage = pathname?.startsWith('/messages');
 
-  // Fetch initial counts from API
+  const ordersKey = orders.map(ord => `${ord.id}_${ord.driver?.id || ""}`).join(",");
+
+  // Fetch initial counts from API using the new getUnreadCount endpoint
   useEffect(() => {
     const fetchCounts = async () => {
+      if (!user?.id) return;
       let total = 0;
       const counts: Record<string, number> = {};
-      
+
       const promises = orders
         .filter(ord => ord.driver && ord.id)
         .map(async (ord) => {
           try {
-            const res = await chatApi.getMessageCount(ord.id);
+            const res = await chatApi.getUnreadCount(ord.id, user.id);
             if (res.statusCode === 200 && typeof res.data === 'number') {
-              total += res.data;
-              counts[`order_${ord.id}`] = res.data;
+              const isViewingThisChat = isMessagesPage && orderIdParam === ord.id.toString();
+              const countVal = isViewingThisChat ? 0 : res.data;
+              total += countVal;
+              counts[`order_${ord.id}`] = countVal;
             }
           } catch (e) {
             console.error("Error loading unread messages count:", e);
@@ -39,17 +46,17 @@ export function useUnreadMessageCount() {
       setUnreadCounts(counts);
     };
 
-    if (orders.length > 0) {
+    if (orders.length > 0 && user?.id) {
       fetchCounts();
     } else {
       setUnreadCount(0);
       setUnreadCounts({});
     }
-  }, [orders]);
+  }, [ordersKey, user?.id, isMessagesPage, orderIdParam]);
 
   // Subscribe to real-time chat updates for each active order
   useEffect(() => {
-    if (!connected || orders.length === 0) return;
+    if (!connected || orders.length === 0 || !user?.id) return;
 
     const activeDestinations: string[] = [];
 
@@ -60,7 +67,6 @@ export function useUnreadMessageCount() {
         activeDestinations.push(destination);
 
         subscribe(destination, (data: any) => {
-          // Increment total real-time count when partner sends a message
           if (data && data.senderType === "DRIVER") {
             const isViewingThisChat = isMessagesPage && orderIdParam === ord.id.toString();
             if (!isViewingThisChat) {
@@ -70,6 +76,8 @@ export function useUnreadMessageCount() {
                 return { ...prev, [`order_${ord.id}`]: newVal };
               });
               setUnreadCount(prev => prev + 1);
+            } else {
+              chatApi.markAsRead(ord.id, user.id).catch(err => console.error("Error marking messages as read:", err));
             }
           }
         });
@@ -78,22 +86,29 @@ export function useUnreadMessageCount() {
     return () => {
       activeDestinations.forEach(dest => unsubscribe(dest));
     };
-  }, [connected, orders, subscribe, unsubscribe, isMessagesPage, orderIdParam]);
+  }, [connected, ordersKey, subscribe, unsubscribe, isMessagesPage, orderIdParam, user?.id]);
 
-  // Reset local unread state for active chat room
+  // Reset local unread state and call markAsRead API when user opens a chat room
   useEffect(() => {
-    if (isMessagesPage && orderIdParam) {
-      const key = `order_${orderIdParam}`;
-      setUnreadCounts(prev => {
-        const currentVal = prev[key] || 0;
-        if (currentVal > 0) {
-          setUnreadCount(total => Math.max(0, total - currentVal));
-          return { ...prev, [key]: 0 };
-        }
-        return prev;
-      });
+    if (isMessagesPage && orderIdParam && user?.id) {
+      const orderIdNum = parseInt(orderIdParam, 10);
+      if (!isNaN(orderIdNum)) {
+        chatApi.markAsRead(orderIdNum, user.id)
+          .then(() => {
+            const key = `order_${orderIdParam}`;
+            setUnreadCounts(prev => {
+              const currentVal = prev[key] || 0;
+              if (currentVal > 0) {
+                setUnreadCount(total => Math.max(0, total - currentVal));
+                return { ...prev, [key]: 0 };
+              }
+              return prev;
+            });
+          })
+          .catch(err => console.error("Error marking messages as read:", err));
+      }
     }
-  }, [isMessagesPage, orderIdParam]);
+  }, [isMessagesPage, orderIdParam, user?.id]);
 
   return { unreadCount, unreadCounts };
 }
