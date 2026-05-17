@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { chatApi, orderApi } from '@repo/api';
 import { useOrderChat } from '@repo/socket';
 import { ChatMessage } from '../data/mockMessages';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 interface UseChatSessionProps {
   chatId: string;
@@ -10,6 +11,7 @@ interface UseChatSessionProps {
 }
 
 export function useChatSession({ chatId, initialMessages, isDriverApp = true }: UseChatSessionProps) {
+  const { user } = useAuth();
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -74,6 +76,17 @@ export function useChatSession({ chatId, initialMessages, isDriverApp = true }: 
               isMe: isDriverApp ? (m.senderType === "DRIVER") : (m.senderType === "CUSTOMER")
             }));
             setLocalMessages(fetched);
+
+            // Mark all messages as read on backend and dispatch event
+            if (user?.id) {
+              chatApi.markAsRead(orderId, user.id)
+                .then(() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent("messagesMarkedAsRead", { detail: { orderId } }));
+                  }
+                })
+                .catch(err => console.error("Error marking messages as read:", err));
+            }
           }
         })
         .catch(err => {
@@ -89,7 +102,7 @@ export function useChatSession({ chatId, initialMessages, isDriverApp = true }: 
       setStickyOrder(null);
       setIsError(false);
     }
-  }, [chatId, orderId, isDriverApp, retryTrigger]);
+  }, [chatId, orderId, isDriverApp, retryTrigger, user?.id]);
 
   // Setup WebSocket connection
   const onMessageReceived = useCallback((newMsg: any) => {
@@ -112,7 +125,18 @@ export function useChatSession({ chatId, initialMessages, isDriverApp = true }: 
       if (exists) return prev;
       return [...prev, mappedMsg];
     });
-  }, [isDriverApp]);
+
+    // Mark as read in backend since user is currently looking at this chat room
+    if (user?.id && orderId && !mappedMsg.isMe) {
+      chatApi.markAsRead(orderId, user.id)
+        .then(() => {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent("messagesMarkedAsRead", { detail: { orderId } }));
+          }
+        })
+        .catch(err => console.error("Error marking messages as read:", err));
+    }
+  }, [isDriverApp, user?.id, orderId]);
 
   const { sendMessage, sendTypingStatus } = useOrderChat(orderId, onMessageReceived);
 

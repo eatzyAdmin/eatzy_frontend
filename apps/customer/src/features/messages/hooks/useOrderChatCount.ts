@@ -62,5 +62,21 @@ export function useOrderChatCount(orderId?: number, hasDriver?: boolean) {
     }
   }, [isMessagesPage, orderIdParam, orderId, user?.id]);
 
+  // Listen to custom event when messages are marked as read
+  useEffect(() => {
+    const handleMarkedAsRead = (e: Event) => {
+      const customEvent = e as CustomEvent<{ orderId: number }>;
+      const readOrderId = customEvent.detail?.orderId;
+      if (readOrderId && readOrderId === orderId) {
+        setMsgCount(0);
+      }
+    };
+
+    window.addEventListener("messagesMarkedAsRead", handleMarkedAsRead);
+    return () => {
+      window.removeEventListener("messagesMarkedAsRead", handleMarkedAsRead);
+    };
+  }, [orderId]);
+
   return { msgCount };
 }

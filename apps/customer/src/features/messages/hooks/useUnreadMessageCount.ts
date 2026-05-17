@@ -110,5 +110,29 @@ export function useUnreadMessageCount() {
     }
   }, [isMessagesPage, orderIdParam, user?.id]);
 
+  // Listen to custom event when messages are marked as read in chat session
+  useEffect(() => {
+    const handleMarkedAsRead = (e: Event) => {
+      const customEvent = e as CustomEvent<{ orderId: number }>;
+      const readOrderId = customEvent.detail?.orderId;
+      if (!readOrderId) return;
+
+      const key = `order_${readOrderId}`;
+      setUnreadCounts(prev => {
+        const currentVal = prev[key] || 0;
+        if (currentVal > 0) {
+          setUnreadCount(total => Math.max(0, total - currentVal));
+          return { ...prev, [key]: 0 };
+        }
+        return prev;
+      });
+    };
+
+    window.addEventListener("messagesMarkedAsRead", handleMarkedAsRead);
+    return () => {
+      window.removeEventListener("messagesMarkedAsRead", handleMarkedAsRead);
+    };
+  }, []);
+
   return { unreadCount, unreadCounts };
 }
