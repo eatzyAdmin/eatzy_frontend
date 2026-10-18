@@ -31,7 +31,7 @@ export function SocketInitializer({ children }: { children: React.ReactNode }) {
   }, [token]);
 
   // WebSocket connects through API Gateway → routed to eatzy-communication-service
-  const WS_URL = "https://eatzy-be.hoanduong.net/ws";
+  const WS_URL = process.env.NEXT_PUBLIC_WS_URL || (process.env.NODE_ENV === "development" ? "http://localhost:8080/ws" : "https://eatzy-be.hoanduong.net/ws");
 
   return (
     <SocketProvider

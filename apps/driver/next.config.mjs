@@ -1,3 +1,5 @@
+const backendUrl = (process.env.BACKEND_URL || (process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8080' : 'https://eatzy-be.hoanduong.net')).replace(/\/+$/, '');
+
 import withSerwistInit from "@serwist/next";
 
 const withSerwist = withSerwistInit({
@@ -31,7 +33,7 @@ const nextConfig = {
     return [
       {
         source: '/api/proxy/:path*',
-        destination: 'https://eatzy-be.hoanduong.net/:path*', // Proxy to Backend
+        destination: `${backendUrl}/:path*`, // Proxy to Backend
       },
     ];
   },
