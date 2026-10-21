@@ -1,3 +1,5 @@
+Hướng dẫn làm việc với agent Eatzy: [quy trình và ví dụ prompt](docs/agent/workflows.md), [kiến trúc](docs/agent/architecture.md). `AGENTS.md` và `.agents/skills` chứa hướng dẫn theo source hiện tại.
+
 # Turborepo starter
 
 This Turborepo starter is maintained by the Turborepo core team.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eatzy Web Review"
+  short_description: "Review Eatzy web changes for concrete regressions"
+  default_prompt: "Use $eatzy-web-review to review the current Eatzy web changes and report actionable findings."

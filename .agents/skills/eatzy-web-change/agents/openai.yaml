@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eatzy Web Change"
+  short_description: "Build Eatzy features across its five web apps"
+  default_prompt: "Use $eatzy-web-change to implement the requested Eatzy web feature and verify the affected roles."

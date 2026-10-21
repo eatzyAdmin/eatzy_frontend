@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eatzy Web Debug"
+  short_description: "Trace Eatzy UI, API, session and socket failures"
+  default_prompt: "Use $eatzy-web-debug to reproduce and fix this Eatzy web failure with evidence."
