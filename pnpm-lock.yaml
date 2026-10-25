@@ -81,6 +81,9 @@ importers:
       '@repo/lib':
         specifier: workspace:*
         version: link:../../packages/lib
+      '@repo/mock':
+        specifier: workspace:*
+        version: link:../../packages/mock
       '@repo/models':
         specifier: workspace:*
         version: link:../../packages/models
@@ -175,6 +178,9 @@ importers:
       '@repo/lib':
         specifier: workspace:*
         version: link:../../packages/lib
+      '@repo/mock':
+        specifier: workspace:*
+        version: link:../../packages/mock
       '@repo/socket':
         specifier: workspace:*
         version: link:../../packages/socket
@@ -266,6 +272,9 @@ importers:
       '@repo/lib':
         specifier: workspace:*
         version: link:../../packages/lib
+      '@repo/mock':
+        specifier: workspace:*
+        version: link:../../packages/mock
       '@repo/store':
         specifier: workspace:*
         version: link:../../packages/store
@@ -357,6 +366,9 @@ importers:
       '@repo/lib':
         specifier: workspace:*
         version: link:../../packages/lib
+      '@repo/mock':
+        specifier: workspace:*
+        version: link:../../packages/mock
       '@repo/store':
         specifier: workspace:*
         version: link:../../packages/store
@@ -418,6 +430,9 @@ importers:
 
   packages/api:
     dependencies:
+      '@repo/mock':
+        specifier: workspace:*
+        version: link:../mock
       '@repo/types':
         specifier: workspace:*
         version: link:../types
@@ -535,6 +550,22 @@ importers:
   packages/mappers: {}
 
   packages/middleware: {}
+
+  packages/mock:
+    dependencies:
+      '@repo/models':
+        specifier: workspace:*
+        version: link:../models
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
 
   packages/models: {}
 

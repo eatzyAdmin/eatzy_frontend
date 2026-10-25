@@ -1,4 +1,5 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from "axios";
+import { handleMockRequest } from "./mockAdapter";
 
 // ======= Memory Storage for Access Token =======
 let accessToken: string | null = null;
@@ -8,6 +9,29 @@ export const setAccessToken = (token: string | null) => {
 };
 
 export const getAccessToken = () => accessToken;
+
+// ======= Mock Mode Controller =======
+/**
+ * Check if mock mode is active.
+ * Default is TRUE in development to allow smooth UI work when backend is down.
+ */
+export const isMockModeEnabled = (): boolean => {
+  if (typeof window !== "undefined") {
+    const localSetting = window.localStorage.getItem("eatzy_mock_mode");
+    if (localSetting === "false") return false;
+    if (localSetting === "true") return true;
+  }
+  // Check environment variables
+  if (process.env.NEXT_PUBLIC_ENABLE_MOCK === "false") return false;
+  return true;
+};
+
+export const setMockMode = (enabled: boolean) => {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem("eatzy_mock_mode", enabled ? "true" : "false");
+    window.location.reload();
+  }
+};
 
 // ======= Token Refresh Logic =======
 let isRefreshing = false;
@@ -25,7 +49,6 @@ const onRefreshed = (token: string) => {
 // ===============================================
 
 export const http = axios.create({
-  // Use Next.js Rewrite Proxy to solve Mixed Content (HTTP backend vs HTTPS frontend)
   baseURL: "/api/proxy",
   withCredentials: true,
   headers: {
@@ -34,24 +57,66 @@ export const http = axios.create({
   },
 });
 
-// Request Interceptor: Attach Token from Memory
+// Request Interceptor: Attach Token & Handle Mock Adapter
 http.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+
+    // If Mock Mode is enabled, route through Mock Adapter
+    if (isMockModeEnabled() && config.url) {
+      config.adapter = async (cfg) => {
+        let parsedData = cfg.data;
+        if (typeof cfg.data === "string") {
+          try {
+            parsedData = JSON.parse(cfg.data);
+          } catch {
+            parsedData = cfg.data;
+          }
+        }
+        const mockResult = await handleMockRequest(cfg.url || "", cfg.method || "GET", parsedData, cfg.params);
+
+        const response: AxiosResponse = {
+          data: mockResult,
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config: cfg,
+        };
+        return response;
+      };
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Handle 401 & Refresh Token
+// Response Interceptor: Handle 401, Refresh Token & Mock Fallback
 http.interceptors.response.use(
   (response) => {
     return response.data ?? response;
   },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    // If network failed (backend is down / unreachable), attempt seamless fallback to mock data
+    if (error.code === "ERR_NETWORK" || !error.response || (error.response.status >= 500 && error.response.status <= 504)) {
+      if (originalRequest?.url) {
+        console.warn(`[Eatzy Mock Fallback] Backend unreachable at ${originalRequest.url}. Serving mock data.`);
+        let parsedData = originalRequest.data;
+        if (typeof originalRequest.data === "string") {
+          try {
+            parsedData = JSON.parse(originalRequest.data);
+          } catch {
+            parsedData = originalRequest.data;
+          }
+        }
+        const mockData = await handleMockRequest(originalRequest.url, originalRequest.method, parsedData, originalRequest.params);
+        return mockData;
+      }
+    }
 
     // If 401 Unauthorized and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -61,7 +126,6 @@ http.interceptors.response.use(
       }
 
       if (isRefreshing) {
-        // If already refreshing, queue this request
         return new Promise((resolve) => {
           subscribeTokenRefresh((token) => {
             if (originalRequest.headers) {
@@ -76,13 +140,7 @@ http.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Call refresh token endpoint
-        // Verify the path matches packages/api/src/auth.ts (which is /api/v1/auth/refresh)
-        // We use 'http' instance here but we need to bypass interceptors loop if needed.
-        // Actually, since it's a new request and we check url above, it's fine.
         const res: any = await http.get("/api/v1/auth/refresh");
-
-        // res.data is already unwrapped by the success interceptor
         const newAccessToken = res?.access_token || res?.data?.access_token;
 
         if (newAccessToken) {
@@ -90,20 +148,18 @@ http.interceptors.response.use(
           isRefreshing = false;
           onRefreshed(newAccessToken);
 
-          // Retry the original request
           if (originalRequest.headers) {
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           }
           return http(originalRequest);
         } else {
-          // Failed to get token
           isRefreshing = false;
           setAccessToken(null);
 
-          // Global redirect on auth failure
-          if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+          // Only redirect if NOT in mock mode
+          if (!isMockModeEnabled() && typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
             window.localStorage.setItem("auth_expired", "true");
-            window.location.href = '/login';
+            window.location.href = "/login";
           }
 
           return Promise.reject(error);
@@ -111,13 +167,12 @@ http.interceptors.response.use(
       } catch (refreshError) {
         isRefreshing = false;
         setAccessToken(null);
-        // We might want to clear subscribers here too or reject them
         refreshSubscribers = [];
 
-        // Global redirect on auth failure
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+        // Only redirect if NOT in mock mode
+        if (!isMockModeEnabled() && typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
           window.localStorage.setItem("auth_expired", "true");
-          window.location.href = '/login';
+          window.location.href = "/login";
         }
 
         return Promise.reject(refreshError);

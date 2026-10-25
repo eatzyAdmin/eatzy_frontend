@@ -21,6 +21,7 @@ export type Order = {
   code?: string;
   restaurantId: string;
   status: OrderStatus;
+  cancellationReason?: string;
   deliveryLocation: LngLat & { address?: string };
   restaurantLocation: LngLat & { name?: string };
   driverLocation: LngLat & { name?: string };

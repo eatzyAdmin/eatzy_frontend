@@ -1,0 +1,267 @@
+import type { Dish, MenuCategory, OptionGroup } from "@repo/types";
+
+export const MOCK_MENU_CATEGORIES: MenuCategory[] = [
+  // Cơm Tấm Ba Ghiền (Restaurant 101)
+  { id: "mcat-101-1", name: "Món Cơm Tấm Đích Thực", restaurantId: "101", displayOrder: 1 },
+  { id: "mcat-101-2", name: "Món Ăn Kèm & Canh", restaurantId: "101", displayOrder: 2 },
+  { id: "mcat-101-3", name: "Đồ Uống Giải Khát", restaurantId: "101", displayOrder: 3 },
+
+  // Phở Thìn (Restaurant 102)
+  { id: "mcat-102-1", name: "Phở Bò Truyền Thống", restaurantId: "102", displayOrder: 1 },
+  { id: "mcat-102-2", name: "Topping Thêm & Quẩy", restaurantId: "102", displayOrder: 2 },
+  { id: "mcat-102-3", name: "Nước Uống & Trà Đá", restaurantId: "102", displayOrder: 3 },
+
+  // Tokyo Sushi (Restaurant 103)
+  { id: "mcat-103-1", name: "Sashimi Tươi Sống", restaurantId: "103", displayOrder: 1 },
+  { id: "mcat-103-2", name: "Nigiri & Maki Roll", restaurantId: "103", displayOrder: 2 },
+  { id: "mcat-103-3", name: "Món Khai Vị & Salad", restaurantId: "103", displayOrder: 3 },
+];
+
+export const MOCK_DISHES: Dish[] = [
+  // ==================== Cơm Tấm Ba Ghiền (101) ====================
+  {
+    id: "dish-101-1",
+    name: "Cơm Tấm Sườn Bì Chả Đặc Biệt",
+    description: "Miếng sườn cốt lết nướng mật ong vàng óng, kèm bì dai giòn sần sật, chả trứng hấp béo ngậy và mỡ hành thơm phức.",
+    price: 85000,
+    imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80",
+    restaurantId: "101",
+    menuCategoryId: "mcat-101-1",
+    availableQuantity: 100,
+    isAvailable: true,
+    rating: 4.9,
+    optionGroups: [
+      {
+        id: "og-rice-1",
+        title: "Chọn Lượng Cơm",
+        required: true,
+        minSelect: 1,
+        maxSelect: 1,
+        options: [
+          { id: "opt-r-1", name: "Cơm vừa", price: 0 },
+          { id: "opt-r-2", name: "Thêm cơm tấm (+)", price: 10000 },
+          { id: "opt-r-3", name: "Ít cơm", price: 0 },
+        ],
+      },
+      {
+        id: "og-addon-1",
+        title: "Topping Thêm",
+        required: false,
+        minSelect: 0,
+        maxSelect: 4,
+        options: [
+          { id: "opt-egg-1", name: "Trứng ốp la lòng đào", price: 10000 },
+          { id: "opt-cha-1", name: "Thêm miếng chả trứng", price: 15000 },
+          { id: "opt-bi-1", name: "Thêm phần bì heo", price: 15000 },
+          { id: "opt-top-1", name: "Tóp mỡ giòn cay", price: 8000 },
+        ],
+      },
+    ],
+  },
+  {
+    id: "dish-101-2",
+    name: "Cơm Tấm Sườn Cốt Lết Nướng Khổng Lồ",
+    description: "Đĩa cơm với tảng sườn nướng dày cộm trứ danh, tẩm ướp sốt bí truyền trên than hoa hồng rực.",
+    price: 75000,
+    imageUrl: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80",
+    restaurantId: "101",
+    menuCategoryId: "mcat-101-1",
+    availableQuantity: 120,
+    isAvailable: true,
+    rating: 4.8,
+    optionGroups: [
+      {
+        id: "og-addon-2",
+        title: "Món Ăn Kèm",
+        required: false,
+        minSelect: 0,
+        maxSelect: 3,
+        options: [
+          { id: "opt-egg-2", name: "Trứng ốp la", price: 10000 },
+          { id: "opt-kimchi", name: "Dưa chua củ cải cà rốt", price: 5000 },
+        ],
+      },
+    ],
+  },
+  {
+    id: "dish-101-3",
+    name: "Canh Khổ Qua Nhồi Thịt",
+    description: "Canh khổ qua tươi đắng nhẹ giải nhiệt, nhồi thịt nạc heo băm mộc nhĩ thanh mát.",
+    price: 25000,
+    imageUrl: "https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=80",
+    restaurantId: "101",
+    menuCategoryId: "mcat-101-2",
+    availableQuantity: 50,
+    isAvailable: true,
+    rating: 4.7,
+  },
+  {
+    id: "dish-101-4",
+    name: "Trà Tắc Mật Ong Hạt Chia",
+    description: "Trà tắc chua ngọt dịu, hạt chia mát bổ bổ sung vitamin xua tan oi bức.",
+    price: 20000,
+    imageUrl: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=600&q=80",
+    restaurantId: "101",
+    menuCategoryId: "mcat-101-3",
+    availableQuantity: 200,
+    isAvailable: true,
+    rating: 4.8,
+  },
+
+  // ==================== Phở Thìn Lò Đúc (102) ====================
+  {
+    id: "dish-102-1",
+    name: "Phở Bò Tái Lăn Hà Nội",
+    description: "Thịt bò tươi xào lăn nhanh trên lửa lớn cùng tỏi gừng, nước dùng đậm đà ngập tràn hành hoa.",
+    price: 75000,
+    imageUrl: "https://images.unsplash.com/photo-1582878826629-297527132b04?w=600&q=80",
+    restaurantId: "102",
+    menuCategoryId: "mcat-102-1",
+    availableQuantity: 80,
+    isAvailable: true,
+    rating: 4.9,
+    optionGroups: [
+      {
+        id: "og-pho-size",
+        title: "Chọn Size Tô",
+        required: true,
+        minSelect: 1,
+        maxSelect: 1,
+        options: [
+          { id: "opt-pho-std", name: "Tô Tiêu Chuẩn", price: 0 },
+          { id: "opt-pho-big", name: "Tô Lớn Đặc Biệt (+)", price: 15000 },
+        ],
+      },
+      {
+        id: "og-pho-addon",
+        title: "Ăn Kèm Thêm",
+        required: false,
+        minSelect: 0,
+        maxSelect: 3,
+        options: [
+          { id: "opt-quay", name: "Đĩa quẩy giòn (3 cái)", price: 10000 },
+          { id: "opt-trung", name: "Trứng gà chần nước phở", price: 10000 },
+          { id: "opt-tiet", name: "Tiết bò luộc", price: 15000 },
+        ],
+      },
+    ],
+  },
+  {
+    id: "dish-102-2",
+    name: "Phở Nạm Gầu Bò Giòn",
+    description: "Miếng gầu giòn sần sật béo ngậy, nạm mềm thơm tan trong miệng hòa quyện bánh phở tươi.",
+    price: 80000,
+    imageUrl: "https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=600&q=80",
+    restaurantId: "102",
+    menuCategoryId: "mcat-102-1",
+    availableQuantity: 60,
+    isAvailable: true,
+    rating: 4.8,
+  },
+
+  // ==================== Tokyo Sushi (103) ====================
+  {
+    id: "dish-103-1",
+    name: "Sashimi Cá Hồi Na Uy Thượng Hạng (5 lát)",
+    description: "Cá hồi tươi nhập khẩu từ vùng biển lạnh Na Uy, vân mỡ đều tăm tắp, béo mềm kèm mù tạt wasabi tươi.",
+    price: 135000,
+    imageUrl: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&q=80",
+    restaurantId: "103",
+    menuCategoryId: "mcat-103-1",
+    availableQuantity: 40,
+    isAvailable: true,
+    rating: 4.9,
+  },
+  {
+    id: "dish-103-2",
+    name: "Dragon Roll - Cuộn Tôm Chiên & Bơ",
+    description: "Sushi cuộn tôm tempura giòn rụm bên trong, phủ quả bơ béo và trứng cá chuồn tobiko cam rực rỡ bên ngoài.",
+    price: 165000,
+    imageUrl: "https://images.unsplash.com/photo-1611143669185-af224c5e3252?w=600&q=80",
+    restaurantId: "103",
+    menuCategoryId: "mcat-103-2",
+    availableQuantity: 30,
+    isAvailable: true,
+    rating: 4.8,
+  },
+
+  // ==================== Smokey Texas BBQ (104) ====================
+  {
+    id: "dish-104-1",
+    name: "Sườn Heo Xông Khói Texas BBQ (Nửa Tảng)",
+    description: "Sườn heo ướp bột gia vị Dry Rub, hun khói gỗ sồi trong 8 giờ, rưới đẫm sốt BBQ chua ngọt sánh mịn.",
+    price: 245000,
+    imageUrl: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80",
+    restaurantId: "104",
+    menuCategoryId: "mcat-104-1",
+    availableQuantity: 25,
+    isAvailable: true,
+    rating: 4.9,
+  },
+
+  // ==================== Phúc Long Tea (106) ====================
+  {
+    id: "dish-106-1",
+    name: "Trà Sữa Phúc Long Truyền Thống",
+    description: "Vị trà đậm đà đặc trưng pha cùng sữa béo thơm nồng, món best-seller của tín đồ trà sữa.",
+    price: 45000,
+    imageUrl: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&q=80",
+    restaurantId: "106",
+    menuCategoryId: "mcat-106-1",
+    availableQuantity: 300,
+    isAvailable: true,
+    rating: 4.8,
+    optionGroups: [
+      {
+        id: "og-sweet",
+        title: "Độ Ngọt (Đường)",
+        required: true,
+        minSelect: 1,
+        maxSelect: 1,
+        options: [
+          { id: "opt-sw-100", name: "100% đường (Bình thường)", price: 0 },
+          { id: "opt-sw-70", name: "70% đường (Vừa phải)", price: 0 },
+          { id: "opt-sw-50", name: "50% đường (Ít ngọt)", price: 0 },
+          { id: "opt-sw-30", name: "30% đường", price: 0 },
+        ],
+      },
+      {
+        id: "og-ice",
+        title: "Lượng Đá",
+        required: true,
+        minSelect: 1,
+        maxSelect: 1,
+        options: [
+          { id: "opt-ice-100", name: "100% đá", price: 0 },
+          { id: "opt-ice-70", name: "70% đá", price: 0 },
+          { id: "opt-ice-50", name: "50% đá", price: 0 },
+          { id: "opt-ice-0", name: "Không đá", price: 0 },
+        ],
+      },
+      {
+        id: "og-pl-topping",
+        title: "Thêm Topping",
+        required: false,
+        minSelect: 0,
+        maxSelect: 3,
+        options: [
+          { id: "opt-top-tc", name: "Trân châu đen dẻo", price: 10000 },
+          { id: "opt-top-tc-trang", name: "Trân châu trắng giòn", price: 12000 },
+          { id: "opt-top-pudding", name: "Pudding trứng béo", price: 12000 },
+        ],
+      },
+    ],
+  },
+  {
+    id: "dish-106-2",
+    name: "Trà Đào Cam Sả Tươi",
+    description: "Hương đào thanh mát kết hợp sả tươi và cam vàng mọng nước, giải nhiệt sảng khoái tức thì.",
+    price: 52000,
+    imageUrl: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=600&q=80",
+    restaurantId: "106",
+    menuCategoryId: "mcat-106-1",
+    availableQuantity: 250,
+    isAvailable: true,
+    rating: 4.8,
+  },
+];

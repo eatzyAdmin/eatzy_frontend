@@ -34,13 +34,13 @@ export default function RegisterForm({ onBack, onSuccess }: RegisterFormProps) {
 
   // Email form
   const emailForm = useForm<EmailVerificationData>({
-    resolver: zodResolver(emailVerificationSchema),
+    resolver: zodResolver(emailVerificationSchema as any),
     mode: "onChange",
   });
 
   // User info form
   const infoForm = useForm<UserInfoData>({
-    resolver: zodResolver(userInfoSchema),
+    resolver: zodResolver(userInfoSchema as any),
     mode: "onChange",
   });
 

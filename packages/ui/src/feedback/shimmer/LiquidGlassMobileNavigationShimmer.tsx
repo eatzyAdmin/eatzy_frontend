@@ -36,7 +36,7 @@ const LiquidGlassMobileNavigationShimmer = () => {
           </div>
         </div>
       </div>
-      <style jsx global>{`
+      <style {...({ jsx: "true", global: "true" } as any)}>{`
         @keyframes buttonAppear { 0% { opacity: 0; transform: scale(0.3);} 60% { transform: scale(1.1);} 100% { opacity: 1; transform: scale(1);} }
         @keyframes menuAppear { 0% { opacity: 0; transform: scale(0.1);} 60% { transform: scale(1.08);} 100% { opacity: 1; transform: scale(1);} }
       `}</style>

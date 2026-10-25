@@ -14,15 +14,19 @@ export function mapMagazineToRestaurantWithMenu(
   layoutIndex: number,
   seed: string | number = 0
 ): RestaurantWithMenu {
-  const menuCategories: MenuCategory[] = (magazine.category || []).map((cat, idx) => ({
+  const rawCategories = Array.isArray(magazine.category)
+    ? magazine.category
+    : (magazine.category ? [magazine.category as any] : []);
+
+  const menuCategories: MenuCategory[] = rawCategories.map((cat, idx) => ({
     id: String(cat.id),
     name: cat.name,
     restaurantId: String(magazine.id),
     displayOrder: idx + 1,
   }));
 
-  let dishes: Dish[] = (magazine.category || []).flatMap(cat =>
-    (cat.dishes || []).map(dish => ({
+  let dishes: Dish[] = rawCategories.flatMap(cat =>
+    (Array.isArray(cat.dishes) ? cat.dishes : []).map(dish => ({
       id: String(dish.id),
       name: dish.name,
       description: dish.description || '',

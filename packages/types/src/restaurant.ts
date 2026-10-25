@@ -56,7 +56,7 @@ export type Review = {
 };
 
 export type Restaurant = {
-  id: number;
+  id: number | string;
   name: string;
   slug?: string;
   address?: string;

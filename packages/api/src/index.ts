@@ -1,5 +1,6 @@
 // Main API exports
-export { http, getAccessToken, setAccessToken } from "./http";
+export { http, getAccessToken, setAccessToken, isMockModeEnabled, setMockMode } from "./http";
+export { getCurrentAppRole, handleMockRequest } from "./mockAdapter";
 export { authApi } from "./auth";
 export { cartApi } from "./cart";
 export { voucherApi } from "./voucher";

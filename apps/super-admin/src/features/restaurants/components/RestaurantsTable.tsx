@@ -69,7 +69,7 @@ export default function RestaurantsTable({
       confirmText: isActive ? "Slide to Lock" : "Slide to Unlock",
       onConfirm: async () => {
         if (restaurant.owner) {
-          await onToggleStatus(restaurant.id, restaurant.owner.id, isActive);
+          await onToggleStatus(Number(restaurant.id), restaurant.owner.id, isActive);
         }
       }
     });
@@ -82,7 +82,7 @@ export default function RestaurantsTable({
       description: "This action cannot be undone. The store will be permanently deleted from the system.",
       confirmText: "Slide to Delete",
       onConfirm: async () => {
-        await onDelete(restaurant.id);
+        await onDelete(Number(restaurant.id));
       }
     });
   };

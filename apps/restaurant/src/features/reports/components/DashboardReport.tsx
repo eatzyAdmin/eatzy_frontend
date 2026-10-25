@@ -124,16 +124,18 @@ const KPICard = ({
 export default function DashboardReport({ data }: DashboardReportProps) {
   if (!data) return null;
 
+  const revenueChart = Array.isArray(data?.revenueChart) ? data.revenueChart : [];
+
   const formattedChartData = useMemo(() =>
-    data.revenueChart.map(item => ({
+    revenueChart.map(item => ({
       ...item,
       displayDate: new Date(item.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
-    })), [data.revenueChart]
+    })), [revenueChart]
   );
 
   const totalChartRevenue = useMemo(() =>
-    data.revenueChart.reduce((sum, item) => sum + item.netRevenue, 0),
-    [data.revenueChart]
+    revenueChart.reduce((sum, item) => sum + (item.netRevenue || 0), 0),
+    [revenueChart]
   );
 
   return (
@@ -143,7 +145,7 @@ export default function DashboardReport({ data }: DashboardReportProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
           title="Tổng Doanh Thu"
-          value={formatCurrency(data.totalRevenue)}
+          value={formatCurrency(data.totalRevenue || 0)}
           subtext="Doanh thu gộp"
           icon={DollarSign}
           bgClass="bg-white hover:shadow-lg transition-shadow"
@@ -152,7 +154,7 @@ export default function DashboardReport({ data }: DashboardReportProps) {
         />
         <KPICard
           title="Doanh Thu Thực"
-          value={formatCurrency(data.netRevenue)}
+          value={formatCurrency(data?.netRevenue || 0)}
           subtext="Sau hoa hồng"
           icon={TrendingUp}
           bgClass="bg-white hover:shadow-lg transition-shadow"
@@ -161,8 +163,8 @@ export default function DashboardReport({ data }: DashboardReportProps) {
         />
         <KPICard
           title="Tổng Đơn Hàng"
-          value={data.totalOrders.toLocaleString()}
-          subtext={`${data.completedOrders} hoàn thành`}
+          value={(data?.totalOrders || 0).toLocaleString()}
+          subtext={`${data?.completedOrders || 0} hoàn thành`}
           icon={ShoppingBag}
           bgClass="bg-white hover:shadow-lg transition-shadow"
           colorClass="text-purple-600"
@@ -181,7 +183,7 @@ export default function DashboardReport({ data }: DashboardReportProps) {
           </div>
           <span className="
             text-xs font-bold text-gray-400 uppercase tracking-wider block
-            max-md:text-[10px] max-md:font-bold max-md:text-gray-400 max-md:uppercase max-md:tracking-widest max-md:mb-0.5
+            max-md:text-[10px] max-md:font-bold text-gray-400 max-md:uppercase max-md:tracking-widest max-md:mb-0.5
           ">
             Đánh Giá TB
           </span>
@@ -191,13 +193,13 @@ export default function DashboardReport({ data }: DashboardReportProps) {
               md:text-3xl
               max-md:text-2xl max-md:font-black max-md:tracking-tighter
             ">
-              {data.averageRating.toFixed(1)}
+              {(data?.averageRating || 0).toFixed(1)}
             </span>
             <p className="
               text-xs text-gray-400 mt-1
               max-md:mt-0 max-md:text-xs max-md:text-gray-400 max-md:font-medium max-md:tracking-tight
             ">
-              {data.totalReviews} đánh giá
+              {data?.totalReviews || 0} đánh giá
             </p>
           </div>
         </motion.div>
@@ -306,7 +308,7 @@ export default function DashboardReport({ data }: DashboardReportProps) {
                     text-xs text-gray-500
                     max-md:text-xs max-md:text-gray-400 max-md:font-medium max-md:tracking-tight
                   ">
-                    {data.completedOrders} đơn
+                    {data?.completedOrders || 0} đơn
                   </p>
                 </div>
               </div>
@@ -314,7 +316,7 @@ export default function DashboardReport({ data }: DashboardReportProps) {
                 text-lg font-anton text-green-600
                 max-md:text-lg max-md:font-black max-md:text-green-650 max-md:tracking-tighter
               ">
-                {(100 - data.cancelRate).toFixed(1)}%
+                {(100 - (data?.cancelRate || 0)).toFixed(1)}%
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -336,7 +338,7 @@ export default function DashboardReport({ data }: DashboardReportProps) {
                     text-xs text-gray-500
                     max-md:text-xs max-md:text-gray-400 max-md:font-medium max-md:tracking-tight
                   ">
-                    {data.cancelledOrders} đơn
+                    {data?.cancelledOrders || 0} đơn
                   </p>
                 </div>
               </div>
@@ -344,7 +346,7 @@ export default function DashboardReport({ data }: DashboardReportProps) {
                 text-lg font-anton text-red-600
                 max-md:text-lg max-md:font-black max-md:text-red-650 max-md:tracking-tighter
               ">
-                {data.cancelRate.toFixed(1)}%
+                {(data?.cancelRate || 0).toFixed(1)}%
               </span>
             </div>
           </div>
@@ -354,11 +356,11 @@ export default function DashboardReport({ data }: DashboardReportProps) {
             <div className="h-3 rounded-full bg-gray-100 overflow-hidden flex">
               <div
                 className="h-full bg-lime-500 rounded-full transition-all duration-500"
-                style={{ width: `${100 - data.cancelRate}%` }}
+                style={{ width: `${100 - (data?.cancelRate || 0)}%` }}
               />
               <div
                 className="h-full bg-red-400"
-                style={{ width: `${data.cancelRate}%` }}
+                style={{ width: `${data?.cancelRate || 0}%` }}
               />
             </div>
           </div>

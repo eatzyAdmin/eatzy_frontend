@@ -153,12 +153,13 @@ export default function MenuReport({ data }: MenuReportProps) {
     );
   }
 
-  const totalMenuRevenue = data.categoryBreakdown.reduce((sum, c) => sum + c.totalRevenue, 0);
+  const categoryBreakdown = Array.isArray(data?.categoryBreakdown) ? data.categoryBreakdown : [];
+  const totalMenuRevenue = categoryBreakdown.reduce((sum, c) => sum + (c.totalRevenue || 0), 0);
 
   // Prepare pie chart data
-  const pieData = data.categoryBreakdown.map((cat, i) => ({
+  const pieData = categoryBreakdown.map((cat, i) => ({
     name: cat.categoryName,
-    value: cat.totalRevenue,
+    value: cat.totalRevenue || 0,
     color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
   }));
 

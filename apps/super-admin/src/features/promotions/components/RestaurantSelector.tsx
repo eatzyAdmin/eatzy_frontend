@@ -97,12 +97,12 @@ export default function RestaurantSelector({ selectedIds, onChange, onClear }: R
           ) : (
             <>
               {restaurants.map((r, index) => {
-                const active = selectedIds.includes(r.id);
+                const active = selectedIds.includes(Number(r.id));
                 return (
                   <button
                     key={`${r.id}-${index}`}
                     type="button"
-                    onClick={() => toggleRestaurant(r.id)}
+                    onClick={() => toggleRestaurant(Number(r.id))}
                     className={`
                       relative w-full text-left p-3 md:p-4 rounded-[24px] border transition-all duration-200 group
                       ${active

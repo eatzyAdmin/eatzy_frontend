@@ -45,11 +45,12 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({
 
   return (
     <div className="relative space-y-12 px-0 md:px-4">
-      {categories.map((c) => {
+      {categories.map((c, idx) => {
+        const categoryKey = c.id && c.id !== "NaN" ? c.id : `cat-${idx}`;
         const dishes = getDishesByCategoryId(c.id);
         return (
           <section
-            key={c.id}
+            key={categoryKey}
             ref={(el) => { sectionRefs.current[c.id] = el; }}
             data-id={c.id}
           >

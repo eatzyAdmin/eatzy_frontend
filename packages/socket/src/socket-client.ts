@@ -27,7 +27,7 @@ export class SocketClient {
       onConnect: config.onConnect,
       onDisconnect: config.onDisconnect,
       onStompError: config.onStompError,
-      debug: (msg) => console.log('STOMP Debug:', msg),
+      debug: typeof process !== "undefined" && process.env?.NEXT_PUBLIC_SOCKET_DEBUG === "true" ? (msg) => console.log("STOMP Debug:", msg) : undefined,
     });
   }
 

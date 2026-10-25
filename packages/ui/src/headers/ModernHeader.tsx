@@ -21,7 +21,13 @@ const ModernHeader = ({ activeSection }: ModernHeaderProps) => {
     settings: { title: 'Cài đặt hệ thống', icon: Settings, gradient: 'from-gray-400 via-slate-500 to-zinc-600', bgPattern: 'bg-gradient-to-br from-gray-50/50 to-slate-50/50', decorations: ['⚙️', '🔧', '🛠️'] },
     permissions: { title: 'Quản lý phân quyền', icon: Lock, gradient: 'from-cyan-400 via-sky-500 to-blue-600', bgPattern: 'bg-gradient-to-br from-cyan-50/50 to-sky-50/50', decorations: ['🧿', '🛡️', '🔐'] }
   };
-  const currentPage: PageInfo = pageInfo[displaySection] ?? pageInfo.overview;
+  const currentPage: PageInfo = pageInfo[displaySection] || pageInfo.overview || {
+    title: 'Trang chủ',
+    icon: Home,
+    gradient: 'from-cyan-400 via-sky-500 to-blue-600',
+    bgPattern: 'bg-gradient-to-br from-cyan-50/50 to-sky-50/50',
+    decorations: ['❄️', '💦', '🌟']
+  };
   const IconComponent = currentPage.icon as any;
   const gradientStyle = {
     background: `linear-gradient(135deg, ${currentPage.gradient.replace('from-', '').replace('via-', '').replace('to-', '').split(' ').map(color => {

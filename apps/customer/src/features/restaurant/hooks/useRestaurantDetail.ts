@@ -149,6 +149,9 @@ export interface UseRestaurantMenuResult {
   refetch: () => void;
 }
 
+const EMPTY_CATEGORIES: MenuCategory[] = [];
+const EMPTY_DISHES: Dish[] = [];
+
 /**
  * Hook to fetch restaurant menu (categories + dishes)
  */
@@ -175,8 +178,8 @@ export function useRestaurantMenu(
 
   return {
     menu: query.data || null,
-    categories: query.data?.categories || [],
-    dishes: query.data?.dishes || [],
+    categories: query.data?.categories || EMPTY_CATEGORIES,
+    dishes: query.data?.dishes || EMPTY_DISHES,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,

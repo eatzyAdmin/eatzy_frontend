@@ -75,7 +75,7 @@ const LiquidGlassNavigation = ({
 
   return (
     <>
-      <style jsx>{`
+      <style {...({ jsx: "true" } as any)}>{`
         .liquid-glass-nav-item { position: relative; overflow: hidden; backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 12px; margin-bottom: 8px; color: rgb(55, 65, 81); }
         .liquid-glass-nav-item:hover { background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(59,130,246,0.1) 100%) !important; transform: translateX(4px) scale(1.02); box-shadow: inset 0 0 24px 16px rgba(255,255,255,0.6), 0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3), 0 0 20px rgba(59,130,246,0.1) !important; color: rgb(31,41,55); }
         .liquid-glass-nav-item.active { background: linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(147,51,234,0.1) 100%) !important; border: 1px solid rgba(59,130,246,0.3); box-shadow: inset 0 0 28px 20px rgba(255,255,255,0.7), 0 4px 20px rgba(59,130,246,0.2), inset 0 1px 0 rgba(255,255,255,0.3) !important; color: rgb(31,41,55); transform: translateX(2px); }

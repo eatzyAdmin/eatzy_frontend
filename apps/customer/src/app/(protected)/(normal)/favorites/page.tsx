@@ -213,8 +213,8 @@ export default function FavoritesPage() {
                           <FavoriteRestaurantCard
                             restaurant={restaurant}
                             onClick={() => handleRestaurantClick(restaurant)}
-                            onRemove={() => toggleFavorite(restaurant.id, restaurant.name)}
-                            isLoading={isRestaurantMutating(restaurant.id)}
+                            onRemove={() => toggleFavorite(Number(restaurant.id), restaurant.name)}
+                            isLoading={isRestaurantMutating(Number(restaurant.id))}
                           />
                         </motion.div>
                       );

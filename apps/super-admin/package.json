@@ -13,6 +13,7 @@
     "@repo/fonts": "workspace:*",
     "@repo/lib": "workspace:*",
     "@repo/store": "workspace:*",
+    "@repo/mock": "workspace:*",
     "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",
     "@tanstack/react-query": "^5.59.20",

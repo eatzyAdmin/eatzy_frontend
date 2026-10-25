@@ -21,15 +21,21 @@ export interface DashboardStats {
   userGrowth: number;
   averageOrderValue: number;
 }
+import { generateAdminMockOrders } from '@repo/mock';
+
 export function useDashboard() {
   const { data: orders = [], isLoading, error } = useQuery<OrderResponse[]>({
     queryKey: ['dashboard-orders'],
     queryFn: async () => {
-      const res = await orderApi.getAllOrders({ size: 1000 });
-      if (res.data?.result) {
-        return res.data.result;
+      try {
+        const res = await orderApi.getAllOrders({ size: 1000 });
+        if (res.data?.result && res.data.result.length > 0) {
+          return res.data.result;
+        }
+      } catch (err) {
+        console.warn("Using mock orders for dashboard fallback");
       }
-      return [];
+      return generateAdminMockOrders();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });

@@ -73,9 +73,9 @@ export const RestaurantCategoryTabs: React.FC<RestaurantCategoryTabsProps> = ({
         <HoverHighlightOverlay rect={catRect} style={catStyle} />
         <div ref={tabsRef} className="overflow-x-auto no-scrollbar">
           <div className="inline-flex items-center gap-6 md:gap-8 px-4 md:px-6 py-4 min-w-full justify-start relative z-10">
-            {categories.map((c) => (
+            {categories.map((c, idx) => (
               <button
-                key={c.id}
+                key={c.id && c.id !== "NaN" ? c.id : `cat-tab-${idx}`}
                 onClick={() => scrollToCategory(c.id)}
                 className={`text-[20px] md:text-[28px] font-bold uppercase tracking-wide transition-all relative pb-1 whitespace-nowrap ${activeCategoryId === c.id
                   ? "text-[#1A1A1A]"

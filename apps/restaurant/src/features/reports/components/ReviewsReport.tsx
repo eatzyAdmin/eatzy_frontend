@@ -158,15 +158,26 @@ export default function ReviewsReport({ data }: ReviewsReportProps) {
     );
   }
 
-  const { ratingDistribution, recentReviews, totalReviews, averageRating, responseRate, averageResponseTime } = data;
+  const safeReviews = Array.isArray(data?.recentReviews) ? data.recentReviews : [];
+  const ratingDistribution = data?.ratingDistribution || {
+    oneStar: 0,
+    twoStar: 0,
+    threeStar: 0,
+    fourStar: 0,
+    fiveStar: 0,
+  };
+  const totalReviews = data?.totalReviews || 0;
+  const averageRating = data?.averageRating || 0;
+  const responseRate = data?.responseRate || 0;
+  const averageResponseTime = data?.averageResponseTime || 0;
 
   const filteredReviews = ratingFilter
-    ? recentReviews.filter(r => r.rating === ratingFilter)
-    : recentReviews;
+    ? safeReviews.filter(r => r.rating === ratingFilter)
+    : safeReviews;
 
   // Calculate positive vs negative
-  const positiveCount = ratingDistribution.fiveStar + ratingDistribution.fourStar;
-  const negativeCount = ratingDistribution.oneStar + ratingDistribution.twoStar;
+  const positiveCount = (ratingDistribution.fiveStar || 0) + (ratingDistribution.fourStar || 0);
+  const negativeCount = (ratingDistribution.oneStar || 0) + (ratingDistribution.twoStar || 0);
   const positivePercent = totalReviews > 0 ? (positiveCount / totalReviews) * 100 : 0;
 
   return (

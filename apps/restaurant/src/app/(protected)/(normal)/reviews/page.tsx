@@ -58,7 +58,7 @@ export default function ReviewsPage() {
       date: formatRelativeDate(review.createdAt),
       content: review.comment,
       reply: review.reply,
-      orderId: review.order.id,
+      orderId: String(review.order.id),
     }));
   }, [reviews]);
 

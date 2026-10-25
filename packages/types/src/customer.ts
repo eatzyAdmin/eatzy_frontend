@@ -35,10 +35,18 @@ export interface ICustomerProfileDisplay {
 
 export type CustomerStatus = 'active' | 'disabled';
 
-// For historical compatibility if needed, but we should use ResCustomerProfileDTO
 export interface Customer extends ResCustomerProfileDTO {
   fullName: string;
   email: string;
   phone: string;
+  idNumber?: string;
+  dateOfBirth?: string | null;
+  address?: string | null;
+  registrationDate?: string;
   status: CustomerStatus;
+  totalOrders?: number;
+  totalSpent?: number;
 }
+
+
+

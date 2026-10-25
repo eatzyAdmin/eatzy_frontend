@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useMemo } from "react";
+import { createContext, useContext, useState, ReactNode, useMemo, useCallback } from "react";
 import LoadingOverlay from "../feedback/LoadingOverlay";
 
 type LoadingContextValue = {
@@ -16,15 +16,21 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("Đang tải...");
 
+  const show = useCallback((msg?: string) => {
+    if (msg) setMessage(msg);
+    setIsLoading(true);
+  }, []);
+
+  const hide = useCallback(() => {
+    setIsLoading(false);
+  }, []);
+
   const value = useMemo<LoadingContextValue>(() => ({
     isLoading,
     message,
-    show: (msg?: string) => {
-      if (msg) setMessage(msg);
-      setIsLoading(true);
-    },
-    hide: () => setIsLoading(false),
-  }), [isLoading, message]);
+    show,
+    hide,
+  }), [isLoading, message, show, hide]);
 
   return (
     <LoadingContext.Provider value={value}>

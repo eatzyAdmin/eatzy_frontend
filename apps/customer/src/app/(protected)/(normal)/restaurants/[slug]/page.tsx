@@ -128,13 +128,20 @@ export default function RestaurantDetailPage() {
       const container = document.getElementById("mobile-scroll-container");
       if (!container) return;
       
+      let ticking = false;
       const handleScroll = () => {
-        setScrollY(container.scrollTop);
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            setScrollY(container.scrollTop);
+            ticking = false;
+          });
+          ticking = true;
+        }
       };
       
       container.addEventListener("scroll", handleScroll, { passive: true });
       // Initial sync
-      handleScroll();
+      setScrollY(container.scrollTop);
       
       return () => container.removeEventListener("scroll", handleScroll);
     }, 100);
@@ -154,7 +161,12 @@ export default function RestaurantDetailPage() {
         const visible = entries
           .filter((e) => e.isIntersecting)
           .sort((a, b) => (a.boundingClientRect.top - b.boundingClientRect.top));
-        if (visible[0]) setActiveCategoryId(visible[0].target.getAttribute("data-id"));
+        if (visible[0]) {
+          const targetId = visible[0].target.getAttribute("data-id");
+          if (targetId && targetId !== "NaN") {
+            setActiveCategoryId((prev) => (prev !== targetId ? targetId : prev));
+          }
+        }
       },
       {
         root: root,
@@ -163,6 +175,7 @@ export default function RestaurantDetailPage() {
       }
     );
     categories.forEach((c) => {
+      if (!c.id || c.id === "NaN") return;
       const node = sectionRefs.current[c.id];
       if (node) obs.observe(node);
     });

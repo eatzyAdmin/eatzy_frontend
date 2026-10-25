@@ -184,3 +184,22 @@ export interface DriverHistoryOrder {
   voucherCode?: string;
 }
 
+export interface Driver {
+  id: number;
+  fullName: string;
+  email: string;
+  phone: string;
+  idNumber?: string;
+  dateOfBirth?: string;
+  address?: string;
+  registrationDate?: string;
+  status: 'active' | 'disabled' | string;
+  vehicleType?: string;
+  licensePlate?: string;
+  rating?: number;
+  totalTrips?: number;
+  totalEarnings?: number;
+  profilePhoto?: string;
+}
+
+

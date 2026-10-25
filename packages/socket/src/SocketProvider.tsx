@@ -35,13 +35,13 @@ export function SocketProvider({
   const clientRef = useRef<SocketClient | null>(null);
 
   useEffect(() => {
-    // Only connect if url and token are available
-    if (!url || !token) {
+    // Only connect if url and token are available and not in mock mode
+    if (!url || !token || url.startsWith("mock:")) {
       if (clientRef.current) {
         clientRef.current.deactivate();
         clientRef.current = null;
-        setConnected(false);
       }
+      setConnected(url?.startsWith("mock:") ? true : false);
       return;
     }
 
@@ -74,7 +74,7 @@ export function SocketProvider({
     };
   }, [url, token]);
 
-  const value: SocketContextType = {
+  const value: SocketContextType = React.useMemo(() => ({
     connected,
     subscribe: (destination, callback) => {
       if (clientRef.current) {
@@ -99,7 +99,7 @@ export function SocketProvider({
         clientRef.current.publish(destination, body);
       }
     }
-  };
+  }), [connected]);
 
   return (
     <SocketContext.Provider value={value}>
