@@ -12,6 +12,7 @@ import type { Restaurant, Dish, MenuCategory } from "@repo/types";
 import { useRestaurantCart } from "@/features/cart/hooks/useCart";
 import { useRestaurantWithMenu } from "@/features/restaurant";
 import DishCustomizeDrawer from "@/features/cart/components/DishCustomizeDrawer";
+import { selectedMenuOptions } from "@/features/cart/utils/cart-request";
 import { ReviewsModal } from "@/features/restaurant/components/ReviewsModal";
 import FloatingRestaurantCart from "@/features/cart/components/FloatingRestaurantCart";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
@@ -81,7 +82,7 @@ export default function RestaurantDetailPage() {
   // Cart API hook - will be initialized after restaurant data loads
   const numericRestaurantId = restaurant ? Number(restaurant.id) : null;
   const { addToCart, cartItems, updateItemQuantity, removeItem: removeCartItem, isAddingToCart, isUpdating } = useRestaurantCart(numericRestaurantId);
-  const { isFavorite, toggleFavorite, isMutating } = useFavorites();
+  const { isFavorite, toggleFavorite, isMutating } = useFavorites(numericRestaurantId);
   const favorited = numericRestaurantId ? isFavorite(numericRestaurantId) : false;
 
   // Shipping info hook
@@ -398,25 +399,7 @@ export default function RestaurantDetailPage() {
           // Check distance restriction
           if (handleRestrictedAction()) return;
 
-          // Collect selected option IDs for API
-          const selectedOptionIds: { id: number }[] = [];
-
-          // Add variant option if selected
-          if (payload.variant?.id) {
-            selectedOptionIds.push({ id: Number(payload.variant.id) });
-          }
-
-          // Add addon options
-          payload.addons.forEach(addon => {
-            selectedOptionIds.push({ id: Number(addon.id) });
-          });
-
-          // Add options from groups
-          payload.groups?.forEach(group => {
-            group.options.forEach(opt => {
-              selectedOptionIds.push({ id: Number(opt.id) });
-            });
-          });
+          const selectedOptionIds = selectedMenuOptions(payload);
 
           // Call API to add to cart
           const success = await addToCart(

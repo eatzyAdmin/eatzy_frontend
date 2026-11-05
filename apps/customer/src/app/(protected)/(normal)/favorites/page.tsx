@@ -17,7 +17,8 @@ export default function FavoritesPage() {
   const { hide, show } = useLoading();
   const [searchInputValue, setSearchInputValue] = useState("");
   const [actualSearchQuery, setActualSearchQuery] = useState("");
-  const { favorites, isLoading: isFavoritesLoading, toggleFavorite, isRestaurantMutating, refresh } = useFavorites();
+  const { favorites, isLoading: isFavoritesLoading, toggleFavorite, isRestaurantMutating, refresh,
+    error, loadMore, hasMore, isLoadingMore } = useFavorites();
 
   const { setIsVisible } = useBottomNav();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -165,7 +166,7 @@ export default function FavoritesPage() {
 
               <input
                 type="text"
-                placeholder="Search favourite restaurants..."
+                placeholder="Search loaded favourite restaurants..."
                 value={searchInputValue}
                 onChange={(e) => setSearchInputValue(e.target.value)}
                 onKeyDown={handleSearch}
@@ -196,6 +197,9 @@ export default function FavoritesPage() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4 relative">
                 <RestaurantCardShimmer cardCount={6} />
               </div>
+            ) : error ? (
+              <EmptyState icon={Store} title="Không thể tải danh sách yêu thích"
+                description="Vui lòng thử lại sau." buttonText="Thử lại" onButtonClick={refresh} className="py-20" />
             ) : filteredRestaurants.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4 relative">
                 <AnimatePresence mode="popLayout">
@@ -240,7 +244,13 @@ export default function FavoritesPage() {
               />
             )}
 
-            {!isFavoritesLoading && filteredRestaurants.length >= 5 && (
+            {hasMore && !error && (
+              <button type="button" disabled={isLoadingMore} onClick={() => void loadMore()}
+                className="block mx-auto my-8 px-6 py-3 rounded-2xl bg-white border border-gray-200 disabled:opacity-50">
+                {isLoadingMore ? "Đang tải..." : "Tải thêm nhà hàng yêu thích"}
+              </button>
+            )}
+            {!hasMore && !error && !isFavoritesLoading && filteredRestaurants.length >= 5 && (
               <div className="py-12 flex items-center justify-center gap-4 opacity-30">
                 <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-400 to-transparent w-24" />
                 <div className="flex flex-col items-center gap-2">

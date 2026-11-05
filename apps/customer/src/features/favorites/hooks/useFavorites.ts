@@ -1,25 +1,28 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { favoriteApi } from "@repo/api";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { sileo } from "@/components/DynamicIslandToast";
 
-export function useFavorites() {
+export function useFavorites(restaurantId?: number | null) {
   const { user, isLoading: isAuthLoading } = useAuth();
   const queryClient = useQueryClient();
   const isLoggedIn = !!user?.id;
 
-  // Fetch all favorites for current user (uses backend auth context)
-  const { data: favorites = [], isLoading: isQueryLoading } = useQuery({
-    queryKey: ["favorites", "my"],
-    queryFn: async () => {
-      const response = await favoriteApi.getMyFavorites();
-      return response.data || [];
+  const { data, isLoading: isQueryLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+    queryKey: ["favorites", "my", user?.id, restaurantId ?? null],
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
+      const response = await favoriteApi.getPage(pageParam, restaurantId ?? undefined);
+      if (!response.data) throw new Error("Không thể tải danh sách yêu thích");
+      return response.data;
     },
+    getNextPageParam: (last) => last.meta.page < last.meta.pages ? last.meta.page + 1 : undefined,
     enabled: isLoggedIn,
   });
+  const favorites = useMemo(() => data?.pages.flatMap(page => page.result).filter(f => f.restaurant != null) ?? [], [data]);
 
   const isLoading = isAuthLoading || (isLoggedIn && isQueryLoading);
 
@@ -127,5 +130,9 @@ export function useFavorites() {
     isMutating: addMutation.isPending || removeMutation.isPending,
     isRestaurantMutating,
     refresh,
+    error,
+    loadMore: fetchNextPage,
+    hasMore: hasNextPage,
+    isLoadingMore: isFetchingNextPage,
   };
 }

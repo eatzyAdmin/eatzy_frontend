@@ -47,6 +47,7 @@ export type OrderResponse = {
   totalAmount: number;
   paymentMethod: string;
   paymentStatus: string;
+  workflowStatus?: string;
   cancellationReason?: string;
   createdAt: string;
   preparingAt?: string;
@@ -90,7 +91,7 @@ export type OrderDriver = {
 
 export type OrderVoucher = {
   id: number;
-  code: string;
+  code: string | null;
 };
 
 export type OrderItemResponse = {

@@ -1,5 +1,6 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
 import { orderApi } from "@repo/api";
 import { sileo } from "@/components/DynamicIslandToast";
 import { useRouter } from "next/navigation";
@@ -15,22 +16,35 @@ interface UseCreateOrderOptions {
 export function useCreateOrder(options: UseCreateOrderOptions = {}) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const attempt = useRef<{ fingerprint: string; key: string } | null>(null);
 
   const mutation = useMutation({
     mutationFn: async (request: CreateOrderRequest) => {
-      const response = await orderApi.createOrder(request);
-      if (response.statusCode !== 201 && response.statusCode !== 200) {
+      const fingerprint = JSON.stringify(request);
+      if (attempt.current?.fingerprint !== fingerprint) {
+        attempt.current = { fingerprint, key: crypto.randomUUID() };
+      }
+      const response = await orderApi.createOrder(request, attempt.current.key);
+      if (![200, 201, 202].includes(response.statusCode ?? 0)) {
         throw new Error(response.message || "Không thể tạo đơn hàng");
       }
       return response.data;
     },
     onSuccess: (data) => {
+      if (data?.orderStatus === "REJECTED" || data?.workflowStatus === "REQUIRES_REVIEW") {
+        if (data.orderStatus === "REJECTED") attempt.current = null;
+        sileo.error({ title: "Đơn hàng cần kiểm tra", description: data.cancellationReason || `Vui lòng kiểm tra trạng thái đơn #${data.id}.` });
+        options.onSuccess?.(data);
+        return;
+      }
       // Invalidate cart queries since cart items become order
       queryClient.invalidateQueries({ queryKey: ["carts"] });
 
       sileo.success({
         title: options.restaurantName || "Đặt hàng thành công",
-        description: `Mã đơn hàng: #ORD-${data?.id || "001"}`,
+        description: data?.workflowStatus && data.workflowStatus !== "ACTIVE"
+          ? `Đã nhận đơn #${data.id}, hệ thống đang xử lý. Theo dõi trạng thái trong đơn hàng của bạn.`
+          : `Mã đơn hàng: #ORD-${data?.id || "001"}`,
         actionType: "order_place",
         avatarUrl: options.avatarUrl,
         onViewOrder: () => {

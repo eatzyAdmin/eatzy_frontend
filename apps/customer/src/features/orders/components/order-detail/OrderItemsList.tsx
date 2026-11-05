@@ -1,4 +1,4 @@
-import { Package, Ticket, CheckCircle2 } from "@repo/ui/icons";
+import { Package, Ticket } from "@repo/ui/icons";
 import { formatVnd } from "@repo/lib";
 import type { OrderResponse, OrderItemResponse } from "@repo/types";
 
@@ -28,7 +28,7 @@ export function OrderItemsList({ order }: { order: OrderResponse }) {
                   {item.orderItemOptions && item.orderItemOptions.length > 0 && (
                     <div className="mt-0.5 text-[10px] md:text-[11px] text-gray-400 font-medium line-clamp-2 leading-relaxed italic">
                       {Array.from(new Map(item.orderItemOptions.map(opt => [opt.menuOption?.id || opt.id, opt])).values())
-                        .map((opt: any) => opt.menuOption?.name)
+                        .map(opt => opt.menuOption?.name)
                         .join(", ")}
                     </div>
                   )}
@@ -62,7 +62,7 @@ export function OrderItemsList({ order }: { order: OrderResponse }) {
             {order.vouchers && order.vouchers.length > 0 && (
               <div className="flex items-center gap-2 mt-0.5">
                 {order.vouchers.map(v => (
-                  <span key={v.id} className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-red-50 text-red-500 border border-red-100 rounded-md">{v.code}</span>
+                  <span key={v.id} className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-red-50 text-red-500 border border-red-100 rounded-md">{v.code ?? `Voucher #${v.id}`}</span>
                 ))}
               </div>
             )}

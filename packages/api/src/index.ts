@@ -5,13 +5,14 @@ export { cartApi } from "./cart";
 export { voucherApi } from "./voucher";
 export { favoriteApi } from "./favorite";
 export { driverApi } from "./driver";
+export { driverKycFields, makeDriverKycSubmission, driverProfileError, makeDriverProfilePatch } from "./driver-kyc";
 export { reportApi } from "./report";
 export { systemConfigApi } from "./system-config";
 export { fileApi } from "./file";
 export { userApi } from "./user";
 export { customerApi } from "./customer";
 export { addressApi } from "./address";
-export { reviewApi, type ReviewDTO } from "./review";
+export { reviewApi, type ReviewDTO, type ReviewPage, type ReviewPageParams } from "./review";
 
 // Restaurant module exports
 export {

@@ -2,14 +2,13 @@
 
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import {
-  X, Wallet, Receipt, Calendar, User, ArrowUpRight, ArrowDownLeft,
-  CheckCircle2, Clock, XCircle, Info, ChevronRight, Hash, Database,
-  CreditCard, ExternalLink, Printer, Share2, Copy, Package, Store, MapPin,
+  X, Receipt, Calendar, User, ArrowUpRight, ArrowDownLeft,
+  CheckCircle2, Clock, XCircle,
+  Package, Store, MapPin,
   ShieldCheck, Banknote, AlertCircle
 } from 'lucide-react';
 import { WalletTransactionResponse, OrderResponse, isWalletCreditType, WalletTransactionStatus, WalletDisplayStatus } from '@repo/types';
 import { orderApi } from '@repo/api';
-import { ImageWithFallback } from '@repo/ui';
 import { createPortal } from 'react-dom';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
@@ -163,7 +162,7 @@ export default function TransactionDetailsModal({
                     <h4 className="font-anton text-sm tracking-tight text-[#1A1A1A] uppercase">Log Description</h4>
                   </div>
                   <p className="text-sm font-medium text-gray-600 italic bg-gray-50 p-4 rounded-2xl leading-relaxed border border-gray-100/50">
-                    "{tx.description || 'System generated automated entry.'}"
+                    &quot;{tx.description || 'System generated automated entry.'}&quot;
                   </p>
                 </div>
 
@@ -343,7 +342,7 @@ export default function TransactionDetailsModal({
                                   <span className="text-gray-500 font-medium">Discount</span>
                                   {orderDetail.vouchers?.[0] && (
                                     <span className="text-[10px] font-bold bg-lime-100 text-primary px-1.5 py-0.5 rounded uppercase tracking-wide border border-lime-200">
-                                      {orderDetail.vouchers[0].code}
+                                      {orderDetail.vouchers[0].code ?? `Voucher #${orderDetail.vouchers[0].id}`}
                                     </span>
                                   )}
                                 </div>

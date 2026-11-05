@@ -262,13 +262,13 @@ export default function ReviewsReport({ data }: ReviewsReportProps) {
               md:text-4xl
               max-md:text-2xl max-md:font-black max-md:tracking-tighter
             ">
-              {averageResponseTime}
+              {averageResponseTime == null ? 'Chưa có dữ liệu' : averageResponseTime}
             </span>
             <span className="
               text-lg text-gray-400 ml-1 block
               max-md:text-xs max-md:font-bold max-md:text-blue-600 max-md:ml-0.5
             ">
-              phút
+              {averageResponseTime == null ? '' : 'phút'}
             </span>
           </div>
         </div>

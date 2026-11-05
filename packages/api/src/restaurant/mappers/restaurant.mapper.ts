@@ -166,6 +166,7 @@ function mapBackendMenuOptionGroup(dto: BackendMenuOptionGroupDTO) {
       id: String(opt.id),
       name: opt.name,
       price: opt.priceAdjustment || 0,
+      isAvailable: opt.available,
     })),
   };
 }

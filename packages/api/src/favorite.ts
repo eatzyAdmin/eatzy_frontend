@@ -1,11 +1,17 @@
 import { http } from "./http";
-import type { IBackendRes, FavoriteRequest, FavoriteResponse } from "../../types/src";
+import type { IBackendRes, FavoriteRequest, FavoriteResponse, ResultPaginationDTO } from "../../types/src";
 
 /**
  * Favorite API endpoints
  * Handles customer's favorite restaurants
  */
 export const favoriteApi = {
+  getPage: async (page = 1, restaurantId?: number): Promise<IBackendRes<ResultPaginationDTO<FavoriteResponse[]>>> => {
+    return http.get("/api/v1/favorites", { params: {
+      page, size: 20, sort: "id,desc",
+      ...(restaurantId ? { filter: `restaurantId : ${restaurantId}` } : {}),
+    } }) as unknown as Promise<IBackendRes<ResultPaginationDTO<FavoriteResponse[]>>>;
+  },
   /**
    * Add a restaurant to favorites
    * POST /api/v1/favorites

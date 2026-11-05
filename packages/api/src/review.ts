@@ -2,9 +2,48 @@ import { http } from "./http";
 import type { IBackendRes, ReviewDTO, ReviewReplyRequest, CreateReviewRequest } from "../../types/src";
 export type { ReviewDTO };
 
+export type ReviewPage = {
+  result: ReviewDTO[];
+  meta: { page: number; pageSize: number; pages: number; total: number };
+};
+export type ReviewPageParams = { page?: number; size?: number };
+
+function pageParams(params: ReviewPageParams = {}) {
+  const page = params.page ?? 1;
+  const size = params.size ?? 20;
+  if (!Number.isInteger(page) || page < 1 || !Number.isInteger(size) || size < 1) {
+    throw new RangeError("Review page and size must be positive integers");
+  }
+  return new URLSearchParams({ page: String(page), size: String(Math.min(size, 100)) });
+}
+
+function reviewPage(path: string, params: URLSearchParams) {
+  return http.get<IBackendRes<ReviewPage>>(`${path}?${params.toString()}`) as unknown as Promise<IBackendRes<ReviewPage>>;
+}
+
 // ======== Review API ========
 
 export const reviewApi = {
+  getReviewsByCustomerPage: (customerId: number, params?: ReviewPageParams) =>
+    reviewPage(`/api/v1/reviews/customer/${customerId}/paginated`, pageParams(params)),
+
+  getReviewsByOrderPage: (orderId: number, params?: ReviewPageParams) =>
+    reviewPage(`/api/v1/reviews/order/${orderId}/paginated`, pageParams(params)),
+
+  getReviewsByTargetPage: (reviewTarget: 'restaurant' | 'driver', targetName: string, params?: ReviewPageParams) => {
+    const query = pageParams(params);
+    query.set('reviewTarget', reviewTarget);
+    query.set('targetName', targetName);
+    return reviewPage('/api/v1/reviews/target/paginated', query);
+  },
+
+  /** Prefer stable IDs when restaurants or drivers can share a display name. */
+  getReviewsByTargetId: (reviewTarget: 'restaurant' | 'driver', targetId: number, params?: ReviewPageParams) => {
+    const query = pageParams(params);
+    query.set('reviewTarget', reviewTarget);
+    query.set('targetId', String(targetId));
+    return reviewPage('/api/v1/reviews/target-id', query);
+  },
   /**
    * Create a new review (customer is auto-assigned from JWT token)
    * POST /api/v1/reviews
@@ -67,6 +106,7 @@ export const reviewApi = {
   },
 
   /**
+   * @deprecated Legacy array is limited to 100 results; use getReviewsByTargetId or getReviewsByTargetPage.
    * Get reviews by target (restaurant or driver name)
    * GET /api/v1/reviews/target
    */

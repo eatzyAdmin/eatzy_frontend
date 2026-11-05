@@ -3,15 +3,15 @@
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { useSwipeConfirmation, useLoading } from "@repo/ui";
 import {
-  User, CreditCard, ShieldCheck,
+  User, ShieldCheck,
   LogOut, Bike, Bell, HelpCircle,
   ArrowLeft, AlertCircle, Landmark
 } from "@repo/ui/icons";
 import { useState, useCallback, useEffect } from "react";
+import DriverKycPanel from "@/features/profile/components/DriverKycPanel";
 import DriverProfileCard from "@/features/profile/components/DriverProfileCard";
 import ProfileMenuItem from "@/features/profile/components/ProfileMenuItem";
 
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import { PullToRefresh } from "@repo/ui";
 import { useDriverProfile } from "@/features/profile/hooks/useDriverProfile";
@@ -28,8 +28,7 @@ type MobileSection = 'personal' | 'vehicle' | 'bank' | 'notifications';
 
 export default function ProfilePage() {
   const { confirm } = useSwipeConfirmation();
-  const { show, hide } = useLoading();
-  const { user } = useAuth();
+  const { show } = useLoading();
   const { profile, isLoading, isError, refresh } = useDriverProfile();
   const { handleLogout: performLogout } = useLogout();
   const { setIsVisible: setBottomNavVisible } = useBottomNav();
@@ -85,6 +84,9 @@ export default function ProfilePage() {
     await refresh();
   }, [refresh]);
 
+  if (isLoading) return <div className="p-8 pt-28" role="status">Loading profile?</div>;
+  if (isError || !profile) return <div className="p-8 pt-28" role="alert">Unable to load your profile. <button onClick={() => void refresh()}>Retry</button></div>;
+
   return (
     <div className="min-h-screen bg-[#F7F7F7] pt-8 pb-40 overflow-hidden relative">
       <AnimatePresence initial={false}>
@@ -105,6 +107,7 @@ export default function ProfilePage() {
               refreshingText="Đang làm mới"
             >
               <div className="space-y-8 pb-32">
+                <DriverKycPanel profile={profile} onSaved={refresh} />
                 {/* Main Card */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}

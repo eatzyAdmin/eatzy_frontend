@@ -4,6 +4,7 @@ import type { Cart, CartItem, AddToCartRequest } from '@repo/types';
 import { useMemo, useCallback } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { sileo } from "@/components/DynamicIslandToast";
+import { addCartItem } from '../utils/cart-request';
 
 // ======== Query Keys ========
 
@@ -188,35 +189,7 @@ export function useRestaurantCart(restaurantId: number | null): UseRestaurantCar
     mutationFn: async ({ dishId, quantity, options }: { dishId: number; quantity: number; options?: { id: number }[] }) => {
       if (!user || !restaurantId) throw new Error('Missing user or restaurant');
 
-      // Build request - merge with existing items
-      const existingItems = cartItems.map(item => ({
-        id: item.id,
-        dish: { id: item.dish.id },
-        quantity: item.quantity,
-        cartItemOptions: item.cartItemOptions?.map(opt => ({
-          id: opt.id,
-          menuOption: { id: opt.menuOption.id },
-        })),
-      }));
-
-      // Check if item already exists
-      const existingIndex = existingItems.findIndex(item => item.dish.id === dishId);
-
-      if (existingIndex >= 0) {
-        // Update quantity
-        existingItems[existingIndex].quantity += quantity;
-      } else {
-        // Add new item
-        existingItems.push({
-          id: undefined as unknown as number,
-          dish: { id: dishId },
-          quantity,
-          cartItemOptions: options?.map(opt => ({
-            id: undefined as unknown as number,
-            menuOption: { id: opt.id },
-          })),
-        });
-      }
+      const existingItems = addCartItem(cartItems, dishId, quantity, options);
 
       const request: AddToCartRequest = {
         customer: { id: Number(user.id) },

@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "@repo/ui/motion";
 import { 
-  ChevronUp, Zap
+  ChevronUp
 } from "@repo/ui/icons";
 import { PullToRefresh } from "@repo/ui";
 import { useDriverProfile } from "@/features/profile/hooks/useDriverProfile";
@@ -31,6 +31,7 @@ export default function SettingsPage() {
   };
 
   const handleUpdateCodLimit = () => {
+    if (!profile) return;
     updateProfile({
       id: profile.id,
       codLimit: codLimit

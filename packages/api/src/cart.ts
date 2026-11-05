@@ -26,15 +26,14 @@ export const cartApi = {
 
   /**
    * Get cart for specific restaurant (for current user)
-   * This will filter getMyCarts result on frontend
+   * Uses the owner-scoped page endpoint; does not load carts for other restaurants.
    */
   getCartForRestaurant: async (restaurantId: number): Promise<IBackendRes<Cart | null>> => {
-    const response = await cartApi.getMyCarts();
-    if (response.statusCode === 200 && response.data) {
-      const cart = response.data.find((c: Cart) => c.restaurant.id === restaurantId) || null;
-      return { ...response, data: cart };
-    }
-    return { ...response, data: null };
+    if (!Number.isSafeInteger(restaurantId) || restaurantId <= 0) throw new Error("Invalid restaurant ID");
+    const response = await http.get<IBackendRes<{ result: Cart[] }>>("/api/v1/carts", {
+      params: { page: 1, size: 1, filter: `restaurantId:${restaurantId}` },
+    }) as unknown as IBackendRes<{ result: Cart[] }>;
+    return { ...response, data: response.data?.result[0] ?? null };
   },
 
   /**

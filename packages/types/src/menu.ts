@@ -11,6 +11,7 @@ export type OptionChoice = {
   id: string;
   name: string;
   price: number;
+  isAvailable?: boolean;
 };
 
 export type AddonOption = OptionChoice;

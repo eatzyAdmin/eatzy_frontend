@@ -235,7 +235,7 @@ export default function CheckoutPage() {
 
     const result = await createOrder(orderRequest);
     // Clear cart for this restaurant after successful order
-    if (result) {
+    if (result && result.orderStatus !== "REJECTED") {
       await clearCart();
     }
   }, [

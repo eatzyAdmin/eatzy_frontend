@@ -1,23 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ComponentType } from 'react';
+import DriverKycReview from './DriverKycReview';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from '@repo/ui/motion';
 import {
-  X, Bike, Phone, Star,
+  X, Bike,
   ShieldCheck, User, FileText, Wallet, ChevronRight, CheckCircle, Trash2
 } from 'lucide-react';
 import { ImageWithFallback, LoadingSpinner, useNotification } from '@repo/ui';
-import { DriverProfile, DriverStatus, VerificationStatus } from '@repo/types';
+import { DriverProfile, DriverStatus, VerificationStatus, UpdateDriverProfileDto } from '@repo/types';
+import { makeDriverProfilePatch } from '@repo/api';
 
 interface EditDriverModalProps {
   driver: DriverProfile | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Partial<DriverProfile>) => Promise<void>;
+  onReviewed: () => void;
+  onSave: (data: UpdateDriverProfileDto) => Promise<void>;
 }
 
-export default function EditDriverModal({ driver, isOpen, onClose, onSave }: EditDriverModalProps) {
+export default function EditDriverModal({ driver, isOpen, onClose, onSave, onReviewed }: EditDriverModalProps) {
   const { showNotification } = useNotification();
   const [mounted, setMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,12 +40,13 @@ export default function EditDriverModal({ driver, isOpen, onClose, onSave }: Edi
   if (!mounted) return null;
 
   const handleSubmit = async () => {
+    if (!driver) return;
     setIsSubmitting(true);
     try {
-      await onSave(formData);
-      showNotification({ message: 'Driver dossier updated successfully', type: 'success' });
+      await onSave(makeDriverProfilePatch(driver, formData));
+      showNotification({ message: 'Saved. Document changes to approved profiles enter the review queue.', type: 'success' });
       onClose();
-    } catch (err) {
+    } catch {
       showNotification({ message: 'Audit update failed', type: 'error' });
     } finally {
       setIsSubmitting(false);
@@ -52,7 +56,8 @@ export default function EditDriverModal({ driver, isOpen, onClose, onSave }: Edi
   const updateVerification = (field: keyof DriverProfile, status: VerificationStatus, reasonField?: keyof DriverProfile) => {
     const newData = { ...formData, [field]: status };
     if (status === 'APPROVED' && reasonField) {
-      (newData as any)[reasonField] = '';
+      setFormData({ ...newData, [reasonField]: '' });
+      return;
     }
     setFormData(newData);
   };
@@ -123,7 +128,7 @@ export default function EditDriverModal({ driver, isOpen, onClose, onSave }: Edi
     );
   };
 
-  const TabButton = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: any }) => (
+  const TabButton = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: ComponentType<{ size?: number; className?: string }> }) => (
     <button
       onClick={() => setActiveTab(id)}
       className={`flex items-center gap-3 px-6 py-4 rounded-2xl transition-all border-2
@@ -213,6 +218,7 @@ export default function EditDriverModal({ driver, isOpen, onClose, onSave }: Edi
 
               {/* Main View Area */}
               <div className="flex-1 overflow-y-auto custom-scrollbar p-12 bg-gray-50/50">
+                {driver && <DriverKycReview key={driver.id} profileId={driver.id} onReviewed={onReviewed} />}
                 <AnimatePresence mode="wait">
                   {activeTab === 'IDENTITY' && (
                     <motion.div

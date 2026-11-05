@@ -1,4 +1,12 @@
-# Turborepo starter
+# Eatzy frontend
+
+Hướng dẫn thay đổi API, field và tích hợp mobile: **[docs/API_HANDOFF.md](docs/API_HANDOFF.md)**.
+
+Node.js 18+; package manager của repo là pnpm 9.0.0. Chạy `corepack enable`, `corepack prepare pnpm@9.0.0 --activate`, `pnpm install --frozen-lockfile`, rồi `npm run dev`. Các app customer/driver/restaurant/super-admin/admin lần lượt dùng cổng 3000–3004. Backend local mặc định qua Gateway `http://127.0.0.1:8080`.
+
+Các nội dung Turborepo bên dưới là tài liệu khởi tạo ban đầu; hợp đồng sản phẩm và giới hạn hiện tại nằm ở tài liệu bàn giao phía trên.
+
+## Turborepo starter
 
 This Turborepo starter is maintained by the Turborepo core team.
 

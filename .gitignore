@@ -36,3 +36,6 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Superseded local agent setup notes; API handoff is documented separately.
+/docs/agent/

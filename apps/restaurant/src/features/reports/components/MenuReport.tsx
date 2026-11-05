@@ -34,7 +34,8 @@ const formatCompact = (value: number) => {
 
 const CATEGORY_COLORS = ['#84cc16', '#1A1A1A', '#3b82f6', '#8b5cf6', '#ec4899'];
 
-const TrendBadge = ({ trend, percent }: { trend: 'up' | 'down' | 'stable'; percent: number }) => {
+const TrendBadge = ({ trend, percent }: { trend: string | null; percent: number | null }) => {
+  if (trend == null || percent == null) return <span className="text-xs text-gray-500">Chưa có dữ liệu xu hướng</span>;
   if (trend === 'up') {
     return (
       <span className="flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-full bg-green-100 text-green-600">
@@ -82,7 +83,7 @@ const DishCard = ({ dish, rank }: { dish: MenuAnalyticsItemDTO; rank?: number })
           )}
           <span className="text-lg font-semibold text-gray-900 max-md:text-sm max-md:font-bold max-md:text-[#1A1A1A] max-md:tracking-tight">{dish.dishName}</span>
         </div>
-        <TrendBadge trend={dish.trend as 'up' | 'down' | 'stable'} percent={dish.trendPercent} />
+        <TrendBadge trend={dish.trend} percent={dish.trendPercent} />
       </div>
       <div className="flex flex-col gap-1 mt-1">
         <span className="text-xs font-bold text-gray-400 uppercase truncate max-md:text-[10px] max-md:font-semibold max-md:text-gray-400 max-md:tracking-tight" title={dish.categoryName}>{dish.categoryName}</span>

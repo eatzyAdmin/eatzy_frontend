@@ -6,7 +6,15 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "check-types": "turbo run check-types",
+    "test:http": "node scripts/test-http-refresh.cjs",
+    "test:cart": "node scripts/test-cart-contract.cjs",
+    "test:orders": "node scripts/test-order-contract.cjs",
+    "test:reviews": "node scripts/test-review-pagination.cjs",
+    "test:dishes": "node scripts/test-dish-contract.cjs",
+    "test:driver-kyc": "node scripts/test-driver-kyc.cjs",
+    "test:driver-profile": "node scripts/test-driver-profile-patch.cjs",
+    "test:socket": "node scripts/test-socket-lifecycle.cjs"
   },
   "devDependencies": {
     "prettier": "^3.6.2",

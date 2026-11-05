@@ -9,7 +9,7 @@ export type BackendMenuOptionDTO = {
   id: number;
   name: string;
   priceAdjustment: number;
-  isAvailable: boolean;
+  available: boolean;
 };
 
 // Menu Option Group DTO

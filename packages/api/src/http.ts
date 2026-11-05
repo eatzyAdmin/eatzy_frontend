@@ -1,133 +1,90 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
-// ======= Memory Storage for Access Token =======
 let accessToken: string | null = null;
+let tokenGeneration = 0;
+let refreshInFlight: Promise<string> | null = null;
+type SessionRequest = InternalAxiosRequestConfig & { _retry?: boolean; _authGeneration?: number };
+class SessionChangedError extends Error {}
 
 export const setAccessToken = (token: string | null) => {
   accessToken = token;
+  tokenGeneration++;
 };
-
 export const getAccessToken = () => accessToken;
 
-// ======= Token Refresh Logic =======
-let isRefreshing = false;
-let refreshSubscribers: ((token: string) => void)[] = [];
-
-const subscribeTokenRefresh = (cb: (token: string) => void) => {
-  refreshSubscribers.push(cb);
+const usesOwnCredentials = (url = "") => {
+  const path = url.split("?")[0];
+  return ["/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh"].includes(path)
+    || path.startsWith("/api/v1/email/");
 };
-
-const onRefreshed = (token: string) => {
-  refreshSubscribers.forEach((cb) => cb(token));
-  refreshSubscribers = [];
-};
-
-// ===============================================
 
 export const http = axios.create({
-  // Use Next.js Rewrite Proxy to solve Mixed Content (HTTP backend vs HTTPS frontend)
   baseURL: "/api/proxy",
   withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  },
+  headers: { "Content-Type": "application/json", Accept: "application/json" },
 });
 
-// Request Interceptor: Attach Token from Memory
-http.interceptors.request.use(
-  (config) => {
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Response Interceptor: Handle 401 & Refresh Token
-http.interceptors.response.use(
-  (response) => {
-    return response.data ?? response;
-  },
-  async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-
-    // If 401 Unauthorized and we haven't retried yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      // Prevent infinite loops if the refresh endpoint itself fails
-      if (originalRequest.url?.includes("/auth/refresh")) {
-        return Promise.reject(error);
-      }
-
-      if (isRefreshing) {
-        // If already refreshing, queue this request
-        return new Promise((resolve) => {
-          subscribeTokenRefresh((token) => {
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-            }
-            resolve(http(originalRequest));
-          });
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        // Call refresh token endpoint
-        // Verify the path matches packages/api/src/auth.ts (which is /api/v1/auth/refresh)
-        // We use 'http' instance here but we need to bypass interceptors loop if needed.
-        // Actually, since it's a new request and we check url above, it's fine.
-        const res: any = await http.get("/api/v1/auth/refresh");
-
-        // res.data is already unwrapped by the success interceptor
-        const newAccessToken = res?.access_token || res?.data?.access_token;
-
-        if (newAccessToken) {
-          setAccessToken(newAccessToken);
-          isRefreshing = false;
-          onRefreshed(newAccessToken);
-
-          // Retry the original request
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          }
-          return http(originalRequest);
-        } else {
-          // Failed to get token
-          isRefreshing = false;
-          setAccessToken(null);
-
-          // Global redirect on auth failure
-          if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
-            window.localStorage.setItem("auth_expired", "true");
-            window.location.href = '/login';
-          }
-
-          return Promise.reject(error);
-        }
-      } catch (refreshError) {
-        isRefreshing = false;
-        setAccessToken(null);
-        // We might want to clear subscribers here too or reject them
-        refreshSubscribers = [];
-
-        // Global redirect on auth failure
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
-          window.localStorage.setItem("auth_expired", "true");
-          window.location.href = '/login';
-        }
-
-        return Promise.reject(refreshError);
-      }
-    }
-
-    // Return specific error data if available
-    if (error?.response?.data) {
-      return Promise.reject(error.response.data);
-    }
-    return Promise.reject(error);
+http.interceptors.request.use((config: SessionRequest) => {
+  if (config._authGeneration !== undefined && config._authGeneration !== tokenGeneration) {
+    throw new SessionChangedError("Session changed before request retry");
   }
+  config._authGeneration = tokenGeneration;
+  if (usesOwnCredentials(config.url)) config.headers.delete("Authorization");
+  else if (accessToken) config.headers.set("Authorization", `Bearer ${accessToken}`);
+  return config;
+});
+
+function refreshAccessToken(): Promise<string> {
+  if (refreshInFlight) return refreshInFlight;
+  const generation = tokenGeneration;
+  const pending = (async () => {
+    try {
+      const body: unknown = await http.get("/api/v1/auth/refresh", { timeout: 5000 });
+      const record = body as { access_token?: unknown; data?: { access_token?: unknown } } | null;
+      const token = record?.data?.access_token ?? record?.access_token;
+      if (generation !== tokenGeneration) throw new SessionChangedError("Session changed during refresh");
+      if (typeof token !== "string" || !token.trim()) throw new Error("Refresh response has no access token");
+      // Automatic rotation preserves the account generation; explicit login/logout changes it.
+      accessToken = token;
+      return token;
+    } catch (error) {
+      if (generation !== tokenGeneration && !(error instanceof SessionChangedError)) {
+        throw new SessionChangedError("Session changed during refresh");
+      }
+      if (!(error instanceof SessionChangedError)) {
+        setAccessToken(null);
+        if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+          window.localStorage.setItem("auth_expired", "true");
+          window.location.href = "/login";
+        }
+      }
+      throw error;
+    }
+  })();
+  refreshInFlight = pending;
+  void pending.then(
+    () => { if (refreshInFlight === pending) refreshInFlight = null; },
+    () => { if (refreshInFlight === pending) refreshInFlight = null; },
+  );
+  return pending;
+}
+
+http.interceptors.response.use(
+  (response) => response.data ?? response,
+  async (error: AxiosError) => {
+    const request = error.config as SessionRequest | undefined;
+    if (request && error.response?.status === 401 && !request._retry && !usesOwnCredentials(request.url)) {
+      request._retry = true;
+      if (request._authGeneration !== tokenGeneration) {
+        throw new SessionChangedError("Session changed while request was in flight");
+      }
+      const sentToken = request.headers.get("Authorization");
+      // An older request may fail after another request already refreshed the session.
+      const token = accessToken && sentToken !== `Bearer ${accessToken}`
+        ? accessToken : await refreshAccessToken();
+      request.headers.set("Authorization", `Bearer ${token}`);
+      return http(request);
+    }
+    return Promise.reject(error.response?.data ?? error);
+  },
 );

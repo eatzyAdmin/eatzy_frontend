@@ -14,14 +14,15 @@ export function mapBackendDishToFrontend(dto: BackendDishDTO): Dish {
     isAvailable: dto.availabilityQuantity > 0,
     optionGroups: dto.menuOptionGroups?.map(g => ({
       id: String(g.id),
-      title: g.title,
-      required: g.required,
-      minSelect: g.minSelect,
-      maxSelect: g.maxSelect,
-      options: (g.options || []).map(o => ({
+      title: g.name,
+      required: (g.minChoices ?? 0) > 0,
+      minSelect: g.minChoices,
+      maxSelect: g.maxChoices,
+      options: (g.menuOptions || []).map(o => ({
         id: String(o.id),
         name: o.name,
-        price: o.price,
+        price: o.priceAdjustment,
+        isAvailable: o.available,
       })),
     })) || [],
   };
@@ -50,14 +51,14 @@ export function mapFrontendDishToBackend(
     // Nested groups for updateDishWithMenuOptions
     menuOptionGroups: dish.optionGroups?.map(g => ({
       id: g.id && !g.id.includes('-') ? Number(g.id) : null,
-      name: g.title,
-      minChoices: g.minSelect || 0,
-      maxChoices: g.maxSelect || 0,
+      groupName: g.title,
+      minChoices: g.minSelect,
+      maxChoices: g.maxSelect,
       menuOptions: (g.options || []).map(o => ({
         id: o.id && !o.id.includes('-') ? Number(o.id) : null,
         name: o.name,
         priceAdjustment: o.price,
-        isAvailable: true
+        isAvailable: o.isAvailable
       }))
     }))
   };

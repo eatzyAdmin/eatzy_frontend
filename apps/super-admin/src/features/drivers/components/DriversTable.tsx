@@ -1,17 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from '@repo/ui/motion';
-import {
-  User, Search, Filter, Play, Pause, AlertCircle, X,
-  RotateCcw, Bike, Star, ShieldCheck, Mail, Navigation, Info, Edit, Trash2,
-  Lock, Unlock, Activity
-} from 'lucide-react';
+import { motion } from '@repo/ui/motion';
+import { Search, Bike, ShieldCheck, Edit, Trash2, Lock } from 'lucide-react';
 import { DataTable, useSwipeConfirmation, SearchPopup, TableHeader } from '@repo/ui';
-import { DriverProfile } from '@repo/types';
+import { DriverProfile, UpdateDriverProfileDto } from '@repo/types';
 import FilterDriverModal from './FilterDriverModal';
 import DriverDetailsModal from './DriverDetailsModal';
 import EditDriverModal from './EditDriverModal';
+import DriverKycQueue from './DriverKycQueue';
 import { getDriversColumns } from './DriversColumns';
 import DriversFilterBadges from './DriversFilterBadges';
 import { useMemo } from 'react';
@@ -23,7 +20,7 @@ interface DriversTableProps {
   hasNextPage?: boolean;
   onLoadMore?: () => void;
   onRefresh: () => void;
-  onEdit: (driver: DriverProfile) => void;
+  onEdit: (driver: UpdateDriverProfileDto) => Promise<unknown>;
   onDelete: (id: number) => void;
   onToggleStatus: (id: number, userId: number, isActive: boolean) => void;
   onSearch: (term: string) => void;
@@ -58,6 +55,7 @@ export default function DriversTable({
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [selectedDriver, setSelectedDriver] = useState<DriverProfile | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [queueVersion, setQueueVersion] = useState(0);
   const [editingDriver, setEditingDriver] = useState<DriverProfile | null>(null);
   const [filterQuery, setFilterQuery] = useState('');
 
@@ -214,12 +212,14 @@ export default function DriversTable({
         onClose={() => setIsDetailsOpen(false)}
       />
 
+      <DriverKycQueue key={queueVersion} onOpen={setEditingDriver} />
       <EditDriverModal
         isOpen={!!editingDriver}
         driver={editingDriver}
         onClose={() => setEditingDriver(null)}
+        onReviewed={() => { setEditingDriver(null); setQueueVersion(value => value + 1); onRefresh(); }}
         onSave={async (data) => {
-          await onEdit({ ...editingDriver!, ...data });
+          await onEdit(data);
           setEditingDriver(null);
         }}
       />

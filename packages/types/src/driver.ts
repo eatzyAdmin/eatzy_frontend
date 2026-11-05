@@ -53,7 +53,34 @@ export interface UserDriver {
   address?: string;
 }
 
+export interface DriverKycRevision {
+  id: number;
+  driverProfileId: number;
+  revisionNumber: number;
+  baseRevisionId: number | null;
+  lockVersion: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  documents: Record<string, string | number | null>;
+  submittedBy: number | null;
+  submittedAt: string;
+  reviewedBy: number | null;
+  reviewedAt: string | null;
+  reason: string | null;
+  reviewSource: string;
+}
+export interface DriverKycState {
+  activeRevisionNumber: number;
+  legacyApproved: boolean;
+  pendingRevision: DriverKycRevision | null;
+}
+export interface SubmitDriverKycRevision {
+  baseRevisionNumber: number;
+  expectedVersion: number | null;
+  documents: Record<string, string | number | null>;
+}
 export interface DriverProfile {
+  kycEligible?: boolean;
+  kycRevisionState?: DriverKycState;
   id: number;
   user: UserDriver;
   vehicleDetails?: string;

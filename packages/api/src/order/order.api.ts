@@ -7,6 +7,9 @@ import type {
   DeliveryFeeResponse
 } from "@repo/types";
 
+export type OrderPage = { result: OrderResponse[]; meta: { page: number; pages: number; total: number; pageSize: number } };
+export type OrderPageParams = { page?: number; size?: number; filter?: string };
+
 /**
  * Order API endpoints
  * Handles order creation, retrieval, and management
@@ -24,8 +27,10 @@ export const orderApi = {
    * Create a new order
    * POST /api/v1/orders
    */
-  createOrder: async (request: CreateOrderRequest): Promise<IBackendRes<OrderResponse>> => {
-    return http.post<IBackendRes<OrderResponse>>("/api/v1/orders", request) as unknown as Promise<IBackendRes<OrderResponse>>;
+  createOrder: async (request: CreateOrderRequest, idempotencyKey: string = crypto.randomUUID()): Promise<IBackendRes<OrderResponse>> => {
+    return http.post<IBackendRes<OrderResponse>>("/api/v1/orders", request, {
+      headers: { "Idempotency-Key": idempotencyKey },
+    }) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
 
   /**
@@ -40,19 +45,24 @@ export const orderApi = {
    * Get orders by customer ID
    * GET /api/v1/orders/customer/:customerId
    */
-  getOrdersByCustomerId: async (customerId: number): Promise<IBackendRes<OrderResponse[]>> => {
-    return http.get<IBackendRes<OrderResponse[]>>(`/api/v1/orders/customer/${customerId}`) as unknown as Promise<IBackendRes<OrderResponse[]>>;
+  getOrdersByCustomerId: async (customerId: number, params?: OrderPageParams): Promise<IBackendRes<OrderPage>> => {
+    return http.get<IBackendRes<OrderPage>>(`/api/v1/orders/customer/${customerId}`, { params }) as unknown as Promise<IBackendRes<OrderPage>>;
   },
 
   /**
    * Get orders by customer ID and status
-   * GET /api/v1/orders/customer/:customerId/status/:orderStatus
+   * GET /api/v1/orders/customer/:customerId with status filter
    */
   getOrdersByCustomerIdAndStatus: async (
     customerId: number,
-    orderStatus: string
-  ): Promise<IBackendRes<OrderResponse[]>> => {
-    return http.get<IBackendRes<OrderResponse[]>>(`/api/v1/orders/customer/${customerId}/status/${orderStatus}`) as unknown as Promise<IBackendRes<OrderResponse[]>>;
+    orderStatus: string,
+    params?: Pick<OrderPageParams, "page" | "size">
+  ): Promise<IBackendRes<OrderPage>> => {
+    const statuses = ["PENDING", "PREPARING", "DRIVER_ASSIGNED", "READY", "PICKED_UP", "ARRIVED", "DELIVERED", "REJECTED"];
+    if (!statuses.includes(orderStatus)) throw new Error("Invalid order status");
+    return http.get<IBackendRes<OrderPage>>(`/api/v1/orders/customer/${customerId}`, {
+      params: { ...params, filter: `orderStatus:'${orderStatus}'` },
+    }) as unknown as Promise<IBackendRes<OrderPage>>;
   },
 
   /**
@@ -75,7 +85,7 @@ export const orderApi = {
    * PATCH /api/v1/orders/:id/customer/cancel
    */
   cancelOrder: async (orderId: number, cancellationReason: string): Promise<IBackendRes<OrderResponse>> => {
-    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/customer/cancel`, { cancellationReason }) as unknown as Promise<IBackendRes<OrderResponse>>;
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/customer/cancel`, {}, { params: { reason: cancellationReason } }) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
 
   /**
@@ -97,8 +107,8 @@ export const orderApi = {
    * Get orders by restaurant ID
    * GET /api/v1/orders/restaurant/:restaurantId
    */
-  getOrdersByRestaurantId: async (restaurantId: number): Promise<IBackendRes<OrderResponse[]>> => {
-    return http.get<IBackendRes<OrderResponse[]>>(`/api/v1/orders/restaurant/${restaurantId}`) as unknown as Promise<IBackendRes<OrderResponse[]>>;
+  getOrdersByRestaurantId: async (restaurantId: number, params?: OrderPageParams): Promise<IBackendRes<OrderPage>> => {
+    return http.get<IBackendRes<OrderPage>>(`/api/v1/orders/restaurant/${restaurantId}`, { params }) as unknown as Promise<IBackendRes<OrderPage>>;
   },
 
   /**
@@ -116,8 +126,8 @@ export const orderApi = {
    * Get orders by driver ID
    * GET /api/v1/orders/driver/:driverId
    */
-  getOrdersByDriverId: async (driverId: number): Promise<IBackendRes<OrderResponse[]>> => {
-    return http.get<IBackendRes<OrderResponse[]>>(`/api/v1/orders/driver/${driverId}`) as unknown as Promise<IBackendRes<OrderResponse[]>>;
+  getOrdersByDriverId: async (driverId: number, params?: OrderPageParams): Promise<IBackendRes<OrderPage>> => {
+    return http.get<IBackendRes<OrderPage>>(`/api/v1/orders/driver/${driverId}`, { params }) as unknown as Promise<IBackendRes<OrderPage>>;
   },
 
   /**
@@ -141,7 +151,7 @@ export const orderApi = {
    * PATCH /api/v1/orders/:id/restaurant/reject
    */
   rejectOrderByRestaurant: async (orderId: number, cancellationReason: string): Promise<IBackendRes<OrderResponse>> => {
-    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/restaurant/reject`, { cancellationReason }) as unknown as Promise<IBackendRes<OrderResponse>>;
+    return http.patch<IBackendRes<OrderResponse>>(`/api/v1/orders/${orderId}/restaurant/reject`, {}, { params: { reason: cancellationReason } }) as unknown as Promise<IBackendRes<OrderResponse>>;
   },
 
   /**

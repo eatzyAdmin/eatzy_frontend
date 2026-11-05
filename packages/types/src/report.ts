@@ -68,10 +68,10 @@ export interface MenuAnalyticsItemDTO {
     price: number;
     totalOrdered: number;
     totalRevenue: number;
-    averageRating: number;
-    reviewCount: number;
-    trend: string; // 'up' | 'down' | 'stable'
-    trendPercent: number;
+    averageRating: number | null;
+    reviewCount: number | null;
+    trend: string | null; // 'up' | 'down' | 'stable'
+    trendPercent: number | null;
 }
 
 export interface CategoryAnalyticsItemDTO {
@@ -116,5 +116,5 @@ export interface ReviewSummaryDTO {
     };
     recentReviews: ReviewReportItemDTO[];
     responseRate: number;
-    averageResponseTime: number;
+    averageResponseTime: number | null;
 }

@@ -1,5 +1,6 @@
 import { http } from "../http";
 import type { IBackendRes, Dish } from "../../../types/src";
+import type { BackendMenuOptionGroupDTO } from "./restaurant-detail.api";
 
 // ======== Backend DTO ========
 
@@ -12,14 +13,8 @@ export type BackendDishDTO = {
   availabilityQuantity: number;
   restaurant?: { id: number };
   category?: { id: number; name: string };
-  menuOptionGroups?: Array<{
-    id: number;
-    title: string;
-    required: boolean;
-    minSelect: number;
-    maxSelect: number;
-    options: Array<{ id: number; name: string; price: number }>;
-  }>;
+  menuOptionGroupCount?: number;
+  menuOptionGroups?: BackendMenuOptionGroupDTO[];
 };
 
 import { mapBackendDishToFrontend, mapFrontendDishToBackend } from "./mappers/dish.mapper";
