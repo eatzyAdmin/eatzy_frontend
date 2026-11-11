@@ -4,6 +4,12 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:customer": "turbo run dev --filter=customer",
+    "dev:driver": "turbo run dev --filter=driver",
+    "dev:restaurant": "turbo run dev --filter=restaurant",
+    "dev:web": "turbo run dev --filter=customer --filter=driver --filter=restaurant",
+    "dev:admin": "turbo run dev --filter=admin",
+    "dev:super-admin": "turbo run dev --filter=super-admin",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"
